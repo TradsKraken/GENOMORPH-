@@ -67,12 +67,19 @@ func _physics_process(delta: float) -> void:
 	# Map 2-D input → 3-D world XZ direction.
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
 
-	# ── Acceleration / friction ───────────────────────────────────────────────
+	# ── Movement / Hopping ────────────────────────────────────────────────────
 	if direction != Vector3.ZERO:
-		velocity.x = move_toward(velocity.x, direction.x * speed, acceleration * delta)
-		velocity.z = move_toward(velocity.z, direction.z * speed, acceleration * delta)
+		if is_on_floor():
+			# Initiate a hop when there is movement input and we are on the ground
+			velocity.y = jump_velocity
+			velocity.x = direction.x * speed
+			velocity.z = direction.z * speed
+		else:
+			# Slight air control to allow adjusting trajectory while hopping
+			velocity.x = move_toward(velocity.x, direction.x * speed, acceleration * 0.2 * delta)
+			velocity.z = move_toward(velocity.z, direction.z * speed, acceleration * 0.2 * delta)
 	else:
-		# Lower friction in the air so our frog-leap maintains momentum
+		# Apply friction to stop when no input or upon landing
 		var current_friction := friction if is_on_floor() else friction * 0.1
 		velocity.x = move_toward(velocity.x, 0.0, current_friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, current_friction * delta)
