@@ -6,7 +6,7 @@ extends CharacterBody3D
 # ── Inspector exports ────────────────────────────────────────────────────────
 
 ## Movement speed in units per second.
-@export var speed: float = 7.0
+@export var speed: float = 2.0
 
 ## How fast the player accelerates to full speed.
 @export var acceleration: float = 20.0
@@ -20,11 +20,11 @@ extends CharacterBody3D
 ## Upward velocity applied when jumping.
 @export var jump_velocity: float = 8.0
 
-## Extra forward momentum added when jumping (the frog leap).
-@export var jump_forward_boost: float = 8.0
-
 ## Whether the mesh rotates to face the movement direction.
 @export var rotate_to_movement: bool = true
+
+## Extra forward momentum added when jumping forward.
+@export var jump_forward_boost: float = 8.0
 
 ## How fast the mesh rotates toward the movement direction (degrees/sec).
 @export var rotation_speed: float = 720.0
@@ -67,19 +67,18 @@ func _physics_process(delta: float) -> void:
 	# Map 2-D input → 3-D world XZ direction.
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
 
-	# ── Movement / Hopping ────────────────────────────────────────────────────
+	# ── Movement / Walking ────────────────────────────────────────────────────
 	if direction != Vector3.ZERO:
 		if is_on_floor():
-			# Initiate a hop when there is movement input and we are on the ground
-			velocity.y = jump_velocity
-			velocity.x = direction.x * speed
-			velocity.z = direction.z * speed
+			# Walk on the ground
+			velocity.x = move_toward(velocity.x, direction.x * speed, acceleration * delta)
+			velocity.z = move_toward(velocity.z, direction.z * speed, acceleration * delta)
 		else:
-			# Slight air control to allow adjusting trajectory while hopping
+			# Slight air control to allow adjusting trajectory while jumping
 			velocity.x = move_toward(velocity.x, direction.x * speed, acceleration * 0.2 * delta)
 			velocity.z = move_toward(velocity.z, direction.z * speed, acceleration * 0.2 * delta)
 	else:
-		# Apply friction to stop when no input or upon landing
+		# Apply friction to stop when no input
 		var current_friction := friction if is_on_floor() else friction * 0.1
 		velocity.x = move_toward(velocity.x, 0.0, current_friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, current_friction * delta)
@@ -91,12 +90,12 @@ func _physics_process(delta: float) -> void:
 		var max_step := deg_to_rad(rotation_speed) * delta
 		rotation.y = rotate_toward(current_angle, target_angle, max_step)
 
-	# ── Jumping (Frog Leap) ──────────────────────────────────────────────────
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+	# ── Jumping ──────────────────────────────────────────────────────────────
+	if Input.is_action_pressed("ui_accept") and is_on_floor():
 		velocity.y = jump_velocity
-		# Leap forward in the direction the player is currently facing
-		var facing := Vector3(sin(rotation.y), 0.0, cos(rotation.y)).normalized()
-		velocity.x += facing.x * jump_forward_boost
-		velocity.z += facing.z * jump_forward_boost
+		if direction != Vector3.ZERO:
+			# Jump forward in the movement direction
+			velocity.x = direction.x * (speed + jump_forward_boost)
+			velocity.z = direction.z * (speed + jump_forward_boost)
 
 	move_and_slide()

@@ -29,6 +29,8 @@ extends Camera3D
 # ── Private ──────────────────────────────────────────────────────────────────
 
 var _player: Node3D = null
+var _last_ground_y: float = 0.0
+var _target_ground_y: float = 0.0
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -48,6 +50,9 @@ func _ready() -> void:
 		push_warning("Camera3D: No player found. Set 'player_path' or add the player to the 'player' group.")
 		return
 
+	_last_ground_y = _player.global_position.y
+	_target_ground_y = _player.global_position.y
+
 	# Snap to position immediately on the first frame.
 	_apply_position(1.0)
 
@@ -55,6 +60,17 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _player == null:
 		return
+
+	if _player is CharacterBody3D:
+		if _player.is_on_floor():
+			_target_ground_y = _player.global_position.y
+		elif _player.global_position.y < _target_ground_y:
+			_target_ground_y = _player.global_position.y
+	else:
+		_target_ground_y = _player.global_position.y
+
+	_last_ground_y = lerp(_last_ground_y, _target_ground_y, 10.0 * delta)
+
 	_apply_position(follow_speed * delta)
 
 
@@ -67,14 +83,19 @@ func _apply_position(weight: float) -> void:
 	var tilt_rad := deg_to_rad(tilt_degrees)
 	var z_offset := height * tan(tilt_rad) + distance_back
 
-	var target_pos := _player.global_position + Vector3(
+	var ground_pos := _player.global_position
+	ground_pos.y = _last_ground_y
+
+	var offset := Vector3(
 		horizontal_offset,
 		height,
 		z_offset
 	)
+	var target_pos := ground_pos + offset
 
 	global_position = global_position.lerp(target_pos, clampf(weight, 0.0, 1.0))
 
-	# look_at ensures the player is always in the exact screen center
-	# regardless of tilt angle or distance settings.
-	look_at(_player.global_position, Vector3.UP)
+	# To prevent the camera from swiveling/tilting when the player moves,
+	# we look at a point relative to the camera's CURRENT position.
+	# This keeps the camera angle completely rigid while it slides into place.
+	look_at(global_position - offset, Vector3.UP)
