@@ -12,8 +12,12 @@ config_version=5
 
 config/name="Controls"
 run/main_scene="res://main_menu.tscn"
-config/features=PackedStringArray("4.7", "Mobile")
+config/features=PackedStringArray("4.6", "Mobile")
 config/icon="res://icon.svg"
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
 
 [physics]
 
@@ -23,7 +27,3 @@ config/icon="res://icon.svg"
 
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
-
-[input_devices]
-
-pointing/emulate_touch_from_mouse=true
