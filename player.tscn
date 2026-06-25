@@ -11,7 +11,7 @@ radius = 0.4
 height = 1.8
 
 [sub_resource type="StandardMaterial3D" id="4_player_material"]
-albedo_color = Color(0.18, 0.55, 1, 1)
+albedo_color = Color(0.14790025, 0.2995788, 0.08399514, 1)
 metallic = 0.1
 roughness = 0.6
 

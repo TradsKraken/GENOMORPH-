@@ -6,7 +6,7 @@ extends CharacterBody3D
 # ── Inspector exports ────────────────────────────────────────────────────────
 
 ## Movement speed in units per second.
-@export var speed: float = 3.0
+@export var speed: float = 2.5
 
 ## How fast the player accelerates to full speed.
 @export var acceleration: float = 20.0
