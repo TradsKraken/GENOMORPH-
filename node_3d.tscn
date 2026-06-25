@@ -1730,7 +1730,7 @@ mesh = SubResource("PlaneMesh_noarx")
 surface_material_override/0 = SubResource("GroundMat")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground/MeshInstance3D" unique_id=1036277206]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.548387, 0, -1.6221825)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.053616, 0, 1.2490333)
 mesh = SubResource("BoxMesh_qwc0f")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=36256288]
