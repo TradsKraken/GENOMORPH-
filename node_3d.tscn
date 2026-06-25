@@ -1723,12 +1723,12 @@ shadow_enabled = true
 [node name="Ground" type="StaticBody3D" parent="." unique_id=456649111]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=643852630]
-transform = Transform3D(3.875, 0, 0, 0, 3.875, 0, 0, 0, 3.875, 0, 0, 0.39675903)
+transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0, 0, 0.39675903)
 mesh = SubResource("PlaneMesh_noarx")
 surface_material_override/0 = SubResource("GroundMat")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=36256288]
-transform = Transform3D(3.89, 0, 0, 0, 3.89, 0, 0, 0, 3.89, 0, -0.1, 0)
+transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0, -0.1, 0)
 shape = SubResource("GroundShape")
 
 [node name="Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]

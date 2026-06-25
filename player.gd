@@ -36,7 +36,7 @@ extends CharacterBody3D
 @export var jump_stamina_cost: float = 15.0
 
 ## How much stamina is recovered per second.
-@export var stamina_recovery_rate: float = 10.0
+@export var stamina_recovery_rate: float = 5.0
 
 # ── Private ──────────────────────────────────────────────────────────────────
 
