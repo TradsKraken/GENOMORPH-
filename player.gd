@@ -29,6 +29,15 @@ extends CharacterBody3D
 ## How fast the mesh rotates toward the movement direction (degrees/sec).
 @export var rotation_speed: float = 720.0
 
+## Maximum stamina available for actions.
+@export var max_stamina: float = 100.0
+
+## How much stamina is consumed per jump.
+@export var jump_stamina_cost: float = 30.0
+
+## How much stamina is recovered per second.
+@export var stamina_recovery_rate: float = 15.0
+
 # ── Private ──────────────────────────────────────────────────────────────────
 
 @onready var _mesh: MeshInstance3D = $MeshInstance3D
@@ -36,9 +45,38 @@ extends CharacterBody3D
 ## Reference to the on-screen virtual joystick (found at runtime via group).
 var _joystick = null
 
+## The player's current stamina.
+var _current_stamina: float = 100.0
+
+## The UI progress bar for stamina.
+var _stamina_bar: ProgressBar
+
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	_current_stamina = max_stamina
+	
+	# Create Stamina UI dynamically
+	var canvas := CanvasLayer.new()
+	add_child(canvas)
+	
+	_stamina_bar = ProgressBar.new()
+	_stamina_bar.max_value = max_stamina
+	_stamina_bar.value = _current_stamina
+	_stamina_bar.show_percentage = false
+	_stamina_bar.position = Vector2(20, 20)
+	_stamina_bar.size = Vector2(200, 20)
+	
+	# Optional styling for a nice green stamina bar
+	var style_bg = StyleBoxFlat.new()
+	style_bg.bg_color = Color(0.1, 0.1, 0.1, 0.8)
+	var style_fill = StyleBoxFlat.new()
+	style_fill.bg_color = Color(0.2, 0.8, 0.2, 0.9)
+	_stamina_bar.add_theme_stylebox_override("background", style_bg)
+	_stamina_bar.add_theme_stylebox_override("fill", style_fill)
+	
+	canvas.add_child(_stamina_bar)
+
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
 
@@ -50,6 +88,13 @@ func _find_joystick() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# ── Stamina ──────────────────────────────────────────────────────────────
+	if _current_stamina < max_stamina:
+		_current_stamina = move_toward(_current_stamina, max_stamina, stamina_recovery_rate * delta)
+	
+	if _stamina_bar:
+		_stamina_bar.value = _current_stamina
+
 	# ── Gravity ──────────────────────────────────────────────────────────────
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -91,7 +136,8 @@ func _physics_process(delta: float) -> void:
 		rotation.y = rotate_toward(current_angle, target_angle, max_step)
 
 	# ── Jumping ──────────────────────────────────────────────────────────────
-	if Input.is_action_pressed("ui_accept") and is_on_floor():
+	if Input.is_action_pressed("ui_accept") and is_on_floor() and _current_stamina >= jump_stamina_cost:
+		_current_stamina -= jump_stamina_cost
 		velocity.y = jump_velocity
 		if direction != Vector3.ZERO:
 			# Jump forward in the movement direction
