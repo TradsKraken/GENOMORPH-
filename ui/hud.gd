@@ -1,4 +1,4 @@
-﻿class_name GameHUD
+class_name GameHUD
 extends CanvasLayer
 
 ## Clean, modern game HUD.
@@ -57,7 +57,7 @@ func _build_player_status() -> void:
 
 	# Level Badge (Circular)
 	var badge := PanelContainer.new()
-	badge.custom_minimum_size = Vector2(64, 64)
+	badge.custom_minimum_size = Vector2(80, 80)
 	badge.position = Vector2(0, 0)
 	badge.z_index = 2
 	
@@ -65,7 +65,7 @@ func _build_player_status() -> void:
 	badge_bg.bg_color = Color(0.08, 0.08, 0.1, 0.9)
 	badge_bg.border_color = C_EXP
 	badge_bg.set_border_width_all(2)
-	badge_bg.set_corner_radius_all(32)
+	badge_bg.set_corner_radius_all(40)
 	badge_bg.shadow_color = Color(0, 0, 0, 0.3)
 	badge_bg.shadow_size = 4
 	badge.add_theme_stylebox_override("panel", badge_bg)
@@ -76,28 +76,28 @@ func _build_player_status() -> void:
 	lvl_vbox.add_theme_constant_override("separation", -4)
 	badge.add_child(lvl_vbox)
 
-	var lvl_title := _make_label("LVL", 10, Color(0.7, 0.7, 0.7))
+	var lvl_title := _make_label("LVL", 12, Color(0.7, 0.7, 0.7))
 	lvl_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lvl_vbox.add_child(lvl_title)
 
-	_lvl_lbl = _make_label("1", 20, Color.WHITE)
+	_lvl_lbl = _make_label("1", 24, Color.WHITE)
 	_lvl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lvl_lbl.add_theme_font_override("font", ThemeDB.fallback_font)
 	lvl_vbox.add_child(_lvl_lbl)
 
 	# Bars Container (Offset to the right of the badge)
 	var bars_vbox := VBoxContainer.new()
-	bars_vbox.position = Vector2(50, 8)
-	bars_vbox.add_theme_constant_override("separation", 6)
+	bars_vbox.position = Vector2(65, 12)
+	bars_vbox.add_theme_constant_override("separation", 8)
 	bars_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars_vbox.z_index = 1
 	status_group.add_child(bars_vbox)
 
 	# Health Bar
 	var hp_box := Control.new()
-	hp_box.custom_minimum_size = Vector2(240, 18)
-	_hp_bar = _make_bar(240, 18, C_HP)
-	_hp_lbl = _make_label("100 / 100", 11, Color.WHITE)
+	hp_box.custom_minimum_size = Vector2(300, 24)
+	_hp_bar = _make_bar(300, 24, C_HP)
+	_hp_lbl = _make_label("100 / 100", 14, Color.WHITE)
 	_hp_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_hp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hp_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -107,15 +107,15 @@ func _build_player_status() -> void:
 
 	# Stamina Bar
 	var stam_box := Control.new()
-	stam_box.custom_minimum_size = Vector2(180, 12)
-	_stam_bar = _make_bar(180, 12, C_STAM)
+	stam_box.custom_minimum_size = Vector2(220, 16)
+	_stam_bar = _make_bar(220, 16, C_STAM)
 	stam_box.add_child(_stam_bar)
 	bars_vbox.add_child(stam_box)
 
 	# EXP Bar (Very thin)
 	var exp_box := Control.new()
-	exp_box.custom_minimum_size = Vector2(180, 4)
-	_exp_bar = _make_bar(180, 4, C_EXP)
+	exp_box.custom_minimum_size = Vector2(220, 6)
+	_exp_bar = _make_bar(220, 6, C_EXP)
 	exp_box.add_child(_exp_bar)
 	bars_vbox.add_child(exp_box)
 
@@ -124,16 +124,16 @@ func _build_player_status() -> void:
 
 func _build_action_buttons() -> void:
 	# Jump Button (Bottom Right)
-	_jump_btn = _make_circle_btn("▲", 72, C_BTN_NORM)
+	_jump_btn = _make_circle_btn("▲", 100, C_BTN_NORM)
 	_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
 	_jump_btn.set_anchor(SIDE_LEFT, 1.0)
 	_jump_btn.set_anchor(SIDE_TOP, 1.0)
-	_jump_btn.offset_right  = -30
-	_jump_btn.offset_bottom = -30
-	_jump_btn.offset_left   = -30 - 72
-	_jump_btn.offset_top    = -30 - 72
-	_jump_btn.add_theme_font_size_override("font_size", 24)
+	_jump_btn.offset_right  = -40
+	_jump_btn.offset_bottom = -40
+	_jump_btn.offset_left   = -40 - 100
+	_jump_btn.offset_top    = -40 - 100
+	_jump_btn.add_theme_font_size_override("font_size", 36)
 	_jump_btn.add_theme_color_override("font_color", Color(1, 1, 1, 0.6))
 	_jump_btn.add_theme_color_override("font_pressed_color", Color(0.1, 0.1, 0.1, 0.9))
 	_jump_btn.button_down.connect(func(): Input.action_press("ui_accept"))
@@ -141,16 +141,16 @@ func _build_action_buttons() -> void:
 	_root.add_child(_jump_btn)
 
 	# Menu Button (Top Right)
-	_menu_btn = _make_circle_btn("⏸", 44, C_BTN_NORM)
+	_menu_btn = _make_circle_btn("⏸", 56, C_BTN_NORM)
 	_menu_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_menu_btn.set_anchor(SIDE_TOP, 0.0)
 	_menu_btn.set_anchor(SIDE_LEFT, 1.0)
 	_menu_btn.set_anchor(SIDE_BOTTOM, 0.0)
 	_menu_btn.offset_right  = -24
 	_menu_btn.offset_top    = 24
-	_menu_btn.offset_left   = -24 - 44
-	_menu_btn.offset_bottom = 24 + 44
-	_menu_btn.add_theme_font_size_override("font_size", 16)
+	_menu_btn.offset_left   = -24 - 56
+	_menu_btn.offset_bottom = 24 + 56
+	_menu_btn.add_theme_font_size_override("font_size", 20)
 	_menu_btn.pressed.connect(_toggle_menu)
 	_root.add_child(_menu_btn)
 

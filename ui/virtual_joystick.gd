@@ -7,10 +7,10 @@ extends Control
 # ── Inspector exports ────────────────────────────────────────────────────────
 
 ## Radius of the outer (background) ring in pixels.
-@export var radius: float = 90.0
+@export var radius: float = 130.0
 
 ## Radius of the draggable knob in pixels.
-@export var knob_radius: float = 34.0
+@export var knob_radius: float = 50.0
 
 ## Fraction of radius below which input is ignored (prevents drift).
 @export var dead_zone: float = 0.12

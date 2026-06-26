@@ -1744,10 +1744,10 @@ layout_mode = 3
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -220.0
-offset_right = 220.0
-offset_bottom = -20.0
+offset_left = 40.0
+offset_top = -300.0
+offset_right = 300.0
+offset_bottom = -40.0
 grow_vertical = 0
 script = ExtResource("3_joystick")
 
