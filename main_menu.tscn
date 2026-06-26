@@ -1,7 +1,4 @@
-[gd_scene format=3 uid="uid://d2ltv12pf31fq"]
-
-[ext_resource type="Script" uid="uid://rvt83r5uoink" path="res://main_menu.gd" id="1_menu_script"]
-[ext_resource type="Shader" uid="uid://1v1r7fud6vev" path="res://scanlines.gdshader" id="2_scanlines"]
+[gd_scene format=3 uid="uid://ch1gifs0kk5g5"]
 
 [sub_resource type="Animation" id="Animation_exit"]
 resource_name = "exit"
@@ -125,8 +122,23 @@ _data = {
 &"intro": SubResource("Animation_intro")
 }
 
+[sub_resource type="Shader" id="Shader_rhts7"]
+code = "shader_type canvas_item;
+
+uniform float scroll_offset : hint_range(0.0, 1.0) = 0.0;
+uniform float line_density : hint_range(10.0, 300.0) = 80.0;
+uniform float line_alpha : hint_range(0.0, 1.0) = 0.07;
+
+void fragment() {
+	float y = UV.y + scroll_offset;
+	float line = mod(y * line_density, 1.0);
+	float mask = step(0.5, line);
+	COLOR = vec4(0.0, 0.0, 0.0, mask * line_alpha);
+}
+"
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_scanlines"]
-shader = ExtResource("2_scanlines")
+shader = SubResource("Shader_rhts7")
 shader_parameter/scroll_offset = 0.0
 shader_parameter/line_density = 70.0
 shader_parameter/line_alpha = 0.055
@@ -219,7 +231,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_menu_script")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=277268935]
 libraries/ = SubResource("AnimationLibrary_main")

@@ -56,6 +56,19 @@ func _ready() -> void:
 	# Snap to position immediately on the first frame.
 	_apply_position(1.0)
 
+	# ── Spawn game systems at runtime (avoids UID-less .tscn references) ──────
+	var hud_script := load("res://ui/hud.gd") as GDScript
+	if hud_script:
+		var hud: CanvasLayer = hud_script.new()
+		hud.name = "GameHUD"
+		get_parent().call_deferred("add_child", hud)
+
+	var spawner_script := load("res://levels/orb_spawner.gd") as GDScript
+	if spawner_script:
+		var spawner: Node3D = spawner_script.new()
+		spawner.name = "OrbSpawner"
+		get_parent().call_deferred("add_child", spawner)
+
 
 func _process(delta: float) -> void:
 	if _player == null:

@@ -80,7 +80,7 @@ func _on_particle_layer_draw() -> void:
 func _on_new_game_pressed() -> void:
 	_anim_player.play("exit")
 	await _anim_player.animation_finished
-	get_tree().change_scene_to_file("res://node_3d.tscn")
+	get_tree().change_scene_to_file("res://levels/node_3d.tscn")
 
 
 func _on_load_game_pressed() -> void:

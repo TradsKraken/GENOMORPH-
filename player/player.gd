@@ -61,38 +61,10 @@ extends CharacterBody3D
 ## Reference to the on-screen virtual joystick (found at runtime via group).
 var _joystick = null
 
-## The player's current stamina.
-var _current_stamina: float = 100.0
-
-## The UI progress bar for stamina.
-var _stamina_bar: ProgressBar
-
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
-	_current_stamina = max_stamina
-	
-	# Create Stamina UI dynamically
-	var canvas := CanvasLayer.new()
-	add_child(canvas)
-	
-	_stamina_bar = ProgressBar.new()
-	_stamina_bar.max_value = max_stamina
-	_stamina_bar.value = _current_stamina
-	_stamina_bar.show_percentage = false
-	_stamina_bar.position = Vector2(20, 20)
-	_stamina_bar.size = Vector2(200, 20)
-	
-	# Optional styling for a nice green stamina bar
-	var style_bg = StyleBoxFlat.new()
-	style_bg.bg_color = Color(0.1, 0.1, 0.1, 0.8)
-	var style_fill = StyleBoxFlat.new()
-	style_fill.bg_color = Color(0.2, 0.8, 0.2, 0.9)
-	_stamina_bar.add_theme_stylebox_override("background", style_bg)
-	_stamina_bar.add_theme_stylebox_override("fill", style_fill)
-	
-	canvas.add_child(_stamina_bar)
-
+	add_to_group("player")
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
 
@@ -104,12 +76,8 @@ func _find_joystick() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# ── Stamina ──────────────────────────────────────────────────────────────
-	if _current_stamina < max_stamina:
-		_current_stamina = move_toward(_current_stamina, max_stamina, stamina_recovery_rate * delta)
-	
-	if _stamina_bar:
-		_stamina_bar.value = _current_stamina
+	# ── Stamina recovery ─────────────────────────────────────────────────────
+	PlayerData.recover_stamina(delta, stamina_recovery_rate)
 
 	# ── Gravity ──────────────────────────────────────────────────────────────
 	if not is_on_floor():
@@ -152,8 +120,7 @@ func _physics_process(delta: float) -> void:
 		rotation.y = rotate_toward(current_angle, target_angle, max_step)
 
 	# ── Jumping ──────────────────────────────────────────────────────────────
-	if Input.is_action_pressed("ui_accept") and is_on_floor() and _current_stamina >= jump_stamina_cost:
-		_current_stamina -= jump_stamina_cost
+	if Input.is_action_pressed("ui_accept") and is_on_floor() and PlayerData.use_stamina(jump_stamina_cost):
 		velocity.y = jump_velocity
 		if direction != Vector3.ZERO:
 			# Jump forward in the movement direction

@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://byhayabks6fn4"]
 
-[ext_resource type="Script" uid="uid://61raa3sdio51" path="res://camera_3d.gd" id="1_a202f"]
-[ext_resource type="PackedScene" uid="uid://ea7e13ofj3cp" path="res://player.tscn" id="2_player"]
-[ext_resource type="Script" uid="uid://c4or157xwuy2k" path="res://virtual_joystick.gd" id="3_joystick"]
-[ext_resource type="Script" uid="uid://1tkj0fahqgl2" path="res://tree_spawner.gd" id="4_tree_spawner"]
+[ext_resource type="Script" uid="uid://61raa3sdio51" path="res://levels/camera_3d.gd" id="1_a202f"]
+[ext_resource type="PackedScene" uid="uid://ea7e13ofj3cp" path="res://player/player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://c4or157xwuy2k" path="res://ui/virtual_joystick.gd" id="3_joystick"]
+[ext_resource type="Script" uid="uid://1tkj0fahqgl2" path="res://levels/tree_spawner.gd" id="4_tree_spawner"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
