@@ -1,16 +1,15 @@
-﻿extends Node3D
+extends Node3D
 
 ## Spawns stamina and EXP orbs randomly across the level at runtime.
 ## Respawns each type automatically after a delay when collected.
 
 # ── Exports ───────────────────────────────────────────────────────────────────
-@export var stamina_orb_count: int   = 4
-@export var exp_orb_count: int       = 3
-@export var spawn_radius: float      = 16.0
+@export var stamina_orb_count: int   = 6
+@export var exp_orb_count: int       = 5
+@export var spawn_radius: float      = 19.0
 @export var clear_radius: float      = 4.0
 @export var orb_height: float        = 1.1
 @export var respawn_delay: float     = 10.0
-@export var random_seed: int         = 42
 
 # ── Private ───────────────────────────────────────────────────────────────────
 const _STAMINA_PATH := "res://levels/stamina_orb.gd"
@@ -23,7 +22,7 @@ var _exp_script:     GDScript
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
-	_rng.seed      = random_seed
+	_rng.randomize()
 	_stamina_script = load(_STAMINA_PATH)
 	_exp_script     = load(_EXP_PATH)
 	for _i in stamina_orb_count:

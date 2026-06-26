@@ -103,12 +103,11 @@ func _physics_process(delta: float) -> void:
 			velocity.x = move_toward(velocity.x, direction.x * speed, acceleration * delta)
 			velocity.z = move_toward(velocity.z, direction.z * speed, acceleration * delta)
 		else:
-			# Slight air control to allow adjusting trajectory while jumping
-			velocity.x = move_toward(velocity.x, direction.x * speed, acceleration * 0.2 * delta)
-			velocity.z = move_toward(velocity.z, direction.z * speed, acceleration * 0.2 * delta)
+			# Frog jump: NO air control. Once you leap, you are committed to the ballistic arc.
+			pass
 	else:
-		# Apply friction to stop when no input
-		var current_friction := friction if is_on_floor() else friction * 0.1
+		# Apply heavy friction to stick the landing instantly when releasing input
+		var current_friction := friction * 5.0 if is_on_floor() else 0.0
 		velocity.x = move_toward(velocity.x, 0.0, current_friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, current_friction * delta)
 
@@ -123,9 +122,13 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_pressed("ui_accept") and is_on_floor() and PlayerData.use_stamina(jump_stamina_cost):
 		velocity.y = jump_velocity
 		if direction != Vector3.ZERO:
-			# Jump forward in the movement direction
+			# Jump forward in the movement direction (true frog leap)
 			velocity.x = direction.x * (speed + jump_forward_boost)
 			velocity.z = direction.z * (speed + jump_forward_boost)
+		else:
+			# Jump straight up
+			velocity.x = 0.0
+			velocity.z = 0.0
 
 	move_and_slide()
 
