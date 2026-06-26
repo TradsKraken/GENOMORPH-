@@ -1,15 +1,97 @@
 extends Control
 
-func _ready() -> void:
-	# Focus the first button automatically so keyboard/controller navigation works
-	$MarginContainer/VBoxContainer/StartButton.grab_focus()
+# ── Node refs ────────────────────────────────────────────────────────────────
+@onready var _start_btn: Button        = $Background/ContentAnchor/ContentBox/ButtonContainer/NewGameButton
+@onready var _particle_layer: Control  = $Background/ParticleLayer
+@onready var _scanlines: ColorRect     = $Background/Scanlines
+@onready var _anim_player: AnimationPlayer = $AnimationPlayer
 
-func _on_start_button_pressed() -> void:
-	# Change to your game scene.
+# ── Particle state ────────────────────────────────────────────────────────────
+var _particles: Array[Dictionary] = []
+var _time: float = 0.0
+const PARTICLE_COUNT := 45
+
+# ── Lifecycle ─────────────────────────────────────────────────────────────────
+
+func _ready() -> void:
+	_spawn_particles()
+	_particle_layer.draw.connect(_on_particle_layer_draw)
+	_anim_player.play("intro")
+	_anim_player.animation_finished.connect(_on_intro_done)
+
+
+func _on_intro_done(_anim_name: String) -> void:
+	_start_btn.grab_focus()
+
+
+func _process(delta: float) -> void:
+	_time += delta
+
+	# Scroll scanlines
+	var mat := _scanlines.material as ShaderMaterial
+	if mat:
+		mat.set_shader_parameter("scroll_offset", fmod(_time * 0.04, 1.0))
+
+	_update_particles(delta)
+	_particle_layer.queue_redraw()
+
+
+# ── Particles — warm firefly / spore effect ───────────────────────────────────
+
+func _spawn_particles() -> void:
+	var vp := get_viewport_rect().size
+	for _i in PARTICLE_COUNT:
+		_particles.append({
+			"x":     randf_range(0.0, vp.x),
+			"y":     randf_range(0.0, vp.y),
+			"speed": randf_range(8.0, 32.0),
+			"size":  randf_range(1.5, 4.5),
+			"alpha": randf_range(0.15, 0.75),
+			"drift": randf_range(-14.0, 14.0),
+			"phase": randf_range(0.0, TAU),
+		})
+
+
+func _update_particles(delta: float) -> void:
+	var vp := get_viewport_rect().size
+	for p in _particles:
+		p["y"] -= p["speed"] * delta
+		p["x"] += sin(_time * 0.7 + p["phase"]) * p["drift"] * delta
+		if p["y"] < -10.0:
+			p["y"] = vp.y + 10.0
+			p["x"] = randf_range(0.0, vp.x)
+
+
+func _on_particle_layer_draw() -> void:
+	for p in _particles:
+		var flicker := 0.55 + 0.45 * sin(_time * 2.2 + p["phase"])
+		# Warm amber-gold fireflies matching jungle/nature theme
+		var col := Color(0.85, 0.78, 0.22, p["alpha"] * flicker)
+		var s: float = p["size"]
+		var pos := Vector2(p["x"], p["y"])
+		_particle_layer.draw_circle(pos, s * 0.5, col)
+		# Soft glow halo on larger fireflies
+		if s > 3.0:
+			_particle_layer.draw_circle(pos, s * 1.1, Color(col.r, col.g, col.b, col.a * 0.18))
+
+
+# ── Button callbacks ──────────────────────────────────────────────────────────
+
+func _on_new_game_pressed() -> void:
+	_anim_player.play("exit")
+	await _anim_player.animation_finished
 	get_tree().change_scene_to_file("res://node_3d.tscn")
 
-func _on_options_button_pressed() -> void:
-	print("Open Options Menu")
+
+func _on_load_game_pressed() -> void:
+	print("Load Game — not yet implemented")
+
+
+func _on_credits_pressed() -> void:
+	print("Credits — not yet implemented")
+
 
 func _on_quit_button_pressed() -> void:
+	_anim_player.play("exit")
+	await _anim_player.animation_finished
 	get_tree().quit()
