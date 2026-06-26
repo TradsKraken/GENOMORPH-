@@ -40,7 +40,23 @@ extends CharacterBody3D
 
 # ── Private ──────────────────────────────────────────────────────────────────
 
-@onready var _mesh: MeshInstance3D = $MeshInstance3D
+@onready var _mesh: Node3D = $MeshInstance3D
+
+## AnimationPlayer from the imported frog .glb (child of the mesh node).
+## Set this in the Inspector once you have imported the frog model.
+@export var animation_player: AnimationPlayer = null
+
+## Name of the idle animation track (must match the name in the .glb).
+@export var anim_idle: String = "idle"
+
+## Name of the walk animation track.
+@export var anim_walk: String = "walk"
+
+## Name of the jump animation track.
+@export var anim_jump: String = "jump"
+
+## Speed at which animations blend/transition.
+@export var anim_blend_time: float = 0.15
 
 ## Reference to the on-screen virtual joystick (found at runtime via group).
 var _joystick = null
@@ -145,3 +161,36 @@ func _physics_process(delta: float) -> void:
 			velocity.z = direction.z * (speed + jump_forward_boost)
 
 	move_and_slide()
+
+	# ── Animation state machine ──────────────────────────────────────────────
+	_update_animation(direction)
+
+
+# ── Animation ────────────────────────────────────────────────────────────────
+
+func _update_animation(direction: Vector3) -> void:
+	if animation_player == null:
+		return
+
+	var target_anim: String
+
+	if not is_on_floor():
+		# In the air → play jump (holds on last frame until landing)
+		target_anim = anim_jump
+	elif direction != Vector3.ZERO:
+		# Moving on the ground → walk cycle
+		target_anim = anim_walk
+	else:
+		# Standing still → idle breathing
+		target_anim = anim_idle
+
+	# Only switch if the animation actually changed
+	if animation_player.current_animation != target_anim:
+		animation_player.play(target_anim, anim_blend_time)
+
+	# Scale walk playback speed with actual movement speed
+	if target_anim == anim_walk:
+		var h_speed := Vector2(velocity.x, velocity.z).length()
+		animation_player.speed_scale = clamp(h_speed / speed, 0.5, 2.0)
+	else:
+		animation_player.speed_scale = 1.0
