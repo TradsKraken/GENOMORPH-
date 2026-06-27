@@ -150,7 +150,7 @@ func _attack() -> void:
 		var cam := get_viewport().get_camera_3d()
 		if cam:
 			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-			hud.show_float_text("SWISH!", scr, Color(1.0, 0.3, 0.1))
+			hud.show_float_text("PEWNG!", scr, Color(1.0, 0.3, 0.1))
 
 
 # ── Animation ────────────────────────────────────────────────────────────────
