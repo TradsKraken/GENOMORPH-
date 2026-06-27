@@ -1,4 +1,4 @@
-﻿extends Node
+extends Node
 
 ## PlayerData — global autoload singleton.
 ## Access from any script: PlayerData.health, PlayerData.gain_exp(25), etc.
@@ -17,7 +17,7 @@ var max_stamina: float = 100.0
 var stamina: float     = 100.0
 
 var level: int         = 1
-var exp: float         = 0.0
+var experience: float  = 0.0
 var exp_to_next: float = 100.0
 
 
@@ -54,14 +54,14 @@ func take_damage(amount: float) -> void:
 # ── EXP / Level API ───────────────────────────────────────────────────────────
 
 func gain_exp(amount: float) -> void:
-	exp += amount
-	while exp >= exp_to_next:
+	experience += amount
+	while experience >= exp_to_next:
 		_do_level_up()
-	exp_changed.emit(exp, exp_to_next)
+	exp_changed.emit(experience, exp_to_next)
 
 
 func _do_level_up() -> void:
-	exp -= exp_to_next
+	experience -= exp_to_next
 	level += 1
 	exp_to_next = 100.0 * pow(1.4, level - 1)
 	level_changed.emit(level)

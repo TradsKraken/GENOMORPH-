@@ -141,6 +141,11 @@ func _build_ring_ui() -> void:
 func _process(delta: float) -> void:
 	if _collected:
 		return
+
+	var cam := get_viewport().get_camera_3d()
+	if cam and not cam.is_position_in_frustum(global_position):
+		return
+
 	_spin_time += delta
 	_mesh.rotation.y = _spin_time * 1.2
 	_mesh.position.y = sin(_spin_time * 2.2) * 0.10

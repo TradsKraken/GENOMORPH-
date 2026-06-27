@@ -40,7 +40,6 @@ extends CharacterBody3D
 
 # ── Private ──────────────────────────────────────────────────────────────────
 
-@onready var _mesh: Node3D = $MeshInstance3D
 
 ## AnimationPlayer from the imported frog .glb (child of the mesh node).
 ## Set this in the Inspector once you have imported the frog model.
@@ -65,6 +64,8 @@ var _joystick = null
 
 func _ready() -> void:
 	add_to_group("player")
+	if not InputMap.has_action("attack"):
+		InputMap.add_action("attack")
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
 
@@ -130,10 +131,26 @@ func _physics_process(delta: float) -> void:
 			velocity.x = 0.0
 			velocity.z = 0.0
 
+	# ── Attacking ────────────────────────────────────────────────────────────
+	if Input.is_action_just_pressed("attack"):
+		_attack()
+
 	move_and_slide()
 
 	# ── Animation state machine ──────────────────────────────────────────────
 	_update_animation(direction)
+
+
+# ── Combat ───────────────────────────────────────────────────────────────────
+
+func _attack() -> void:
+	# Placeholder for attack logic until animations are added
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_float_text"):
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+			hud.show_float_text("SWISH!", scr, Color(1.0, 0.3, 0.1))
 
 
 # ── Animation ────────────────────────────────────────────────────────────────

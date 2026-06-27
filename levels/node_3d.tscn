@@ -2850,4 +2850,3 @@ shape = SubResource("SphereShape3D_a3crp")
 
 [node name="PerfHUD" type="CanvasLayer" parent="." unique_id=1995366968]
 script = ExtResource("5_perf_hud")
-show_hud = false

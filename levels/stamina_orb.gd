@@ -141,6 +141,11 @@ func _build_ring_ui() -> void:
 func _process(delta: float) -> void:
 	if _collected:
 		return
+
+	var cam := get_viewport().get_camera_3d()
+	if cam and not cam.is_position_in_frustum(global_position):
+		return
+
 	_bob_time += delta * 1.8
 	_mesh.position.y = sin(_bob_time) * 0.12
 	_light.light_energy = 2.8 + sin(_bob_time * 2.1) * 0.6

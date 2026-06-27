@@ -23,6 +23,7 @@ var _stam_lbl:   Label
 var _exp_bar:    ProgressBar
 var _lvl_lbl:    Label
 
+var _attack_btn: Button
 var _jump_btn:   Button
 var _menu_btn:   Button
 var _menu_panel: PanelContainer
@@ -123,16 +124,31 @@ func _build_player_status() -> void:
 # ── Action Buttons ────────────────────────────────────────────────────────────
 
 func _build_action_buttons() -> void:
-	# Jump Button (Bottom Right)
-	_jump_btn = _make_circle_btn("", 100, C_BTN_NORM)
+	# Attack Button (Main, Bottom Right)
+	_attack_btn = _make_circle_btn("", 120, C_BTN_NORM)
+	_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
+	_attack_btn.set_anchor(SIDE_LEFT, 1.0)
+	_attack_btn.set_anchor(SIDE_TOP, 1.0)
+	_attack_btn.offset_right  = -40
+	_attack_btn.offset_bottom = -40
+	_attack_btn.offset_left   = -40 - 120
+	_attack_btn.offset_top    = -40 - 120
+	_attack_btn.button_down.connect(func(): Input.action_press("attack"))
+	_attack_btn.button_up.connect(func():   Input.action_release("attack"))
+	_attack_btn.draw.connect(_draw_attack_icon)
+	_root.add_child(_attack_btn)
+
+	# Jump Button (Small, Top-Left of Attack)
+	_jump_btn = _make_circle_btn("", 70, C_BTN_NORM)
 	_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
 	_jump_btn.set_anchor(SIDE_LEFT, 1.0)
 	_jump_btn.set_anchor(SIDE_TOP, 1.0)
-	_jump_btn.offset_right  = -40
-	_jump_btn.offset_bottom = -40
-	_jump_btn.offset_left   = -40 - 100
-	_jump_btn.offset_top    = -40 - 100
+	_jump_btn.offset_right  = -150
+	_jump_btn.offset_bottom = -150
+	_jump_btn.offset_left   = -150 - 70
+	_jump_btn.offset_top    = -150 - 70
 	_jump_btn.button_down.connect(func(): Input.action_press("ui_accept"))
 	_jump_btn.button_up.connect(func():   Input.action_release("ui_accept"))
 	_jump_btn.draw.connect(_draw_jump_icon)
@@ -228,7 +244,7 @@ func _connect_signals() -> void:
 	_stam_bar.value     = pd.stamina
 	
 	_exp_bar.max_value  = pd.exp_to_next
-	_exp_bar.value      = pd.exp
+	_exp_bar.value      = pd.experience
 	_lvl_lbl.text       = str(pd.level)
 
 
@@ -354,17 +370,31 @@ func _make_circle_btn(text: String, size: float, bg_col: Color) -> Button:
 	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	return btn
 
+func _draw_attack_icon() -> void:
+	var center = _attack_btn.size / 2.0
+	var col = Color(1, 1, 1, 0.85)
+	if _attack_btn.is_pressed() or _attack_btn.is_hovered():
+		col = Color.WHITE
+		
+	var thick = 8.0
+	# Sword handle
+	_attack_btn.draw_line(center + Vector2(-15, 15), center + Vector2(-30, 30), col, thick, true)
+	# Sword crossguard
+	_attack_btn.draw_line(center + Vector2(-25, 10), center + Vector2(-10, 25), col, thick, true)
+	# Sword blade
+	_attack_btn.draw_line(center + Vector2(-15, 15), center + Vector2(25, -25), col, thick + 2.0, true)
+
 func _draw_jump_icon() -> void:
 	var center = _jump_btn.size / 2.0
 	var col = Color(1, 1, 1, 0.85)
 	if _jump_btn.is_pressed() or _jump_btn.is_hovered():
 		col = Color.WHITE
 		
-	var thick = 8.0
+	var thick = 6.0
 	var pts = PackedVector2Array([
-		center + Vector2(-20, 8),
-		center + Vector2(0, -12),
-		center + Vector2(20, 8)
+		center + Vector2(-14, 5),
+		center + Vector2(0, -9),
+		center + Vector2(14, 5)
 	])
 	_jump_btn.draw_polyline(pts, col, thick, true)
 
