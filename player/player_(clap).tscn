@@ -3,9 +3,6 @@
 [ext_resource type="PackedScene" uid="uid://ds6kyl03hkij1" path="res://player with rig/Untitled.fbx" id="1_ijh6s"]
 [ext_resource type="Script" uid="uid://cawahxp0f604b" path="res://player/npc_clap.gd" id="2_script"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_npc"]
-height = 1.8
-
 [node name="Player (Clap)" unique_id=1938706111 instance=ExtResource("1_ijh6s")]
 script = ExtResource("2_script")
 
@@ -33,7 +30,3 @@ bones/39/rotation = Quaternion(0.24660245, -9.525923e-08, 1.5616288e-09, 0.96911
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." index="2" unique_id=519325850]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" index="0" unique_id=1457299008]
-transform = Transform3D(1.555, 0, 0, 0, 2.58, 0, 0, 0, 1.555, 0, 1.405, 0)
-shape = SubResource("CapsuleShape3D_npc")
