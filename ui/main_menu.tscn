@@ -337,14 +337,14 @@ custom_minimum_size = Vector2(380, 58)
 layout_mode = 2
 size_flags_horizontal = 4
 theme = SubResource("Theme_buttons")
-text = "NEW GAME"
+text = "PLAY GAME"
 
 [node name="LoadGameButton" type="Button" parent="Background/ContentAnchor/ContentBox/ButtonContainer" unique_id=428661248]
 custom_minimum_size = Vector2(380, 58)
 layout_mode = 2
 size_flags_horizontal = 4
 theme = SubResource("Theme_buttons")
-text = "LOAD GAME"
+text = "SETTINGS"
 
 [node name="CreditsButton" type="Button" parent="Background/ContentAnchor/ContentBox/ButtonContainer" unique_id=677692272]
 custom_minimum_size = Vector2(380, 58)

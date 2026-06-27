@@ -193,6 +193,13 @@ func _build_menu_panel() -> void:
 	btn_resume.pressed.connect(_toggle_menu)
 	vbox.add_child(btn_resume)
 
+	var btn_settings := _panel_btn("Settings")
+	btn_settings.pressed.connect(func():
+		var settings = preload("res://ui/settings_menu.gd").new()
+		_root.add_child(settings)
+	)
+	vbox.add_child(btn_settings)
+
 	var btn_quit := _panel_btn("Main Menu", Color("#ff3b5c"))
 	btn_quit.pressed.connect(func():
 		get_tree().paused = false

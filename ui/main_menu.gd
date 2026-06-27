@@ -1,6 +1,8 @@
 extends Control
 
 # ── Node refs ────────────────────────────────────────────────────────────────
+@onready var _title_label: Label       = $Background/ContentAnchor/ContentBox/TitleLabel
+@onready var _tagline_label: Label     = $Background/ContentAnchor/ContentBox/TaglineLabel
 @onready var _start_btn: Button        = $Background/ContentAnchor/ContentBox/ButtonContainer/NewGameButton
 @onready var _particle_layer: Control  = $Background/ParticleLayer
 @onready var _scanlines: ColorRect     = $Background/Scanlines
@@ -14,6 +16,9 @@ const PARTICLE_COUNT := 45
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	_title_label.add_theme_font_override("font", ThemeDB.fallback_font)
+	_tagline_label.add_theme_font_override("font", ThemeDB.fallback_font)
+	
 	_spawn_particles()
 	_particle_layer.draw.connect(_on_particle_layer_draw)
 	_anim_player.play("intro")
@@ -78,17 +83,26 @@ func _on_particle_layer_draw() -> void:
 # ── Button callbacks ──────────────────────────────────────────────────────────
 
 func _on_new_game_pressed() -> void:
-	_anim_player.play("exit")
-	await _anim_player.animation_finished
-	get_tree().change_scene_to_file("res://levels/node_3d.tscn")
+	var play_menu = preload("res://ui/play_menu.gd").new()
+	play_menu.new_game.connect(func():
+		_anim_player.play("exit")
+		await _anim_player.animation_finished
+		get_tree().change_scene_to_file("res://levels/node_3d.tscn")
+	)
+	play_menu.load_game.connect(func():
+		print("Load Game — not yet implemented")
+	)
+	add_child(play_menu)
 
 
 func _on_load_game_pressed() -> void:
-	print("Load Game — not yet implemented")
+	var settings = preload("res://ui/settings_menu.gd").new()
+	add_child(settings)
 
 
 func _on_credits_pressed() -> void:
-	print("Credits — not yet implemented")
+	var credits = preload("res://ui/credits_menu.gd").new()
+	add_child(credits)
 
 
 func _on_quit_button_pressed() -> void:

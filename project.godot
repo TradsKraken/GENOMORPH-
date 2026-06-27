@@ -18,6 +18,7 @@ config/icon="res://assets/icon.svg"
 [autoload]
 
 PlayerData="*res://player/player_data.gd"
+SettingsManager="*res://tools/settings_manager.gd"
 
 [display]
 
