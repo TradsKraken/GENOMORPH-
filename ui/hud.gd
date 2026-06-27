@@ -124,7 +124,7 @@ func _build_player_status() -> void:
 
 func _build_action_buttons() -> void:
 	# Jump Button (Bottom Right)
-	_jump_btn = _make_circle_btn("▲", 100, C_BTN_NORM)
+	_jump_btn = _make_circle_btn("", 100, C_BTN_NORM)
 	_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
 	_jump_btn.set_anchor(SIDE_LEFT, 1.0)
@@ -133,15 +133,13 @@ func _build_action_buttons() -> void:
 	_jump_btn.offset_bottom = -40
 	_jump_btn.offset_left   = -40 - 100
 	_jump_btn.offset_top    = -40 - 100
-	_jump_btn.add_theme_font_size_override("font_size", 36)
-	_jump_btn.add_theme_color_override("font_color", Color(1, 1, 1, 0.6))
-	_jump_btn.add_theme_color_override("font_pressed_color", Color(0.1, 0.1, 0.1, 0.9))
 	_jump_btn.button_down.connect(func(): Input.action_press("ui_accept"))
 	_jump_btn.button_up.connect(func():   Input.action_release("ui_accept"))
+	_jump_btn.draw.connect(_draw_jump_icon)
 	_root.add_child(_jump_btn)
 
 	# Menu Button (Top Right)
-	_menu_btn = _make_circle_btn("⏸", 56, C_BTN_NORM)
+	_menu_btn = _make_circle_btn("", 56, C_BTN_NORM)
 	_menu_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_menu_btn.set_anchor(SIDE_TOP, 0.0)
 	_menu_btn.set_anchor(SIDE_LEFT, 1.0)
@@ -150,8 +148,8 @@ func _build_action_buttons() -> void:
 	_menu_btn.offset_top    = 24
 	_menu_btn.offset_left   = -24 - 56
 	_menu_btn.offset_bottom = 24 + 56
-	_menu_btn.add_theme_font_size_override("font_size", 20)
 	_menu_btn.pressed.connect(_toggle_menu)
+	_menu_btn.draw.connect(_draw_pause_icon)
 	_root.add_child(_menu_btn)
 
 
@@ -325,19 +323,63 @@ func _make_circle_btn(text: String, size: float, bg_col: Color) -> Button:
 	btn.custom_minimum_size = Vector2(size, size)
 	
 	var normal := StyleBoxFlat.new()
-	normal.bg_color = bg_col
+	normal.bg_color = Color(0.05, 0.07, 0.15, 0.50)
 	normal.set_corner_radius_all(int(size / 2.0))
-	normal.border_color = Color(1, 1, 1, 0.1)
-	normal.set_border_width_all(1)
+	normal.border_color = Color(0.55, 0.78, 1.0, 0.40)
+	normal.set_border_width_all(3)
+	normal.shadow_color = Color(0, 0, 0, 0.4)
+	normal.shadow_size = 8
+	normal.shadow_offset = Vector2(0, 4)
+	normal.anti_aliasing = true
 	
 	var pressed := normal.duplicate() as StyleBoxFlat
-	pressed.bg_color = C_BTN_PRSS
+	pressed.bg_color = Color(0.18, 0.42, 0.90, 0.90)
+	pressed.border_color = Color(0.70, 0.88, 1.0, 0.60)
+	pressed.shadow_size = 2
+	pressed.shadow_offset = Vector2(0, 1)
+	
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = normal.bg_color.lightened(0.1)
 	
 	btn.add_theme_stylebox_override("normal", normal)
-	btn.add_theme_stylebox_override("hover", normal)
+	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
 	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	return btn
+
+func _draw_jump_icon() -> void:
+	var center = _jump_btn.size / 2.0
+	var col = Color(1, 1, 1, 0.85)
+	if _jump_btn.is_pressed() or _jump_btn.is_hovered():
+		col = Color.WHITE
+		
+	var thick = 8.0
+	var pts = PackedVector2Array([
+		center + Vector2(-20, 8),
+		center + Vector2(0, -12),
+		center + Vector2(20, 8)
+	])
+	_jump_btn.draw_polyline(pts, col, thick, true)
+
+func _draw_pause_icon() -> void:
+	var center = _menu_btn.size / 2.0
+	var col = Color(1, 1, 1, 0.85)
+	if _menu_btn.is_pressed() or _menu_btn.is_hovered():
+		col = Color.WHITE
+		
+	var w = 6.0
+	var h = 20.0
+	var spacing = 14.0
+	var r1 = Rect2(center.x - spacing/2.0 - w/2.0, center.y - h/2.0, w, h)
+	var r2 = Rect2(center.x + spacing/2.0 - w/2.0, center.y - h/2.0, w, h)
+	
+	# Draw rounded rectangles for the pause icon
+	var style = StyleBoxFlat.new()
+	style.bg_color = col
+	style.set_corner_radius_all(3)
+	style.anti_aliasing = true
+	style.draw(_menu_btn.get_canvas_item(), r1)
+	style.draw(_menu_btn.get_canvas_item(), r2)
 
 
 func _panel_btn(text: String, col: Color = Color.WHITE) -> Button:

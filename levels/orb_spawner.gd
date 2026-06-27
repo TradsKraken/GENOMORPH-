@@ -4,10 +4,10 @@ extends Node3D
 ## Respawns each type automatically after a delay when collected.
 
 # ── Exports ───────────────────────────────────────────────────────────────────
-@export var stamina_orb_count: int   = 6
-@export var exp_orb_count: int       = 5
-@export var spawn_radius: float      = 19.0
-@export var clear_radius: float      = 4.0
+@export var stamina_orb_count: int   = 25
+@export var exp_orb_count: int       = 20
+@export var spawn_radius: float      = 70.0
+@export var clear_radius: float      = 6.0
 @export var orb_height: float        = 1.1
 @export var respawn_delay: float     = 10.0
 
