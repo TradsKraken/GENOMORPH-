@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://c4or157xwuy2k" path="res://ui/virtual_joystick.gd" id="3_joystick"]
 [ext_resource type="Script" uid="uid://1tkj0fahqgl2" path="res://levels/tree_spawner.gd" id="4_tree_spawner"]
 [ext_resource type="Script" uid="uid://doyuennmlsgvu" path="res://tools/perf_hud.gd" id="5_perf_hud"]
+[ext_resource type="PackedScene" uid="uid://dspfn6lejrk6i" path="res://player/player_(clap).tscn" id="6_qraxk"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -2850,3 +2851,6 @@ shape = SubResource("SphereShape3D_a3crp")
 
 [node name="PerfHUD" type="CanvasLayer" parent="." unique_id=1995366968]
 script = ExtResource("5_perf_hud")
+
+[node name="Player (Clap)" parent="." unique_id=1938706111 instance=ExtResource("6_qraxk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 0.5169997, 1.3138075)
