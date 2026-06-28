@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://1tkj0fahqgl2" path="res://levels/tree_spawner.gd" id="4_tree_spawner"]
 [ext_resource type="Script" uid="uid://doyuennmlsgvu" path="res://tools/perf_hud.gd" id="5_perf_hud"]
 [ext_resource type="PackedScene" uid="uid://dspfn6lejrk6i" path="res://player/player_(clap).tscn" id="6_qraxk"]
+[ext_resource type="PackedScene" uid="uid://drm37ehmomxl3" path="res://player/Frog.tscn" id="7_4b24i"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -1728,7 +1729,7 @@ shadow_enabled = true
 [node name="Ground" type="StaticBody3D" parent="." unique_id=456649111]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=643852630]
-transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0, 0, 0.39675903)
+transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0.0064697266, 0.053894043, 0.39871216)
 mesh = SubResource("PlaneMesh_noarx")
 surface_material_override/0 = SubResource("GroundMat")
 
@@ -1736,12 +1737,16 @@ surface_material_override/0 = SubResource("GroundMat")
 transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0, -0.1, 0)
 shape = SubResource("GroundShape")
 
-[node name="Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
+[node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
+transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -5.0990906, 0.005617738, -12.969448)
+
+[node name="Frog Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
 transform = Transform3D(-0.595, 0, -5.2016553e-08, 0, 0.595, 0, 5.2016553e-08, 0, -0.595, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=256334508]
 transform = Transform3D(1, 0, 0, 0, 0.82086027, 0.5711291, 0, -0.5711291, 0.82086027, 0, 3.8155704, 8.207459)
 script = ExtResource("1_a202f")
+player_path = NodePath("../Frog Player")
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=669675839]
 
