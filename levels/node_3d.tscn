@@ -2867,6 +2867,7 @@ shape = SubResource("SphereShape3D_a3crp")
 
 [node name="PerfHUD" type="CanvasLayer" parent="." unique_id=1995366968]
 script = ExtResource("5_perf_hud")
+show_hud = false
 
 [node name="Human (Clap)" parent="." unique_id=1938706111 instance=ExtResource("6_qraxk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 0.015337229, 1.3138075)
