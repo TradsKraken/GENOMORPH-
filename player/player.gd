@@ -18,7 +18,7 @@ extends CharacterBody3D
 @export var gravity: float = 20.0
 
 ## Upward velocity applied when jumping.
-@export var jump_velocity: float = 10.0
+@export var jump_velocity: float = 8.0
 
 ## Whether the mesh rotates to face the movement direction.
 @export var rotate_to_movement: bool = true
@@ -154,8 +154,8 @@ func _physics_process(delta: float) -> void:
 		velocity.y = jump_velocity
 		if direction != Vector3.ZERO:
 			# Jump forward in the movement direction (true frog leap)
-			velocity.x = direction.x * (speed * 2.0)
-			velocity.z = direction.z * (speed * 2.0)
+			velocity.x = direction.x * (speed * 4.0)
+			velocity.z = direction.z * (speed * 4.0)
 		else:
 			# Jump straight up
 			velocity.x = 0.0
@@ -223,8 +223,18 @@ func _update_animation(direction: Vector3) -> void:
 	if should_play:
 		animation_player.play(target_anim, anim_blend_time)
 
-	# Scale walk playback speed with the export speed instead of dynamic velocity
-	if target_anim == anim_walk:
+	# ── Sync Animation Speed ──────────────────────────────────────────────────
+	if not is_on_floor() and target_anim == anim_jump:
+		# Scale the big jump animation to perfectly match the physical air time!
+		if animation_player:
+			var anim = animation_player.get_animation(target_anim)
+			if anim:
+				var air_time := (2.0 * jump_velocity) / gravity
+				if air_time > 0.0:
+					animation_player.speed_scale = anim.length / air_time
+	elif target_anim == anim_walk:
+		# Scale walking hop to movement speed
 		animation_player.speed_scale = clamp(speed / 2.5, 0.5, 2.0)
 	else:
+		# Idle
 		animation_player.speed_scale = 1.0
