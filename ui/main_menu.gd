@@ -7,6 +7,8 @@ extends Control
 @onready var _particle_layer: Control  = $Background/ParticleLayer
 @onready var _scanlines: ColorRect     = $Background/Scanlines
 @onready var _anim_player: AnimationPlayer = $AnimationPlayer
+@onready var _background_root: Control = $Background
+@onready var _version_label: Label     = $Background/VersionLabel
 
 # ── Particle state ────────────────────────────────────────────────────────────
 var _particles: Array[Dictionary] = []
@@ -19,10 +21,20 @@ func _ready() -> void:
 	_title_label.add_theme_font_override("font", ThemeDB.fallback_font)
 	_tagline_label.add_theme_font_override("font", ThemeDB.fallback_font)
 	
+	# Dynamically show the version number from project settings
+	var app_version = ProjectSettings.get_setting("application/config/version", "0.1.0")
+	_version_label.text = "v" + str(app_version) + " — GENOMORPH"
+	
+	_spawn_background_world()
+	
 	_spawn_particles()
 	_particle_layer.draw.connect(_on_particle_layer_draw)
 	_anim_player.play("intro")
 	_anim_player.animation_finished.connect(_on_intro_done)
+	
+	# Remove the scanline effect entirely so it doesn't look like stripes
+	if _scanlines:
+		_scanlines.queue_free()
 
 
 func _on_intro_done(_anim_name: String) -> void:
@@ -31,14 +43,68 @@ func _on_intro_done(_anim_name: String) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
-
-	# Scroll scanlines
-	var mat := _scanlines.material as ShaderMaterial
-	if mat:
-		mat.set_shader_parameter("scroll_offset", fmod(_time * 0.04, 1.0))
-
 	_update_particles(delta)
 	_particle_layer.queue_redraw()
+
+
+# ── Background World Instantiation ───────────────────────────────────────────
+
+func _spawn_background_world() -> void:
+	# Create a SubViewportContainer and SubViewport to render the 3D scene
+	var sub_viewport_container = SubViewportContainer.new()
+	sub_viewport_container.set_anchors_preset(Control.PRESET_FULL_RECT)
+	sub_viewport_container.stretch = true
+	
+	var sub_viewport = SubViewport.new()
+	sub_viewport.handle_input_locally = false
+	sub_viewport_container.add_child(sub_viewport)
+	
+	# Load the 3D world
+	var world_scene = load("res://levels/node_3d.tscn")
+	var world = world_scene.instantiate()
+	
+	# Find the camera and set it to main menu mode
+	var camera = world.get_node_or_null("Camera3D")
+	if camera and "is_main_menu" in camera:
+		camera.is_main_menu = true
+		
+	# Disable the player from moving if they somehow receive input
+	var player = world.get_node_or_null("Frog Player")
+	if player:
+		player.set_process(false)
+		player.set_physics_process(false)
+		player.set_process_input(false)
+		
+	# Hide any gameplay HUDs (joysticks, buttons) that are in the level
+	for child in world.get_children():
+		if child is CanvasLayer:
+			child.visible = false
+		
+	sub_viewport.add_child(world)
+	
+	# Create a blur shader overlay
+	var blur_overlay = ColorRect.new()
+	blur_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	
+	var blur_shader = Shader.new()
+	blur_shader.code = """
+shader_type canvas_item;
+uniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;
+void fragment() {
+	COLOR = textureLod(screen_texture, SCREEN_UV, 3.5);
+}
+"""
+	var blur_mat = ShaderMaterial.new()
+	blur_mat.shader = blur_shader
+	blur_overlay.material = blur_mat
+	
+	# Add the viewport behind everything else in the background
+	_background_root.add_child(sub_viewport_container)
+	_background_root.move_child(sub_viewport_container, 0)
+	
+	# Add the blur overlay directly on top of the viewport
+	_background_root.add_child(blur_overlay)
+	_background_root.move_child(blur_overlay, 1)
 
 
 # ── Particles — warm firefly / spore effect ───────────────────────────────────

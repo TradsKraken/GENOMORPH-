@@ -26,6 +26,9 @@ extends Camera3D
 ## Smooth-follow speed. Lower = lazier follow, higher = snappier.
 @export var follow_speed: float = 8.0
 
+## Set to true if this scene is being loaded as the main menu background.
+@export var is_main_menu: bool = false
+
 # ── Private ──────────────────────────────────────────────────────────────────
 
 var _player: Node3D = null
@@ -57,20 +60,34 @@ func _ready() -> void:
 	_apply_position(1.0)
 
 	# ── Spawn game systems at runtime (avoids UID-less .tscn references) ──────
-	var hud_script := load("res://ui/hud.gd") as GDScript
-	if hud_script:
-		var hud: CanvasLayer = hud_script.new()
-		hud.name = "GameHUD"
-		get_parent().call_deferred("add_child", hud)
+	if not is_main_menu:
+		var hud_script := load("res://ui/hud.gd") as GDScript
+		if hud_script:
+			var hud: CanvasLayer = hud_script.new()
+			hud.name = "GameHUD"
+			get_parent().call_deferred("add_child", hud)
 
-	var spawner_script := load("res://levels/orb_spawner.gd") as GDScript
-	if spawner_script:
-		var spawner: Node3D = spawner_script.new()
-		spawner.name = "OrbSpawner"
-		get_parent().call_deferred("add_child", spawner)
+		var spawner_script := load("res://levels/orb_spawner.gd") as GDScript
+		if spawner_script:
+			var spawner: Node3D = spawner_script.new()
+			spawner.name = "OrbSpawner"
+			get_parent().call_deferred("add_child", spawner)
 
 
 func _process(delta: float) -> void:
+	if is_main_menu:
+		# Slowly pan/rotate the camera over the swamp
+		var t = Time.get_ticks_msec() / 1000.0
+		var radius = 18.0
+		var orbit_speed = 0.12
+		var cam_height = 12.0
+		
+		# Orbit around the center of the level
+		var target_pos = Vector3(cos(t * orbit_speed) * radius, cam_height, sin(t * orbit_speed) * radius)
+		global_position = global_position.lerp(target_pos, delta * 2.0)
+		look_at(Vector3.ZERO, Vector3.UP)
+		return
+
 	if _player == null:
 		return
 

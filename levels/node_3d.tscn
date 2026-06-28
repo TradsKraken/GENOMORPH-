@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://byhayabks6fn4"]
 
 [ext_resource type="Script" uid="uid://61raa3sdio51" path="res://levels/camera_3d.gd" id="1_a202f"]
+[ext_resource type="Script" uid="uid://y5iqc4ir2acj" path="res://tools/auto_collision.gd" id="1_ysmlf"]
 [ext_resource type="Script" uid="uid://ducc3imx6yxhg" path="res://levels/npc_frog.gd" id="2_fhumt"]
 [ext_resource type="PackedScene" uid="uid://ea7e13ofj3cp" path="res://player/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://c4or157xwuy2k" path="res://ui/virtual_joystick.gd" id="3_joystick"]
@@ -23,11 +24,13 @@ glow_enabled = true
 glow_intensity = 1.5
 glow_bloom = 0.2
 
+[sub_resource type="TorusMesh" id="TorusMesh_qwc0f"]
+
 [sub_resource type="PlaneMesh" id="PlaneMesh_noarx"]
 size = Vector2(40, 40)
 
 [sub_resource type="StandardMaterial3D" id="GroundMat"]
-albedo_color = Color(0.2, 0.22, 0.2, 1)
+albedo_color = Color(0.1493181, 0.31432223, 0.11743338, 1)
 
 [sub_resource type="BoxShape3D" id="GroundShape"]
 size = Vector3(40, 0.2, 40)
@@ -1728,6 +1731,11 @@ light_energy = 1.2
 shadow_enabled = true
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=456649111]
+
+[node name="Swamp Sample" type="MeshInstance3D" parent="Ground" unique_id=779578895]
+transform = Transform3D(24.635, 0, 0, 0, 24.635, 0, 0, 0, 24.635, -37.711266, -5.3720093, -13.250458)
+mesh = SubResource("TorusMesh_qwc0f")
+script = ExtResource("1_ysmlf")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=643852630]
 transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0.0064697266, 0.053894043, 0.39871216)
