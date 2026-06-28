@@ -11,6 +11,7 @@ bones/0/rotation = Quaternion(0.0031175266, -0.015910735, 0.98124015, -0.1921067
 bones/4/rotation = Quaternion(0.011243575, -8.3191196e-07, 2.7605085e-09, 0.9999368)
 bones/5/rotation = Quaternion(0.08210643, 8.078302e-06, 0.00014098368, 0.9966236)
 bones/6/rotation = Quaternion(-0.115399, -0.00019848658, 0.0030009258, 0.99331474)
+bones/7/position = Vector3(0, 0.005, 0)
 bones/10/rotation = Quaternion(-0.5641519, -0.31250522, -0.6732207, 0.3617279)
 bones/11/rotation = Quaternion(-0.033604722, -0.017689133, -0.18155004, 0.98264825)
 bones/12/rotation = Quaternion(-0.09158767, 0.011810835, -0.0010548992, 0.99572647)
