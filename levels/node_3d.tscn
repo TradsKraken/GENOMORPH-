@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://byhayabks6fn4"]
 
 [ext_resource type="Script" uid="uid://61raa3sdio51" path="res://levels/camera_3d.gd" id="1_a202f"]
+[ext_resource type="Script" uid="uid://ducc3imx6yxhg" path="res://levels/npc_frog.gd" id="2_fhumt"]
 [ext_resource type="PackedScene" uid="uid://ea7e13ofj3cp" path="res://player/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://c4or157xwuy2k" path="res://ui/virtual_joystick.gd" id="3_joystick"]
 [ext_resource type="Script" uid="uid://1tkj0fahqgl2" path="res://levels/tree_spawner.gd" id="4_tree_spawner"]
@@ -1739,6 +1740,7 @@ shape = SubResource("GroundShape")
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
 transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -5.0990906, 0.005617738, -12.969448)
+script = ExtResource("2_fhumt")
 
 [node name="Frog Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
 transform = Transform3D(-0.595, 0, -5.2016553e-08, 0, 0.595, 0, 5.2016553e-08, 0, -0.595, 0, 0, 0)
