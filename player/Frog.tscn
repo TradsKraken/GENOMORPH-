@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://drm37ehmomxl3"]
+
+[ext_resource type="PackedScene" uid="uid://cjp2wyw3gr04g" path="res://Models/Frog.glb" id="1_a2b3c"]
+
+[node name="Root Scene" instance=ExtResource("1_a2b3c")]
+
+[node name="Skeleton3D" parent="RootNode/FrogArmature" parent_id_path=PackedInt32Array(961336093) index="0" unique_id=1655190135]
+bones/1/position = Vector3(2.249051e-05, 0.017828934, -7.25789e-05)
+bones/2/rotation = Quaternion(0.7355204, 0.6762389, -0.036419295, -0.019604048)
+bones/3/rotation = Quaternion(0.17938948, 0.2303927, 0.45333275, 0.84215677)
+bones/4/rotation = Quaternion(-0.7395802, -0.14514922, 0.1867213, 0.6301493)
+bones/7/rotation = Quaternion(-0.011484059, -0.0030392313, -0.036979422, 0.99924546)
+bones/8/rotation = Quaternion(-0.19260108, -0.25411475, 0.050834835, 0.9464388)
+bones/11/rotation = Quaternion(-0.004292181, 0.004775406, -0.6826169, 0.73074824)
+bones/12/rotation = Quaternion(0.13534991, 0.8887381, 0.4377393, 0.014468686)
+bones/13/rotation = Quaternion(0.6825014, 0.0655813, 0.65193504, 0.32383913)
+bones/14/rotation = Quaternion(0.98025686, 0.12623748, 0.04737924, -0.14462309)
+bones/15/rotation = Quaternion(-0.038465366, -0.012715323, 0.7148128, 0.69814134)
+bones/16/rotation = Quaternion(-0.50718915, 0.7935263, -0.1374032, 0.30691293)
+bones/17/rotation = Quaternion(-0.7494376, 0.20916766, -0.11037356, 0.61839306)
+bones/18/rotation = Quaternion(-0.0043004784, -0.0046747355, 0.6825645, 0.73079777)
+bones/19/rotation = Quaternion(0.45769578, -0.20890823, 0.021230172, 0.86395675)
+bones/20/rotation = Quaternion(0.79012525, -0.3292747, 0.51636535, 0.025436899)
+bones/21/rotation = Quaternion(0.9810682, -0.12263897, -0.024664883, -0.14783931)
+bones/24/position = Vector3(0.010585935, 2.8755961e-05, 0.0084805675)
+bones/26/position = Vector3(-0.01068614, 2.8755665e-05, 0.0084805675)
+
+[node name="FrontLowLeg_L" parent="RootNode/FrogArmature/Skeleton3D" index="0" unique_id=1770065112]
+transform = Transform3D(0.99939823, 0.024030901, -0.025018122, 0.03232406, -0.90687984, 0.4201479, -0.012592278, -0.42070356, -0.9071107, 0.0103707705, -0.00036078598, 0.0037955497)
+
+[node name="Back" parent="RootNode/FrogArmature/Skeleton3D" index="1" unique_id=215069260]
+transform = Transform3D(1, -1.1368683e-13, 1.668937e-06, 8.978918e-07, -0.8429433, -0.53800213, 1.4068195e-06, 0.53800213, -0.8429433, -0.00011252286, 0.0111858975, 0.0048500057)
+
+[node name="Head" parent="RootNode/FrogArmature/Skeleton3D" index="2" unique_id=1658554606]
+transform = Transform3D(-0.865681, -0.0016681913, 0.5005928, -0.12832722, -0.96583974, -0.22513649, 0.48386785, -0.25913608, 0.83589476, -0.00011254818, -0.009543564, 0.011666231)
+
+[node name="Torso" parent="RootNode/FrogArmature/Skeleton3D" index="3" unique_id=903442539]
+transform = Transform3D(-0.99960995, -0.02715554, 0.0065101553, 0.02784787, -0.9520664, 0.30462086, -0.002074046, 0.3046834, 0.95245117, -0.00011252232, 0.0017630155, 0.008785803)
+
+[node name="BackLowLeg_L" parent="RootNode/FrogArmature/Skeleton3D" index="4" unique_id=1058811331]
+transform = Transform3D(0.92710894, 0.3745878, 0.012384286, 0.37274545, -0.92499006, 0.073849455, 0.039118364, -0.063850105, -0.99719256, 0.009132224, 0.014126265, 0.0011391302)
+
+[node name="FrontLowLeg_R" parent="RootNode/FrogArmature/Skeleton3D" index="5" unique_id=1092653609]
+transform = Transform3D(0.9969392, -0.05545738, 0.055103965, -0.073404856, -0.90654296, 0.4156811, 0.026901372, -0.41845357, -0.9078392, -0.010189597, -0.0003637825, 0.0037754034)
+
+[node name="BackLowLeg_R" parent="RootNode/FrogArmature/Skeleton3D" index="6" unique_id=1304418261]
+transform = Transform3D(0.927112, -0.3745326, -0.01394663, -0.37253985, -0.9249723, 0.07511164, -0.041032024, -0.06444085, -0.99708116, -0.009233323, 0.014126182, 0.0011455019)
+
+[node name="PoleTarget_L" parent="RootNode/FrogArmature/Skeleton3D" index="7" unique_id=1642043847]
+transform = Transform3D(1, 0, 0, 0, -1.1920929e-07, -0.99999994, 0, 0.99999994, -1.1920929e-07, 0.011622314, -0.04024126, 0.0038089529)
+
+[node name="PoleTarget_R" parent="RootNode/FrogArmature/Skeleton3D" index="8" unique_id=218977178]
+transform = Transform3D(1, 0, 0, 0, -1.1920929e-07, -0.99999994, 0, 0.99999994, -1.1920929e-07, -0.011552991, -0.04024126, 0.0038089529)
+
+[node name="FrontFoot_L" parent="RootNode/FrogArmature/Skeleton3D" index="9" unique_id=936933556]
+transform = Transform3D(1, -2.2737368e-13, -2.773601e-06, 5.580127e-13, -0.9999999, 2.3841856e-07, -2.7736007e-06, -2.3841856e-07, -0.9999999, 0.010585935, -0.008480567, 2.8754948e-05)
+
+[node name="FrontFoot_R" parent="RootNode/FrogArmature/Skeleton3D" index="11" unique_id=1075854088]
+transform = Transform3D(1, -2.2737368e-13, -2.773601e-06, 5.580127e-13, -0.9999999, 2.3841856e-07, -2.7736007e-06, -2.3841856e-07, -0.9999999, -0.01068614, -0.008480567, 2.8754652e-05)

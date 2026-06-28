@@ -18,13 +18,13 @@ extends CharacterBody3D
 @export var gravity: float = 20.0
 
 ## Upward velocity applied when jumping.
-@export var jump_velocity: float = 8.0
+@export var jump_velocity: float = 10.0
 
 ## Whether the mesh rotates to face the movement direction.
 @export var rotate_to_movement: bool = true
 
 ## Extra forward momentum added when jumping forward.
-@export var jump_forward_boost: float = 8.0
+@export var jump_forward_boost: float = 2.5
 
 ## How fast the mesh rotates toward the movement direction (degrees/sec).
 @export var rotation_speed: float = 720.0
@@ -46,13 +46,13 @@ extends CharacterBody3D
 @export var animation_player: AnimationPlayer = null
 
 ## Name of the idle animation track (must match the name in the .glb).
-@export var anim_idle: String = "idle"
+@export var anim_idle: String = "FrogArmature|Frog_Idle"
 
 ## Name of the walk animation track.
-@export var anim_walk: String = "walk"
+@export var anim_walk: String = "FrogArmature|Frog_Jump"
 
 ## Name of the jump animation track.
-@export var anim_jump: String = "jump"
+@export var anim_jump: String = "FrogArmature|Frog_Jump"
 
 ## Speed at which animations blend/transition.
 @export var anim_blend_time: float = 0.15
@@ -68,6 +68,23 @@ func _ready() -> void:
 		InputMap.add_action("attack")
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
+	
+	if animation_player == null:
+		animation_player = _find_animation_player(self)
+		if animation_player:
+			var walk = animation_player.get_animation(anim_walk)
+			if walk: walk.loop_mode = Animation.LOOP_LINEAR
+			var idle = animation_player.get_animation(anim_idle)
+			if idle: idle.loop_mode = Animation.LOOP_LINEAR
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	for child in node.get_children():
+		if child is AnimationPlayer:
+			return child
+		var result = _find_animation_player(child)
+		if result != null:
+			return result
+	return null
 
 
 func _find_joystick() -> void:
@@ -92,7 +109,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		raw_input = Input.get_vector(
 			"ui_left", "ui_right",   # A / Left  →  D / Right
-			"ui_up",   "ui_down"     # W / Up    →  S / Down
+			"ui_up",   "ui_down"	 # W / Up	→  S / Down
 		)
 	# Map 2-D input → 3-D world XZ direction.
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
@@ -100,9 +117,22 @@ func _physics_process(delta: float) -> void:
 	# ── Movement / Walking ────────────────────────────────────────────────────
 	if direction != Vector3.ZERO:
 		if is_on_floor():
+			var current_speed := speed
+			var current_accel := acceleration
+			
+			# Synchronize movement speed to the animation frame
+			if animation_player and animation_player.current_animation == anim_walk and animation_player.is_playing():
+				var pos := animation_player.current_animation_position
+				var length := animation_player.current_animation_length
+				if length > 0.0:
+					# Use a sine wave squared to make the player stop at the ends and move fast in the middle
+					var phase := (pos / length) * PI
+					current_speed = speed * pow(sin(phase), 2) * 2.0
+					current_accel = acceleration * 2.0 # Track the curve faster
+					
 			# Walk on the ground
-			velocity.x = move_toward(velocity.x, direction.x * speed, acceleration * delta)
-			velocity.z = move_toward(velocity.z, direction.z * speed, acceleration * delta)
+			velocity.x = move_toward(velocity.x, direction.x * current_speed, current_accel * delta)
+			velocity.z = move_toward(velocity.z, direction.z * current_speed, current_accel * delta)
 		else:
 			# Frog jump: NO air control. Once you leap, you are committed to the ballistic arc.
 			pass
@@ -124,12 +154,15 @@ func _physics_process(delta: float) -> void:
 		velocity.y = jump_velocity
 		if direction != Vector3.ZERO:
 			# Jump forward in the movement direction (true frog leap)
-			velocity.x = direction.x * (speed + jump_forward_boost)
-			velocity.z = direction.z * (speed + jump_forward_boost)
+			velocity.x = direction.x * (speed * 2.0)
+			velocity.z = direction.z * (speed * 2.0)
 		else:
 			# Jump straight up
 			velocity.x = 0.0
 			velocity.z = 0.0
+			
+		if animation_player:
+			animation_player.stop() # Force the animation to restart from the beginning for the big leap
 
 	# ── Attacking ────────────────────────────────────────────────────────────
 	if Input.is_action_just_pressed("attack"):
@@ -144,7 +177,9 @@ func _physics_process(delta: float) -> void:
 # ── Combat ───────────────────────────────────────────────────────────────────
 
 func _attack() -> void:
-	# Placeholder for attack logic until animations are added
+	if animation_player:
+		animation_player.play("FrogArmature|Frog_Attack", 0.1)
+	
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("show_float_text"):
 		var cam := get_viewport().get_camera_3d()
@@ -159,25 +194,37 @@ func _update_animation(direction: Vector3) -> void:
 	if animation_player == null:
 		return
 
+	if animation_player.current_animation == "FrogArmature|Frog_Attack" and animation_player.is_playing():
+		return
+
 	var target_anim: String
 
 	if not is_on_floor():
 		# In the air → play jump (holds on last frame until landing)
 		target_anim = anim_jump
+		if animation_player:
+			var anim = animation_player.get_animation(target_anim)
+			if anim: anim.loop_mode = Animation.LOOP_NONE
 	elif direction != Vector3.ZERO:
 		# Moving on the ground → walk cycle
 		target_anim = anim_walk
+		if animation_player:
+			var anim = animation_player.get_animation(target_anim)
+			if anim: anim.loop_mode = Animation.LOOP_LINEAR
 	else:
 		# Standing still → idle breathing
 		target_anim = anim_idle
 
-	# Only switch if the animation actually changed
-	if animation_player.current_animation != target_anim:
+	# Only switch if the animation actually changed or if a ground animation stopped playing
+	var should_play = animation_player.current_animation != target_anim
+	if is_on_floor() and not animation_player.is_playing():
+		should_play = true
+
+	if should_play:
 		animation_player.play(target_anim, anim_blend_time)
 
-	# Scale walk playback speed with actual movement speed
+	# Scale walk playback speed with the export speed instead of dynamic velocity
 	if target_anim == anim_walk:
-		var h_speed := Vector2(velocity.x, velocity.z).length()
-		animation_player.speed_scale = clamp(h_speed / speed, 0.5, 2.0)
+		animation_player.speed_scale = clamp(speed / 2.5, 0.5, 2.0)
 	else:
 		animation_player.speed_scale = 1.0

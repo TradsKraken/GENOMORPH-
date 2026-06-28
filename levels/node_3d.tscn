@@ -1737,6 +1737,7 @@ transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0, -0.1, 0)
 shape = SubResource("GroundShape")
 
 [node name="Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
+transform = Transform3D(0.595, 0, 0, 0, 0.595, 0, 0, 0, 0.595, 0, 0, 0)
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=256334508]
 transform = Transform3D(1, 0, 0, 0, 0.82086027, 0.5711291, 0, -0.5711291, 0.82086027, 0, 3.8155704, 8.207459)
@@ -2852,5 +2853,5 @@ shape = SubResource("SphereShape3D_a3crp")
 [node name="PerfHUD" type="CanvasLayer" parent="." unique_id=1995366968]
 script = ExtResource("5_perf_hud")
 
-[node name="Player (Clap)" parent="." unique_id=1938706111 instance=ExtResource("6_qraxk")]
+[node name="Human (Clap)" parent="." unique_id=1938706111 instance=ExtResource("6_qraxk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 0.015337229, 1.3138075)

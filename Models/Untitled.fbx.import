@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cjp2wyw3gr04g"
-path="res://.godot/imported/Frog.glb-3f5d94f87e46f23c3ee0a28be8917773.scn"
+uid="uid://ds6kyl03hkij1"
+path="res://.godot/imported/Untitled.fbx-6b9e319dc1500007f7a7ea5432f68afc.scn"
 
 [deps]
 
-source_file="res://player with rig/Frog.glb"
-dest_files=["res://.godot/imported/Frog.glb-3f5d94f87e46f23c3ee0a28be8917773.scn"]
+source_file="res://Models/Untitled.fbx"
+dest_files=["res://.godot/imported/Untitled.fbx-6b9e319dc1500007f7a7ea5432f68afc.scn"]
 
 [params]
 
@@ -32,7 +32,7 @@ meshes/force_disable_compression=false
 skins/use_named_skins=true
 animation/import=true
 animation/fps=30
-animation/trimming=false
+animation/trimming=true
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
@@ -40,6 +40,7 @@ materials/extract=0
 materials/extract_format=0
 materials/extract_path=""
 _subresources={}
-gltf/naming_version=2
-gltf/embedded_image_handling=1
-gltf/texture_map_mode=1
+fbx/importer=0
+fbx/allow_geometry_helper_nodes=false
+fbx/embedded_image_handling=1
+fbx/naming_version=2
