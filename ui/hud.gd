@@ -24,7 +24,9 @@ var _exp_bar:    ProgressBar
 var _lvl_lbl:    Label
 
 var _attack_btn: Button
+var _skill1_btn: Button
 var _jump_btn:   Button
+var _skill3_btn: Button
 var _menu_btn:   Button
 var _menu_panel: PanelContainer
 var _menu_open:  bool = false
@@ -124,35 +126,68 @@ func _build_player_status() -> void:
 # ── Action Buttons ────────────────────────────────────────────────────────────
 
 func _build_action_buttons() -> void:
-	# Attack Button (Main, Bottom Right)
-	_attack_btn = _make_circle_btn("", 120, C_BTN_NORM)
+	# 1. Primary Attack Button (Sticky Tongue Whip)
+	# Largest button, outermost bottom-right
+	_attack_btn = _make_circle_btn("👅", 120, C_BTN_NORM)
+	_attack_btn.add_theme_font_size_override("font_size", 64)
 	_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
 	_attack_btn.set_anchor(SIDE_LEFT, 1.0)
 	_attack_btn.set_anchor(SIDE_TOP, 1.0)
 	_attack_btn.offset_right  = -40
 	_attack_btn.offset_bottom = -40
-	_attack_btn.offset_left   = -40 - 120
-	_attack_btn.offset_top    = -40 - 120
+	_attack_btn.offset_left   = -160
+	_attack_btn.offset_top    = -160
 	_attack_btn.button_down.connect(func(): Input.action_press("attack"))
 	_attack_btn.button_up.connect(func():   Input.action_release("attack"))
-	_attack_btn.draw.connect(_draw_attack_icon)
 	_root.add_child(_attack_btn)
 
-	# Jump Button (Small, Top-Left of Attack)
-	_jump_btn = _make_circle_btn("", 70, C_BTN_NORM)
+	# 2. Skill 1 Button (Webbed Lunge)
+	# Medium, directly to the left of Primary Attack
+	_skill1_btn = _make_circle_btn("🦵", 80, C_BTN_NORM)
+	_skill1_btn.add_theme_font_size_override("font_size", 48)
+	_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_skill1_btn.set_anchor(SIDE_BOTTOM, 1.0)
+	_skill1_btn.set_anchor(SIDE_LEFT, 1.0)
+	_skill1_btn.set_anchor(SIDE_TOP, 1.0)
+	_skill1_btn.offset_right  = -190
+	_skill1_btn.offset_bottom = -60
+	_skill1_btn.offset_left   = -270
+	_skill1_btn.offset_top    = -140
+	_root.add_child(_skill1_btn)
+
+	# 3. Skill 2 Button (Splashdown Jump)
+	# Medium, directly above Skill 1, forming the center of the UI arc
+	_jump_btn = _make_circle_btn("🦘", 80, C_BTN_NORM)
+	_jump_btn.add_theme_font_size_override("font_size", 48)
 	_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
 	_jump_btn.set_anchor(SIDE_LEFT, 1.0)
 	_jump_btn.set_anchor(SIDE_TOP, 1.0)
-	_jump_btn.offset_right  = -150
-	_jump_btn.offset_bottom = -150
-	_jump_btn.offset_left   = -150 - 70
-	_jump_btn.offset_top    = -150 - 70
+	_jump_btn.offset_right  = -152
+	_jump_btn.offset_bottom = -152
+	_jump_btn.offset_left   = -232
+	_jump_btn.offset_top    = -232
 	_jump_btn.button_down.connect(func(): Input.action_press("ui_accept"))
 	_jump_btn.button_up.connect(func():   Input.action_release("ui_accept"))
-	_jump_btn.draw.connect(_draw_jump_icon)
 	_root.add_child(_jump_btn)
+
+	# 4. Skill 3 Button (Cutaneous Respiration - Ultimate)
+	# Medium, top of the curved arc (directly above Primary Attack)
+	_skill3_btn = _make_circle_btn("☣️", 80, C_BTN_NORM)
+	_skill3_btn.add_theme_font_size_override("font_size", 48)
+	_skill3_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_skill3_btn.set_anchor(SIDE_BOTTOM, 1.0)
+	_skill3_btn.set_anchor(SIDE_LEFT, 1.0)
+	_skill3_btn.set_anchor(SIDE_TOP, 1.0)
+	_skill3_btn.offset_right  = -60
+	_skill3_btn.offset_bottom = -190
+	_skill3_btn.offset_left   = -140
+	_skill3_btn.offset_top    = -270
+	_skill3_btn.disabled = true
+	_skill3_btn.modulate = Color(0.5, 0.5, 0.5, 0.5) # Locked visual state
+	_root.add_child(_skill3_btn)
+
 
 	# Menu Button (Top Right)
 	_menu_btn = _make_circle_btn("", 56, C_BTN_NORM)
