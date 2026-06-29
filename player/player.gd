@@ -60,6 +60,12 @@ extends CharacterBody3D
 ## Reference to the on-screen virtual joystick (found at runtime via group).
 var _joystick = null
 
+# ── Splashdown Jump State ────────────────────────────────────────────────────
+var is_aiming_jump: bool = false
+var is_jumping: bool = false
+var jump_target_pos: Vector3 = Vector3.ZERO
+var _reticle: MeshInstance3D
+
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
@@ -68,6 +74,8 @@ func _ready() -> void:
 		InputMap.add_action("attack")
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
+	
+	_build_reticle()
 	
 	if animation_player == null:
 		animation_player = _find_animation_player(self)
@@ -85,6 +93,27 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 		if result != null:
 			return result
 	return null
+
+func _build_reticle() -> void:
+	_reticle = MeshInstance3D.new()
+	var cyl = CylinderMesh.new()
+	cyl.top_radius = 2.5
+	cyl.bottom_radius = 2.5
+	cyl.height = 0.2
+	_reticle.mesh = cyl
+	
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(0.2, 0.6, 1.0, 0.5)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_reticle.material_override = mat
+	
+	_reticle.visible = false
+	# Add to main scene so it ignores player rotation/scale
+	call_deferred("_add_reticle_to_scene")
+
+func _add_reticle_to_scene() -> void:
+	get_tree().current_scene.add_child(_reticle)
 
 
 func _find_joystick() -> void:
@@ -115,7 +144,10 @@ func _physics_process(delta: float) -> void:
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
 
 	# ── Movement / Walking ────────────────────────────────────────────────────
-	if direction != Vector3.ZERO:
+	if is_aiming_jump:
+		velocity.x = move_toward(velocity.x, 0.0, friction * 5.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, friction * 5.0 * delta)
+	elif direction != Vector3.ZERO:
 		if is_on_floor():
 			var current_speed := speed
 			var current_accel := acceleration
@@ -149,26 +181,17 @@ func _physics_process(delta: float) -> void:
 		var max_step := deg_to_rad(rotation_speed) * delta
 		rotation.y = rotate_toward(current_angle, target_angle, max_step)
 
-	# ── Jumping ──────────────────────────────────────────────────────────────
-	if Input.is_action_pressed("ui_accept") and is_on_floor() and PlayerData.use_stamina(jump_stamina_cost):
-		velocity.y = jump_velocity
-		if direction != Vector3.ZERO:
-			# Jump forward in the movement direction (true frog leap)
-			velocity.x = direction.x * (speed * 4.0)
-			velocity.z = direction.z * (speed * 4.0)
-		else:
-			# Jump straight up
-			velocity.x = 0.0
-			velocity.z = 0.0
-			
-		if animation_player:
-			animation_player.stop() # Force the animation to restart from the beginning for the big leap
-
 	# ── Attacking ────────────────────────────────────────────────────────────
 	if Input.is_action_just_pressed("attack"):
 		_attack()
 
+	var was_on_floor = is_on_floor()
 	move_and_slide()
+	var just_landed = is_on_floor() and not was_on_floor
+	
+	if just_landed and is_jumping:
+		is_jumping = false
+		_trigger_splashdown_aoe()
 
 	# ── Animation state machine ──────────────────────────────────────────────
 	_update_animation(direction)
@@ -176,9 +199,128 @@ func _physics_process(delta: float) -> void:
 
 # ── Combat ───────────────────────────────────────────────────────────────────
 
+func take_damage(amount: float) -> void:
+	PlayerData.take_damage(amount)
+	# Give some visual feedback when hit
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_float_text"):
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+			hud.show_float_text("-" + str(roundi(amount)), scr, Color.RED)
+	
+	if PlayerData.health <= 0:
+		# Player death logic: Reset health then reload scene
+		PlayerData.health = PlayerData.max_health
+		get_tree().reload_current_scene()
+
+# ── Splashdown Jump Mechanics ────────────────────────────────────────────────
+
+func start_aiming_jump() -> void:
+	if not is_on_floor() or is_jumping: return
+	is_aiming_jump = true
+	_reticle.visible = true
+	_reticle.global_position = global_position
+	jump_target_pos = global_position
+	
+func update_aim_jump(drag_vec: Vector2, is_cancelled: bool = false) -> void:
+	if not is_aiming_jump: return
+	var aim_range = 8.0
+	var offset = Vector3(drag_vec.x, 0, drag_vec.y) * aim_range
+	jump_target_pos = global_position + offset
+	jump_target_pos.y = global_position.y
+	_reticle.global_position = jump_target_pos
+	
+	var mat = _reticle.material_override as StandardMaterial3D
+	if mat:
+		if is_cancelled:
+			mat.albedo_color = Color(1.0, 0.2, 0.2, 0.5) # Turn red if cancelling
+		else:
+			mat.albedo_color = Color(0.2, 0.6, 1.0, 0.5) # Normal blue
+
+func cancel_aiming_jump() -> void:
+	if not is_aiming_jump: return
+	is_aiming_jump = false
+	_reticle.visible = false
+	
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_float_text"):
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+			hud.show_float_text("CANCELLED", scr, Color(0.7, 0.7, 0.7))
+
+func execute_splash_jump(is_quick_tap: bool) -> void:
+	if not is_aiming_jump: return
+	is_aiming_jump = false
+	_reticle.visible = false
+	
+	if not is_on_floor() or not PlayerData.use_stamina(jump_stamina_cost):
+		return
+		
+	is_jumping = true
+	
+	if is_quick_tap:
+		velocity.x = 0.0
+		velocity.z = 0.0
+		velocity.y = jump_velocity
+	else:
+		var dist = global_position.distance_to(jump_target_pos)
+		var t = 0.8 # Fixed hang time
+		velocity.y = (gravity * t) / 2.0
+		
+		var dir = global_position.direction_to(jump_target_pos)
+		var h_speed = dist / t
+		velocity.x = dir.x * h_speed
+		velocity.z = dir.z * h_speed
+		
+		rotation.y = atan2(dir.x, dir.z)
+		
+	if animation_player:
+		animation_player.stop()
+
+func _trigger_splashdown_aoe() -> void:
+	var splash_radius = 4.5
+	var splash_damage = 25.0
+	
+	# Visual feedback
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_float_text"):
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+			hud.show_float_text("SPLASH!", scr, Color.CYAN)
+			
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy.has_method("take_damage") and not enemy.is_dead:
+			var dist = global_position.distance_to(enemy.global_position)
+			if dist <= splash_radius:
+				enemy.take_damage(splash_damage)
+
 func _attack() -> void:
 	if animation_player:
 		animation_player.play("FrogArmature|Frog_Attack", 0.1)
+	
+	# MVP Attack Logic: Damage closest enemy in front
+	var attack_range = 4.0
+	var damage = 5.0
+	var closest_enemy = null
+	var closest_dist = attack_range
+	
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy.has_method("take_damage") and not enemy.is_dead:
+			var dist = global_position.distance_to(enemy.global_position)
+			if dist < closest_dist:
+				closest_enemy = enemy
+				closest_dist = dist
+					
+	if closest_enemy:
+		# Auto-aim: Snap rotation to face the target
+		var to_enemy = global_position.direction_to(closest_enemy.global_position)
+		rotation.y = atan2(to_enemy.x, to_enemy.z)
+		
+		# Deal damage
+		closest_enemy.take_damage(damage)
 	
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("show_float_text"):

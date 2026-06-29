@@ -27,6 +27,7 @@ var _attack_btn: Button
 var _skill1_btn: Button
 var _jump_btn:   Button
 var _skill3_btn: Button
+var _cancel_zone: Label
 var _menu_btn:   Button
 var _menu_panel: PanelContainer
 var _menu_open:  bool = false
@@ -45,6 +46,7 @@ func _ready() -> void:
 
 	_build_player_status()
 	_build_action_buttons()
+	_build_cancel_zone()
 	_build_menu_panel()
 	_connect_signals()
 
@@ -168,8 +170,7 @@ func _build_action_buttons() -> void:
 	_jump_btn.offset_bottom = -152
 	_jump_btn.offset_left   = -232
 	_jump_btn.offset_top    = -232
-	_jump_btn.button_down.connect(func(): Input.action_press("ui_accept"))
-	_jump_btn.button_up.connect(func():   Input.action_release("ui_accept"))
+	_jump_btn.gui_input.connect(_on_jump_btn_input)
 	_root.add_child(_jump_btn)
 
 	# 4. Skill 3 Button (Cutaneous Respiration - Ultimate)
@@ -260,6 +261,101 @@ func _build_menu_panel() -> void:
 
 	_root.add_child(_menu_panel)
 
+
+# ── Cancel Zone ───────────────────────────────────────────────────────────────
+
+func _build_cancel_zone() -> void:
+	_cancel_zone = Label.new()
+	_cancel_zone.text = "X\nCANCEL"
+	_cancel_zone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_cancel_zone.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_cancel_zone.add_theme_font_size_override("font_size", 14) # Smaller font prevents stretching
+	
+	_cancel_zone.custom_minimum_size = Vector2(80, 80)
+	
+	# Lock all 4 anchors to the top right to strictly enforce the 80x80 size
+	_cancel_zone.set_anchor(SIDE_RIGHT, 1.0)
+	_cancel_zone.set_anchor(SIDE_TOP, 0.0)
+	_cancel_zone.set_anchor(SIDE_LEFT, 1.0)
+	_cancel_zone.set_anchor(SIDE_BOTTOM, 0.0)
+	
+	_cancel_zone.offset_right = -152
+	_cancel_zone.offset_left = -232 # perfectly aligned vertically with Skill 2
+	_cancel_zone.offset_top = 100
+	_cancel_zone.offset_bottom = 180 # exactly 80 tall
+	
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.8, 0.1, 0.1, 0.6)
+	bg.set_corner_radius_all(40) # Half of 80 = perfect circle
+	bg.border_color = Color(1, 0.3, 0.3, 1)
+	bg.set_border_width_all(3)
+	_cancel_zone.add_theme_stylebox_override("normal", bg)
+	
+	_cancel_zone.visible = false
+	_root.add_child(_cancel_zone)
+
+
+# ── Action Button Logic ───────────────────────────────────────────────────────
+
+var _is_aiming_jump: bool = false
+var _jump_start_pos: Vector2
+
+func _on_jump_btn_input(event: InputEvent) -> void:
+	var player = get_tree().get_first_node_in_group("player")
+	if player == null: return
+	
+	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+		if event.is_pressed():
+			_is_aiming_jump = true
+			_jump_start_pos = event.position
+			if _cancel_zone: _cancel_zone.visible = true
+			if player.has_method("start_aiming_jump"):
+				player.start_aiming_jump()
+		else:
+			if _is_aiming_jump:
+				_is_aiming_jump = false
+				if _cancel_zone: _cancel_zone.visible = false
+				
+				# Check visual cancel zone intersection
+				var is_cancelled = false
+				var global_touch_pos = _jump_btn.get_global_position() + event.position
+				if _cancel_zone and _cancel_zone.get_global_rect().has_point(global_touch_pos):
+					is_cancelled = true
+				
+				if is_cancelled:
+					if player.has_method("cancel_aiming_jump"):
+						player.cancel_aiming_jump()
+				else:
+					var drag_dist = event.position.distance_to(_jump_start_pos)
+					var is_quick_tap = drag_dist < 20.0
+					if player.has_method("execute_splash_jump"):
+						player.execute_splash_jump(is_quick_tap)
+					
+	elif event is InputEventScreenDrag or (event is InputEventMouseMotion and _is_aiming_jump):
+		if _is_aiming_jump:
+			var is_cancelled = false
+			var global_touch_pos = _jump_btn.get_global_position() + event.position
+			if _cancel_zone and _cancel_zone.get_global_rect().has_point(global_touch_pos):
+				is_cancelled = true
+				
+			# Highlight cancel zone when hovering
+			if _cancel_zone:
+				var bg = _cancel_zone.get_theme_stylebox("normal") as StyleBoxFlat
+				if is_cancelled:
+					bg.bg_color = Color(1.0, 0.2, 0.2, 0.95)
+					bg.set_border_width_all(6)
+				else:
+					bg.bg_color = Color(0.8, 0.1, 0.1, 0.6)
+					bg.set_border_width_all(3)
+			
+			var max_drag = 80.0
+			var drag_vec = (event.position - _jump_start_pos) / max_drag
+			if drag_vec.length() > 1.0:
+				drag_vec = drag_vec.normalized()
+				
+			var mapped_vec = Vector2(drag_vec.x, drag_vec.y)
+			if player.has_method("update_aim_jump"):
+				player.update_aim_jump(mapped_vec, is_cancelled)
 
 # ── Signals ───────────────────────────────────────────────────────────────────
 

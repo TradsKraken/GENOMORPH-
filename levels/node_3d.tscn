@@ -3,12 +3,14 @@
 [ext_resource type="Script" uid="uid://61raa3sdio51" path="res://levels/camera_3d.gd" id="1_a202f"]
 [ext_resource type="Script" uid="uid://y5iqc4ir2acj" path="res://tools/auto_collision.gd" id="1_ysmlf"]
 [ext_resource type="Script" uid="uid://ducc3imx6yxhg" path="res://levels/npc_frog.gd" id="2_fhumt"]
+[ext_resource type="PackedScene" uid="uid://3k43c2xdhhuu" path="res://enemies/mosquito_swarm.tscn" id="2_nap4l"]
 [ext_resource type="PackedScene" uid="uid://ea7e13ofj3cp" path="res://player/player.tscn" id="2_player"]
 [ext_resource type="Script" uid="uid://c4or157xwuy2k" path="res://ui/virtual_joystick.gd" id="3_joystick"]
 [ext_resource type="Script" uid="uid://1tkj0fahqgl2" path="res://levels/tree_spawner.gd" id="4_tree_spawner"]
 [ext_resource type="Script" uid="uid://doyuennmlsgvu" path="res://tools/perf_hud.gd" id="5_perf_hud"]
 [ext_resource type="PackedScene" uid="uid://dspfn6lejrk6i" path="res://player/player_(clap).tscn" id="6_qraxk"]
 [ext_resource type="PackedScene" uid="uid://drm37ehmomxl3" path="res://player/Frog.tscn" id="7_4b24i"]
+[ext_resource type="PackedScene" uid="uid://b5e3g6b4h2p1" path="res://enemies/enemy_spawner.tscn" id="10_q5bw4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -2871,3 +2873,7 @@ show_hud = false
 
 [node name="Human (Clap)" parent="." unique_id=1938706111 instance=ExtResource("6_qraxk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 0.015337229, 1.3138075)
+
+[node name="EnemySpawner" parent="." unique_id=473286899 instance=ExtResource("10_q5bw4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.388798, 0.00012207031, -12.80444)
+enemy_scene = ExtResource("2_nap4l")
