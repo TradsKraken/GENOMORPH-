@@ -11,7 +11,7 @@ func _ready() -> void:
 	# Override base values
 	max_health = 100.0
 	health = max_health
-	speed = 2.0
+	speed = 4.0
 	exp_value = 15.0
 
 func _process_movement(delta: float) -> void:

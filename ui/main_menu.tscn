@@ -232,7 +232,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-
 [node name="BgAtmosphere" type="ColorRect" parent="Background" unique_id=1514618417]
 layout_mode = 1
 anchors_preset = 15
