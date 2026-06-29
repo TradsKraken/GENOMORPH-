@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://byhayabks6fn4"]
 
 [ext_resource type="Script" uid="uid://61raa3sdio51" path="res://levels/camera_3d.gd" id="1_a202f"]
-[ext_resource type="Script" uid="uid://y5iqc4ir2acj" path="res://tools/auto_collision.gd" id="1_ysmlf"]
 [ext_resource type="Script" uid="uid://ducc3imx6yxhg" path="res://levels/npc_frog.gd" id="2_fhumt"]
 [ext_resource type="PackedScene" uid="uid://3k43c2xdhhuu" path="res://enemies/mosquito_swarm.tscn" id="2_nap4l"]
 [ext_resource type="PackedScene" uid="uid://ea7e13ofj3cp" path="res://player/player.tscn" id="2_player"]
@@ -11,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://dspfn6lejrk6i" path="res://player/player_(clap).tscn" id="6_qraxk"]
 [ext_resource type="PackedScene" uid="uid://drm37ehmomxl3" path="res://player/Frog.tscn" id="7_4b24i"]
 [ext_resource type="PackedScene" uid="uid://b5e3g6b4h2p1" path="res://enemies/enemy_spawner.tscn" id="10_q5bw4"]
+[ext_resource type="Script" uid="uid://c6s3xvmjwy8bl" path="res://tools/auto_collision_recursive.gd" id="11_auto_col"]
+[ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -25,17 +26,6 @@ ambient_light_energy = 0.5
 glow_enabled = true
 glow_intensity = 1.5
 glow_bloom = 0.2
-
-[sub_resource type="TorusMesh" id="TorusMesh_qwc0f"]
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_noarx"]
-size = Vector2(40, 40)
-
-[sub_resource type="StandardMaterial3D" id="GroundMat"]
-albedo_color = Color(0.1493181, 0.31432223, 0.11743338, 1)
-
-[sub_resource type="BoxShape3D" id="GroundShape"]
-size = Vector3(40, 0.2, 40)
 
 [sub_resource type="PrismMesh" id="PrismMesh_a0tk4"]
 
@@ -1732,31 +1722,19 @@ transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -
 light_energy = 1.2
 shadow_enabled = true
 
-[node name="Ground" type="StaticBody3D" parent="." unique_id=456649111]
-
-[node name="Swamp Sample" type="MeshInstance3D" parent="Ground" unique_id=779578895]
-transform = Transform3D(24.635, 0, 0, 0, 24.635, 0, 0, 0, 24.635, -37.711266, -5.3720093, -13.250458)
-mesh = SubResource("TorusMesh_qwc0f")
-script = ExtResource("1_ysmlf")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=643852630]
-transform = Transform3D(6.17, 0, 0, 0, 6.17, 0, 0, 0, 6.17, 0, 0, 0)
-mesh = SubResource("PlaneMesh_noarx")
-surface_material_override/0 = SubResource("GroundMat")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=36256288]
-transform = Transform3D(6.17, 0, 0, 0, 1, 0, 0, 0, 6.17, 0, -0.1, 0)
-shape = SubResource("GroundShape")
+[node name="Ground" parent="." unique_id=456649111 instance=ExtResource("12_terrain")]
+transform = Transform3D(0.77, 0, 0, 0, 0.77, 0, 0, 0, 0.77, 0, 0, 0)
+script = ExtResource("11_auto_col")
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
-transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -5.0990906, 0.005617738, -12.969448)
+transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -5.0990906, 6.2432275, -12.969448)
 script = ExtResource("2_fhumt")
 
 [node name="Frog Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
-transform = Transform3D(-0.595, 0, -5.2016553e-08, 0, 0.595, 0, 5.2016553e-08, 0, -0.595, 0, 0, 0)
+transform = Transform3D(-0.595, 0, -5.2016553e-08, 0, 0.595, 0, 5.2016553e-08, 0, -0.595, 0, 4.897278, 0)
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=256334508]
-transform = Transform3D(1, 0, 0, 0, 0.82086027, 0.5711291, 0, -0.5711291, 0.82086027, 0, 3.8155704, 8.207459)
+transform = Transform3D(1, 0, 0, 0, 0.82086027, 0.5711291, 0, -0.5711291, 0.82086027, 0, 9.776386, 8.207459)
 script = ExtResource("1_a202f")
 player_path = NodePath("../Frog Player")
 
@@ -2874,8 +2852,8 @@ script = ExtResource("5_perf_hud")
 show_hud = false
 
 [node name="Human (Clap)" parent="." unique_id=1938706111 instance=ExtResource("6_qraxk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 0.015337229, 1.3138075)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 5.66131, 1.3138075)
 
 [node name="EnemySpawner" parent="." unique_id=473286899 instance=ExtResource("10_q5bw4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.388798, 0.00012207031, -12.80444)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.388798, 15.177673, -12.80444)
 enemy_scene = ExtResource("2_nap4l")
