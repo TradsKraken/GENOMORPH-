@@ -64,7 +64,8 @@ var _joystick = null
 var is_aiming_jump: bool = false
 var is_jumping: bool = false
 var jump_target_pos: Vector3 = Vector3.ZERO
-var _reticle: MeshInstance3D
+var _aim_offset: Vector3 = Vector3.ZERO
+var _reticle: Decal
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -95,18 +96,30 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 	return null
 
 func _build_reticle() -> void:
-	_reticle = MeshInstance3D.new()
-	var cyl = CylinderMesh.new()
-	cyl.top_radius = 2.5
-	cyl.bottom_radius = 2.5
-	cyl.height = 0.2
-	_reticle.mesh = cyl
+	_reticle = Decal.new()
+	# The X and Z size is 5.0 (radius 2.5). The Y size is 4.0 (projection depth)
+	_reticle.size = Vector3(5.0, 4.0, 5.0)
 	
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(0.2, 0.6, 1.0, 0.5)
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	_reticle.material_override = mat
+	# Generate a perfectly round circle texture using code
+	var grad = Gradient.new()
+	grad.offsets = PackedFloat32Array([0.0, 0.8, 0.85, 0.95])
+	grad.colors = PackedColorArray([
+		Color(1.0, 1.0, 1.0, 0.3),
+		Color(1.0, 1.0, 1.0, 0.3),
+		Color(1.0, 1.0, 1.0, 0.8),
+		Color(1.0, 1.0, 1.0, 0.0)
+	])
+	
+	var tex = GradientTexture2D.new()
+	tex.gradient = grad
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(0.5, 0.0)
+	tex.width = 256
+	tex.height = 256
+	
+	_reticle.texture_albedo = tex
+	_reticle.modulate = Color(0.2, 0.6, 1.0, 1.0) # Blue by default
 	
 	_reticle.visible = false
 	# Add to main scene so it ignores player rotation/scale
@@ -143,11 +156,14 @@ func _physics_process(delta: float) -> void:
 	# Map 2-D input → 3-D world XZ direction.
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
 
-	# ── Movement / Walking ────────────────────────────────────────────────────
+	# Keep reticle attached to player as they walk
 	if is_aiming_jump:
-		velocity.x = move_toward(velocity.x, 0.0, friction * 5.0 * delta)
-		velocity.z = move_toward(velocity.z, 0.0, friction * 5.0 * delta)
-	elif direction != Vector3.ZERO:
+		jump_target_pos = global_position + _aim_offset
+		jump_target_pos.y = global_position.y
+		_reticle.global_position = jump_target_pos
+
+	# ── Movement / Walking ────────────────────────────────────────────────────
+	if direction != Vector3.ZERO:
 		if is_on_floor():
 			var current_speed := speed
 			var current_accel := acceleration
@@ -174,12 +190,10 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0.0, current_friction * delta)
 		velocity.z = move_toward(velocity.z, 0.0, current_friction * delta)
 
-	# ── Rotate whole player to face movement direction ────────────────────────
-	if rotate_to_movement and direction != Vector3.ZERO:
-		var target_angle := atan2(direction.x, direction.z)
-		var current_angle: float = rotation.y
-		var max_step := deg_to_rad(rotation_speed) * delta
-		rotation.y = rotate_toward(current_angle, target_angle, max_step)
+	# ── Visual Rotation ────────────────────────────────────────────────────────
+	if velocity.length() > 0.1:
+		var target_angle := atan2(velocity.x, velocity.z)
+		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
 
 	# ── Attacking ────────────────────────────────────────────────────────────
 	if Input.is_action_just_pressed("attack"):
@@ -219,24 +233,24 @@ func take_damage(amount: float) -> void:
 func start_aiming_jump() -> void:
 	if not is_on_floor() or is_jumping: return
 	is_aiming_jump = true
+	_aim_offset = Vector3.ZERO
 	_reticle.visible = true
+	_reticle.modulate = Color(0.2, 0.6, 1.0, 1.0)
 	_reticle.global_position = global_position
 	jump_target_pos = global_position
 	
 func update_aim_jump(drag_vec: Vector2, is_cancelled: bool = false) -> void:
 	if not is_aiming_jump: return
 	var aim_range = 8.0
-	var offset = Vector3(drag_vec.x, 0, drag_vec.y) * aim_range
-	jump_target_pos = global_position + offset
+	_aim_offset = Vector3(drag_vec.x, 0, drag_vec.y) * aim_range
+	jump_target_pos = global_position + _aim_offset
 	jump_target_pos.y = global_position.y
 	_reticle.global_position = jump_target_pos
 	
-	var mat = _reticle.material_override as StandardMaterial3D
-	if mat:
-		if is_cancelled:
-			mat.albedo_color = Color(1.0, 0.2, 0.2, 0.5) # Turn red if cancelling
-		else:
-			mat.albedo_color = Color(0.2, 0.6, 1.0, 0.5) # Normal blue
+	if is_cancelled:
+		_reticle.modulate = Color(1.0, 0.2, 0.2, 1.0) # Turn red if cancelling
+	else:
+		_reticle.modulate = Color(0.2, 0.6, 1.0, 1.0) # Normal blue
 
 func cancel_aiming_jump() -> void:
 	if not is_aiming_jump: return
@@ -254,6 +268,15 @@ func execute_splash_jump(is_quick_tap: bool) -> void:
 	if not is_aiming_jump: return
 	is_aiming_jump = false
 	_reticle.visible = false
+	
+	if is_quick_tap:
+		jump_target_pos = global_position
+		
+	# Instantly snap frog rotation to face the jump target
+	var to_target = jump_target_pos - global_position
+	to_target.y = 0
+	if to_target.length() > 0.1:
+		rotation.y = atan2(to_target.x, to_target.z)
 	
 	if not is_on_floor() or not PlayerData.use_stamina(jump_stamina_cost):
 		return
