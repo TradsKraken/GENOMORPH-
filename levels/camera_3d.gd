@@ -11,7 +11,7 @@ extends Camera3D
 @export var player_path: NodePath = NodePath("../Player")
 
 ## Height above the player (Y axis).
-@export var height: float = 9.0
+@export var height: float = 13.0
 
 ## How far behind the player the camera sits (Z axis in world space).
 ## Positive = further back; adjust to taste.

@@ -14,8 +14,10 @@ func _ready() -> void:
 	speed = 4.0
 	exp_value = 15.0
 
+var is_active: bool = false
+
 func _process_movement(delta: float) -> void:
-	if target == null:
+	if not is_active or target == null:
 		return
 		
 	var dist = global_position.distance_to(target.global_position)

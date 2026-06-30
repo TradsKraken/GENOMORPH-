@@ -32,6 +32,10 @@ var _menu_btn:   Button
 var _menu_panel: PanelContainer
 var _menu_open:  bool = false
 
+var _tutorial_panel: PanelContainer
+var _tutorial_title: Label
+var _tutorial_desc:  Label
+
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
@@ -48,6 +52,7 @@ func _ready() -> void:
 	_build_action_buttons()
 	_build_cancel_zone()
 	_build_menu_panel()
+	_build_tutorial_panel()
 	_connect_signals()
 
 
@@ -128,9 +133,9 @@ func _build_player_status() -> void:
 # ── Action Buttons ────────────────────────────────────────────────────────────
 
 func _build_action_buttons() -> void:
-	# 1. Primary Attack Button (Sticky Tongue Whip)
+	# 1. Primary Attack Button (Webbed Lunge)
 	# Largest button, outermost bottom-right
-	_attack_btn = _make_circle_btn("👅", 120, C_BTN_NORM)
+	_attack_btn = _make_circle_btn("🦵", 120, C_BTN_NORM)
 	_attack_btn.add_theme_font_size_override("font_size", 64)
 	_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -144,9 +149,9 @@ func _build_action_buttons() -> void:
 	_attack_btn.button_up.connect(func():   Input.action_release("attack"))
 	_root.add_child(_attack_btn)
 
-	# 2. Skill 1 Button (Webbed Lunge)
+	# 2. Skill 1 Button (Sticky Tongue Whip)
 	# Medium, directly to the left of Primary Attack
-	_skill1_btn = _make_circle_btn("🦵", 80, C_BTN_NORM)
+	_skill1_btn = _make_circle_btn("👅", 80, C_BTN_NORM)
 	_skill1_btn.add_theme_font_size_override("font_size", 48)
 	_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_skill1_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -156,6 +161,8 @@ func _build_action_buttons() -> void:
 	_skill1_btn.offset_bottom = -60
 	_skill1_btn.offset_left   = -270
 	_skill1_btn.offset_top    = -140
+	_skill1_btn.button_down.connect(func(): Input.action_press("skill1"))
+	_skill1_btn.button_up.connect(func():   Input.action_release("skill1"))
 	_root.add_child(_skill1_btn)
 
 	# 3. Skill 2 Button (Splashdown Jump)
@@ -260,6 +267,70 @@ func _build_menu_panel() -> void:
 	vbox.add_child(btn_quit)
 
 	_root.add_child(_menu_panel)
+
+
+# ── Tutorial Panel ────────────────────────────────────────────────────────────
+
+func _build_tutorial_panel() -> void:
+	_tutorial_panel = PanelContainer.new()
+	_tutorial_panel.visible = false
+	_tutorial_panel.modulate.a = 0.0
+	
+	_tutorial_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_tutorial_panel.custom_minimum_size = Vector2(400, 0)
+	_tutorial_panel.offset_left   = -200
+	_tutorial_panel.offset_right  = 200
+	_tutorial_panel.offset_top    = -150
+	_tutorial_panel.offset_bottom = 150
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.05, 0.08, 0.15, 0.95)
+	bg.border_color = Color(0.3, 0.6, 1.0, 0.8)
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(24)
+	bg.shadow_color = Color(0, 0, 0, 0.6)
+	bg.shadow_size = 20
+	bg.content_margin_left   = 32.0
+	bg.content_margin_right  = 32.0
+	bg.content_margin_top    = 32.0
+	bg.content_margin_bottom = 32.0
+	_tutorial_panel.add_theme_stylebox_override("panel", bg)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 24)
+	_tutorial_panel.add_child(vbox)
+
+	_tutorial_title = _make_label("TUTORIAL", 28, Color(1.0, 0.8, 0.2))
+	_tutorial_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(_tutorial_title)
+
+	_tutorial_desc = _make_label("Tutorial text goes here.", 18, Color.WHITE)
+	_tutorial_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_tutorial_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_tutorial_desc)
+
+	var btn_got_it := _panel_btn("Got It!", Color(0.2, 0.8, 0.3))
+	btn_got_it.pressed.connect(_hide_tutorial)
+	vbox.add_child(btn_got_it)
+
+	_root.add_child(_tutorial_panel)
+
+func show_tutorial(title: String, text: String) -> void:
+	_tutorial_title.text = title
+	_tutorial_desc.text = text
+	get_tree().paused = true
+	_tutorial_panel.modulate.a = 0.0
+	_tutorial_panel.visible = true
+	var tw := create_tween()
+	tw.tween_property(_tutorial_panel, "modulate:a", 1.0, 0.2)
+
+func _hide_tutorial() -> void:
+	var tw := create_tween()
+	tw.tween_property(_tutorial_panel, "modulate:a", 0.0, 0.15)
+	tw.tween_callback(func():
+		_tutorial_panel.visible = false
+		get_tree().paused = false
+	)
 
 
 # ── Cancel Zone ───────────────────────────────────────────────────────────────

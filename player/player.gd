@@ -70,9 +70,12 @@ var _reticle: Decal
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	rotation.y = PI
 	add_to_group("player")
 	if not InputMap.has_action("attack"):
 		InputMap.add_action("attack")
+	if not InputMap.has_action("skill1"):
+		InputMap.add_action("skill1")
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
 	
@@ -191,13 +194,15 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, current_friction * delta)
 
 	# ── Visual Rotation ────────────────────────────────────────────────────────
-	if velocity.length() > 0.1:
+	if Vector2(velocity.x, velocity.z).length() > 0.1:
 		var target_angle := atan2(velocity.x, velocity.z)
 		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
 
 	# ── Attacking ────────────────────────────────────────────────────────────
 	if Input.is_action_just_pressed("attack"):
 		_attack()
+	if Input.is_action_just_pressed("skill1"):
+		_skill1()
 
 	var was_on_floor = is_on_floor()
 	move_and_slide()
@@ -337,6 +342,7 @@ func _attack() -> void:
 				closest_enemy = enemy
 				closest_dist = dist
 					
+	
 	if closest_enemy:
 		# Auto-aim: Snap rotation to face the target
 		var to_enemy = global_position.direction_to(closest_enemy.global_position)
@@ -350,7 +356,40 @@ func _attack() -> void:
 		var cam := get_viewport().get_camera_3d()
 		if cam:
 			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-			hud.show_float_text("PEWNG!", scr, Color(1.0, 0.3, 0.1))
+			hud.show_float_text("LUNGE!", scr, Color(1.0, 0.3, 0.1))
+
+func _skill1() -> void:
+	if animation_player:
+		# Play the attack animation sped up for the whip
+		animation_player.play("FrogArmature|Frog_Attack", 0.1, 1.5)
+	
+	# Sticky Tongue Whip: Damage closest enemy at long range
+	var attack_range = 12.0
+	var damage = 10.0
+	var closest_enemy = null
+	var closest_dist = attack_range
+	
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy.has_method("take_damage") and not enemy.is_dead:
+			var dist = global_position.distance_to(enemy.global_position)
+			if dist < closest_dist:
+				closest_enemy = enemy
+				closest_dist = dist
+					
+	if closest_enemy:
+		# Auto-aim: Snap rotation to face the target
+		var to_enemy = global_position.direction_to(closest_enemy.global_position)
+		rotation.y = atan2(to_enemy.x, to_enemy.z)
+		
+		# Deal damage
+		closest_enemy.take_damage(damage)
+	
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_float_text"):
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+			hud.show_float_text("WHIP!", scr, Color(0.9, 0.2, 0.8))
 
 
 # ── Animation ────────────────────────────────────────────────────────────────

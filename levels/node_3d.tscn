@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://b5e3g6b4h2p1" path="res://enemies/enemy_spawner.tscn" id="10_q5bw4"]
 [ext_resource type="Script" uid="uid://c6s3xvmjwy8bl" path="res://tools/auto_collision_recursive.gd" id="11_auto_col"]
 [ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
+[ext_resource type="PackedScene" path="res://levels/mosquito_zone.tscn" id="13_mosquito_zone"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -1723,18 +1724,18 @@ light_energy = 1.2
 shadow_enabled = true
 
 [node name="Ground" parent="." unique_id=456649111 instance=ExtResource("12_terrain")]
-transform = Transform3D(0.77, 0, 0, 0, 0.77, 0, 0, 0, 0.77, 0, 0, 0)
+transform = Transform3D(-0.32, 0, -4.8318654e-08, 0, 0.32, 0, 4.8318654e-08, 0, -0.32, 0.402771, -0.8284302, 0.13708496)
 script = ExtResource("11_auto_col")
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
-transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -5.0990906, 6.2432275, -12.969448)
+transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -61.7464, 4.2499337, -12.969448)
 script = ExtResource("2_fhumt")
 
 [node name="Frog Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
-transform = Transform3D(-0.595, 0, -5.2016553e-08, 0, 0.595, 0, 5.2016553e-08, 0, -0.595, 0, 4.897278, 0)
+transform = Transform3D(0.59496784, 0, -0.006173812, 0, 0.59499985, 0, 0.006173812, 0, 0.59496784, -49.984406, 3.8099976, 20.261673)
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=256334508]
-transform = Transform3D(1, 0, 0, 0, 0.82086027, 0.5711291, 0, -0.5711291, 0.82086027, 0, 9.776386, 8.207459)
+transform = Transform3D(-1, 4.9893366e-08, -7.178714e-08, 0, 0.8211492, 0.5707136, 8.742278e-08, 0.5707136, -0.8211492, 0, 9.776386, 8.207459)
 script = ExtResource("1_a202f")
 player_path = NodePath("../Frog Player")
 
@@ -2855,5 +2856,8 @@ show_hud = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 5.66131, 1.3138075)
 
 [node name="EnemySpawner" parent="." unique_id=473286899 instance=ExtResource("10_q5bw4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -39.388798, 15.177673, -12.80444)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.33613, 4.874325, -23.63757)
 enemy_scene = ExtResource("2_nap4l")
+
+[node name="MosquitoZone" parent="." unique_id=719311273 instance=ExtResource("13_mosquito_zone")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.638504, 4.281311, -21.287655)
