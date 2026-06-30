@@ -12,6 +12,7 @@
 [ext_resource type="Script" uid="uid://c6s3xvmjwy8bl" path="res://tools/auto_collision_recursive.gd" id="11_auto_col"]
 [ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
 [ext_resource type="PackedScene" path="res://levels/mosquito_zone.tscn" id="13_mosquito_zone"]
+[ext_resource type="PackedScene" uid="uid://cose2frbh0p48" path="res://Models/mosquito/mosquito.glb" id="13_oag3d"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -95,3 +96,6 @@ enemy_scene = ExtResource("2_nap4l")
 
 [node name="MosquitoZone" parent="." unique_id=719311273 instance=ExtResource("13_mosquito_zone")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.638504, 4.281311, -21.287655)
+
+[node name="mosquito" parent="." unique_id=1261197706 instance=ExtResource("13_oag3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.92253, 0, 21.956177)
