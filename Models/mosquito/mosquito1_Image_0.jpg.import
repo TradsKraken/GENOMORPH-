@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cco0tihelc12u"
-path.s3tc="res://.godot/imported/mosquito_Image_0.jpg-a9515ae6c17b20beb37a67bedff0a462.s3tc.ctex"
-path.etc2="res://.godot/imported/mosquito_Image_0.jpg-a9515ae6c17b20beb37a67bedff0a462.etc2.ctex"
+uid="uid://c5hy2kpduwqil"
+path.s3tc="res://.godot/imported/mosquito1_Image_0.jpg-e29fc34bc2c5b6e437b9e7ee68d45f53.s3tc.ctex"
+path.etc2="res://.godot/imported/mosquito1_Image_0.jpg-e29fc34bc2c5b6e437b9e7ee68d45f53.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -15,8 +15,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Models/mosquito/mosquito_Image_0.jpg"
-dest_files=["res://.godot/imported/mosquito_Image_0.jpg-a9515ae6c17b20beb37a67bedff0a462.s3tc.ctex", "res://.godot/imported/mosquito_Image_0.jpg-a9515ae6c17b20beb37a67bedff0a462.etc2.ctex"]
+source_file="res://Models/mosquito/mosquito1_Image_0.jpg"
+dest_files=["res://.godot/imported/mosquito1_Image_0.jpg-e29fc34bc2c5b6e437b9e7ee68d45f53.s3tc.ctex", "res://.godot/imported/mosquito1_Image_0.jpg-e29fc34bc2c5b6e437b9e7ee68d45f53.etc2.ctex"]
 
 [params]
 
