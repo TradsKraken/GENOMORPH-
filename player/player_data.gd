@@ -19,6 +19,7 @@ var stamina: float     = 100.0
 var level: int         = 1
 var experience: float  = 0.0
 var exp_to_next: float = 100.0
+var genome_fragments: int = 0
 
 
 # ── Stamina API ───────────────────────────────────────────────────────────────

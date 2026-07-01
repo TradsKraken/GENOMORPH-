@@ -56,6 +56,9 @@ func _spawn_orb(is_exp: bool) -> void:
 
 
 func _on_orb_collected(is_exp: bool) -> void:
+	if not is_inside_tree():
+		return
+		
 	var tree := get_tree()
 	if tree == null:
 		return

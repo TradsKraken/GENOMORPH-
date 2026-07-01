@@ -8,11 +8,9 @@
 [ext_resource type="Script" uid="uid://doyuennmlsgvu" path="res://tools/perf_hud.gd" id="5_perf_hud"]
 [ext_resource type="PackedScene" uid="uid://dspfn6lejrk6i" path="res://player/player_(clap).tscn" id="6_qraxk"]
 [ext_resource type="PackedScene" uid="uid://drm37ehmomxl3" path="res://player/Frog.tscn" id="7_4b24i"]
-[ext_resource type="PackedScene" uid="uid://b5e3g6b4h2p1" path="res://enemies/enemy_spawner.tscn" id="10_q5bw4"]
 [ext_resource type="Script" uid="uid://c6s3xvmjwy8bl" path="res://tools/auto_collision_recursive.gd" id="11_auto_col"]
 [ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
-[ext_resource type="PackedScene" path="res://levels/mosquito_zone.tscn" id="13_mosquito_zone"]
-[ext_resource type="PackedScene" uid="uid://cose2frbh0p48" path="res://Models/mosquito/mosquito.glb" id="13_oag3d"]
+[ext_resource type="Script" uid="uid://kb1niigjnckw" path="res://levels/tutorial_trigger.gd" id="14_g4oow"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -33,6 +31,12 @@ glow_bloom = 0.2
 [sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_a0tk4"]
 data = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5, 0, 0.5, 0.5, 0, 0.5, -0.5, 0.5, -0.5, 0.5, 0, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, -0.5, -0.5, -0.5, 0, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, -0.5)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_qgxk8"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wpc2v"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qwc0f"]
+
 [node name="Node3D" type="Node3D" unique_id=2040944572]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=191560905]
@@ -44,7 +48,7 @@ light_energy = 1.2
 shadow_enabled = true
 
 [node name="Ground" parent="." unique_id=456649111 instance=ExtResource("12_terrain")]
-transform = Transform3D(-0.32, 0, -4.8318654e-08, 0, 0.32, 0, 4.8318654e-08, 0, -0.32, 0.402771, -0.8284302, 0.13708496)
+transform = Transform3D(-0.32, 0, -4.8318654e-08, 0, 0.32, 0, 4.8318654e-08, 0, -0.32, 0.5923157, -0.9533081, 0.38635254)
 script = ExtResource("11_auto_col")
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
@@ -90,12 +94,31 @@ show_hud = false
 [node name="Human (Clap)" parent="." unique_id=1938706111 instance=ExtResource("6_qraxk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 5.66131, 1.3138075)
 
-[node name="EnemySpawner" parent="." unique_id=473286899 instance=ExtResource("10_q5bw4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.33613, 4.874325, -23.63757)
-enemy_scene = ExtResource("2_nap4l")
+[node name="tut3" type="Area3D" parent="." unique_id=556050028]
+transform = Transform3D(1.88, 0, 0, 0, 1.88, 0, 0, 0, 1.88, -6.2894287, 6.0787354, -41.27295)
+script = ExtResource("14_g4oow")
+trigger_type = 2
 
-[node name="MosquitoZone" parent="." unique_id=719311273 instance=ExtResource("13_mosquito_zone")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.638504, 4.281311, -21.287655)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="tut3" unique_id=1877371651]
+transform = Transform3D(12.625, 0, 0, 0, 12.625, 0, 0, 0, 12.625, 0.9967818, 0, -0.12650299)
+shape = SubResource("BoxShape3D_qgxk8")
 
-[node name="mosquito" parent="." unique_id=1261197706 instance=ExtResource("13_oag3d")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.92253, 0, 21.956177)
+[node name="tut2" type="Area3D" parent="." unique_id=128122477]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.6293945e-06)
+script = ExtResource("14_g4oow")
+trigger_type = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="tut2" unique_id=544268666]
+transform = Transform3D(25.01, 0, 0, 0, 25.01, 0, 0, 0, 25.01, -21.854734, 7.6846924, -14.608887)
+shape = SubResource("BoxShape3D_wpc2v")
+
+[node name="MosquitoSwarm" parent="tut2" unique_id=688820672 instance=ExtResource("2_nap4l")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.878235, 5.005554, -16.650223)
+
+[node name="tut1" type="Area3D" parent="." unique_id=508198586]
+transform = Transform3D(1.255, 0, 0, 0, 1.255, 0, 0, 0, 1.255, -19.34452, 6.9867554, -0.018310547)
+script = ExtResource("14_g4oow")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="tut1" unique_id=1289229355]
+transform = Transform3D(18.355, 0, 0, 0, 18.355, 0, 0, 0, 18.355, 1.4904251, 0, 10.939689)
+shape = SubResource("BoxShape3D_qwc0f")

@@ -14,6 +14,7 @@ func _ready() -> void:
 	speed = 4.0
 	exp_value = 15.0
 
+@export var is_passive: bool = false
 var is_active: bool = false
 
 func _process_movement(delta: float) -> void:
@@ -22,8 +23,8 @@ func _process_movement(delta: float) -> void:
 		
 	var dist = global_position.distance_to(target.global_position)
 	
-	# Move towards target
-	if dist > attack_range * 0.9:
+	# Move towards target (skip if passive)
+	if not is_passive and dist > attack_range * 0.9:
 		var dir = global_position.direction_to(target.global_position)
 		# Keep it somewhat level, mosquitoes fly a bit above ground
 		dir.y = 0
@@ -40,7 +41,7 @@ func _process_movement(delta: float) -> void:
 		velocity = Vector3.ZERO
 		
 	# Attack logic
-	if dist <= attack_range:
+	if not is_passive and dist <= attack_range:
 		_attack_timer += delta
 		if _attack_timer >= 1.0:
 			_attack_timer = 0.0

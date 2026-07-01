@@ -36,6 +36,12 @@ var _tutorial_panel: PanelContainer
 var _tutorial_title: Label
 var _tutorial_desc:  Label
 
+var _subtitle_panel: PanelContainer
+var _subtitle_label: RichTextLabel
+var _subtitle_tween: Tween
+
+signal subtitle_dismissed
+
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
@@ -53,7 +59,17 @@ func _ready() -> void:
 	_build_cancel_zone()
 	_build_menu_panel()
 	_build_tutorial_panel()
+	_build_subtitle_panel()
 	_connect_signals()
+
+func _input(event: InputEvent) -> void:
+	if _subtitle_panel and _subtitle_panel.visible and _subtitle_panel.modulate.a > 0.5:
+		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+			if event.is_pressed():
+				hide_subtitle()
+				# Accept the event so it doesn't trigger jumping or attacking if they tap the subtitle area
+				# Alternatively, let them attack/jump while dismissing. 
+				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
 
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
@@ -331,6 +347,97 @@ func _hide_tutorial() -> void:
 		_tutorial_panel.visible = false
 		get_tree().paused = false
 	)
+
+
+# ── Subtitle System ───────────────────────────────────────────────────────────
+
+func _build_subtitle_panel() -> void:
+	_subtitle_panel = PanelContainer.new()
+	_subtitle_panel.visible = false
+	_subtitle_panel.modulate.a = 0.0
+	
+	_subtitle_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_subtitle_panel.custom_minimum_size = Vector2(800, 100)
+	
+	_subtitle_panel.set_anchor(SIDE_LEFT, 0.5)
+	_subtitle_panel.set_anchor(SIDE_RIGHT, 0.5)
+	_subtitle_panel.set_anchor(SIDE_BOTTOM, 1.0)
+	_subtitle_panel.offset_left = -400
+	_subtitle_panel.offset_right = 400
+	_subtitle_panel.offset_bottom = -40
+	_subtitle_panel.offset_top = -140
+	
+	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.05, 0.05, 0.05, 0.75)
+	bg.set_corner_radius_all(12)
+	bg.border_color = Color(0.8, 0.8, 0.8, 0.5)
+	bg.set_border_width_all(2)
+	bg.content_margin_left   = 24.0
+	bg.content_margin_right  = 24.0
+	bg.content_margin_top    = 16.0
+	bg.content_margin_bottom = 16.0
+	_subtitle_panel.add_theme_stylebox_override("panel", bg)
+
+	_subtitle_label = RichTextLabel.new()
+	_subtitle_label.bbcode_enabled = true
+	_subtitle_label.fit_content = true
+	_subtitle_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_subtitle_label.add_theme_font_size_override("normal_font_size", 24)
+	_subtitle_label.add_theme_font_size_override("bold_font_size", 26)
+	_subtitle_panel.add_child(_subtitle_label)
+
+	_root.add_child(_subtitle_panel)
+
+func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> void:
+	var color_hex = "40c0ff" # Default Sterling blue
+	if speaker == "Lolo Palaka":
+		color_hex = "40ff80" # Greenish for Palaka
+		
+	_subtitle_label.text = "[center][b][color=#" + color_hex + "]" + speaker + ":[/color][/b] " + text + "\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
+	
+	if _subtitle_tween and _subtitle_tween.is_valid():
+		_subtitle_tween.kill()
+		
+	_subtitle_panel.visible = true
+	_subtitle_tween = create_tween()
+	_subtitle_tween.tween_property(_subtitle_panel, "modulate:a", 1.0, 0.3)
+	
+func hide_subtitle() -> void:
+	if _subtitle_tween and _subtitle_tween.is_valid():
+		_subtitle_tween.kill()
+	_subtitle_tween = create_tween()
+	_subtitle_tween.tween_property(_subtitle_panel, "modulate:a", 0.0, 0.2)
+	_subtitle_tween.tween_callback(func(): 
+		_subtitle_panel.visible = false
+		subtitle_dismissed.emit()
+	)
+
+# ── Tutorial UI Controls ──────────────────────────────────────────────────────
+
+func hide_action_buttons() -> void:
+	if _attack_btn: _attack_btn.modulate.a = 0.0
+	if _jump_btn:   _jump_btn.modulate.a = 0.0
+	if _skill1_btn: _skill1_btn.modulate.a = 0.0
+	if _skill3_btn: _skill3_btn.modulate.a = 0.0
+	
+func reveal_jump() -> void:
+	if _jump_btn and _jump_btn.modulate.a < 1.0:
+		var tw = create_tween()
+		tw.tween_property(_jump_btn, "modulate:a", 1.0, 1.0)
+		
+func reveal_attack() -> void:
+	if _attack_btn and _attack_btn.modulate.a < 1.0:
+		var tw = create_tween()
+		tw.tween_property(_attack_btn, "modulate:a", 1.0, 1.0)
+		
+func flash_dodge() -> void:
+	if _jump_btn:
+		var tw = create_tween()
+		for i in range(3):
+			tw.tween_property(_jump_btn, "modulate", Color(1.0, 0.5, 0.5, 1.0), 0.15)
+			tw.tween_property(_jump_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.15)
 
 
 # ── Cancel Zone ───────────────────────────────────────────────────────────────
