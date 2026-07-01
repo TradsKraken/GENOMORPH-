@@ -55,9 +55,6 @@ func _spawn_exp_orb() -> void:
 	var exp_script = load("res://levels/exp_orb.gd")
 	if exp_script:
 		var orb = exp_script.new()
-E 0:00:28:135   enemy_spawner.gd:26 @ _spawn_enemy(): Condition "!is_inside_tree()" is true. Returning: Transform3D()
-  <C++ Source>  scene/3d/node_3d.cpp:649 @ get_global_transform()
-  <Stack Trace> enemy_spawner.gd:26 @ _spawn_enemy()
 		orb.global_position = global_position
 		get_tree().current_scene.call_deferred("add_child", orb)
 
