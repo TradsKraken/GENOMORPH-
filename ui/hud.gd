@@ -296,8 +296,9 @@ func _build_tutorial_panel() -> void:
 	_tutorial_panel.custom_minimum_size = Vector2(400, 0)
 	_tutorial_panel.offset_left   = -200
 	_tutorial_panel.offset_right  = 200
-	_tutorial_panel.offset_top    = -150
-	_tutorial_panel.offset_bottom = 150
+	_tutorial_panel.offset_top    = 0
+	_tutorial_panel.offset_bottom = 0
+	_tutorial_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 	var bg := StyleBoxFlat.new()
 	bg.bg_color = Color(0.05, 0.08, 0.15, 0.95)
@@ -365,7 +366,8 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.offset_left = -400
 	_subtitle_panel.offset_right = 400
 	_subtitle_panel.offset_bottom = -40
-	_subtitle_panel.offset_top = -140
+	_subtitle_panel.offset_top = -40
+	_subtitle_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	
 	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -376,13 +378,14 @@ func _build_subtitle_panel() -> void:
 	bg.set_border_width_all(2)
 	bg.content_margin_left   = 24.0
 	bg.content_margin_right  = 24.0
-	bg.content_margin_top    = 16.0
-	bg.content_margin_bottom = 16.0
+	bg.content_margin_top    = 24.0
+	bg.content_margin_bottom = 32.0
 	_subtitle_panel.add_theme_stylebox_override("panel", bg)
 
 	_subtitle_label = RichTextLabel.new()
 	_subtitle_label.bbcode_enabled = true
 	_subtitle_label.fit_content = true
+	_subtitle_label.scroll_active = false
 	_subtitle_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_subtitle_label.add_theme_font_size_override("normal_font_size", 24)
 	_subtitle_label.add_theme_font_size_override("bold_font_size", 26)
