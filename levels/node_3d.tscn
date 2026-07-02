@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://drm37ehmomxl3" path="res://player/Frog.tscn" id="7_4b24i"]
 [ext_resource type="Script" uid="uid://c6s3xvmjwy8bl" path="res://tools/auto_collision_recursive.gd" id="11_auto_col"]
 [ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
+[ext_resource type="PackedScene" uid="uid://dpxlu8oobmyh8" path="res://enemies/Mosqito.tscn" id="12_x7tiv"]
 [ext_resource type="Script" uid="uid://kb1niigjnckw" path="res://levels/tutorial_trigger.gd" id="14_g4oow"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
@@ -122,3 +123,6 @@ script = ExtResource("14_g4oow")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="tut1" unique_id=1289229355]
 transform = Transform3D(18.355, 0, 0, 0, 18.355, 0, 0, 0, 18.355, 1.4904251, 0, 10.939689)
 shape = SubResource("BoxShape3D_qwc0f")
+
+[node name="mosquito1" parent="." unique_id=970387258 instance=ExtResource("12_x7tiv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.239624, 7.998413, 1.0349731)
