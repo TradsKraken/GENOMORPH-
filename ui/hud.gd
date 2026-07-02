@@ -227,6 +227,20 @@ func _build_action_buttons() -> void:
 	_menu_btn.draw.connect(_draw_pause_icon)
 	_root.add_child(_menu_btn)
 
+	# Knowledge Button (Top Right, left of Menu Button)
+	var _knowledge_btn = _make_circle_btn("📖", 56, C_BTN_NORM)
+	_knowledge_btn.add_theme_font_size_override("font_size", 28)
+	_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
+	_knowledge_btn.set_anchor(SIDE_LEFT, 1.0)
+	_knowledge_btn.set_anchor(SIDE_BOTTOM, 0.0)
+	_knowledge_btn.offset_right  = -24 - 56 - 16
+	_knowledge_btn.offset_top    = 24
+	_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
+	_knowledge_btn.offset_bottom = 24 + 56
+	_knowledge_btn.pressed.connect(_open_knowledge_menu)
+	_root.add_child(_knowledge_btn)
+
 
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
 
@@ -546,6 +560,7 @@ func _connect_signals() -> void:
 	pd.stamina_changed.connect(_on_stamina)
 	pd.exp_changed.connect(_on_exp)
 	pd.level_changed.connect(_on_level)
+	pd.knowledge_unlocked.connect(_on_knowledge_unlocked)
 	
 	# Init
 	_hp_bar.max_value   = pd.max_health
@@ -600,6 +615,19 @@ func _toggle_menu() -> void:
 			_menu_panel.visible = false
 			get_tree().paused = false
 		)
+
+func _open_knowledge_menu() -> void:
+	get_tree().paused = true
+	var menu = preload("res://ui/knowledge_menu.gd").new()
+	_root.add_child(menu)
+	
+func _on_knowledge_unlocked(id: String) -> void:
+	if id in PlayerData.KNOWLEDGE_DB:
+		var data = PlayerData.KNOWLEDGE_DB[id]
+		var title = data.get("title", "Unknown")
+		var icon = data.get("icon", "")
+		var screen_pos = Vector2(get_viewport().size.x / 2.0, 150) # top center
+		show_float_text("NEW KNOWLEDGE: " + icon + " " + title, screen_pos, Color(0.9, 0.8, 0.4))
 
 
 # ── Floating Rewards ──────────────────────────────────────────────────────────

@@ -237,6 +237,16 @@ func take_damage(amount: float) -> void:
 
 func start_aiming_jump() -> void:
 	if not is_on_floor() or is_jumping: return
+	
+	if PlayerData.stamina < jump_stamina_cost:
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+				hud.show_float_text("NO STAMINA!", scr, Color(1.0, 0.4, 0.4))
+		return
+		
 	is_aiming_jump = true
 	_aim_offset = Vector3.ZERO
 	_reticle.visible = true
@@ -283,7 +293,22 @@ func execute_splash_jump(is_quick_tap: bool) -> void:
 	if to_target.length() > 0.1:
 		rotation.y = atan2(to_target.x, to_target.z)
 	
-	if not is_on_floor() or not PlayerData.use_stamina(jump_stamina_cost):
+	if not is_on_floor():
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+				hud.show_float_text("TOO LATE!", scr, Color.GRAY)
+		return
+		
+	if not PlayerData.use_stamina(jump_stamina_cost):
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+				hud.show_float_text("NO STAMINA!", scr, Color(1.0, 0.4, 0.4))
 		return
 		
 	is_jumping = true

@@ -66,3 +66,37 @@ func _do_level_up() -> void:
 	level += 1
 	exp_to_next = 100.0 * pow(1.4, level - 1)
 	level_changed.emit(level)
+
+
+# ── Knowledge Base ────────────────────────────────────────────────────────────
+
+const KNOWLEDGE_DB: Dictionary = {
+	"mosquito": {
+		"title": "Giant Mosquito",
+		"category": "Species",
+		"icon": "🦟",
+		"desc": "A heavily mutated, blood-sucking insect. It flies in erratic patterns and drains stamina as well as health. Avoid its stinger!"
+	},
+	"swamp": {
+		"title": "Toxic Swamp",
+		"category": "Environment",
+		"icon": "☣️",
+		"desc": "A hazardous wetland teeming with aggressive flora and fauna. The water itself is highly acidic, slowly eating away at any organic matter submerged in it."
+	},
+	"lolo_palaka": {
+		"title": "Lolo Palaka",
+		"category": "Characters",
+		"icon": "🐸",
+		"desc": "A wise old amphibian who guides young tadpoles through the dangerous environment. Often speaks in riddles."
+	}
+}
+
+var unlocked_knowledge: Array[String] = []
+
+signal knowledge_unlocked(id: String)
+
+func unlock_knowledge(id: String) -> void:
+	if id in KNOWLEDGE_DB and not id in unlocked_knowledge:
+		unlocked_knowledge.append(id)
+		knowledge_unlocked.emit(id)
+
