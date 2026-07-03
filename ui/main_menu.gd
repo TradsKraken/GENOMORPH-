@@ -151,12 +151,17 @@ func _on_particle_layer_draw() -> void:
 func _on_new_game_pressed() -> void:
 	var play_menu = preload("res://ui/play_menu.gd").new()
 	play_menu.new_game.connect(func():
+		PlayerData.reset_data()
 		_anim_player.play("exit")
 		await _anim_player.animation_finished
 		get_tree().change_scene_to_file("res://levels/node_3d.tscn")
 	)
 	play_menu.load_game.connect(func():
-		print("Load Game — not yet implemented")
+		if PlayerData.has_save_file():
+			PlayerData.load_game()
+			_anim_player.play("exit")
+			await _anim_player.animation_finished
+			get_tree().change_scene_to_file(PlayerData.current_scene_path)
 	)
 	add_child(play_menu)
 

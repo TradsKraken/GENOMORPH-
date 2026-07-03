@@ -67,6 +67,9 @@ func _ready() -> void:
 	var load_game_btn := Button.new()
 	load_game_btn.text = "Load Game"
 	load_game_btn.custom_minimum_size = Vector2(0, 50)
+	if not PlayerData.has_save_file():
+		load_game_btn.disabled = true
+		load_game_btn.text = "Load Game (Empty)"
 	load_game_btn.pressed.connect(func():
 		load_game.emit()
 		queue_free()

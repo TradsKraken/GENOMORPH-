@@ -66,6 +66,7 @@ var is_jumping: bool = false
 var jump_target_pos: Vector3 = Vector3.ZERO
 var _aim_offset: Vector3 = Vector3.ZERO
 var _reticle: Decal
+var input_locked: bool = false
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -147,15 +148,18 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 
 	# ── Input direction (X-Z plane, top-down) ────────────────────────────────
-	# Prefer joystick on mobile; fall back to keyboard in the editor / desktop.
 	var raw_input: Vector2
-	if _joystick != null and _joystick.get_vector().length_squared() > 0.0:
-		raw_input = _joystick.get_vector()
+	if input_locked:
+		raw_input = Vector2.ZERO
 	else:
-		raw_input = Input.get_vector(
-			"ui_left", "ui_right",   # A / Left  →  D / Right
-			"ui_up",   "ui_down"	 # W / Up	→  S / Down
-		)
+		# Prefer joystick on mobile; fall back to keyboard in the editor / desktop.
+		if _joystick != null and _joystick.get_vector().length_squared() > 0.0:
+			raw_input = _joystick.get_vector()
+		else:
+			raw_input = Input.get_vector(
+				"ui_left", "ui_right",   # A / Left  →  D / Right
+				"ui_up",   "ui_down"	 # W / Up	→  S / Down
+			)
 	# Map 2-D input → 3-D world XZ direction.
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
 
@@ -199,10 +203,11 @@ func _physics_process(delta: float) -> void:
 		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
 
 	# ── Attacking ────────────────────────────────────────────────────────────
-	if Input.is_action_just_pressed("attack"):
-		_attack()
-	if Input.is_action_just_pressed("skill1"):
-		_skill1()
+	if not input_locked:
+		if Input.is_action_just_pressed("attack"):
+			_attack()
+		if Input.is_action_just_pressed("skill1"):
+			_skill1()
 
 	var was_on_floor = is_on_floor()
 	move_and_slide()

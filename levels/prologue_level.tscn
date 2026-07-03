@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://cx6e7x1wfqm4p"]
+
+[ext_resource type="Script" path="res://levels/prologue_manager.gd" id="1_mgr"]
+[ext_resource type="PackedScene" uid="uid://ea7e13ofj3cp" path="res://player/player.tscn" id="2_player"]
+[ext_resource type="Script" uid="uid://61raa3sdio51" path="res://levels/camera_3d.gd" id="3_camera"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_swamp"]
+albedo_color = Color(0.15, 0.1, 0.05, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+material = SubResource("StandardMaterial3D_swamp")
+size = Vector2(100, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(100, 1, 100)
+
+[node name="PrologueLevel" type="Node3D"]
+script = ExtResource("1_mgr")
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_ground")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Ground"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_ground")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 10, 0)
+light_color = Color(0.4, 0.5, 0.45, 1)
+light_energy = 0.5
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 3, 4)
+current = true
+fov = 60.0
+script = ExtResource("3_camera")
+player_path = NodePath("../Player")
+height = 4.0
+distance_back = 5.0
+tilt_degrees = 15.0

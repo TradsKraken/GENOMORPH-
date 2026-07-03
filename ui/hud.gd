@@ -253,11 +253,11 @@ func _build_menu_panel() -> void:
 	_menu_panel.modulate.a = 0.0
 	
 	_menu_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_menu_panel.custom_minimum_size = Vector2(320, 320)
-	_menu_panel.offset_left   = -160
-	_menu_panel.offset_right  = 160
-	_menu_panel.offset_top    = -160
-	_menu_panel.offset_bottom = 160
+	_menu_panel.custom_minimum_size = Vector2(360, 440)
+	_menu_panel.offset_left   = -180
+	_menu_panel.offset_right  = 180
+	_menu_panel.offset_top    = -220
+	_menu_panel.offset_bottom = 220
 
 	var panel_bg := ColorRect.new()
 	panel_bg.color = Color(0.02, 0.04, 0.08, 0.95)
@@ -321,6 +321,7 @@ func _build_menu_panel() -> void:
 		sb_h.bg_color = Color(0.1, 0.3, 0.25, 0.9)
 		sb_h.border_color = color
 		b.add_theme_stylebox_override("hover", sb_h)
+		b.add_theme_stylebox_override("pressed", sb_h)
 
 	var btn_resume := _panel_btn("Resume Game")
 	btn_resume.pressed.connect(_toggle_menu)
@@ -335,8 +336,21 @@ func _build_menu_panel() -> void:
 	style_btn.call(btn_settings)
 	vbox.add_child(btn_settings)
 
+	var btn_save := _panel_btn("Save Game")
+	btn_save.pressed.connect(func():
+		PlayerData.save_game()
+		btn_save.text = "Saved!"
+		get_tree().create_timer(1.0).timeout.connect(func():
+			if is_instance_valid(btn_save):
+				btn_save.text = "Save Game"
+		)
+	)
+	style_btn.call(btn_save)
+	vbox.add_child(btn_save)
+
 	var btn_quit := _panel_btn("Main Menu", Color(1.0, 0.2, 0.3))
 	btn_quit.pressed.connect(func():
+		PlayerData.save_game()
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://ui/main_menu.tscn")
 	)
@@ -433,10 +447,10 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.05, 0.05, 0.05, 0.75)
-	bg.set_corner_radius_all(12)
-	bg.border_color = Color(0.8, 0.8, 0.8, 0.5)
+	bg.bg_color = Color(0.02, 0.04, 0.08, 0.85)
+	bg.border_color = Color(0.1, 0.9, 0.7, 0.6)
 	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(0)
 	bg.content_margin_left   = 24.0
 	bg.content_margin_right  = 24.0
 	bg.content_margin_top    = 24.0
@@ -444,6 +458,10 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.add_theme_stylebox_override("panel", bg)
 
 	_subtitle_label = RichTextLabel.new()
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+	_subtitle_label.add_theme_font_override("normal_font", tech_font)
+	_subtitle_label.add_theme_font_override("bold_font", tech_font)
 	_subtitle_label.bbcode_enabled = true
 	_subtitle_label.fit_content = true
 	_subtitle_label.scroll_active = false
@@ -824,3 +842,30 @@ func _panel_btn(text: String, col: Color = Color.WHITE) -> Button:
 	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	btn.add_theme_color_override("font_color", col)
 	return btn
+
+# ── Prologue Sequence ─────────────────────────────────────────────────────────
+
+func play_boot_sequence() -> void:
+	var boot_overlay = ColorRect.new()
+	boot_overlay.color = Color.BLACK
+	boot_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	boot_overlay.z_index = 100
+	_root.add_child(boot_overlay)
+	
+	for child in _root.get_children():
+		if child != boot_overlay and child != _subtitle_panel:
+			child.modulate.a = 0.0
+			
+	var tw = create_tween()
+	tw.tween_interval(2.0)
+	tw.tween_property(boot_overlay, "color:a", 0.0, 3.0)
+	
+	tw.tween_callback(func():
+		var hud_tw = create_tween()
+		for child in _root.get_children():
+			if child != boot_overlay and child != _subtitle_panel and child != _menu_panel and child != _tutorial_panel:
+				hud_tw.tween_property(child, "modulate:a", 1.0, 0.5)
+				hud_tw.tween_interval(0.2)
+	).set_delay(2.0)
+	
+	tw.tween_callback(boot_overlay.queue_free).set_delay(1.0)
