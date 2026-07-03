@@ -369,17 +369,14 @@ func _build_tutorial_panel() -> void:
 	
 	_tutorial_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_tutorial_panel.custom_minimum_size = Vector2(400, 0)
-	_tutorial_panel.offset_left   = -200
-	_tutorial_panel.offset_right  = 200
-	_tutorial_panel.offset_top    = 0
-	_tutorial_panel.offset_bottom = 0
+	_tutorial_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_tutorial_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.05, 0.08, 0.15, 0.95)
-	bg.border_color = Color(0.3, 0.6, 1.0, 0.8)
+	bg.bg_color = Color(0.02, 0.04, 0.08, 0.85)
+	bg.border_color = Color(0.1, 0.9, 0.7, 0.6)
 	bg.set_border_width_all(2)
-	bg.set_corner_radius_all(24)
+	bg.set_corner_radius_all(0)
 	bg.shadow_color = Color(0, 0, 0, 0.6)
 	bg.shadow_size = 20
 	bg.content_margin_left   = 32.0
@@ -388,20 +385,40 @@ func _build_tutorial_panel() -> void:
 	bg.content_margin_bottom = 32.0
 	_tutorial_panel.add_theme_stylebox_override("panel", bg)
 
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 24)
 	_tutorial_panel.add_child(vbox)
 
-	_tutorial_title = _make_label("TUTORIAL", 28, Color(1.0, 0.8, 0.2))
+	_tutorial_title = _make_label("TUTORIAL", 24, Color(0.1, 0.9, 0.7))
+	_tutorial_title.add_theme_font_override("font", tech_font)
 	_tutorial_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(_tutorial_title)
 
-	_tutorial_desc = _make_label("Tutorial text goes here.", 18, Color.WHITE)
+	_tutorial_desc = _make_label("Tutorial text goes here.", 18, Color(0.8, 1.0, 0.9))
+	_tutorial_desc.add_theme_font_override("font", tech_font)
 	_tutorial_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_tutorial_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_tutorial_desc)
 
-	var btn_got_it := _panel_btn("Got It!", Color(0.2, 0.8, 0.3))
+	var btn_got_it := _panel_btn("ACKNOWLEDGE", Color(0.1, 0.9, 0.7))
+	btn_got_it.add_theme_font_override("font", tech_font)
+	
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.08, 0.12, 0.9)
+	sb.border_color = Color(0.1, 0.9, 0.7, 0.4)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(0)
+	btn_got_it.add_theme_stylebox_override("normal", sb)
+	
+	var sb_h := sb.duplicate()
+	sb_h.bg_color = Color(0.1, 0.3, 0.25, 0.9)
+	sb_h.border_color = Color(0.1, 0.9, 0.7)
+	btn_got_it.add_theme_stylebox_override("hover", sb_h)
+	btn_got_it.add_theme_stylebox_override("pressed", sb_h)
+	
 	btn_got_it.pressed.connect(_hide_tutorial)
 	vbox.add_child(btn_got_it)
 

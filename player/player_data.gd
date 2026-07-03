@@ -91,10 +91,28 @@ const KNOWLEDGE_DB: Dictionary = {
 		"category": "Characters",
 		"icon": "◈",
 		"desc": "A wise old amphibian who guides young tadpoles through the dangerous environment. Often speaks in riddles."
+	},
+	"genomorph_suit": {
+		"title": "GenoMorph Prototype",
+		"category": "Technology",
+		"icon": "⌬",
+		"desc": "A cutting-edge biological shape-shifting suit designed to adapt to extreme environments by assimilating local genome fragments."
+	},
+	"dr_sterling": {
+		"title": "Dr. Alistair Sterling",
+		"category": "Characters",
+		"icon": "◈",
+		"desc": "The lead researcher and creator of the GenoMorph project. He monitors the suit's telemetry from a secure clinical laboratory."
+	},
+	"the_collapse": {
+		"title": "The Collapse",
+		"category": "History",
+		"icon": "⬡",
+		"desc": "The ecological catastrophe that decimated the region's diverse ecosystems, leaving behind highly toxic and mutated zones."
 	}
 }
 
-var unlocked_knowledge: Array[String] = []
+var unlocked_knowledge: Array[String] = ["genomorph_suit", "dr_sterling", "the_collapse"]
 
 signal knowledge_unlocked(id: String)
 
@@ -105,12 +123,33 @@ func unlock_knowledge(id: String) -> void:
 
 # ── Save & Load ───────────────────────────────────────────────────────────────
 
-const SAVE_PATH := "user://genomorph_save.json"
+var current_save_slot: int = 1
 
-func has_save_file() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+func get_save_path(slot: int = -1) -> String:
+	if slot == -1:
+		slot = current_save_slot
+	return "user://genomorph_save_%d.json" % slot
 
-func save_game() -> void:
+func has_save_file(slot: int = -1) -> bool:
+	return FileAccess.file_exists(get_save_path(slot))
+
+func get_save_preview(slot: int) -> Dictionary:
+	var path = get_save_path(slot)
+	if not FileAccess.file_exists(path):
+		return {}
+	var file = FileAccess.open(path, FileAccess.READ)
+	if file:
+		var json = JSON.new()
+		if json.parse(file.get_as_text()) == OK:
+			var data = json.get_data()
+			if typeof(data) == TYPE_DICTIONARY:
+				return {
+					"level": data.get("level", 1),
+					"has_seen_prologue": data.get("has_seen_prologue", false)
+				}
+	return {}
+
+func save_game(slot: int = -1) -> void:
 	var current_level_path = get_tree().current_scene.scene_file_path if get_tree().current_scene else current_scene_path
 	if current_level_path != "":
 		current_scene_path = current_level_path
@@ -128,14 +167,18 @@ func save_game() -> void:
 		"unlocked_knowledge": unlocked_knowledge,
 		"current_scene_path": current_scene_path
 	}
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file = FileAccess.open(get_save_path(slot), FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data))
 
-func load_game() -> bool:
-	if not has_save_file():
+func load_game(slot: int = -1) -> bool:
+	if not has_save_file(slot):
 		return false
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+		
+	if slot != -1:
+		current_save_slot = slot
+		
+	var file = FileAccess.open(get_save_path(slot), FileAccess.READ)
 	if file:
 		var json_str = file.get_as_text()
 		var json = JSON.new()
@@ -167,7 +210,9 @@ func load_game() -> bool:
 				return true
 	return false
 
-func reset_data() -> void:
+func reset_data(slot: int = -1) -> void:
+	if slot != -1:
+		current_save_slot = slot
 	max_health = 100.0
 	health = 100.0
 	max_stamina = 100.0
@@ -178,6 +223,7 @@ func reset_data() -> void:
 	genome_fragments = 0
 	has_seen_prologue = false
 	unlocked_knowledge.clear()
+	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])
 	current_scene_path = "res://levels/node_3d.tscn"
 	
 	health_changed.emit(health, max_health)

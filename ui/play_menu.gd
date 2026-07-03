@@ -1,10 +1,12 @@
 extends CanvasLayer
 
-signal new_game
-signal load_game
+signal new_game(slot: int)
+signal load_game(slot: int)
 signal closed
 
 var _panel: PanelContainer
+var _vbox: VBoxContainer
+var _title: Label
 
 func _ready() -> void:
 	layer = 100 # Ensure it's above other UI
@@ -39,46 +41,64 @@ func _ready() -> void:
 	sb.content_margin_bottom = 24
 	_panel.add_theme_stylebox_override("panel", sb)
 	
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	_panel.add_child(vbox)
+	_vbox = VBoxContainer.new()
+	_vbox.add_theme_constant_override("separation", 16)
+	_panel.add_child(_vbox)
 	
 	# Title
-	var title := Label.new()
-	title.text = "PLAY GAME"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24)
-	title.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
-	vbox.add_child(title)
+	_title = Label.new()
+	_title.text = "PLAY GAME"
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_title.add_theme_font_size_override("font_size", 24)
+	_title.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+	_vbox.add_child(_title)
 	
 	var sep := HSeparator.new()
-	vbox.add_child(sep)
+	_vbox.add_child(sep)
+	
+	_show_main_actions()
+	add_child(_panel)
+
+func _clear_vbox_items() -> void:
+	for child in _vbox.get_children():
+		if child != _title and not child is HSeparator:
+			child.queue_free()
+
+func _show_main_actions() -> void:
+	_clear_vbox_items()
+	_title.text = "PLAY GAME"
 	
 	# Buttons
 	var new_game_btn := Button.new()
 	new_game_btn.text = "New Game"
 	new_game_btn.custom_minimum_size = Vector2(0, 50)
 	new_game_btn.pressed.connect(func():
-		new_game.emit()
-		queue_free()
+		_show_slot_selection(false)
 	)
-	vbox.add_child(new_game_btn)
+	_vbox.add_child(new_game_btn)
 	
 	var load_game_btn := Button.new()
 	load_game_btn.text = "Load Game"
 	load_game_btn.custom_minimum_size = Vector2(0, 50)
-	if not PlayerData.has_save_file():
+	
+	# Check if ANY slot exists
+	var any_save = false
+	for i in range(1, 5):
+		if PlayerData.has_save_file(i):
+			any_save = true
+			break
+			
+	if not any_save:
 		load_game_btn.disabled = true
-		load_game_btn.text = "Load Game (Empty)"
+		load_game_btn.text = "Load Game (No saves)"
 	load_game_btn.pressed.connect(func():
-		load_game.emit()
-		queue_free()
+		_show_slot_selection(true)
 	)
-	vbox.add_child(load_game_btn)
+	_vbox.add_child(load_game_btn)
 	
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	vbox.add_child(spacer)
+	_vbox.add_child(spacer)
 	
 	var close_btn := Button.new()
 	close_btn.text = "Cancel"
@@ -87,6 +107,39 @@ func _ready() -> void:
 		closed.emit()
 		queue_free()
 	)
-	vbox.add_child(close_btn)
+	_vbox.add_child(close_btn)
+
+func _show_slot_selection(is_loading: bool) -> void:
+	_clear_vbox_items()
+	_title.text = "LOAD SLOT" if is_loading else "NEW GAME (OVERWRITE)"
 	
-	add_child(_panel)
+	for i in range(1, 5):
+		var slot_btn := Button.new()
+		slot_btn.custom_minimum_size = Vector2(0, 50)
+		var preview = PlayerData.get_save_preview(i)
+		
+		if preview.is_empty():
+			slot_btn.text = "Slot " + str(i) + " - Empty"
+			if is_loading:
+				slot_btn.disabled = true
+		else:
+			slot_btn.text = "Slot " + str(i) + " - Level " + str(preview.get("level", 1))
+			
+		slot_btn.pressed.connect(func():
+			if is_loading:
+				load_game.emit(i)
+			else:
+				new_game.emit(i)
+			queue_free()
+		)
+		_vbox.add_child(slot_btn)
+		
+	var spacer := Control.new()
+	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_vbox.add_child(spacer)
+	
+	var back_btn := Button.new()
+	back_btn.text = "Back"
+	back_btn.custom_minimum_size = Vector2(0, 40)
+	back_btn.pressed.connect(_show_main_actions)
+	_vbox.add_child(back_btn)
