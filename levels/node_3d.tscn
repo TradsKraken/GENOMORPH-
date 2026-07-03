@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
 [ext_resource type="PackedScene" uid="uid://dpxlu8oobmyh8" path="res://enemies/Mosqito.tscn" id="12_x7tiv"]
 [ext_resource type="Script" uid="uid://kb1niigjnckw" path="res://levels/tutorial_trigger.gd" id="14_g4oow"]
-[ext_resource type="Script" path="res://levels/prologue_manager.gd" id="15_prologue"]
+[ext_resource type="Script" uid="uid://dxdlwxa8t8qti" path="res://levels/prologue_manager.gd" id="15_prologue"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -36,8 +36,6 @@ data = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0, 0.5, 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qgxk8"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wpc2v"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_qwc0f"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yljyx"]
 
@@ -119,14 +117,6 @@ shape = SubResource("BoxShape3D_wpc2v")
 [node name="MosquitoSwarm" parent="tut2" unique_id=688820672 instance=ExtResource("2_nap4l")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.878235, 5.005554, -16.650223)
 
-[node name="tut1" type="Area3D" parent="." unique_id=508198586]
-transform = Transform3D(1.255, 0, 0, 0, 1.255, 0, 0, 0, 1.255, -53.459785, 6.9867554, 2.4509125)
-script = ExtResource("14_g4oow")
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="tut1" unique_id=1289229355]
-transform = Transform3D(18.355, 0, 0, 0, 18.355, 0, 0, 0, 18.355, 1.4904251, 0, 10.939689)
-shape = SubResource("BoxShape3D_qwc0f")
-
 [node name="mosquito1" parent="." unique_id=970387258 instance=ExtResource("12_x7tiv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.66313, 4.021881, -17.946228)
 
@@ -141,5 +131,5 @@ trigger_type = 3
 transform = Transform3D(26.845, 0, 0, 0, 26.845, 0, 0, 0, 26.845, 0, 0, 0)
 shape = SubResource("BoxShape3D_yljyx")
 
-[node name="PrologueManager" type="Node" parent="."]
+[node name="PrologueManager" type="Node" parent="." unique_id=1364717053]
 script = ExtResource("15_prologue")

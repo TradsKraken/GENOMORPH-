@@ -45,7 +45,6 @@ func _ready() -> void:
 	call_deferred("_start_sequence")
 
 func _start_sequence() -> void:
-	await get_tree().create_timer(1.0).timeout
 	var huds = get_tree().get_nodes_in_group("hud")
 	if huds.size() > 0:
 		if huds[0].has_method("play_boot_sequence"):
