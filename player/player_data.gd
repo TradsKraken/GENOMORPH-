@@ -145,7 +145,12 @@ func get_save_preview(slot: int) -> Dictionary:
 			if typeof(data) == TYPE_DICTIONARY:
 				return {
 					"level": data.get("level", 1),
-					"has_seen_prologue": data.get("has_seen_prologue", false)
+					"has_seen_prologue": data.get("has_seen_prologue", false),
+					"timestamp": data.get("timestamp", "Unknown Date"),
+					"biome_name": data.get("biome_name", "Unknown Region"),
+					"active_form": data.get("active_form", "Unknown Form"),
+					"genome_fragments": data.get("genome_fragments", 0),
+					"max_genome_fragments": data.get("max_genome_fragments", 4)
 				}
 	return {}
 
@@ -153,6 +158,17 @@ func save_game(slot: int = -1) -> void:
 	var current_level_path = get_tree().current_scene.scene_file_path if get_tree().current_scene else current_scene_path
 	if current_level_path != "":
 		current_scene_path = current_level_path
+
+	var biome_name = "Level 1: The Polluted Wetlands"
+	if "mosquito_zone" in current_scene_path:
+		biome_name = "Level 1: Mosquito Swarm Zone"
+		
+	var datetime = Time.get_datetime_dict_from_system()
+	# Format: YYYY-MM-DD HH:MM
+	var timestamp = "%04d-%02d-%02d %02d:%02d" % [
+		datetime.year, datetime.month, datetime.day,
+		datetime.hour, datetime.minute
+	]
 
 	var data = {
 		"health": health,
@@ -163,9 +179,13 @@ func save_game(slot: int = -1) -> void:
 		"experience": experience,
 		"exp_to_next": exp_to_next,
 		"genome_fragments": genome_fragments,
+		"max_genome_fragments": 4, # Default to 4 for now
 		"has_seen_prologue": has_seen_prologue,
 		"unlocked_knowledge": unlocked_knowledge,
-		"current_scene_path": current_scene_path
+		"current_scene_path": current_scene_path,
+		"timestamp": timestamp,
+		"biome_name": biome_name,
+		"active_form": "Small Native Frog"
 	}
 	var file = FileAccess.open(get_save_path(slot), FileAccess.WRITE)
 	if file:

@@ -53,6 +53,9 @@ shadow_enabled = true
 transform = Transform3D(-0.32, 0, -4.8318654e-08, 0, 0.32, 0, 4.8318654e-08, 0, -0.32, 0.6908264, -1.001648, 0.42462158)
 script = ExtResource("11_auto_col")
 
+[node name="Tree_lp_11_022" parent="Ground" index="56" unique_id=698647607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.931206, 0, 5.1259995e-06)
+
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
 transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -61.7464, 4.2499337, -12.969448)
 script = ExtResource("2_fhumt")
@@ -133,3 +136,5 @@ shape = SubResource("BoxShape3D_yljyx")
 
 [node name="PrologueManager" type="Node" parent="." unique_id=1364717053]
 script = ExtResource("15_prologue")
+
+[editable path="Ground"]

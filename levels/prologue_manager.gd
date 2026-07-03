@@ -50,6 +50,8 @@ func _start_sequence() -> void:
 		if huds[0].has_method("play_boot_sequence"):
 			huds[0].play_boot_sequence()
 		
+
+
 	current_state = State.HUD_BOOT
 	await get_tree().create_timer(6.0).timeout # Wait for boot sequence
 	

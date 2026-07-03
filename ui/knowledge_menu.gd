@@ -93,7 +93,7 @@ func _ready() -> void:
 	header_hbox.add_child(title)
 	
 	var close_btn := Button.new()
-	close_btn.text = "TERMINATE"
+	close_btn.text = "CLOSE"
 	close_btn.add_theme_font_override("font", tech_font)
 	close_btn.custom_minimum_size = Vector2(100, 40)
 	
