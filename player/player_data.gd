@@ -74,19 +74,19 @@ const KNOWLEDGE_DB: Dictionary = {
 	"mosquito": {
 		"title": "Giant Mosquito",
 		"category": "Species",
-		"icon": "🦟",
+		"icon": "⬡",
 		"desc": "A heavily mutated, blood-sucking insect. It flies in erratic patterns and drains stamina as well as health. Avoid its stinger!"
 	},
 	"swamp": {
 		"title": "Toxic Swamp",
 		"category": "Environment",
-		"icon": "☣️",
+		"icon": "⌬",
 		"desc": "A hazardous wetland teeming with aggressive flora and fauna. The water itself is highly acidic, slowly eating away at any organic matter submerged in it."
 	},
 	"lolo_palaka": {
 		"title": "Lolo Palaka",
 		"category": "Characters",
-		"icon": "🐸",
+		"icon": "◈",
 		"desc": "A wise old amphibian who guides young tadpoles through the dangerous environment. Often speaks in riddles."
 	}
 }

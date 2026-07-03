@@ -38,6 +38,8 @@ data = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0, 0.5, 
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_qwc0f"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_yljyx"]
+
 [node name="Node3D" type="Node3D" unique_id=2040944572]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=191560905]
@@ -49,7 +51,7 @@ light_energy = 1.2
 shadow_enabled = true
 
 [node name="Ground" parent="." unique_id=456649111 instance=ExtResource("12_terrain")]
-transform = Transform3D(-0.32, 0, -4.8318654e-08, 0, 0.32, 0, 4.8318654e-08, 0, -0.32, 0.5923157, -0.9533081, 0.38635254)
+transform = Transform3D(-0.32, 0, -4.8318654e-08, 0, 0.32, 0, 4.8318654e-08, 0, -0.32, 0.6908264, -1.001648, 0.42462158)
 script = ExtResource("11_auto_col")
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
@@ -96,7 +98,7 @@ show_hud = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 5.66131, 1.3138075)
 
 [node name="tut3" type="Area3D" parent="." unique_id=556050028]
-transform = Transform3D(1.88, 0, 0, 0, 1.88, 0, 0, 0, 1.88, -6.2894287, 6.0787354, -41.27295)
+transform = Transform3D(1.88, 0, 0, 0, 1.88, 0, 0, 0, 1.88, -18.381805, 6.0787354, -26.763187)
 script = ExtResource("14_g4oow")
 trigger_type = 2
 
@@ -105,7 +107,7 @@ transform = Transform3D(12.625, 0, 0, 0, 12.625, 0, 0, 0, 12.625, 0.9967818, 0, 
 shape = SubResource("BoxShape3D_qgxk8")
 
 [node name="tut2" type="Area3D" parent="." unique_id=128122477]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -7.6293945e-06)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 15.06057)
 script = ExtResource("14_g4oow")
 trigger_type = 1
 
@@ -128,3 +130,12 @@ shape = SubResource("BoxShape3D_qwc0f")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.66313, 4.021881, -17.946228)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=690566539]
+
+[node name="tut4" type="Area3D" parent="." unique_id=1226536906]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -55)
+script = ExtResource("14_g4oow")
+trigger_type = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="tut4" unique_id=917240532]
+transform = Transform3D(26.845, 0, 0, 0, 26.845, 0, 0, 0, 26.845, 0, 0, 0)
+shape = SubResource("BoxShape3D_yljyx")

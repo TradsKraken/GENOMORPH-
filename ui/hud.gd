@@ -29,7 +29,7 @@ var _jump_btn:   Button
 var _skill3_btn: Button
 var _cancel_zone: Label
 var _menu_btn:   Button
-var _menu_panel: PanelContainer
+var _menu_panel: Control
 var _menu_open:  bool = false
 
 var _tutorial_panel: PanelContainer
@@ -245,41 +245,86 @@ func _build_action_buttons() -> void:
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
 
 func _build_menu_panel() -> void:
-	_menu_panel = PanelContainer.new()
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+
+	_menu_panel = Control.new()
 	_menu_panel.visible = false
 	_menu_panel.modulate.a = 0.0
 	
 	_menu_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_menu_panel.custom_minimum_size = Vector2(280, 0)
-	# Center it manually
-	_menu_panel.offset_left   = -140
-	_menu_panel.offset_right  = 140
-	_menu_panel.offset_top    = -100
-	_menu_panel.offset_bottom = 100
+	_menu_panel.custom_minimum_size = Vector2(320, 320)
+	_menu_panel.offset_left   = -160
+	_menu_panel.offset_right  = 160
+	_menu_panel.offset_top    = -160
+	_menu_panel.offset_bottom = 160
 
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.06, 0.06, 0.08, 0.95)
-	bg.border_color = Color(1, 1, 1, 0.1)
-	bg.set_border_width_all(1)
-	bg.set_corner_radius_all(16)
-	bg.shadow_color = Color(0, 0, 0, 0.5)
-	bg.shadow_size = 20
-	bg.content_margin_left   = 24.0
-	bg.content_margin_right  = 24.0
-	bg.content_margin_top    = 24.0
-	bg.content_margin_bottom = 24.0
-	_menu_panel.add_theme_stylebox_override("panel", bg)
+	var panel_bg := ColorRect.new()
+	panel_bg.color = Color(0.02, 0.04, 0.08, 0.95)
+	panel_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_menu_panel.add_child(panel_bg)
+	
+	var scanlines := ColorRect.new()
+	scanlines.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var scan_mat := ShaderMaterial.new()
+	scan_mat.shader = load("res://ui/scanlines.gdshader")
+	scanlines.material = scan_mat
+	scanlines.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_menu_panel.add_child(scanlines)
+	
+	var borders := Control.new()
+	borders.set_anchors_preset(Control.PRESET_FULL_RECT)
+	borders.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var b_script := GDScript.new()
+	b_script.source_code = "extends Control\nfunc _draw():\n\tvar c = Color(0.1, 0.9, 0.7, 0.9)\n\tvar r = get_rect().size\n\tvar l = 16.0\n\tvar t = 2.0\n\tdraw_rect(Rect2(0,0,l,t), c); draw_rect(Rect2(0,0,t,l), c)\n\tdraw_rect(Rect2(r.x-l,0,l,t), c); draw_rect(Rect2(r.x-t,0,t,l), c)\n\tdraw_rect(Rect2(0,r.y-t,l,t), c); draw_rect(Rect2(0,r.y-l,t,l), c)\n\tdraw_rect(Rect2(r.x-l,r.y-t,l,t), c); draw_rect(Rect2(r.x-t,r.y-l,t,l), c)\n\tvar c2 = Color(0.1, 0.9, 0.7, 0.4)\n\tfor p in [Vector2(20,20), Vector2(r.x-20,20), Vector2(20,r.y-20), Vector2(r.x-20,r.y-20)]:\n\t\tdraw_line(p-Vector2(6,0), p+Vector2(6,0), c2, 1)\n\t\tdraw_line(p-Vector2(0,6), p+Vector2(0,6), c2, 1)"
+	b_script.reload()
+	borders.set_script(b_script)
+	_menu_panel.add_child(borders)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 32)
+	margin.add_theme_constant_override("margin_right", 32)
+	margin.add_theme_constant_override("margin_top", 32)
+	margin.add_theme_constant_override("margin_bottom", 32)
+	_menu_panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 16)
-	_menu_panel.add_child(vbox)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	margin.add_child(vbox)
 
-	var title := _make_label("PAUSED", 18, Color.WHITE)
+	var title := _make_label("PAUSED", 24, Color(0.1, 0.9, 0.7))
+	title.add_theme_font_override("font", tech_font)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(title)
+	
+	var sep := HSeparator.new()
+	var sep_style := StyleBoxLine.new()
+	sep_style.color = Color(0.1, 0.9, 0.7, 0.3)
+	sep_style.thickness = 1
+	sep.add_theme_stylebox_override("separator", sep_style)
+	vbox.add_child(sep)
+
+	var style_btn = func(b: Button, color: Color = Color(0.8, 1.0, 0.9)):
+		b.add_theme_font_override("font", tech_font)
+		b.add_theme_font_size_override("font_size", 18)
+		b.add_theme_color_override("font_color", color)
+		b.add_theme_color_override("font_hover_color", Color.WHITE)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.04, 0.08, 0.12, 0.9)
+		sb.border_color = color * 0.4
+		sb.set_border_width_all(1)
+		sb.set_corner_radius_all(0)
+		b.add_theme_stylebox_override("normal", sb)
+		var sb_h := sb.duplicate()
+		sb_h.bg_color = Color(0.1, 0.3, 0.25, 0.9)
+		sb_h.border_color = color
+		b.add_theme_stylebox_override("hover", sb_h)
 
 	var btn_resume := _panel_btn("Resume Game")
 	btn_resume.pressed.connect(_toggle_menu)
+	style_btn.call(btn_resume, Color(0.1, 0.9, 0.7))
 	vbox.add_child(btn_resume)
 
 	var btn_settings := _panel_btn("Settings")
@@ -287,13 +332,15 @@ func _build_menu_panel() -> void:
 		var settings = preload("res://ui/settings_menu.gd").new()
 		_root.add_child(settings)
 	)
+	style_btn.call(btn_settings)
 	vbox.add_child(btn_settings)
 
-	var btn_quit := _panel_btn("Main Menu", Color("#ff3b5c"))
+	var btn_quit := _panel_btn("Main Menu", Color(1.0, 0.2, 0.3))
 	btn_quit.pressed.connect(func():
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://ui/main_menu.tscn")
 	)
+	style_btn.call(btn_quit, Color(1.0, 0.2, 0.3))
 	vbox.add_child(btn_quit)
 
 	_root.add_child(_menu_panel)
