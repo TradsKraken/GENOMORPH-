@@ -39,6 +39,8 @@ data = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0, 0.5, 
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_yljyx"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_qwc0f"]
+
 [node name="Node3D" type="Node3D" unique_id=2040944572]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=191560905]
@@ -136,5 +138,14 @@ shape = SubResource("BoxShape3D_yljyx")
 
 [node name="PrologueManager" type="Node" parent="." unique_id=1364717053]
 script = ExtResource("15_prologue")
+
+[node name="Area3D" type="Area3D" parent="." unique_id=1728138279]
+transform = Transform3D(0.961495, 0, -0.27482253, 0, 1, 0, 0.27482253, 0, 0.961495, 52.499004, 2.5349731, -51.686825)
+script = ExtResource("14_g4oow")
+trigger_type = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=25314993]
+transform = Transform3D(17.430134, 0, -4.67039, 0, 18.045002, 0, 4.67039, 0, 17.430134, -2, 0, -1)
+shape = SubResource("BoxShape3D_qwc0f")
 
 [editable path="Ground"]

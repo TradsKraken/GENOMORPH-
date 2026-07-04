@@ -389,12 +389,8 @@ func _attack() -> void:
 			hud.show_float_text("LUNGE!", scr, Color(1.0, 0.3, 0.1))
 
 func _skill1() -> void:
-	if animation_player:
-		# Play the attack animation sped up for the whip
-		animation_player.play("FrogArmature|Frog_Attack", 0.1, 1.5)
-	
-	# Sticky Tongue Whip: Damage closest enemy at long range
-	var attack_range = 12.0
+	# Sticky Tongue Whip: Damage closest enemy at short range
+	var attack_range = 5.0
 	var damage = 10.0
 	var closest_enemy = null
 	var closest_dist = attack_range
@@ -413,6 +409,13 @@ func _skill1() -> void:
 		
 		# Deal damage
 		closest_enemy.take_damage(damage)
+		
+		# Visual Tongue Animation
+		_animate_tongue(closest_enemy.global_position)
+	else:
+		# If no enemy, just shoot tongue forward (+Z is character forward)
+		var target_pos = global_position + global_transform.basis.z * 5.0
+		_animate_tongue(target_pos)
 	
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("show_float_text"):
@@ -420,6 +423,45 @@ func _skill1() -> void:
 		if cam:
 			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
 			hud.show_float_text("WHIP!", scr, Color(0.9, 0.2, 0.8))
+
+func _animate_tongue(target_pos: Vector3) -> void:
+	var tongue_pivot = Node3D.new()
+	get_tree().current_scene.add_child(tongue_pivot)
+	
+	# Start slightly forward and up from the center to match the mouth
+	var start_pos = global_position + Vector3(0, 0.5, 0) + global_transform.basis.z * 0.6
+	target_pos.y += 0.5
+	tongue_pivot.global_position = start_pos
+	
+	if start_pos.distance_to(target_pos) > 0.1:
+		tongue_pivot.look_at(target_pos, Vector3.UP)
+	
+	var tongue_mesh = MeshInstance3D.new()
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.3, 0.5) # Pink tongue
+	mat.roughness = 0.2
+	var mesh = CylinderMesh.new()
+	mesh.top_radius = 0.15
+	mesh.bottom_radius = 0.15
+	mesh.height = 1.0
+	tongue_mesh.mesh = mesh
+	tongue_mesh.material_override = mat
+	
+	tongue_pivot.add_child(tongue_mesh)
+	tongue_mesh.rotation.x = PI / 2.0
+	tongue_mesh.position = Vector3(0, 0, -0.5)
+	
+	var dist = start_pos.distance_to(target_pos)
+	tongue_pivot.scale.z = 0.01
+	
+	var tween = create_tween()
+	# Extend
+	tween.tween_property(tongue_pivot, "scale:z", dist, 0.1)
+	# Retract
+	tween.tween_property(tongue_pivot, "scale:z", 0.01, 0.1).set_delay(0.05)
+	tween.finished.connect(func():
+		tongue_pivot.queue_free()
+	)
 
 
 # ── Animation ────────────────────────────────────────────────────────────────
