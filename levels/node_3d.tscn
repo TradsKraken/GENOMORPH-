@@ -12,6 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
 [ext_resource type="PackedScene" uid="uid://dpxlu8oobmyh8" path="res://enemies/Mosqito.tscn" id="12_x7tiv"]
 [ext_resource type="Script" uid="uid://kb1niigjnckw" path="res://levels/tutorial_trigger.gd" id="14_g4oow"]
+[ext_resource type="PackedScene" uid="uid://b7nidmc3yoodx" path="res://Models/Terrain/terrainenhance.glb" id="14_irpdk"]
 [ext_resource type="Script" uid="uid://dxdlwxa8t8qti" path="res://levels/prologue_manager.gd" id="15_prologue"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
@@ -147,5 +148,8 @@ trigger_type = 4
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D" unique_id=25314993]
 transform = Transform3D(17.430134, 0, -4.67039, 0, 18.045002, 0, 4.67039, 0, 17.430134, -2, 0, -1)
 shape = SubResource("BoxShape3D_qwc0f")
+
+[node name="terrainenhance" parent="." unique_id=419227518 instance=ExtResource("14_irpdk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.551525, 0, -72.884766)
 
 [editable path="Ground"]
