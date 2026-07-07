@@ -93,8 +93,23 @@ func _start_tutorial() -> void:
 		
 	var huds = get_tree().get_nodes_in_group("hud")
 	if huds.size() > 0:
-		huds[0].show_tutorial("OBJECTIVE: SEEK BIOLOGICAL NUTRIENTS", "Use the Virtual Joystick to move.\nTap the JUMP button to Leap.\nTap the ATTACK button to Feed.")
-		huds[0].reveal_jump()
-		huds[0].reveal_attack()
+		var steps = [
+			{
+				"title": "PLAYER STATUS",
+				"text": "This is your biological status.\nKeep an eye on your Health (Red), Stamina (Green), and Mutation Level (Yellow).",
+				"nodes": ["_status_group"]
+			},
+			{
+				"title": "KNOWLEDGE DATABASE",
+				"text": "This is the Knowledge Menu.\nTap here to review discovered biological traits and lore.",
+				"nodes": ["_knowledge_btn"]
+			},
+			{
+				"title": "OBJECTIVE: SEEK NUTRIENTS",
+				"text": "Use the Virtual Joystick to move.\nTap the JUMP button to Leap.\nTap the ATTACK button to Feed.",
+				"nodes": ["_jump_btn", "_attack_btn"]
+			}
+		]
+		huds[0].start_ui_walkthrough(steps)
 		
 	current_state = State.PLAYING

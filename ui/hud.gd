@@ -22,6 +22,7 @@ var _stam_bar:   ProgressBar
 var _stam_lbl:   Label
 var _exp_bar:    ProgressBar
 var _lvl_lbl:    Label
+var _status_group: Control
 
 var _attack_btn: Button
 var _skill1_btn: Button
@@ -31,6 +32,7 @@ var _cancel_zone: Label
 var _menu_btn:   Button
 var _menu_panel: Control
 var _menu_open:  bool = false
+var _knowledge_btn: Button
 
 var _tutorial_panel: PanelContainer
 var _tutorial_title: Label
@@ -39,6 +41,14 @@ var _tutorial_desc:  Label
 var _subtitle_panel: PanelContainer
 var _subtitle_label: RichTextLabel
 var _subtitle_tween: Tween
+
+var _jump_highlight_tw: Tween
+var _attack_highlight_tw: Tween
+
+var _walkthrough_steps: Array = []
+var _current_step_index: int = 0
+var _active_highlight_nodes: Array = []
+var _active_highlight_tweens: Dictionary = {}
 
 signal subtitle_dismissed
 
@@ -76,10 +86,10 @@ func _input(event: InputEvent) -> void:
 
 func _build_player_status() -> void:
 	# Group container
-	var status_group := Control.new()
-	status_group.position = Vector2(24, 24)
-	status_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(status_group)
+	_status_group = Control.new()
+	_status_group.position = Vector2(24, 24)
+	_status_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_status_group)
 
 	# Level Badge (Circular)
 	var badge := PanelContainer.new()
@@ -95,7 +105,7 @@ func _build_player_status() -> void:
 	badge_bg.shadow_color = Color(0, 0, 0, 0.3)
 	badge_bg.shadow_size = 4
 	badge.add_theme_stylebox_override("panel", badge_bg)
-	status_group.add_child(badge)
+	_status_group.add_child(badge)
 
 	var lvl_vbox := VBoxContainer.new()
 	lvl_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -117,7 +127,7 @@ func _build_player_status() -> void:
 	bars_vbox.add_theme_constant_override("separation", 8)
 	bars_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars_vbox.z_index = 1
-	status_group.add_child(bars_vbox)
+	_status_group.add_child(bars_vbox)
 
 	# Health Bar
 	var hp_box := Control.new()
@@ -161,7 +171,10 @@ func _build_action_buttons() -> void:
 	_attack_btn.offset_bottom = -40
 	_attack_btn.offset_left   = -160
 	_attack_btn.offset_top    = -160
-	_attack_btn.button_down.connect(func(): Input.action_press("attack"))
+	_attack_btn.button_down.connect(func():
+		stop_highlight_attack()
+		Input.action_press("attack")
+	)
 	_attack_btn.button_up.connect(func():   Input.action_release("attack"))
 	_root.add_child(_attack_btn)
 
@@ -228,7 +241,7 @@ func _build_action_buttons() -> void:
 	_root.add_child(_menu_btn)
 
 	# Knowledge Button (Top Right, left of Menu Button)
-	var _knowledge_btn = _make_circle_btn("📖", 56, C_BTN_NORM)
+	_knowledge_btn = _make_circle_btn("📖", 56, C_BTN_NORM)
 	_knowledge_btn.add_theme_font_size_override("font_size", 28)
 	_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
@@ -434,6 +447,10 @@ func show_tutorial(title: String, text: String) -> void:
 	tw.tween_property(_tutorial_panel, "modulate:a", 1.0, 0.2)
 
 func _hide_tutorial() -> void:
+	if _walkthrough_steps.size() > 0 and _current_step_index < _walkthrough_steps.size():
+		_advance_walkthrough_step()
+		return
+		
 	var tw := create_tween()
 	tw.tween_property(_tutorial_panel, "modulate:a", 0.0, 0.15)
 	tw.tween_callback(func():
@@ -521,15 +538,89 @@ func hide_action_buttons() -> void:
 	if _skill1_btn: _skill1_btn.modulate.a = 0.0
 	if _skill3_btn: _skill3_btn.modulate.a = 0.0
 	
+func start_ui_walkthrough(steps: Array) -> void:
+	_walkthrough_steps = steps
+	_current_step_index = 0
+	_advance_walkthrough_step()
+
+func _advance_walkthrough_step() -> void:
+	for node in _active_highlight_nodes:
+		stop_highlight_node(node)
+	_active_highlight_nodes.clear()
+	
+	if _current_step_index >= _walkthrough_steps.size():
+		_hide_tutorial()
+		return
+		
+	var step = _walkthrough_steps[_current_step_index]
+	_current_step_index += 1
+	
+	if step.has("nodes"):
+		for node_name in step.nodes:
+			var node = get(node_name)
+			if node and node is Control:
+				_active_highlight_nodes.append(node)
+				highlight_node(node)
+				if node.modulate.a < 1.0:
+					var tw = create_tween()
+					tw.tween_property(node, "modulate:a", 1.0, 1.0)
+				
+	show_tutorial(step.get("title", "TUTORIAL"), step.get("text", ""))
+
+func highlight_node(node: Control) -> void:
+	if not node: return
+	
+	node.pivot_offset = node.size / 2.0
+	if _active_highlight_tweens.has(node) and _active_highlight_tweens[node].is_valid():
+		_active_highlight_tweens[node].kill()
+		
+	var tw = create_tween().set_loops()
+	tw.tween_property(node, "scale", Vector2(1.15, 1.15), 0.4).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate", Color(1.2, 1.5, 2.0, 1.0), 0.4)
+	tw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.4)
+	
+	_active_highlight_tweens[node] = tw
+
+func stop_highlight_node(node: Control) -> void:
+	if not node: return
+	
+	if _active_highlight_tweens.has(node):
+		var tw = _active_highlight_tweens[node]
+		if tw and tw.is_valid():
+			tw.kill()
+		_active_highlight_tweens.erase(node)
+		
+	var rtw = create_tween()
+	rtw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.1)
+	rtw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.1)
+
+	
 func reveal_jump() -> void:
-	if _jump_btn and _jump_btn.modulate.a < 1.0:
-		var tw = create_tween()
-		tw.tween_property(_jump_btn, "modulate:a", 1.0, 1.0)
+	if _jump_btn:
+		if _jump_btn.modulate.a < 1.0:
+			var tw = create_tween()
+			tw.tween_property(_jump_btn, "modulate:a", 1.0, 1.0)
+		highlight_node(_jump_btn)
 		
 func reveal_attack() -> void:
-	if _attack_btn and _attack_btn.modulate.a < 1.0:
-		var tw = create_tween()
-		tw.tween_property(_attack_btn, "modulate:a", 1.0, 1.0)
+	if _attack_btn:
+		if _attack_btn.modulate.a < 1.0:
+			var tw = create_tween()
+			tw.tween_property(_attack_btn, "modulate:a", 1.0, 1.0)
+		highlight_node(_attack_btn)
+		
+func highlight_jump() -> void:
+	highlight_node(_jump_btn)
+
+func stop_highlight_jump() -> void:
+	stop_highlight_node(_jump_btn)
+
+func highlight_attack() -> void:
+	highlight_node(_attack_btn)
+
+func stop_highlight_attack() -> void:
+	stop_highlight_node(_attack_btn)
 		
 func flash_dodge() -> void:
 	if _jump_btn:
@@ -583,6 +674,7 @@ func _on_jump_btn_input(event: InputEvent) -> void:
 	
 	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 		if event.is_pressed():
+			stop_highlight_jump()
 			_is_aiming_jump = true
 			_jump_start_pos = event.position
 			if _cancel_zone: _cancel_zone.visible = true
