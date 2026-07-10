@@ -123,9 +123,9 @@ shape = SubResource("BoxShape3D_wpc2v")
 
 [node name="EnemySpawner" parent="tut2" unique_id=1824858483 instance=ExtResource("13_oag3d")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.744324, 5.2372437, -13.508756)
-spawn_asleep_initially = true
 enemy_scene = ExtResource("2_nap4l")
 max_spawns = 3
+spawn_asleep_initially = true
 
 [node name="mosquito1" parent="." unique_id=970387258 instance=ExtResource("12_x7tiv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.66313, 4.021881, -17.946228)

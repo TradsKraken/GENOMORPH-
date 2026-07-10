@@ -51,6 +51,9 @@ func _activate_children() -> void:
 		if child is EnemyBase:
 			if "is_active" in child:
 				child.is_active = true
+		elif child is EnemySpawner:
+			if is_instance_valid(child._current_enemy) and "is_active" in child._current_enemy:
+				child._current_enemy.is_active = true
 
 func _start_minigame() -> void:
 	for path in minigame_enemies:
