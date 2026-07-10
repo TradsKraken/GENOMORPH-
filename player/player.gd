@@ -265,12 +265,7 @@ func start_aiming_jump() -> void:
 	if not is_on_floor() or is_jumping: return
 	
 	if PlayerData.stamina < jump_stamina_cost:
-		var hud := get_tree().get_first_node_in_group("hud")
-		if hud and hud.has_method("show_float_text"):
-			var cam := get_viewport().get_camera_3d()
-			if cam:
-				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-				hud.show_float_text("NO STAMINA!", scr, Color(1.0, 0.4, 0.4))
+		AudioManager.play_sfx("error", 1.0, 5.0)
 		return
 		
 	is_aiming_jump = true
@@ -329,15 +324,11 @@ func execute_splash_jump(is_quick_tap: bool) -> void:
 		return
 		
 	if not PlayerData.use_stamina(jump_stamina_cost):
-		var hud := get_tree().get_first_node_in_group("hud")
-		if hud and hud.has_method("show_float_text"):
-			var cam := get_viewport().get_camera_3d()
-			if cam:
-				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-				hud.show_float_text("NO STAMINA!", scr, Color(1.0, 0.4, 0.4))
+		AudioManager.play_sfx("error", 1.0, 5.0)
 		return
 		
 	is_jumping = true
+	AudioManager.play_sfx("jump", randf_range(0.9, 1.1))
 	
 	if is_quick_tap:
 		velocity.x = 0.0
@@ -409,8 +400,13 @@ func _attack() -> void:
 	pass
 
 func _skill1() -> void:
+	if not PlayerData.use_stamina(25.0):
+		AudioManager.play_sfx("error", 1.0, 5.0)
+		return
+		
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
+	AudioManager.play_sfx("whip", randf_range(0.9, 1.1))
 	# Sticky Tongue Whip: Damage closest enemy at short range
 	var attack_range = 5.0
 	var damage = 10.0

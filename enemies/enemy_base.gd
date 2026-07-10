@@ -56,8 +56,8 @@ func _create_health_bar() -> void:
 	_hp_fg.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_hp_fg.no_depth_test = true
 	_hp_fg.centered = false
-	_hp_fg.offset = Vector2(0, -7.5) # Center vertically, left-aligned horizontally
-	_hp_fg.position = Vector3(-0.75, 1.4, 0.001) # Positioned at the left edge of the background
+	_hp_fg.offset = Vector2(-75, -7.5)
+	_hp_fg.position = Vector3(0, 1.4, 0.001)
 	_hp_fg.pixel_size = 0.01
 	_hp_fg.visible = false
 	add_child(_hp_fg)
@@ -67,12 +67,16 @@ func take_damage(amount: float) -> void:
 		return
 	
 	health -= amount
+	AudioManager.play_sfx("hit", randf_range(0.8, 1.2))
 	# _show_damage_text(amount) # Removed to avoid spam overlapping the health bar
 	
 	if health < max_health:
 		_hp_bg.visible = true
 		_hp_fg.visible = true
-		_hp_fg.scale.x = maxf(0.0, health / max_health)
+		var ratio = maxf(0.001, health / max_health)
+		_hp_fg.scale.x = ratio
+		# Dynamically shift the offset so the left edge remains perfectly anchored at -75
+		_hp_fg.offset.x = -75.0 / ratio
 	
 	if health <= 0:
 		die()

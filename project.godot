@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="GENOMORPH"
-config/version="0.0.52"
+config/version="0.0.53"
 run/main_scene="res://ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://assets/Geno_Icon.png"
@@ -20,6 +20,7 @@ config/icon="res://assets/Geno_Icon.png"
 
 PlayerData="*res://player/player_data.gd"
 SettingsManager="*res://tools/settings_manager.gd"
+AudioManager="*res://audio_manager.gd"
 
 [display]
 

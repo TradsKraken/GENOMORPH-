@@ -798,6 +798,18 @@ func _on_health(value: float, maximum: float) -> void:
 func _on_stamina(value: float, maximum: float) -> void:
 	_stam_bar.max_value = maximum
 	_stam_bar.value = value
+	
+	if _skill1_btn:
+		if value < 25.0:
+			_skill1_btn.modulate = Color(0.3, 0.3, 0.3, 0.8)
+		else:
+			_skill1_btn.modulate = Color.WHITE
+			
+	if _jump_btn:
+		if value < 30.0:
+			_jump_btn.modulate = Color(0.3, 0.3, 0.3, 0.8)
+		else:
+			_jump_btn.modulate = Color.WHITE
 
 
 func _on_exp(value: float, needed: float) -> void:
