@@ -11,10 +11,10 @@ config_version=5
 [application]
 
 config/name="GENOMORPH"
-config/version="0.0.42"
+config/version="0.0.45"
 run/main_scene="res://ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
-config/icon="res://assets/icon.svg"
+config/icon="res://assets/Geno_Icon.png"
 
 [autoload]
 

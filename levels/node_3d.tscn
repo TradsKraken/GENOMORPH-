@@ -48,8 +48,8 @@ data = PackedVector3Array(0, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0, 0.5, 
 environment = SubResource("Environment_1")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=357907381]
-transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 10, 0)
-light_energy = 1.2
+transform = Transform3D(0.7071068, -0.49999994, 0.5000001, 0, 0.70710695, 0.7071067, -0.7071068, -0.49999994, 0.5000001, -7.5842896, 38.17108, 23.704346)
+light_energy = 1.005
 shadow_enabled = true
 
 [node name="Ground" parent="." unique_id=456649111 instance=ExtResource("12_terrain")]
@@ -67,7 +67,7 @@ transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.5
 script = ExtResource("2_fhumt")
 
 [node name="Frog Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
-transform = Transform3D(0.59496784, 0, -0.006173812, 0, 0.59499985, 0, 0.006173812, 0, 0.59496784, -28.087677, 3.874817, 33.03958)
+transform = Transform3D(0.59496784, 0, -0.006173812, 0, 0.59499985, 0, 0.006173812, 0, 0.59496784, -38.79854, 0.022277832, 59.55246)
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=256334508]
 transform = Transform3D(-1, 4.9893366e-08, -7.178714e-08, 0, 0.8211492, 0.5707136, 8.742278e-08, 0.5707136, -0.8211492, 0, 9.776386, 8.207459)
