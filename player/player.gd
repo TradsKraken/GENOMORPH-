@@ -67,6 +67,8 @@ var jump_target_pos: Vector3 = Vector3.ZERO
 var _aim_offset: Vector3 = Vector3.ZERO
 var _reticle: Decal
 var input_locked: bool = false
+var _time_since_combat: float = 5.0
+var _heal_timer: float = 0.0
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -142,6 +144,7 @@ func _find_joystick() -> void:
 func _physics_process(delta: float) -> void:
 	# ── Stamina recovery ─────────────────────────────────────────────────────
 	PlayerData.recover_stamina(delta, stamina_recovery_rate)
+	_process_auto_heal(delta)
 
 	# ── Gravity ──────────────────────────────────────────────────────────────
 	if not is_on_floor():
@@ -224,6 +227,8 @@ func _physics_process(delta: float) -> void:
 # ── Combat ───────────────────────────────────────────────────────────────────
 
 func take_damage(amount: float) -> void:
+	_time_since_combat = 0.0
+	_heal_timer = 0.0
 	PlayerData.take_damage(amount)
 	# Give some visual feedback when hit
 	var hud := get_tree().get_first_node_in_group("hud")
@@ -237,6 +242,22 @@ func take_damage(amount: float) -> void:
 		# Player death logic: Reset health then reload scene
 		PlayerData.health = PlayerData.max_health
 		get_tree().reload_current_scene()
+
+func _process_auto_heal(delta: float) -> void:
+	_time_since_combat += delta
+	if _time_since_combat >= 5.0:
+		_heal_timer += delta
+		if _heal_timer >= 2.0:
+			_heal_timer -= 2.0
+			if PlayerData.health < PlayerData.max_health:
+				PlayerData.heal(5.0)
+				# Visual feedback for heal
+				var hud := get_tree().get_first_node_in_group("hud")
+				if hud and hud.has_method("show_float_text"):
+					var cam := get_viewport().get_camera_3d()
+					if cam:
+						var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+						hud.show_float_text("+5", scr, Color.GREEN)
 
 # ── Splashdown Jump Mechanics ────────────────────────────────────────────────
 
@@ -338,6 +359,8 @@ func execute_splash_jump(is_quick_tap: bool) -> void:
 		animation_player.stop()
 
 func _trigger_splashdown_aoe() -> void:
+	_time_since_combat = 0.0
+	_heal_timer = 0.0
 	var splash_radius = 4.5
 	var splash_damage = 25.0
 	
@@ -356,6 +379,8 @@ func _trigger_splashdown_aoe() -> void:
 				enemy.take_damage(splash_damage)
 
 func _attack() -> void:
+	_time_since_combat = 0.0
+	_heal_timer = 0.0
 	if animation_player:
 		animation_player.play("FrogArmature|Frog_Attack", 0.1)
 	
@@ -389,6 +414,8 @@ func _attack() -> void:
 			hud.show_float_text("LUNGE!", scr, Color(1.0, 0.3, 0.1))
 
 func _skill1() -> void:
+	_time_since_combat = 0.0
+	_heal_timer = 0.0
 	# Sticky Tongue Whip: Damage closest enemy at short range
 	var attack_range = 5.0
 	var damage = 10.0

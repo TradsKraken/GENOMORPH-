@@ -118,11 +118,22 @@ func _show_slot_selection(is_loading: bool) -> void:
 	_clear_vbox_items()
 	_title.text = "Load Game" if is_loading else "New Game"
 	
+	var center := CenterContainer.new()
+	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 24)
+	grid.add_theme_constant_override("v_separation", 24)
+	center.add_child(grid)
+	
 	for i in range(1, 5):
 		var preview = PlayerData.get_save_preview(i)
-		var slot_card = _create_save_slot(i, preview, is_loading)
-		_vbox.add_child(slot_card)
+		var slot_card = _create_save_slot_card(i, preview, is_loading)
+		grid.add_child(slot_card)
 		
+	_vbox.add_child(center)
+	
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 16)
 	_vbox.add_child(spacer)
@@ -134,76 +145,109 @@ func _show_slot_selection(is_loading: bool) -> void:
 	back_btn.pressed.connect(_show_main_actions)
 	_vbox.add_child(back_btn)
 
-func _create_save_slot(slot_idx: int, preview: Dictionary, is_loading: bool) -> Button:
-	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(0, 110)
-	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+func _create_save_slot_card(slot_idx: int, preview: Dictionary, is_loading: bool) -> PanelContainer:
+	var card := PanelContainer.new()
+	card.custom_minimum_size = Vector2(320, 220)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	
 	var is_empty = preview.is_empty()
 	
+	var sb := StyleBoxFlat.new()
+	if is_empty:
+		sb.bg_color = Color(0.1, 0.1, 0.12)
+		sb.border_color = Color(0.2, 0.2, 0.2)
+	else:
+		sb.bg_color = Color(0.18, 0.18, 0.22)
+		sb.border_color = Color(0.3, 0.5, 0.8)
+	sb.set_corner_radius_all(16)
+	sb.set_border_width_all(2)
+	card.add_theme_stylebox_override("panel", sb)
+	
 	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	margin.add_theme_constant_override("margin_left", 16)
-	margin.add_theme_constant_override("margin_right", 16)
-	margin.add_theme_constant_override("margin_top", 12)
-	margin.add_theme_constant_override("margin_bottom", 12)
-	btn.add_child(margin)
+	margin.add_theme_constant_override("margin_left", 20)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_bottom", 20)
+	card.add_child(margin)
 	
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	margin.add_child(vbox)
 	
 	var header_hbox := HBoxContainer.new()
-	header_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(header_hbox)
 	
 	var file_lbl := Label.new()
 	file_lbl.text = "Slot " + str(slot_idx)
-	file_lbl.add_theme_font_size_override("font_size", 24)
+	file_lbl.add_theme_font_size_override("font_size", 28)
+	file_lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9) if not is_empty else Color(0.5, 0.5, 0.5))
 	header_hbox.add_child(file_lbl)
 	
 	var date_lbl := Label.new()
 	date_lbl.text = preview.get("timestamp", "") if not is_empty else ""
 	date_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	date_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	date_lbl.add_theme_font_size_override("font_size", 20)
-	date_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+	date_lbl.add_theme_font_size_override("font_size", 16)
+	date_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	header_hbox.add_child(date_lbl)
+	
+	var sep := HSeparator.new()
+	vbox.add_child(sep)
+	
+	var body_vbox := VBoxContainer.new()
+	body_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(body_vbox)
+	
+	var action_btn := Button.new()
+	action_btn.custom_minimum_size = Vector2(0, 50)
+	action_btn.add_theme_font_size_override("font_size", 24)
 	
 	if is_empty:
 		var empty_lbl := Label.new()
-		empty_lbl.text = "Empty"
+		empty_lbl.text = "Empty Slot"
+		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		empty_lbl.add_theme_font_size_override("font_size", 24)
-		empty_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
-		vbox.add_child(empty_lbl)
+		empty_lbl.add_theme_color_override("font_color", Color(0.4, 0.4, 0.4))
+		body_vbox.add_child(empty_lbl)
+		
+		action_btn.text = "Create New Game"
+		if is_loading:
+			action_btn.disabled = true
+			action_btn.text = "Empty"
+	else:
+		var form_lbl := Label.new()
+		form_lbl.text = preview.get("active_form", "Unknown Form")
+		form_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		form_lbl.add_theme_font_size_override("font_size", 24)
+		form_lbl.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
+		body_vbox.add_child(form_lbl)
+		
+		var biome_lbl := Label.new()
+		biome_lbl.text = preview.get("biome_name", "Unknown Region") + "  |  Level " + str(preview.get("level", 1))
+		biome_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		biome_lbl.add_theme_font_size_override("font_size", 18)
+		biome_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+		body_vbox.add_child(biome_lbl)
 		
 		if is_loading:
-			btn.disabled = true
-	else:
-		var body_hbox := HBoxContainer.new()
-		body_hbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		vbox.add_child(body_hbox)
-		
-		var form_lbl := Label.new()
-		form_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		form_lbl.text = preview.get("active_form", "Unknown Form") + " - " + preview.get("biome_name", "Unknown Region")
-		form_lbl.add_theme_font_size_override("font_size", 20)
-		form_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-		body_hbox.add_child(form_lbl)
-		
-		var level_lbl := Label.new()
-		level_lbl.text = "Level " + str(preview.get("level", 1))
-		level_lbl.add_theme_font_size_override("font_size", 20)
-		body_hbox.add_child(level_lbl)
-		
-	btn.pressed.connect(func():
+			action_btn.text = "Load Game"
+		else:
+			action_btn.text = "Overwrite Save"
+			var sbb := StyleBoxFlat.new()
+			sbb.bg_color = Color(0.6, 0.2, 0.2)
+			sbb.set_corner_radius_all(6)
+			action_btn.add_theme_stylebox_override("normal", sbb)
+			
+	vbox.add_child(action_btn)
+	
+	action_btn.pressed.connect(func():
 		if is_loading:
 			load_game.emit(slot_idx)
 		else:
 			new_game.emit(slot_idx)
 		queue_free()
 	)
-	return btn
+	
+	return card

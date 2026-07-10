@@ -116,6 +116,12 @@ trigger_type = 2
 transform = Transform3D(12.625, 0, 0, 0, 12.625, 0, 0, 0, 12.625, 0.9967818, 0, -0.12650299)
 shape = SubResource("BoxShape3D_qgxk8")
 
+[node name="EnemySpawner" parent="tut3" unique_id=1924858483 instance=ExtResource("13_oag3d")]
+transform = Transform3D(0.531915, 0, 0, 0, 0.531915, 0, 0, 0, 0.531915, 0, 0, 0)
+enemy_scene = ExtResource("2_nap4l")
+max_spawns = 3
+spawn_asleep_initially = true
+
 [node name="tut2" type="Area3D" parent="." unique_id=128122477]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.3927, 0, 49.47048)
 script = ExtResource("14_g4oow")

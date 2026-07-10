@@ -54,6 +54,10 @@ func take_damage(amount: float) -> void:
 	health = maxf(0.0, health - amount)
 	health_changed.emit(health, max_health)
 
+func heal(amount: float) -> void:
+	health = minf(max_health, health + amount)
+	health_changed.emit(health, max_health)
+
 
 # ── EXP / Level API ───────────────────────────────────────────────────────────
 
