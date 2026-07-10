@@ -51,6 +51,8 @@ environment = SubResource("Environment_1")
 transform = Transform3D(0.7071068, -0.49999994, 0.5000001, 0, 0.70710695, 0.7071067, -0.7071068, -0.49999994, 0.5000001, -7.5842896, 38.17108, 23.704346)
 light_energy = 1.005
 shadow_enabled = true
+directional_shadow_mode = 0
+directional_shadow_max_distance = 45.0
 
 [node name="Ground" parent="." unique_id=456649111 instance=ExtResource("12_terrain")]
 transform = Transform3D(-0.74, 0, -1.11736895e-07, 0, 0.74, 0, 1.11736895e-07, 0, -0.74, 0.6908264, -8.351471, 0.42462158)
@@ -106,7 +108,7 @@ show_hud = false
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6390772, 5.66131, 1.3138075)
 
 [node name="tut3" type="Area3D" parent="." unique_id=556050028]
-transform = Transform3D(1.88, 0, 0, 0, 1.88, 0, 0, 0, 1.88, -18.381805, 6.0787354, -26.763187)
+transform = Transform3D(1.88, 0, 0, 0, 1.88, 0, 0, 0, 1.88, -27.475647, 6.0787354, -1.7445107)
 script = ExtResource("14_g4oow")
 trigger_type = 2
 
@@ -115,7 +117,7 @@ transform = Transform3D(12.625, 0, 0, 0, 12.625, 0, 0, 0, 12.625, 0.9967818, 0, 
 shape = SubResource("BoxShape3D_qgxk8")
 
 [node name="tut2" type="Area3D" parent="." unique_id=128122477]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 15.06057)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.3927, 0, 49.47048)
 script = ExtResource("14_g4oow")
 trigger_type = 1
 minigame_enemies = Array[NodePath]([NodePath("")])

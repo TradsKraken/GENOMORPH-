@@ -5,6 +5,7 @@ const SAVE_PATH = "user://settings.cfg"
 var resolution_scale: float = 1.0
 var msaa: int = Viewport.MSAA_DISABLED
 var glow_enabled: bool = true
+var draw_distance: float = 60.0
 
 func _ready() -> void:
 	load_settings()
@@ -16,6 +17,7 @@ func save_settings() -> void:
 	config.set_value("graphics", "resolution_scale", resolution_scale)
 	config.set_value("graphics", "msaa", msaa)
 	config.set_value("graphics", "glow", glow_enabled)
+	config.set_value("graphics", "draw_distance", draw_distance)
 	config.save(SAVE_PATH)
 
 func load_settings() -> void:
@@ -24,6 +26,7 @@ func load_settings() -> void:
 		resolution_scale = config.get_value("graphics", "resolution_scale", 1.0)
 		msaa = config.get_value("graphics", "msaa", Viewport.MSAA_DISABLED)
 		glow_enabled = config.get_value("graphics", "glow", true)
+		draw_distance = config.get_value("graphics", "draw_distance", 60.0)
 
 func apply_settings() -> void:
 	var vp := get_viewport()
@@ -33,6 +36,11 @@ func apply_settings() -> void:
 	
 	# Apply glow to WorldEnvironment if present
 	_apply_glow_to_tree(get_tree().root)
+	
+	var meshes = get_tree().get_nodes_in_group("cullable_meshes")
+	for m in meshes:
+		if m is MeshInstance3D:
+			m.visibility_range_end = draw_distance
 
 func _apply_glow_to_tree(node: Node) -> void:
 	if node is WorldEnvironment and node.environment != null:

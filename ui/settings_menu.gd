@@ -59,6 +59,7 @@ func _ready() -> void:
 	_build_scale_option()
 	_build_msaa_option()
 	_build_glow_toggle()
+	_build_draw_distance_option()
 	
 	# Spacer
 	var spacer := Control.new()
@@ -146,6 +147,37 @@ func _build_glow_toggle() -> void:
 		SettingsManager.apply_settings()
 	)
 	hbox.add_child(check)
+	_vbox.add_child(hbox)
+
+func _build_draw_distance_option() -> void:
+	var hbox := HBoxContainer.new()
+	var lbl := Label.new()
+	lbl.text = "Draw Distance:"
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(lbl)
+	
+	var opt := OptionButton.new()
+	opt.add_theme_font_size_override("font_size", 24)
+	opt.add_item("Low (35m)", 0)
+	opt.add_item("Medium (60m)", 1)
+	opt.add_item("High (100m)", 2)
+	opt.add_item("Ultra (200m)", 3)
+	
+	var current = SettingsManager.draw_distance
+	if current <= 35.0: opt.selected = 0
+	elif current <= 60.0: opt.selected = 1
+	elif current <= 100.0: opt.selected = 2
+	else: opt.selected = 3
+	
+	opt.item_selected.connect(func(index: int):
+		if index == 0: SettingsManager.draw_distance = 35.0
+		elif index == 1: SettingsManager.draw_distance = 60.0
+		elif index == 2: SettingsManager.draw_distance = 100.0
+		elif index == 3: SettingsManager.draw_distance = 200.0
+		SettingsManager.apply_settings()
+	)
+	hbox.add_child(opt)
 	_vbox.add_child(hbox)
 
 func _on_close() -> void:
