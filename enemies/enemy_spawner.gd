@@ -7,6 +7,9 @@ extends Node3D
 ## Set to 0 for infinite spawns. Set to a positive number (e.g. 3) to clear a nest after 3 kills.
 @export var max_spawns: int = 0
 
+## If true, the very first enemy spawned will have is_active = false. It must be woken up by a script or trigger zone. Subsequent respawns will always be active.
+@export var spawn_asleep_initially: bool = false
+
 var _spawn_count: int = 0
 var _current_enemy: Node3D = null
 
@@ -24,6 +27,11 @@ func _spawn_enemy() -> void:
 		
 	_current_enemy = enemy_scene.instantiate()
 	_current_enemy.global_position = global_position
+	if "is_active" in _current_enemy:
+		if _spawn_count == 0 and spawn_asleep_initially:
+			_current_enemy.is_active = false
+		else:
+			_current_enemy.is_active = true
 	get_tree().current_scene.call_deferred("add_child", _current_enemy)
 	
 	_spawn_count += 1

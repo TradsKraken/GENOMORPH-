@@ -5,9 +5,8 @@ extends Area3D
 ## Movement during collection cancels the process.
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-const EXP_GRANT     := 25.0
-const COLLECT_TIME  := 0.9    # faster than stamina orb
-const INTERACT_DIST := 4.5
+var exp_grant: float = 25.0
+const INTERACT_DIST := 3.0
 const MOVE_TOLERANCE:= 0.3
 
 const ORB_COLOR   := Color(1.00, 0.78, 0.06)
@@ -15,66 +14,19 @@ const ORB_EMIT    := Color(1.00, 0.85, 0.10)
 const LIGHT_COLOR := Color(1.00, 0.82, 0.20)
 const RING_COLOR  := Color(1.00, 0.85, 0.10)
 
-# ── Progress ring ─────────────────────────────────────────────────────────────
-
-class _ProgressRing extends Control:
-	var fill_color: Color = Color.WHITE
-	var progress: float   = 0.0
-	var is_near:  bool    = false
-	var _orb: Area3D
-	var _time: float      = 0.0
-
-	func _process(delta: float) -> void:
-		_time += delta
-		if not is_instance_valid(_orb):
-			return
-		var cam := get_viewport().get_camera_3d()
-		if cam == null or not cam.is_position_in_frustum(_orb.global_position):
-			visible = false
-			return
-		var scr := cam.unproject_position(_orb.global_position)
-		position = scr - size / 2.0
-		visible = is_near or progress > 0.001
-		if visible:
-			queue_redraw()
-
-	func _draw() -> void:
-		var c := size / 2.0
-		var r := 32.0
-		var font := ThemeDB.fallback_font
-		
-		draw_arc(c, r, 0.0, TAU, 64, Color(0.0, 0.0, 0.0, 0.55), 10.0)
-
-		if progress <= 0.001:
-			var pulse := 0.6 + sin(_time * 4.0) * 0.4
-			var tw := font.get_string_size("TAP", HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
-			draw_string(font, c - Vector2(tw / 2.0, -5.0), "TAP",
-					HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.8 * pulse))
-			draw_arc(c, r, 0.0, TAU, 64, fill_color * Color(1, 1, 1, 0.5 * pulse), 2.0)
-		else:
-			draw_arc(c, r, -PI / 2.0, -PI / 2.0 + TAU * progress, 32,
-					fill_color * Color(1, 1, 1, 0.30), 18.0)
-			draw_arc(c, r, -PI / 2.0, -PI / 2.0 + TAU * progress, 64, fill_color, 7.0, true)
-			var pct  := "%d%%" % roundi(progress * 100.0)
-			var tw   := font.get_string_size(pct, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
-			draw_string(font, c - Vector2(tw / 2.0, -6.0), pct,
-					HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color.WHITE)
-
 # ── Nodes ─────────────────────────────────────────────────────────────────────
 var _mesh:        MeshInstance3D
 var _light:       OmniLight3D
-var _ring_canvas: CanvasLayer
-var _ring:        _ProgressRing
 var _orb_mat:     StandardMaterial3D
 var _player:      Node3D
 
 # ── State ─────────────────────────────────────────────────────────────────────
-var _progress:       float = 0.0
-var _is_near:        bool  = false
-var _is_obtaining:   bool  = false
-var _start_pos:      Vector3 = Vector3.ZERO
+var _is_magnetizing: bool = false
 var _spin_time:      float = 0.0
 var _collected:      bool  = false
+var velocity:        Vector3 = Vector3.ZERO
+var _floor_y:        float = -999.0
+var _scatter_timer:  float = 0.8
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
@@ -84,14 +36,26 @@ func _ready() -> void:
 	_build_mesh()
 	_build_light()
 	_build_collision()
-	_build_ring_ui()
+	call_deferred("_find_floor")
+
+func _find_floor() -> void:
+	var space := get_world_3d().direct_space_state
+	if space:
+		var query := PhysicsRayQueryParameters3D.create(global_position, global_position + Vector3.DOWN * 20.0, 1)
+		var result := space.intersect_ray(query)
+		if result:
+			_floor_y = result.position.y + 0.3
+		else:
+			_floor_y = global_position.y - 1.0
+	else:
+		_floor_y = global_position.y - 1.0
 
 
 func _build_mesh() -> void:
 	_mesh = MeshInstance3D.new()
 	var sphere := SphereMesh.new()
-	sphere.radius = 0.38
-	sphere.height = 0.76
+	sphere.radius = 0.18
+	sphere.height = 0.36
 	sphere.radial_segments = 20
 	sphere.rings = 12
 	_mesh.mesh = sphere
@@ -110,8 +74,8 @@ func _build_mesh() -> void:
 func _build_light() -> void:
 	_light = OmniLight3D.new()
 	_light.light_color  = LIGHT_COLOR
-	_light.light_energy = 3.2
-	_light.omni_range   = 4.5
+	_light.light_energy = 1.8
+	_light.omni_range   = 2.5
 	add_child(_light)
 
 
@@ -121,20 +85,6 @@ func _build_collision() -> void:
 	sh.radius = 1.2
 	cs.shape  = sh
 	add_child(cs)
-
-
-func _build_ring_ui() -> void:
-	_ring_canvas = CanvasLayer.new()
-	_ring_canvas.layer = 5
-	add_child(_ring_canvas)
-	_ring = _ProgressRing.new()
-	_ring.custom_minimum_size = Vector2(80, 80)
-	_ring.size       = Vector2(80, 80)
-	_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_ring.fill_color = RING_COLOR
-	_ring._orb       = self
-	_ring.visible    = false
-	_ring_canvas.add_child(_ring)
 
 # ── Update ────────────────────────────────────────────────────────────────────
 
@@ -158,62 +108,37 @@ func _process(delta: float) -> void:
 		if players.size() > 0:
 			_player = players[0] as Node3D
 
-	if _player != null:
-		var dist := global_position.distance_to(_player.global_position)
-		_is_near = dist < INTERACT_DIST
+	if _scatter_timer > 0.0:
+		_scatter_timer -= delta
 	else:
-		_is_near = false
+		if _player != null:
+			var dist := global_position.distance_to(_player.global_position)
+			if dist < INTERACT_DIST:
+				_is_magnetizing = true
 
-	if _is_obtaining and _player != null:
-		if _player.global_position.distance_to(_start_pos) > MOVE_TOLERANCE:
-			_is_obtaining = false
-			_progress = 0.0
-			_show_float_text("Cancelled", Color(0.9, 0.4, 0.4))
-		else:
-			_progress += delta / COLLECT_TIME
-			if _progress >= 1.0:
-				_collect()
+	if _is_magnetizing and _player != null:
+		var target_pos = _player.global_position + Vector3(0, 1.0, 0)
+		var dir = (target_pos - global_position).normalized()
+		global_position += dir * 18.0 * delta
+		if global_position.distance_to(target_pos) < 1.0:
+			_collect()
 	else:
-		_progress = move_toward(_progress, 0.0, delta / (COLLECT_TIME * 0.60))
+		if velocity.length_squared() > 0.01 or global_position.y > _floor_y:
+			velocity.y -= 25.0 * delta
+			global_position += velocity * delta
+			velocity.x = lerp(velocity.x, 0.0, delta * 2.5)
+			velocity.z = lerp(velocity.z, 0.0, delta * 2.5)
+			
+			if global_position.y <= _floor_y:
+				global_position.y = _floor_y
+				velocity.y = -velocity.y * 0.45
+				if abs(velocity.y) < 2.0:
+					velocity.y = 0.0
 
-	_ring.is_near = _is_near
-	_ring.progress = _progress
-
-	var s := 1.0 + _progress * 0.20 + sin(_spin_time * 4.0) * 0.025
+	var s := 1.0 + sin(_spin_time * 4.0) * 0.025
 	_mesh.scale = Vector3(s, s, s)
 
 # ── Input ─────────────────────────────────────────────────────────────────────
-
-func _unhandled_input(event: InputEvent) -> void:
-	if _collected:
-		return
-	if event is InputEventScreenTouch and event.pressed:
-		if _is_tap_on_me(event.position):
-			get_viewport().set_input_as_handled()
-			if _is_near:
-				if not _is_obtaining:
-					_is_obtaining = true
-					_progress = 0.0
-					if _player:
-						_start_pos = _player.global_position
-			else:
-				_show_float_text("Too Far!", Color(0.9, 0.3, 0.3))
-
-
-func _is_tap_on_me(screen_pos: Vector2) -> bool:
-	var cam := get_viewport().get_camera_3d()
-	if cam == null:
-		return false
-	var space := get_world_3d().direct_space_state
-	if space == null:
-		return false
-	var origin := cam.project_ray_origin(screen_pos)
-	var target := origin + cam.project_ray_normal(screen_pos) * 200.0
-	var params  := PhysicsRayQueryParameters3D.create(origin, target, 8)
-	params.collide_with_areas = true
-	var result  := space.intersect_ray(params)
-	return result.has("collider") and result["collider"] == self
-
 
 func _show_float_text(text: String, color: Color) -> void:
 	var cam := get_viewport().get_camera_3d()
@@ -229,11 +154,9 @@ func _collect() -> void:
 	if _collected:
 		return
 	_collected  = true
-	_is_obtaining = false
-	_ring.visible = false
 
-	PlayerData.gain_exp(EXP_GRANT)
-	_show_float_text("+%d XP ★" % int(EXP_GRANT), Color(1.00, 0.88, 0.10))
+	PlayerData.gain_exp(exp_grant)
+	_show_float_text("+%d XP ★" % int(exp_grant), Color(1.00, 0.88, 0.10))
 
 	var tween := create_tween().set_parallel(true)
 	tween.tween_property(_mesh,  "scale",        Vector3.ZERO, 0.30).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)

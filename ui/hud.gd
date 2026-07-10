@@ -24,6 +24,10 @@ var _exp_bar:    ProgressBar
 var _lvl_lbl:    Label
 var _status_group: Control
 
+var _interact_btn: Button
+var _current_interact_source: Node
+var _interact_callback: Callable
+
 var _attack_btn: Button
 var _skill1_btn: Button
 var _jump_btn:   Button
@@ -224,6 +228,22 @@ func _build_action_buttons() -> void:
 	_skill3_btn.disabled = true
 	_skill3_btn.modulate = Color(0.5, 0.5, 0.5, 0.5) # Locked visual state
 	_root.add_child(_skill3_btn)
+
+	# 5. Interact Button
+	_interact_btn = _make_circle_btn("🖐️", 70, C_BTN_NORM)
+	_interact_btn.add_theme_font_size_override("font_size", 32)
+	_interact_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_interact_btn.set_anchor(SIDE_BOTTOM, 1.0)
+	_interact_btn.set_anchor(SIDE_LEFT, 1.0)
+	_interact_btn.set_anchor(SIDE_TOP, 1.0)
+	_interact_btn.offset_right  = -40
+	_interact_btn.offset_bottom = -300
+	_interact_btn.offset_left   = -110
+	_interact_btn.offset_top    = -370
+	_interact_btn.visible = false
+	_interact_btn.pressed.connect(_on_interact_pressed)
+	_root.add_child(_interact_btn)
+
 
 
 	# Menu Button (Top Right)
@@ -661,6 +681,25 @@ func _build_cancel_zone() -> void:
 	
 	_cancel_zone.visible = false
 	_root.add_child(_cancel_zone)
+
+# ── Interact API ──────────────────────────────────────────────────────────────
+
+func show_interact(text: String, callback: Callable, source: Node) -> void:
+	_current_interact_source = source
+	_interact_callback = callback
+	_interact_btn.visible = true
+	# if text != "": _interact_btn.text = text
+
+func hide_interact(source: Node) -> void:
+	if _current_interact_source == source:
+		_interact_btn.visible = false
+		_current_interact_source = null
+		_interact_callback = Callable()
+
+func _on_interact_pressed() -> void:
+	if _interact_callback.is_valid():
+		_interact_callback.call()
+
 
 
 # ── Action Button Logic ───────────────────────────────────────────────────────

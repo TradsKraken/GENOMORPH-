@@ -54,9 +54,17 @@ func _process_movement(_delta: float) -> void:
 func _spawn_exp_orb() -> void:
 	var exp_script = load("res://levels/exp_orb.gd")
 	if exp_script:
-		var orb = exp_script.new()
-		orb.global_position = global_position
-		get_tree().current_scene.call_deferred("add_child", orb)
+		var orb_count := randi_range(5, 10)
+		for i in range(orb_count):
+			var orb = exp_script.new()
+			orb.global_position = global_position
+			if "exp_grant" in orb:
+				orb.exp_grant = 2.0
+			if "velocity" in orb:
+				var angle = randf() * TAU
+				var spd = randf_range(3.0, 7.0)
+				orb.velocity = Vector3(cos(angle) * spd, randf_range(4.0, 8.0), sin(angle) * spd)
+			get_tree().current_scene.call_deferred("add_child", orb)
 
 func _show_damage_text(amount: float) -> void:
 	var hud := get_tree().get_first_node_in_group("hud")
