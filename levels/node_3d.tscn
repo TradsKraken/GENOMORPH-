@@ -65,7 +65,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.931206, 0, 5.1259995e-06)
 transform = Transform3D(-0.27762857, 0, -0.24012755, 0, 0.3670682, 0, 0.24012755, 0, -0.27762857, 50.97146, 10.229657, -121.028366)
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
-transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -61.7464, 4.2499337, -12.969448)
+transform = Transform3D(0.34259272, 0, -0.52870625, 0, 0.63, 0, 0.52870625, 0, 0.34259272, -0.90600586, -0.24989843, -44.157314)
 script = ExtResource("2_fhumt")
 
 [node name="Frog Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
@@ -144,7 +144,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.66313, 4.021881, -17.9462
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=690566539]
 
 [node name="tut4" type="Area3D" parent="." unique_id=1226536906]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -55)
+transform = Transform3D(0.92, 0, 0, 0, 0.92, 0, 0, 0, 0.92, 0, 0, -43.203766)
 script = ExtResource("14_g4oow")
 trigger_type = 3
 
