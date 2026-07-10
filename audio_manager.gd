@@ -23,6 +23,7 @@ func _ready() -> void:
 	sounds["whip"] = _generate_sfx("whip")
 	sounds["hit"] = _generate_sfx("hit")
 	sounds["error"] = _generate_sfx("error")
+	sounds["ui_click"] = _generate_sfx("ui_click")
 	
 	for i in range(8):
 		var p = AudioStreamPlayer.new()
@@ -111,6 +112,17 @@ func _generate_sfx(type: String) -> AudioStreamWAV:
 			var t = float(i) / 22050.0
 			# Square wave
 			var val = (0.3 if sin(t * 120.0 * TAU) > 0 else -0.3) * (1.0 - t/0.15)
+			var sample = int(clampf(val, -1.0, 1.0) * 32767.0)
+			data[i * 2] = sample & 0xFF
+			data[i * 2 + 1] = (sample >> 8) & 0xFF
+			
+	elif type == "ui_click":
+		length = int(22050 * 0.05)
+		data.resize(length * 2)
+		for i in range(length):
+			var t = float(i) / 22050.0
+			var freq = 1200.0 - 8000.0 * t
+			var val = sin(t * freq * TAU) * (1.0 - t/0.05) * 0.4
 			var sample = int(clampf(val, -1.0, 1.0) * 32767.0)
 			data[i * 2] = sample & 0xFF
 			data[i * 2 + 1] = (sample >> 8) & 0xFF
