@@ -9,21 +9,70 @@ var health: float
 var is_dead: bool = false
 var target: Node3D = null
 
+var _hp_bg: Sprite3D
+var _hp_fg: Sprite3D
+
 func _ready() -> void:
 	health = max_health
 	add_to_group("enemies")
+	
+	_create_health_bar()
 	
 	# Find player target
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		target = players[0]
 
+func _create_health_bar() -> void:
+	# Background
+	var bg_grad = Gradient.new()
+	bg_grad.set_color(0, Color(0.1, 0.1, 0.1, 0.8))
+	bg_grad.set_color(1, Color(0.1, 0.1, 0.1, 0.8))
+	var bg_tex = GradientTexture2D.new()
+	bg_tex.gradient = bg_grad
+	bg_tex.width = 150
+	bg_tex.height = 15
+	
+	_hp_bg = Sprite3D.new()
+	_hp_bg.texture = bg_tex
+	_hp_bg.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_hp_bg.no_depth_test = true
+	_hp_bg.position = Vector3(0, 1.4, 0)
+	_hp_bg.pixel_size = 0.01
+	_hp_bg.visible = false
+	add_child(_hp_bg)
+	
+	# Foreground
+	var fg_grad = Gradient.new()
+	fg_grad.set_color(0, Color(0.9, 0.2, 0.2, 1.0))
+	fg_grad.set_color(1, Color(0.9, 0.2, 0.2, 1.0))
+	var fg_tex = GradientTexture2D.new()
+	fg_tex.gradient = fg_grad
+	fg_tex.width = 150
+	fg_tex.height = 15
+	
+	_hp_fg = Sprite3D.new()
+	_hp_fg.texture = fg_tex
+	_hp_fg.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_hp_fg.no_depth_test = true
+	_hp_fg.centered = false
+	_hp_fg.offset = Vector2(0, -7.5) # Center vertically, left-aligned horizontally
+	_hp_fg.position = Vector3(-0.75, 1.4, 0.001) # Positioned at the left edge of the background
+	_hp_fg.pixel_size = 0.01
+	_hp_fg.visible = false
+	add_child(_hp_fg)
+
 func take_damage(amount: float) -> void:
 	if is_dead:
 		return
 	
 	health -= amount
-	_show_damage_text(amount)
+	# _show_damage_text(amount) # Removed to avoid spam overlapping the health bar
+	
+	if health < max_health:
+		_hp_bg.visible = true
+		_hp_fg.visible = true
+		_hp_fg.scale.x = maxf(0.0, health / max_health)
 	
 	if health <= 0:
 		die()

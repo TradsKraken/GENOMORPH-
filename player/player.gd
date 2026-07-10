@@ -406,12 +406,7 @@ func _attack() -> void:
 		# Deal damage
 		closest_enemy.take_damage(damage)
 	
-	var hud := get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_float_text"):
-		var cam := get_viewport().get_camera_3d()
-		if cam:
-			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-			hud.show_float_text("LUNGE!", scr, Color(1.0, 0.3, 0.1))
+	pass
 
 func _skill1() -> void:
 	_time_since_combat = 0.0
@@ -444,12 +439,7 @@ func _skill1() -> void:
 		var target_pos = global_position + global_transform.basis.z * 5.0
 		_animate_tongue(target_pos)
 	
-	var hud := get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_float_text"):
-		var cam := get_viewport().get_camera_3d()
-		if cam:
-			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-			hud.show_float_text("WHIP!", scr, Color(0.9, 0.2, 0.8))
+	pass
 
 func _animate_tongue(target_pos: Vector3) -> void:
 	var tongue_pivot = Node3D.new()
