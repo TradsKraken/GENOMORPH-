@@ -14,7 +14,7 @@ func _ready() -> void:
 	_spawn_enemy()
 
 func _spawn_enemy() -> void:
-	if enemy_scene == null:
+	if not is_inside_tree() or enemy_scene == null:
 		return
 		
 	# Check if we reached the maximum spawn limit for this nest

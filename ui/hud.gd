@@ -22,6 +22,7 @@ var _stam_bar:   ProgressBar
 var _stam_lbl:   Label
 var _exp_bar:    ProgressBar
 var _lvl_lbl:    Label
+var _status_group: Control
 
 var _attack_btn: Button
 var _skill1_btn: Button
@@ -29,8 +30,27 @@ var _jump_btn:   Button
 var _skill3_btn: Button
 var _cancel_zone: Label
 var _menu_btn:   Button
-var _menu_panel: PanelContainer
+var _menu_panel: Control
 var _menu_open:  bool = false
+var _knowledge_btn: Button
+
+var _tutorial_panel: PanelContainer
+var _tutorial_title: Label
+var _tutorial_desc:  Label
+
+var _subtitle_panel: PanelContainer
+var _subtitle_label: RichTextLabel
+var _subtitle_tween: Tween
+
+var _jump_highlight_tw: Tween
+var _attack_highlight_tw: Tween
+
+var _walkthrough_steps: Array = []
+var _current_step_index: int = 0
+var _active_highlight_nodes: Array = []
+var _active_highlight_tweens: Dictionary = {}
+
+signal subtitle_dismissed
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
@@ -48,17 +68,28 @@ func _ready() -> void:
 	_build_action_buttons()
 	_build_cancel_zone()
 	_build_menu_panel()
+	_build_tutorial_panel()
+	_build_subtitle_panel()
 	_connect_signals()
+
+func _input(event: InputEvent) -> void:
+	if _subtitle_panel and _subtitle_panel.visible and _subtitle_panel.modulate.a > 0.5:
+		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+			if event.is_pressed():
+				hide_subtitle()
+				# Accept the event so it doesn't trigger jumping or attacking if they tap the subtitle area
+				# Alternatively, let them attack/jump while dismissing. 
+				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
 
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
 
 func _build_player_status() -> void:
 	# Group container
-	var status_group := Control.new()
-	status_group.position = Vector2(24, 24)
-	status_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_root.add_child(status_group)
+	_status_group = Control.new()
+	_status_group.position = Vector2(24, 24)
+	_status_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_status_group)
 
 	# Level Badge (Circular)
 	var badge := PanelContainer.new()
@@ -74,7 +105,7 @@ func _build_player_status() -> void:
 	badge_bg.shadow_color = Color(0, 0, 0, 0.3)
 	badge_bg.shadow_size = 4
 	badge.add_theme_stylebox_override("panel", badge_bg)
-	status_group.add_child(badge)
+	_status_group.add_child(badge)
 
 	var lvl_vbox := VBoxContainer.new()
 	lvl_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -96,7 +127,7 @@ func _build_player_status() -> void:
 	bars_vbox.add_theme_constant_override("separation", 8)
 	bars_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars_vbox.z_index = 1
-	status_group.add_child(bars_vbox)
+	_status_group.add_child(bars_vbox)
 
 	# Health Bar
 	var hp_box := Control.new()
@@ -128,9 +159,9 @@ func _build_player_status() -> void:
 # ── Action Buttons ────────────────────────────────────────────────────────────
 
 func _build_action_buttons() -> void:
-	# 1. Primary Attack Button (Sticky Tongue Whip)
+	# 1. Primary Attack Button (Webbed Lunge)
 	# Largest button, outermost bottom-right
-	_attack_btn = _make_circle_btn("👅", 120, C_BTN_NORM)
+	_attack_btn = _make_circle_btn("🦵", 120, C_BTN_NORM)
 	_attack_btn.add_theme_font_size_override("font_size", 64)
 	_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -140,13 +171,16 @@ func _build_action_buttons() -> void:
 	_attack_btn.offset_bottom = -40
 	_attack_btn.offset_left   = -160
 	_attack_btn.offset_top    = -160
-	_attack_btn.button_down.connect(func(): Input.action_press("attack"))
+	_attack_btn.button_down.connect(func():
+		stop_highlight_attack()
+		Input.action_press("attack")
+	)
 	_attack_btn.button_up.connect(func():   Input.action_release("attack"))
 	_root.add_child(_attack_btn)
 
-	# 2. Skill 1 Button (Webbed Lunge)
+	# 2. Skill 1 Button (Sticky Tongue Whip)
 	# Medium, directly to the left of Primary Attack
-	_skill1_btn = _make_circle_btn("🦵", 80, C_BTN_NORM)
+	_skill1_btn = _make_circle_btn("👅", 80, C_BTN_NORM)
 	_skill1_btn.add_theme_font_size_override("font_size", 48)
 	_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_skill1_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -156,6 +190,8 @@ func _build_action_buttons() -> void:
 	_skill1_btn.offset_bottom = -60
 	_skill1_btn.offset_left   = -270
 	_skill1_btn.offset_top    = -140
+	_skill1_btn.button_down.connect(func(): Input.action_press("skill1"))
+	_skill1_btn.button_up.connect(func():   Input.action_release("skill1"))
 	_root.add_child(_skill1_btn)
 
 	# 3. Skill 2 Button (Splashdown Jump)
@@ -204,45 +240,105 @@ func _build_action_buttons() -> void:
 	_menu_btn.draw.connect(_draw_pause_icon)
 	_root.add_child(_menu_btn)
 
+	# Knowledge Button (Top Right, left of Menu Button)
+	_knowledge_btn = _make_circle_btn("📖", 56, C_BTN_NORM)
+	_knowledge_btn.add_theme_font_size_override("font_size", 28)
+	_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
+	_knowledge_btn.set_anchor(SIDE_LEFT, 1.0)
+	_knowledge_btn.set_anchor(SIDE_BOTTOM, 0.0)
+	_knowledge_btn.offset_right  = -24 - 56 - 16
+	_knowledge_btn.offset_top    = 24
+	_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
+	_knowledge_btn.offset_bottom = 24 + 56
+	_knowledge_btn.pressed.connect(_open_knowledge_menu)
+	_root.add_child(_knowledge_btn)
+
 
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
 
 func _build_menu_panel() -> void:
-	_menu_panel = PanelContainer.new()
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+
+	_menu_panel = Control.new()
 	_menu_panel.visible = false
 	_menu_panel.modulate.a = 0.0
 	
 	_menu_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_menu_panel.custom_minimum_size = Vector2(280, 0)
-	# Center it manually
-	_menu_panel.offset_left   = -140
-	_menu_panel.offset_right  = 140
-	_menu_panel.offset_top    = -100
-	_menu_panel.offset_bottom = 100
+	_menu_panel.custom_minimum_size = Vector2(360, 440)
+	_menu_panel.offset_left   = -180
+	_menu_panel.offset_right  = 180
+	_menu_panel.offset_top    = -220
+	_menu_panel.offset_bottom = 220
 
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.06, 0.06, 0.08, 0.95)
-	bg.border_color = Color(1, 1, 1, 0.1)
-	bg.set_border_width_all(1)
-	bg.set_corner_radius_all(16)
-	bg.shadow_color = Color(0, 0, 0, 0.5)
-	bg.shadow_size = 20
-	bg.content_margin_left   = 24.0
-	bg.content_margin_right  = 24.0
-	bg.content_margin_top    = 24.0
-	bg.content_margin_bottom = 24.0
-	_menu_panel.add_theme_stylebox_override("panel", bg)
+	var panel_bg := ColorRect.new()
+	panel_bg.color = Color(0.02, 0.04, 0.08, 0.95)
+	panel_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_menu_panel.add_child(panel_bg)
+	
+	var scanlines := ColorRect.new()
+	scanlines.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var scan_mat := ShaderMaterial.new()
+	scan_mat.shader = load("res://ui/scanlines.gdshader")
+	scanlines.material = scan_mat
+	scanlines.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_menu_panel.add_child(scanlines)
+	
+	var borders := Control.new()
+	borders.set_anchors_preset(Control.PRESET_FULL_RECT)
+	borders.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var b_script := GDScript.new()
+	b_script.source_code = "extends Control\nfunc _draw():\n\tvar c = Color(0.1, 0.9, 0.7, 0.9)\n\tvar r = get_rect().size\n\tvar l = 16.0\n\tvar t = 2.0\n\tdraw_rect(Rect2(0,0,l,t), c); draw_rect(Rect2(0,0,t,l), c)\n\tdraw_rect(Rect2(r.x-l,0,l,t), c); draw_rect(Rect2(r.x-t,0,t,l), c)\n\tdraw_rect(Rect2(0,r.y-t,l,t), c); draw_rect(Rect2(0,r.y-l,t,l), c)\n\tdraw_rect(Rect2(r.x-l,r.y-t,l,t), c); draw_rect(Rect2(r.x-t,r.y-l,t,l), c)\n\tvar c2 = Color(0.1, 0.9, 0.7, 0.4)\n\tfor p in [Vector2(20,20), Vector2(r.x-20,20), Vector2(20,r.y-20), Vector2(r.x-20,r.y-20)]:\n\t\tdraw_line(p-Vector2(6,0), p+Vector2(6,0), c2, 1)\n\t\tdraw_line(p-Vector2(0,6), p+Vector2(0,6), c2, 1)"
+	b_script.reload()
+	borders.set_script(b_script)
+	_menu_panel.add_child(borders)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 32)
+	margin.add_theme_constant_override("margin_right", 32)
+	margin.add_theme_constant_override("margin_top", 32)
+	margin.add_theme_constant_override("margin_bottom", 32)
+	_menu_panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 16)
-	_menu_panel.add_child(vbox)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	margin.add_child(vbox)
 
-	var title := _make_label("PAUSED", 18, Color.WHITE)
+	var title := _make_label("PAUSED", 24, Color(0.1, 0.9, 0.7))
+	title.add_theme_font_override("font", tech_font)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(title)
+	
+	var sep := HSeparator.new()
+	var sep_style := StyleBoxLine.new()
+	sep_style.color = Color(0.1, 0.9, 0.7, 0.3)
+	sep_style.thickness = 1
+	sep.add_theme_stylebox_override("separator", sep_style)
+	vbox.add_child(sep)
+
+	var style_btn = func(b: Button, color: Color = Color(0.8, 1.0, 0.9)):
+		b.add_theme_font_override("font", tech_font)
+		b.add_theme_font_size_override("font_size", 18)
+		b.add_theme_color_override("font_color", color)
+		b.add_theme_color_override("font_hover_color", Color.WHITE)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.04, 0.08, 0.12, 0.9)
+		sb.border_color = color * 0.4
+		sb.set_border_width_all(1)
+		sb.set_corner_radius_all(0)
+		b.add_theme_stylebox_override("normal", sb)
+		var sb_h := sb.duplicate()
+		sb_h.bg_color = Color(0.1, 0.3, 0.25, 0.9)
+		sb_h.border_color = color
+		b.add_theme_stylebox_override("hover", sb_h)
+		b.add_theme_stylebox_override("pressed", sb_h)
 
 	var btn_resume := _panel_btn("Resume Game")
 	btn_resume.pressed.connect(_toggle_menu)
+	style_btn.call(btn_resume, Color(0.1, 0.9, 0.7))
 	vbox.add_child(btn_resume)
 
 	var btn_settings := _panel_btn("Settings")
@@ -250,16 +346,288 @@ func _build_menu_panel() -> void:
 		var settings = preload("res://ui/settings_menu.gd").new()
 		_root.add_child(settings)
 	)
+	style_btn.call(btn_settings)
 	vbox.add_child(btn_settings)
 
-	var btn_quit := _panel_btn("Main Menu", Color("#ff3b5c"))
+	var btn_save := _panel_btn("Save Game")
+	btn_save.pressed.connect(func():
+		PlayerData.save_game()
+		btn_save.text = "Saved!"
+		get_tree().create_timer(1.0).timeout.connect(func():
+			if is_instance_valid(btn_save):
+				btn_save.text = "Save Game"
+		)
+	)
+	style_btn.call(btn_save)
+	vbox.add_child(btn_save)
+
+	var btn_quit := _panel_btn("Main Menu", Color(1.0, 0.2, 0.3))
 	btn_quit.pressed.connect(func():
+		PlayerData.save_game()
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://ui/main_menu.tscn")
 	)
+	style_btn.call(btn_quit, Color(1.0, 0.2, 0.3))
 	vbox.add_child(btn_quit)
 
 	_root.add_child(_menu_panel)
+
+
+# ── Tutorial Panel ────────────────────────────────────────────────────────────
+
+func _build_tutorial_panel() -> void:
+	_tutorial_panel = PanelContainer.new()
+	_tutorial_panel.visible = false
+	_tutorial_panel.modulate.a = 0.0
+	
+	_tutorial_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_tutorial_panel.custom_minimum_size = Vector2(400, 0)
+	_tutorial_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_tutorial_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.02, 0.04, 0.08, 0.85)
+	bg.border_color = Color(0.1, 0.9, 0.7, 0.6)
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(0)
+	bg.shadow_color = Color(0, 0, 0, 0.6)
+	bg.shadow_size = 20
+	bg.content_margin_left   = 32.0
+	bg.content_margin_right  = 32.0
+	bg.content_margin_top    = 32.0
+	bg.content_margin_bottom = 32.0
+	_tutorial_panel.add_theme_stylebox_override("panel", bg)
+
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 24)
+	_tutorial_panel.add_child(vbox)
+
+	_tutorial_title = _make_label("TUTORIAL", 24, Color(0.1, 0.9, 0.7))
+	_tutorial_title.add_theme_font_override("font", tech_font)
+	_tutorial_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(_tutorial_title)
+
+	_tutorial_desc = _make_label("Tutorial text goes here.", 18, Color(0.8, 1.0, 0.9))
+	_tutorial_desc.add_theme_font_override("font", tech_font)
+	_tutorial_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_tutorial_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_tutorial_desc)
+
+	var btn_got_it := _panel_btn("ACKNOWLEDGE", Color(0.1, 0.9, 0.7))
+	btn_got_it.add_theme_font_override("font", tech_font)
+	
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.08, 0.12, 0.9)
+	sb.border_color = Color(0.1, 0.9, 0.7, 0.4)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(0)
+	btn_got_it.add_theme_stylebox_override("normal", sb)
+	
+	var sb_h := sb.duplicate()
+	sb_h.bg_color = Color(0.1, 0.3, 0.25, 0.9)
+	sb_h.border_color = Color(0.1, 0.9, 0.7)
+	btn_got_it.add_theme_stylebox_override("hover", sb_h)
+	btn_got_it.add_theme_stylebox_override("pressed", sb_h)
+	
+	btn_got_it.pressed.connect(_hide_tutorial)
+	vbox.add_child(btn_got_it)
+
+	_root.add_child(_tutorial_panel)
+
+func show_tutorial(title: String, text: String) -> void:
+	_tutorial_title.text = title
+	_tutorial_desc.text = text
+	get_tree().paused = true
+	_tutorial_panel.modulate.a = 0.0
+	_tutorial_panel.visible = true
+	var tw := create_tween()
+	tw.tween_property(_tutorial_panel, "modulate:a", 1.0, 0.2)
+
+func _hide_tutorial() -> void:
+	if _walkthrough_steps.size() > 0 and _current_step_index < _walkthrough_steps.size():
+		_advance_walkthrough_step()
+		return
+		
+	var tw := create_tween()
+	tw.tween_property(_tutorial_panel, "modulate:a", 0.0, 0.15)
+	tw.tween_callback(func():
+		_tutorial_panel.visible = false
+		get_tree().paused = false
+	)
+
+
+# ── Subtitle System ───────────────────────────────────────────────────────────
+
+func _build_subtitle_panel() -> void:
+	_subtitle_panel = PanelContainer.new()
+	_subtitle_panel.visible = false
+	_subtitle_panel.modulate.a = 0.0
+	
+	_subtitle_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_subtitle_panel.custom_minimum_size = Vector2(800, 100)
+	
+	_subtitle_panel.set_anchor(SIDE_LEFT, 0.5)
+	_subtitle_panel.set_anchor(SIDE_RIGHT, 0.5)
+	_subtitle_panel.set_anchor(SIDE_BOTTOM, 1.0)
+	_subtitle_panel.offset_left = -400
+	_subtitle_panel.offset_right = 400
+	_subtitle_panel.offset_bottom = -40
+	_subtitle_panel.offset_top = -40
+	_subtitle_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	
+	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.02, 0.04, 0.08, 0.85)
+	bg.border_color = Color(0.1, 0.9, 0.7, 0.6)
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(0)
+	bg.content_margin_left   = 24.0
+	bg.content_margin_right  = 24.0
+	bg.content_margin_top    = 24.0
+	bg.content_margin_bottom = 32.0
+	_subtitle_panel.add_theme_stylebox_override("panel", bg)
+
+	_subtitle_label = RichTextLabel.new()
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+	_subtitle_label.add_theme_font_override("normal_font", tech_font)
+	_subtitle_label.add_theme_font_override("bold_font", tech_font)
+	_subtitle_label.bbcode_enabled = true
+	_subtitle_label.fit_content = true
+	_subtitle_label.scroll_active = false
+	_subtitle_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_subtitle_label.add_theme_font_size_override("normal_font_size", 24)
+	_subtitle_label.add_theme_font_size_override("bold_font_size", 26)
+	_subtitle_panel.add_child(_subtitle_label)
+
+	_root.add_child(_subtitle_panel)
+
+func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> void:
+	var color_hex = "40c0ff" # Default Sterling blue
+	if speaker == "Lolo Palaka":
+		color_hex = "40ff80" # Greenish for Palaka
+		
+	_subtitle_label.text = "[center][b][color=#" + color_hex + "]" + speaker + ":[/color][/b] " + text + "\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
+	
+	if _subtitle_tween and _subtitle_tween.is_valid():
+		_subtitle_tween.kill()
+		
+	_subtitle_panel.visible = true
+	_subtitle_tween = create_tween()
+	_subtitle_tween.tween_property(_subtitle_panel, "modulate:a", 1.0, 0.3)
+	
+func hide_subtitle() -> void:
+	if _subtitle_tween and _subtitle_tween.is_valid():
+		_subtitle_tween.kill()
+	_subtitle_tween = create_tween()
+	_subtitle_tween.tween_property(_subtitle_panel, "modulate:a", 0.0, 0.2)
+	_subtitle_tween.tween_callback(func(): 
+		_subtitle_panel.visible = false
+		subtitle_dismissed.emit()
+	)
+
+# ── Tutorial UI Controls ──────────────────────────────────────────────────────
+
+func hide_action_buttons() -> void:
+	if _attack_btn: _attack_btn.modulate.a = 0.0
+	if _jump_btn:   _jump_btn.modulate.a = 0.0
+	if _skill1_btn: _skill1_btn.modulate.a = 0.0
+	if _skill3_btn: _skill3_btn.modulate.a = 0.0
+	
+func start_ui_walkthrough(steps: Array) -> void:
+	_walkthrough_steps = steps
+	_current_step_index = 0
+	_advance_walkthrough_step()
+
+func _advance_walkthrough_step() -> void:
+	for node in _active_highlight_nodes:
+		stop_highlight_node(node)
+	_active_highlight_nodes.clear()
+	
+	if _current_step_index >= _walkthrough_steps.size():
+		_hide_tutorial()
+		return
+		
+	var step = _walkthrough_steps[_current_step_index]
+	_current_step_index += 1
+	
+	if step.has("nodes"):
+		for node_name in step.nodes:
+			var node = get(node_name)
+			if node and node is Control:
+				_active_highlight_nodes.append(node)
+				highlight_node(node)
+				if node.modulate.a < 1.0:
+					var tw = create_tween()
+					tw.tween_property(node, "modulate:a", 1.0, 1.0)
+				
+	show_tutorial(step.get("title", "TUTORIAL"), step.get("text", ""))
+
+func highlight_node(node: Control) -> void:
+	if not node: return
+	
+	node.pivot_offset = node.size / 2.0
+	if _active_highlight_tweens.has(node) and _active_highlight_tweens[node].is_valid():
+		_active_highlight_tweens[node].kill()
+		
+	var tw = create_tween().set_loops()
+	tw.tween_property(node, "scale", Vector2(1.15, 1.15), 0.4).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate", Color(1.2, 1.5, 2.0, 1.0), 0.4)
+	tw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.4)
+	
+	_active_highlight_tweens[node] = tw
+
+func stop_highlight_node(node: Control) -> void:
+	if not node: return
+	
+	if _active_highlight_tweens.has(node):
+		var tw = _active_highlight_tweens[node]
+		if tw and tw.is_valid():
+			tw.kill()
+		_active_highlight_tweens.erase(node)
+		
+	var rtw = create_tween()
+	rtw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.1)
+	rtw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.1)
+
+	
+func reveal_jump() -> void:
+	if _jump_btn:
+		if _jump_btn.modulate.a < 1.0:
+			var tw = create_tween()
+			tw.tween_property(_jump_btn, "modulate:a", 1.0, 1.0)
+		highlight_node(_jump_btn)
+		
+func reveal_attack() -> void:
+	if _attack_btn:
+		if _attack_btn.modulate.a < 1.0:
+			var tw = create_tween()
+			tw.tween_property(_attack_btn, "modulate:a", 1.0, 1.0)
+		highlight_node(_attack_btn)
+		
+func highlight_jump() -> void:
+	highlight_node(_jump_btn)
+
+func stop_highlight_jump() -> void:
+	stop_highlight_node(_jump_btn)
+
+func highlight_attack() -> void:
+	highlight_node(_attack_btn)
+
+func stop_highlight_attack() -> void:
+	stop_highlight_node(_attack_btn)
+		
+func flash_dodge() -> void:
+	if _jump_btn:
+		var tw = create_tween()
+		for i in range(3):
+			tw.tween_property(_jump_btn, "modulate", Color(1.0, 0.5, 0.5, 1.0), 0.15)
+			tw.tween_property(_jump_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.15)
 
 
 # ── Cancel Zone ───────────────────────────────────────────────────────────────
@@ -306,6 +674,7 @@ func _on_jump_btn_input(event: InputEvent) -> void:
 	
 	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 		if event.is_pressed():
+			stop_highlight_jump()
 			_is_aiming_jump = true
 			_jump_start_pos = event.position
 			if _cancel_zone: _cancel_zone.visible = true
@@ -365,6 +734,7 @@ func _connect_signals() -> void:
 	pd.stamina_changed.connect(_on_stamina)
 	pd.exp_changed.connect(_on_exp)
 	pd.level_changed.connect(_on_level)
+	pd.knowledge_unlocked.connect(_on_knowledge_unlocked)
 	
 	# Init
 	_hp_bar.max_value   = pd.max_health
@@ -419,6 +789,19 @@ func _toggle_menu() -> void:
 			_menu_panel.visible = false
 			get_tree().paused = false
 		)
+
+func _open_knowledge_menu() -> void:
+	get_tree().paused = true
+	var menu = preload("res://ui/knowledge_menu.gd").new()
+	_root.add_child(menu)
+	
+func _on_knowledge_unlocked(id: String) -> void:
+	if id in PlayerData.KNOWLEDGE_DB:
+		var data = PlayerData.KNOWLEDGE_DB[id]
+		var title = data.get("title", "Unknown")
+		var icon = data.get("icon", "")
+		var screen_pos = Vector2(get_viewport().size.x / 2.0, 150) # top center
+		show_float_text("NEW KNOWLEDGE: " + icon + " " + title, screen_pos, Color(0.9, 0.8, 0.4))
 
 
 # ── Floating Rewards ──────────────────────────────────────────────────────────
@@ -568,3 +951,30 @@ func _panel_btn(text: String, col: Color = Color.WHITE) -> Button:
 	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	btn.add_theme_color_override("font_color", col)
 	return btn
+
+# ── Prologue Sequence ─────────────────────────────────────────────────────────
+
+func play_boot_sequence() -> void:
+	var boot_overlay = ColorRect.new()
+	boot_overlay.color = Color.BLACK
+	boot_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	boot_overlay.z_index = 100
+	_root.add_child(boot_overlay)
+	
+	for child in _root.get_children():
+		if child != boot_overlay and child != _subtitle_panel:
+			child.modulate.a = 0.0
+			
+	var tw = create_tween()
+	tw.tween_interval(2.0)
+	tw.tween_property(boot_overlay, "color:a", 0.0, 3.0)
+	
+	tw.tween_callback(func():
+		var hud_tw = create_tween()
+		for child in _root.get_children():
+			if child != boot_overlay and child != _subtitle_panel and child != _menu_panel and child != _tutorial_panel:
+				hud_tw.tween_property(child, "modulate:a", 1.0, 0.5)
+				hud_tw.tween_interval(0.2)
+	).set_delay(2.0)
+	
+	tw.tween_callback(boot_overlay.queue_free).set_delay(1.0)

@@ -13,7 +13,7 @@ func _ready() -> void:
 	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_label.no_depth_test = true # Ensure it draws on top of other objects
 	_label.position = Vector3(0, 1.5, 0) # Height above the frog
-	_label.font_size = 70
+	_label.font_size = 100
 	_label.outline_size = 8
 	_label.visible = false
 	add_child(_label)

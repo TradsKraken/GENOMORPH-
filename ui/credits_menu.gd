@@ -84,7 +84,7 @@ func _ready() -> void:
 	# Skip label
 	var skip_lbl := Label.new()
 	skip_lbl.text = "Click anywhere to skip"
-	skip_lbl.add_theme_font_size_override("font_size", 14)
+	skip_lbl.add_theme_font_size_override("font_size", 24)
 	skip_lbl.add_theme_color_override("font_color", Color(1, 1, 1, 0.4))
 	skip_lbl.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	skip_lbl.offset_right = -20

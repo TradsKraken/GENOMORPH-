@@ -25,6 +25,10 @@ func _ready() -> void:
 	_rng.randomize()
 	_stamina_script = load(_STAMINA_PATH)
 	_exp_script     = load(_EXP_PATH)
+	
+	# Wait for physics to sync so raycasts work
+	await get_tree().physics_frame
+	
 	for _i in stamina_orb_count:
 		_spawn_orb(false)
 	for _i in exp_orb_count:
@@ -34,14 +38,27 @@ func _ready() -> void:
 
 func _spawn_orb(is_exp: bool) -> void:
 	var pos := _random_position()
-	var orb := Area3D.new()
-	orb.set_script(_exp_script if is_exp else _stamina_script)
-	orb.position = Vector3(pos.x, orb_height, pos.y)
+	var orb = _exp_script.new() if is_exp else _stamina_script.new()
+	
+	var final_y = orb_height
+	var space_state = get_world_3d().direct_space_state
+	if space_state:
+		var origin = Vector3(pos.x, 200.0, pos.y)
+		var target = Vector3(pos.x, -100.0, pos.y)
+		var params = PhysicsRayQueryParameters3D.create(origin, target)
+		var result = space_state.intersect_ray(params)
+		if result.has("position"):
+			final_y = result.position.y + orb_height
+			
+	orb.position = Vector3(pos.x, final_y, pos.y)
 	add_child(orb)
 	orb.tree_exited.connect(_on_orb_collected.bind(is_exp))
 
 
 func _on_orb_collected(is_exp: bool) -> void:
+	if not is_inside_tree():
+		return
+		
 	var tree := get_tree()
 	if tree == null:
 		return

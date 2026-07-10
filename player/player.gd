@@ -33,7 +33,7 @@ extends CharacterBody3D
 @export var max_stamina: float = 100.0
 
 ## How much stamina is consumed per jump.
-@export var jump_stamina_cost: float = 15.0
+@export var jump_stamina_cost: float = 30.0
 
 ## How much stamina is recovered per second.
 @export var stamina_recovery_rate: float = 5.0
@@ -66,13 +66,17 @@ var is_jumping: bool = false
 var jump_target_pos: Vector3 = Vector3.ZERO
 var _aim_offset: Vector3 = Vector3.ZERO
 var _reticle: Decal
+var input_locked: bool = false
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	rotation.y = PI
 	add_to_group("player")
 	if not InputMap.has_action("attack"):
 		InputMap.add_action("attack")
+	if not InputMap.has_action("skill1"):
+		InputMap.add_action("skill1")
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
 	
@@ -144,15 +148,18 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= gravity * delta
 
 	# ── Input direction (X-Z plane, top-down) ────────────────────────────────
-	# Prefer joystick on mobile; fall back to keyboard in the editor / desktop.
 	var raw_input: Vector2
-	if _joystick != null and _joystick.get_vector().length_squared() > 0.0:
-		raw_input = _joystick.get_vector()
+	if input_locked:
+		raw_input = Vector2.ZERO
 	else:
-		raw_input = Input.get_vector(
-			"ui_left", "ui_right",   # A / Left  →  D / Right
-			"ui_up",   "ui_down"	 # W / Up	→  S / Down
-		)
+		# Prefer joystick on mobile; fall back to keyboard in the editor / desktop.
+		if _joystick != null and _joystick.get_vector().length_squared() > 0.0:
+			raw_input = _joystick.get_vector()
+		else:
+			raw_input = Input.get_vector(
+				"ui_left", "ui_right",   # A / Left  →  D / Right
+				"ui_up",   "ui_down"	 # W / Up	→  S / Down
+			)
 	# Map 2-D input → 3-D world XZ direction.
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
 
@@ -191,13 +198,16 @@ func _physics_process(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, current_friction * delta)
 
 	# ── Visual Rotation ────────────────────────────────────────────────────────
-	if velocity.length() > 0.1:
+	if Vector2(velocity.x, velocity.z).length() > 0.1:
 		var target_angle := atan2(velocity.x, velocity.z)
 		rotation.y = lerp_angle(rotation.y, target_angle, 10.0 * delta)
 
 	# ── Attacking ────────────────────────────────────────────────────────────
-	if Input.is_action_just_pressed("attack"):
-		_attack()
+	if not input_locked:
+		if Input.is_action_just_pressed("attack"):
+			_attack()
+		if Input.is_action_just_pressed("skill1"):
+			_skill1()
 
 	var was_on_floor = is_on_floor()
 	move_and_slide()
@@ -232,6 +242,16 @@ func take_damage(amount: float) -> void:
 
 func start_aiming_jump() -> void:
 	if not is_on_floor() or is_jumping: return
+	
+	if PlayerData.stamina < jump_stamina_cost:
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+				hud.show_float_text("NO STAMINA!", scr, Color(1.0, 0.4, 0.4))
+		return
+		
 	is_aiming_jump = true
 	_aim_offset = Vector3.ZERO
 	_reticle.visible = true
@@ -278,7 +298,22 @@ func execute_splash_jump(is_quick_tap: bool) -> void:
 	if to_target.length() > 0.1:
 		rotation.y = atan2(to_target.x, to_target.z)
 	
-	if not is_on_floor() or not PlayerData.use_stamina(jump_stamina_cost):
+	if not is_on_floor():
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+				hud.show_float_text("TOO LATE!", scr, Color.GRAY)
+		return
+		
+	if not PlayerData.use_stamina(jump_stamina_cost):
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+				hud.show_float_text("NO STAMINA!", scr, Color(1.0, 0.4, 0.4))
 		return
 		
 	is_jumping = true
@@ -337,6 +372,7 @@ func _attack() -> void:
 				closest_enemy = enemy
 				closest_dist = dist
 					
+	
 	if closest_enemy:
 		# Auto-aim: Snap rotation to face the target
 		var to_enemy = global_position.direction_to(closest_enemy.global_position)
@@ -350,7 +386,82 @@ func _attack() -> void:
 		var cam := get_viewport().get_camera_3d()
 		if cam:
 			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-			hud.show_float_text("PEWNG!", scr, Color(1.0, 0.3, 0.1))
+			hud.show_float_text("LUNGE!", scr, Color(1.0, 0.3, 0.1))
+
+func _skill1() -> void:
+	# Sticky Tongue Whip: Damage closest enemy at short range
+	var attack_range = 5.0
+	var damage = 10.0
+	var closest_enemy = null
+	var closest_dist = attack_range
+	
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy.has_method("take_damage") and not enemy.is_dead:
+			var dist = global_position.distance_to(enemy.global_position)
+			if dist < closest_dist:
+				closest_enemy = enemy
+				closest_dist = dist
+					
+	if closest_enemy:
+		# Auto-aim: Snap rotation to face the target
+		var to_enemy = global_position.direction_to(closest_enemy.global_position)
+		rotation.y = atan2(to_enemy.x, to_enemy.z)
+		
+		# Deal damage
+		closest_enemy.take_damage(damage)
+		
+		# Visual Tongue Animation
+		_animate_tongue(closest_enemy.global_position)
+	else:
+		# If no enemy, just shoot tongue forward (+Z is character forward)
+		var target_pos = global_position + global_transform.basis.z * 5.0
+		_animate_tongue(target_pos)
+	
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_float_text"):
+		var cam := get_viewport().get_camera_3d()
+		if cam:
+			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+			hud.show_float_text("WHIP!", scr, Color(0.9, 0.2, 0.8))
+
+func _animate_tongue(target_pos: Vector3) -> void:
+	var tongue_pivot = Node3D.new()
+	get_tree().current_scene.add_child(tongue_pivot)
+	
+	# Start slightly forward and up from the center to match the mouth
+	var start_pos = global_position + Vector3(0, 0.5, 0) + global_transform.basis.z * 0.6
+	target_pos.y += 0.5
+	tongue_pivot.global_position = start_pos
+	
+	if start_pos.distance_to(target_pos) > 0.1:
+		tongue_pivot.look_at(target_pos, Vector3.UP)
+	
+	var tongue_mesh = MeshInstance3D.new()
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.3, 0.5) # Pink tongue
+	mat.roughness = 0.2
+	var mesh = CylinderMesh.new()
+	mesh.top_radius = 0.15
+	mesh.bottom_radius = 0.15
+	mesh.height = 1.0
+	tongue_mesh.mesh = mesh
+	tongue_mesh.material_override = mat
+	
+	tongue_pivot.add_child(tongue_mesh)
+	tongue_mesh.rotation.x = PI / 2.0
+	tongue_mesh.position = Vector3(0, 0, -0.5)
+	
+	var dist = start_pos.distance_to(target_pos)
+	tongue_pivot.scale.z = 0.01
+	
+	var tween = create_tween()
+	# Extend
+	tween.tween_property(tongue_pivot, "scale:z", dist, 0.1)
+	# Retract
+	tween.tween_property(tongue_pivot, "scale:z", 0.01, 0.1).set_delay(0.05)
+	tween.finished.connect(func():
+		tongue_pivot.queue_free()
+	)
 
 
 # ── Animation ────────────────────────────────────────────────────────────────

@@ -19,13 +19,13 @@ func _ready() -> void:
 	# Center panel
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_panel.custom_minimum_size = Vector2(400, 300)
+	_panel.custom_minimum_size = Vector2(700, 500)
 	
 	# Center it properly
-	_panel.offset_left = -200
-	_panel.offset_right = 200
-	_panel.offset_top = -150
-	_panel.offset_bottom = 150
+	_panel.offset_left = -350
+	_panel.offset_right = 350
+	_panel.offset_top = -250
+	_panel.offset_bottom = 250
 	
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.1, 0.1, 0.15, 0.95)
@@ -34,21 +34,21 @@ func _ready() -> void:
 	sb.set_corner_radius_all(12)
 	sb.shadow_color = Color(0, 0, 0, 0.6)
 	sb.shadow_size = 16
-	sb.content_margin_left = 24
-	sb.content_margin_right = 24
-	sb.content_margin_top = 24
-	sb.content_margin_bottom = 24
+	sb.content_margin_left = 40
+	sb.content_margin_right = 40
+	sb.content_margin_top = 40
+	sb.content_margin_bottom = 40
 	_panel.add_theme_stylebox_override("panel", sb)
 	
 	_vbox = VBoxContainer.new()
-	_vbox.add_theme_constant_override("separation", 16)
+	_vbox.add_theme_constant_override("separation", 32)
 	_panel.add_child(_vbox)
 	
 	# Title
 	var title := Label.new()
 	title.text = "GRAPHICS SETTINGS"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_font_size_override("font_size", 48)
 	title.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 	_vbox.add_child(title)
 	
@@ -68,7 +68,8 @@ func _ready() -> void:
 	# Close button
 	var close_btn := Button.new()
 	close_btn.text = "Close"
-	close_btn.custom_minimum_size = Vector2(0, 40)
+	close_btn.add_theme_font_size_override("font_size", 36)
+	close_btn.custom_minimum_size = Vector2(0, 80)
 	close_btn.pressed.connect(_on_close)
 	_vbox.add_child(close_btn)
 	
@@ -79,9 +80,11 @@ func _build_scale_option() -> void:
 	var lbl := Label.new()
 	lbl.text = "3D Render Scale:"
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
 	hbox.add_child(lbl)
 	
 	var opt := OptionButton.new()
+	opt.add_theme_font_size_override("font_size", 24)
 	opt.add_item("50% (Fast)", 0)
 	opt.add_item("75% (Balanced)", 1)
 	opt.add_item("100% (High Quality)", 2)
@@ -106,9 +109,11 @@ func _build_msaa_option() -> void:
 	var lbl := Label.new()
 	lbl.text = "Anti-Aliasing (MSAA):"
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
 	hbox.add_child(lbl)
 	
 	var opt := OptionButton.new()
+	opt.add_theme_font_size_override("font_size", 24)
 	opt.add_item("Off", Viewport.MSAA_DISABLED)
 	opt.add_item("2x", Viewport.MSAA_2X)
 	opt.add_item("4x", Viewport.MSAA_4X)
@@ -131,6 +136,7 @@ func _build_glow_toggle() -> void:
 	var lbl := Label.new()
 	lbl.text = "Environment Glow:"
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
 	hbox.add_child(lbl)
 	
 	var check := CheckButton.new()

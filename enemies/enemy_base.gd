@@ -54,8 +54,7 @@ func _process_movement(_delta: float) -> void:
 func _spawn_exp_orb() -> void:
 	var exp_script = load("res://levels/exp_orb.gd")
 	if exp_script:
-		var orb = Area3D.new()
-		orb.set_script(exp_script)
+		var orb = exp_script.new()
 		orb.global_position = global_position
 		get_tree().current_scene.call_deferred("add_child", orb)
 

@@ -132,10 +132,10 @@ shader_parameter/line_density = 70.0
 shader_parameter/line_alpha = 0.055
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_focus"]
-content_margin_left = 20.0
-content_margin_top = 12.0
-content_margin_right = 20.0
-content_margin_bottom = 12.0
+content_margin_left = 30.0
+content_margin_top = 18.0
+content_margin_right = 30.0
+content_margin_bottom = 18.0
 bg_color = Color(0, 0, 0, 0)
 border_width_left = 2
 border_width_top = 2
@@ -148,10 +148,10 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_hover"]
-content_margin_left = 24.0
-content_margin_top = 14.0
-content_margin_right = 24.0
-content_margin_bottom = 14.0
+content_margin_left = 32.0
+content_margin_top = 20.0
+content_margin_right = 32.0
+content_margin_bottom = 20.0
 bg_color = Color(0.09, 0.19, 0.05, 0.97)
 border_width_left = 3
 border_width_top = 3
@@ -167,10 +167,10 @@ shadow_size = 12
 shadow_offset = Vector2(0, 2)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_normal"]
-content_margin_left = 24.0
-content_margin_top = 14.0
-content_margin_right = 24.0
-content_margin_bottom = 14.0
+content_margin_left = 32.0
+content_margin_top = 20.0
+content_margin_right = 32.0
+content_margin_bottom = 20.0
 bg_color = Color(0.05, 0.1, 0.03, 0.92)
 border_width_left = 3
 border_width_top = 3
@@ -186,10 +186,10 @@ shadow_size = 6
 shadow_offset = Vector2(0, 3)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pressed"]
-content_margin_left = 24.0
-content_margin_top = 14.0
-content_margin_right = 24.0
-content_margin_bottom = 14.0
+content_margin_left = 32.0
+content_margin_top = 20.0
+content_margin_right = 32.0
+content_margin_bottom = 20.0
 bg_color = Color(0.12, 0.26, 0.06, 1)
 border_width_left = 3
 border_width_top = 3
@@ -206,7 +206,7 @@ Button/colors/font_color = Color(0.88, 0.96, 0.78, 1)
 Button/colors/font_focus_color = Color(0.95, 1, 0.7, 1)
 Button/colors/font_hover_color = Color(1, 1, 0.88, 1)
 Button/colors/font_pressed_color = Color(1, 1, 1, 1)
-Button/font_sizes/font_size = 22
+Button/font_sizes/font_size = 36
 Button/styles/focus = SubResource("StyleBoxFlat_btn_focus")
 Button/styles/hover = SubResource("StyleBoxFlat_btn_hover")
 Button/styles/normal = SubResource("StyleBoxFlat_btn_normal")
@@ -231,7 +231,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
 
 [node name="BgAtmosphere" type="ColorRect" parent="Background" unique_id=1514618417]
 layout_mode = 1
@@ -294,7 +293,7 @@ theme_override_colors/font_outline_color = Color(0.1, 0.28, 0.06, 1)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 4
 theme_override_constants/outline_size = 5
-theme_override_font_sizes/font_size = 82
+theme_override_font_sizes/font_size = 110
 text = "GENOMORPH"
 horizontal_alignment = 1
 uppercase = true
@@ -304,7 +303,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.62, 0.88, 0.48, 0.9)
 theme_override_colors/font_outline_color = Color(0, 0.08, 0, 0.8)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 26
 text = "Transform and Thrive.  Keep the Wild Alive."
 horizontal_alignment = 1
 
@@ -322,31 +321,31 @@ layout_mode = 2
 
 [node name="ButtonContainer" type="VBoxContainer" parent="Background/ContentAnchor/ContentBox" unique_id=1724252693]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 24
 
 [node name="NewGameButton" type="Button" parent="Background/ContentAnchor/ContentBox/ButtonContainer" unique_id=125871679]
-custom_minimum_size = Vector2(380, 58)
+custom_minimum_size = Vector2(480, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme = SubResource("Theme_buttons")
 text = "PLAY GAME"
 
 [node name="LoadGameButton" type="Button" parent="Background/ContentAnchor/ContentBox/ButtonContainer" unique_id=428661248]
-custom_minimum_size = Vector2(380, 58)
+custom_minimum_size = Vector2(480, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme = SubResource("Theme_buttons")
 text = "SETTINGS"
 
 [node name="CreditsButton" type="Button" parent="Background/ContentAnchor/ContentBox/ButtonContainer" unique_id=677692272]
-custom_minimum_size = Vector2(380, 58)
+custom_minimum_size = Vector2(480, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme = SubResource("Theme_buttons")
 text = "CREDITS"
 
 [node name="QuitButton" type="Button" parent="Background/ContentAnchor/ContentBox/ButtonContainer" unique_id=198423582]
-custom_minimum_size = Vector2(380, 58)
+custom_minimum_size = Vector2(480, 80)
 layout_mode = 2
 size_flags_horizontal = 4
 theme = SubResource("Theme_buttons")
@@ -366,7 +365,7 @@ offset_bottom = -8.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_colors/font_color = Color(0.3019608, 1, 0.32156864, 0.4509804)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 18
 text = "v0.1.0 — GENOMORPH"
 horizontal_alignment = 2
 

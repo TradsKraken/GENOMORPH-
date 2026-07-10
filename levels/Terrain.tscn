@@ -1,0 +1,416 @@
+[gd_scene format=3 uid="uid://dkdpa468ef1v7"]
+
+[ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="1_kqih2"]
+
+[node name="Terrain" unique_id=2011643875 instance=ExtResource("1_kqih2")]
+
+[node name="Tree_lp_11_007" parent="." index="0" unique_id=2010954110]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_008" parent="." index="1" unique_id=868335586]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_007" parent="." index="2" unique_id=873955051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_002" parent="." index="3" unique_id=1713860266]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_001" parent="." index="4" unique_id=1431108679]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_019" parent="." index="5" unique_id=309496411]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_021" parent="." index="6" unique_id=106629076]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Plane_010" parent="." index="7" unique_id=1841840329]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 73.79758, 0)
+
+[node name="Tree_lp_11_011" parent="." index="8" unique_id=38537336]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder" parent="." index="9" unique_id=75298724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_042" parent="." index="10" unique_id=1615547597]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_043" parent="." index="11" unique_id=972764923]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_044" parent="." index="12" unique_id=2017334875]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_001" parent="." index="13" unique_id=2121990102]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_006" parent="." index="14" unique_id=1701466893]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_007" parent="." index="15" unique_id=1845703931]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_012" parent="." index="16" unique_id=981356449]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_013" parent="." index="17" unique_id=55191077]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_010" parent="." index="18" unique_id=455599291]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_018" parent="." index="19" unique_id=2108987528]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_028" parent="." index="20" unique_id=1185467562]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_022" parent="." index="21" unique_id=1507215233]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_037" parent="." index="22" unique_id=14708022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_038" parent="." index="23" unique_id=729031801]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_039" parent="." index="24" unique_id=179255502]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_041" parent="." index="25" unique_id=339846864]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_026" parent="." index="26" unique_id=582140086]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_002" parent="." index="27" unique_id=1371300937]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_008" parent="." index="28" unique_id=1878591631]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_009" parent="." index="29" unique_id=1752837213]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_001" parent="." index="30" unique_id=1212063928]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_005" parent="." index="31" unique_id=2005893972]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_006" parent="." index="32" unique_id=573256975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_013" parent="." index="33" unique_id=1293951083]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_018" parent="." index="34" unique_id=290537883]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_019" parent="." index="35" unique_id=1013157327]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Vert" parent="." index="36" unique_id=1437930246]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_021" parent="." index="37" unique_id=1526386297]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_025" parent="." index="38" unique_id=1071747892]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_026" parent="." index="39" unique_id=1867505920]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_028" parent="." index="40" unique_id=561305776]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -16.202423, 0)
+
+[node name="Cube_029" parent="." index="41" unique_id=1359727061]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_027" parent="." index="42" unique_id=1508109869]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_032" parent="." index="43" unique_id=1196807560]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_033" parent="." index="44" unique_id=867185451]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_034" parent="." index="45" unique_id=1634988846]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_035" parent="." index="46" unique_id=393387982]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_020" parent="." index="47" unique_id=1645975548]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_023" parent="." index="48" unique_id=938509338]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_024" parent="." index="49" unique_id=527921647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_036" parent="." index="50" unique_id=1017534054]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_037" parent="." index="51" unique_id=2038617317]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_038" parent="." index="52" unique_id=510705378]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_039" parent="." index="53" unique_id=660520198]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_040" parent="." index="54" unique_id=244931356]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_020" parent="." index="55" unique_id=446504701]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_022" parent="." index="56" unique_id=698647607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_023" parent="." index="57" unique_id=1334562130]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_024" parent="." index="58" unique_id=978532229]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_001" parent="." index="59" unique_id=618145413]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_002" parent="." index="60" unique_id=530227449]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_003" parent="." index="61" unique_id=1991815340]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_004" parent="." index="62" unique_id=85321531]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_005" parent="." index="63" unique_id=246557602]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_006" parent="." index="64" unique_id=1702218171]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_008" parent="." index="65" unique_id=2024494013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_009" parent="." index="66" unique_id=1157916974]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Tree_lp_11_010" parent="." index="67" unique_id=676916429]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_030" parent="." index="68" unique_id=1224048877]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cube_031" parent="." index="69" unique_id=1775360966]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Plane_204" parent="." index="70" unique_id=1425596636]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_003" parent="." index="71" unique_id=948441470]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_004" parent="." index="72" unique_id=269789889]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_005" parent="." index="73" unique_id=1603390808]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_006" parent="." index="74" unique_id=864491793]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_009" parent="." index="75" unique_id=34268349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_010" parent="." index="76" unique_id=1171064331]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_011" parent="." index="77" unique_id=332439102]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_012" parent="." index="78" unique_id=1668117030]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_013" parent="." index="79" unique_id=876838071]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_014" parent="." index="80" unique_id=729590357]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_015" parent="." index="81" unique_id=144177725]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_016" parent="." index="82" unique_id=2138545950]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_017" parent="." index="83" unique_id=50143832]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_018" parent="." index="84" unique_id=1864511165]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_019" parent="." index="85" unique_id=678869470]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Icosphere_020" parent="." index="86" unique_id=1687800525]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_001" parent="." index="87" unique_id=1300766077]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_002" parent="." index="88" unique_id=1254136719]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_003" parent="." index="89" unique_id=1251879948]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_004" parent="." index="90" unique_id=1574933982]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_005" parent="." index="91" unique_id=118181596]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_006" parent="." index="92" unique_id=1396007039]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_007" parent="." index="93" unique_id=1840579171]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_008" parent="." index="94" unique_id=1821598534]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_009" parent="." index="95" unique_id=1611875738]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_010" parent="." index="96" unique_id=455764240]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_011" parent="." index="97" unique_id=1451980369]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_012" parent="." index="98" unique_id=1399038483]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_013" parent="." index="99" unique_id=1751807813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_014" parent="." index="100" unique_id=214280845]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_015" parent="." index="101" unique_id=1527567761]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_016" parent="." index="102" unique_id=569624681]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_017" parent="." index="103" unique_id=1270105551]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_018" parent="." index="104" unique_id=1898178353]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_019" parent="." index="105" unique_id=983197085]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_020" parent="." index="106" unique_id=849338961]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_021" parent="." index="107" unique_id=1333547180]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_022" parent="." index="108" unique_id=658942028]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_023" parent="." index="109" unique_id=2011896862]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_024" parent="." index="110" unique_id=582104861]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_025" parent="." index="111" unique_id=1480086608]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_026" parent="." index="112" unique_id=1783746559]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_027" parent="." index="113" unique_id=1704162315]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_028" parent="." index="114" unique_id=106463280]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_029" parent="." index="115" unique_id=450492634]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_030" parent="." index="116" unique_id=180212958]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_031" parent="." index="117" unique_id=980607008]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_032" parent="." index="118" unique_id=340523007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_033" parent="." index="119" unique_id=1773396368]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_034" parent="." index="120" unique_id=1046973849]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_035" parent="." index="121" unique_id=1658049945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_036" parent="." index="122" unique_id=931514111]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_037" parent="." index="123" unique_id=1810514088]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_039" parent="." index="124" unique_id=1243594939]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_040" parent="." index="125" unique_id=684661665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_038" parent="." index="126" unique_id=1716380121]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_041" parent="." index="127" unique_id=577674552]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_042" parent="." index="128" unique_id=122502289]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_043" parent="." index="129" unique_id=44652691]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_044" parent="." index="130" unique_id=1289957121]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_045" parent="." index="131" unique_id=2073420993]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_046" parent="." index="132" unique_id=256180705]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_047" parent="." index="133" unique_id=1509612148]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_048" parent="." index="134" unique_id=1387693222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="GRASS_049" parent="." index="135" unique_id=474789193]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
+
+[node name="Cylinder_005" parent="." index="136" unique_id=1015732740]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.202423, 0)
