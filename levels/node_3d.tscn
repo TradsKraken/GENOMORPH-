@@ -9,7 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://dspfn6lejrk6i" path="res://player/player_(clap).tscn" id="6_qraxk"]
 [ext_resource type="PackedScene" uid="uid://drm37ehmomxl3" path="res://player/Frog.tscn" id="7_4b24i"]
 [ext_resource type="Script" uid="uid://c6s3xvmjwy8bl" path="res://tools/auto_collision_recursive.gd" id="11_auto_col"]
-[ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="12_terrain"]
+[ext_resource type="PackedScene" uid="uid://dmqf2edi0etyf" path="res://Models/Terrain/FINAL TERRAIN THOMAS.glb" id="12_terrain"]
 [ext_resource type="PackedScene" uid="uid://dpxlu8oobmyh8" path="res://enemies/Mosqito.tscn" id="12_x7tiv"]
 [ext_resource type="PackedScene" uid="uid://b5e3g6b4h2p1" path="res://enemies/enemy_spawner.tscn" id="13_oag3d"]
 [ext_resource type="Script" uid="uid://kb1niigjnckw" path="res://levels/tutorial_trigger.gd" id="14_g4oow"]
@@ -53,18 +53,21 @@ light_energy = 1.2
 shadow_enabled = true
 
 [node name="Ground" parent="." unique_id=456649111 instance=ExtResource("12_terrain")]
-transform = Transform3D(-0.32, 0, -4.8318654e-08, 0, 0.32, 0, 4.8318654e-08, 0, -0.32, 0.6908264, -1.001648, 0.42462158)
+transform = Transform3D(-0.74, 0, -1.11736895e-07, 0, 0.74, 0, 1.11736895e-07, 0, -0.74, 0.6908264, -8.351471, 0.42462158)
 script = ExtResource("11_auto_col")
 
-[node name="Tree_lp_11_022" parent="Ground" index="56" unique_id=698647607]
+[node name="Tree_lp_11_022" parent="Ground" index="150" unique_id=23939872]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.931206, 0, 5.1259995e-06)
+
+[node name="GRASS_074" parent="Ground" index="379" unique_id=1518254357]
+transform = Transform3D(-0.27762857, 0, -0.24012755, 0, 0.3670682, 0, 0.24012755, 0, -0.27762857, 50.97146, 10.229657, -121.028366)
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
 transform = Transform3D(0.539961, 0, 0.32456455, 0, 0.63, 0, -0.32456455, 0, 0.539961, -61.7464, 4.2499337, -12.969448)
 script = ExtResource("2_fhumt")
 
 [node name="Frog Player" parent="." unique_id=1867651735 instance=ExtResource("2_player")]
-transform = Transform3D(0.59496784, 0, -0.006173812, 0, 0.59499985, 0, 0.006173812, 0, 0.59496784, -49.984406, 3.8099976, 20.261673)
+transform = Transform3D(0.59496784, 0, -0.006173812, 0, 0.59499985, 0, 0.006173812, 0, 0.59496784, -28.087677, 3.874817, 33.03958)
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=256334508]
 transform = Transform3D(-1, 4.9893366e-08, -7.178714e-08, 0, 0.8211492, 0.5707136, 8.742278e-08, 0.5707136, -0.8211492, 0, 9.776386, 8.207459)
