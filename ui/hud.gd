@@ -7,7 +7,7 @@ extends CanvasLayer
 # ── Colors & Styling ──────────────────────────────────────────────────────────
 
 const C_HP       := Color("#ff3b5c")
-const C_STAM     := Color("#26d97c")
+const C_STAM     := Color("#9400ff")
 const C_EXP      := Color("#ffb31a")
 const C_BG_DARK  := Color(0.04, 0.04, 0.06, 0.65)
 const C_BTN_NORM := Color(0.12, 0.13, 0.18, 0.75)
@@ -112,6 +112,8 @@ func _build_player_status() -> void:
 	badge_bg.shadow_color = Color(0, 0, 0, 0.3)
 	badge_bg.shadow_size = 4
 	badge.add_theme_stylebox_override("panel", badge_bg)
+	badge.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	badge.gui_input.connect(_on_badge_gui_input)
 	_status_group.add_child(badge)
 
 	var lvl_vbox := VBoxContainer.new()
@@ -883,7 +885,16 @@ func _toggle_menu() -> void:
 
 func _open_knowledge_menu() -> void:
 	get_tree().paused = true
-	var menu = preload("res://ui/knowledge_menu.gd").new()
+	var menu = load("res://ui/knowledge_menu.gd").new()
+	_root.add_child(menu)
+	
+func _on_badge_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+		_open_character_menu()
+
+func _open_character_menu() -> void:
+	get_tree().paused = true
+	var menu = load("res://ui/character_menu.gd").new()
 	_root.add_child(menu)
 	
 func _on_knowledge_unlocked(id: String) -> void:

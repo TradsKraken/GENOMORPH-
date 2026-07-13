@@ -19,6 +19,13 @@ var stamina: float     = 100.0
 var level: int         = 1
 var experience: float  = 0.0
 var exp_to_next: float = 100.0
+var skill_points: int  = 0
+
+var attack_power: float = 10.0
+var defense: float = 5.0
+var speed: float = 4.0
+
+var inventory: Array = []
 var genome_fragments: int = 0
 var has_seen_prologue: bool = false
 
@@ -71,6 +78,7 @@ func gain_exp(amount: float) -> void:
 func _do_level_up() -> void:
 	experience -= exp_to_next
 	level += 1
+	skill_points += 1
 	exp_to_next = 100.0 * pow(1.4, level - 1)
 	level_changed.emit(level)
 
@@ -182,6 +190,11 @@ func save_game(slot: int = -1) -> void:
 		"level": level,
 		"experience": experience,
 		"exp_to_next": exp_to_next,
+		"skill_points": skill_points,
+		"attack_power": attack_power,
+		"defense": defense,
+		"speed": speed,
+		"inventory": inventory,
 		"genome_fragments": genome_fragments,
 		"max_genome_fragments": 4, # Default to 4 for now
 		"has_seen_prologue": has_seen_prologue,
@@ -217,6 +230,11 @@ func load_game(slot: int = -1) -> bool:
 				level = data.get("level", 1)
 				experience = data.get("experience", 0.0)
 				exp_to_next = data.get("exp_to_next", 100.0)
+				skill_points = data.get("skill_points", 0)
+				attack_power = data.get("attack_power", 10.0)
+				defense = data.get("defense", 5.0)
+				speed = data.get("speed", 4.0)
+				inventory = data.get("inventory", [])
 				genome_fragments = data.get("genome_fragments", 0)
 				has_seen_prologue = data.get("has_seen_prologue", false)
 				
@@ -244,6 +262,11 @@ func reset_data(slot: int = -1) -> void:
 	level = 1
 	experience = 0.0
 	exp_to_next = 100.0
+	skill_points = 0
+	attack_power = 10.0
+	defense = 5.0
+	speed = 4.0
+	inventory.clear()
 	genome_fragments = 0
 	has_seen_prologue = false
 	unlocked_knowledge.clear()

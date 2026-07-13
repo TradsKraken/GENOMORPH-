@@ -6,7 +6,7 @@ extends Area3D
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 var exp_grant: float = 25.0
-const INTERACT_DIST := 1.5
+const INTERACT_DIST := 3.0
 const MOVE_TOLERANCE:= 0.3
 
 const ORB_COLOR   := Color(1.00, 0.78, 0.06)
