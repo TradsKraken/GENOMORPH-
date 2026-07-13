@@ -61,11 +61,17 @@ func _ready() -> void:
 
 	# ── Spawn game systems at runtime (avoids UID-less .tscn references) ──────
 	if not is_main_menu:
-		var hud_script := load("res://ui/hud.gd") as GDScript
-		if hud_script:
-			var hud: CanvasLayer = hud_script.new()
+		var hud_scene := load("res://ui/hud.tscn") as PackedScene
+		if hud_scene:
+			var hud = hud_scene.instantiate()
 			hud.name = "GameHUD"
 			get_parent().call_deferred("add_child", hud)
+		else:
+			var hud_script := load("res://ui/hud.gd") as GDScript
+			if hud_script:
+				var hud: CanvasLayer = hud_script.new()
+				hud.name = "GameHUD"
+				get_parent().call_deferred("add_child", hud)
 
 		var spawner_script := load("res://levels/orb_spawner.gd") as GDScript
 		if spawner_script:

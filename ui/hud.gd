@@ -63,10 +63,13 @@ func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	add_to_group("hud")
 
-	_root = Control.new()
-	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_root)
+	if has_node("Root"):
+		_root = get_node("Root")
+	else:
+		_root = Control.new()
+		_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_root)
 
 	_build_player_status()
 	_build_action_buttons()
@@ -195,114 +198,121 @@ func _draw():
 func _build_action_buttons() -> void:
 	# 1. Primary Attack Button (Webbed Lunge)
 	# Largest button, outermost bottom-right
-	_attack_btn = _make_circle_btn("🦵", 120, C_BTN_NORM)
+	var attack_is_new = not _root.has_node("AttackBtn")
+	_attack_btn = _make_circle_btn("AttackBtn", "🦵", 120, C_BTN_NORM)
 	_attack_btn.add_theme_font_size_override("font_size", 64)
-	_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
-	_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
-	_attack_btn.set_anchor(SIDE_LEFT, 1.0)
-	_attack_btn.set_anchor(SIDE_TOP, 1.0)
-	_attack_btn.offset_right  = -40
-	_attack_btn.offset_bottom = -40
-	_attack_btn.offset_left   = -160
-	_attack_btn.offset_top    = -160
+	if attack_is_new:
+		_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_attack_btn.set_anchor(SIDE_LEFT, 1.0)
+		_attack_btn.set_anchor(SIDE_TOP, 1.0)
+		_attack_btn.offset_right  = -40
+		_attack_btn.offset_bottom = -40
+		_attack_btn.offset_left   = -160
+		_attack_btn.offset_top    = -160
 	_attack_btn.button_down.connect(func():
 		stop_highlight_attack()
 		Input.action_press("attack")
 	)
 	_attack_btn.button_up.connect(func():   Input.action_release("attack"))
-	_root.add_child(_attack_btn)
 
 	# 2. Skill 1 Button (Sticky Tongue Whip)
 	# Medium, directly to the left of Primary Attack
-	_skill1_btn = _make_circle_btn("👅", 80, C_BTN_NORM)
+	var skill1_is_new = not _root.has_node("Skill1Btn")
+	_skill1_btn = _make_circle_btn("Skill1Btn", "👅", 80, C_BTN_NORM)
 	_skill1_btn.add_theme_font_size_override("font_size", 48)
-	_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
-	_skill1_btn.set_anchor(SIDE_BOTTOM, 1.0)
-	_skill1_btn.set_anchor(SIDE_LEFT, 1.0)
-	_skill1_btn.set_anchor(SIDE_TOP, 1.0)
-	_skill1_btn.offset_right  = -190
-	_skill1_btn.offset_bottom = -60
-	_skill1_btn.offset_left   = -270
-	_skill1_btn.offset_top    = -140
+	if skill1_is_new:
+		_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_skill1_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_skill1_btn.set_anchor(SIDE_LEFT, 1.0)
+		_skill1_btn.set_anchor(SIDE_TOP, 1.0)
+		_skill1_btn.offset_right  = -190
+		_skill1_btn.offset_bottom = -60
+		_skill1_btn.offset_left   = -270
+		_skill1_btn.offset_top    = -140
 	_skill1_btn.button_down.connect(func(): Input.action_press("skill1"))
 	_skill1_btn.button_up.connect(func():   Input.action_release("skill1"))
-	_root.add_child(_skill1_btn)
 
 	# 3. Skill 2 Button (Splashdown Jump)
 	# Medium, directly above Skill 1, forming the center of the UI arc
-	_jump_btn = _make_circle_btn("🦘", 80, C_BTN_NORM)
+	var jump_is_new = not _root.has_node("JumpBtn")
+	_jump_btn = _make_circle_btn("JumpBtn", "🦘", 80, C_BTN_NORM)
 	_jump_btn.add_theme_font_size_override("font_size", 48)
-	_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
-	_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
-	_jump_btn.set_anchor(SIDE_LEFT, 1.0)
-	_jump_btn.set_anchor(SIDE_TOP, 1.0)
-	_jump_btn.offset_right  = -152
-	_jump_btn.offset_bottom = -152
-	_jump_btn.offset_left   = -232
-	_jump_btn.offset_top    = -232
+	if jump_is_new:
+		_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_jump_btn.set_anchor(SIDE_LEFT, 1.0)
+		_jump_btn.set_anchor(SIDE_TOP, 1.0)
+		_jump_btn.offset_right  = -152
+		_jump_btn.offset_bottom = -152
+		_jump_btn.offset_left   = -232
+		_jump_btn.offset_top    = -232
 	_jump_btn.gui_input.connect(_on_jump_btn_input)
-	_root.add_child(_jump_btn)
 
 	# 4. Skill 3 Button (Cutaneous Respiration - Ultimate)
 	# Medium, top of the curved arc (directly above Primary Attack)
-	_skill3_btn = _make_circle_btn("☣️", 80, C_BTN_NORM)
+	var skill3_is_new = not _root.has_node("Skill3Btn")
+	_skill3_btn = _make_circle_btn("Skill3Btn", "☣️", 80, C_BTN_NORM)
 	_skill3_btn.add_theme_font_size_override("font_size", 48)
-	_skill3_btn.set_anchor(SIDE_RIGHT, 1.0)
-	_skill3_btn.set_anchor(SIDE_BOTTOM, 1.0)
-	_skill3_btn.set_anchor(SIDE_LEFT, 1.0)
-	_skill3_btn.set_anchor(SIDE_TOP, 1.0)
-	_skill3_btn.offset_right  = -60
-	_skill3_btn.offset_bottom = -190
-	_skill3_btn.offset_left   = -140
-	_skill3_btn.offset_top    = -270
+	if skill3_is_new:
+		_skill3_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_skill3_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_skill3_btn.set_anchor(SIDE_LEFT, 1.0)
+		_skill3_btn.set_anchor(SIDE_TOP, 1.0)
+		_skill3_btn.offset_right  = -60
+		_skill3_btn.offset_bottom = -190
+		_skill3_btn.offset_left   = -140
+		_skill3_btn.offset_top    = -270
 	_skill3_btn.disabled = true
 	_skill3_btn.modulate = Color(0.5, 0.5, 0.5, 0.5) # Locked visual state
-	_root.add_child(_skill3_btn)
 
 	# 5. Interact Button
-	_interact_btn = _make_circle_btn("🖐️", 70, C_BTN_NORM)
+	var interact_is_new = not _root.has_node("InteractBtn")
+	_interact_btn = _make_circle_btn("InteractBtn", "🖐️", 70, C_BTN_NORM)
 	_interact_btn.add_theme_font_size_override("font_size", 32)
-	_interact_btn.set_anchor(SIDE_RIGHT, 1.0)
-	_interact_btn.set_anchor(SIDE_BOTTOM, 1.0)
-	_interact_btn.set_anchor(SIDE_LEFT, 1.0)
-	_interact_btn.set_anchor(SIDE_TOP, 1.0)
-	_interact_btn.offset_right  = -40
-	_interact_btn.offset_bottom = -300
-	_interact_btn.offset_left   = -110
-	_interact_btn.offset_top    = -370
+	if interact_is_new:
+		_interact_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_interact_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_interact_btn.set_anchor(SIDE_LEFT, 1.0)
+		_interact_btn.set_anchor(SIDE_TOP, 1.0)
+		_interact_btn.offset_right  = -40
+		_interact_btn.offset_bottom = -300
+		_interact_btn.offset_left   = -110
+		_interact_btn.offset_top    = -370
 	_interact_btn.visible = false
 	_interact_btn.pressed.connect(_on_interact_pressed)
-	_root.add_child(_interact_btn)
 
 
 
 	# Menu Button (Top Right)
-	_menu_btn = _make_circle_btn("", 56, C_BTN_NORM)
-	_menu_btn.set_anchor(SIDE_RIGHT, 1.0)
-	_menu_btn.set_anchor(SIDE_TOP, 0.0)
-	_menu_btn.set_anchor(SIDE_LEFT, 1.0)
-	_menu_btn.set_anchor(SIDE_BOTTOM, 0.0)
-	_menu_btn.offset_right  = -24
-	_menu_btn.offset_top    = 24
-	_menu_btn.offset_left   = -24 - 56
-	_menu_btn.offset_bottom = 24 + 56
+	var menu_is_new = not _root.has_node("MenuBtn")
+	_menu_btn = _make_circle_btn("MenuBtn", "", 56, C_BTN_NORM)
+	if menu_is_new:
+		_menu_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_menu_btn.set_anchor(SIDE_TOP, 0.0)
+		_menu_btn.set_anchor(SIDE_LEFT, 1.0)
+		_menu_btn.set_anchor(SIDE_BOTTOM, 0.0)
+		_menu_btn.offset_right  = -24
+		_menu_btn.offset_top    = 24
+		_menu_btn.offset_left   = -24 - 56
+		_menu_btn.offset_bottom = 24 + 56
 	_menu_btn.pressed.connect(_toggle_menu)
 	_menu_btn.draw.connect(_draw_pause_icon)
-	_root.add_child(_menu_btn)
 
 	# Knowledge Button (Top Right, left of Menu Button)
-	_knowledge_btn = _make_circle_btn("📖", 56, C_BTN_NORM)
+	var knowledge_is_new = not _root.has_node("KnowledgeBtn")
+	_knowledge_btn = _make_circle_btn("KnowledgeBtn", "📖", 56, C_BTN_NORM)
 	_knowledge_btn.add_theme_font_size_override("font_size", 28)
-	_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
-	_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
-	_knowledge_btn.set_anchor(SIDE_LEFT, 1.0)
-	_knowledge_btn.set_anchor(SIDE_BOTTOM, 0.0)
-	_knowledge_btn.offset_right  = -24 - 56 - 16
-	_knowledge_btn.offset_top    = 24
-	_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
-	_knowledge_btn.offset_bottom = 24 + 56
+	if knowledge_is_new:
+		_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
+		_knowledge_btn.set_anchor(SIDE_LEFT, 1.0)
+		_knowledge_btn.set_anchor(SIDE_BOTTOM, 0.0)
+		_knowledge_btn.offset_right  = -24 - 56 - 16
+		_knowledge_btn.offset_top    = 24
+		_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
+		_knowledge_btn.offset_bottom = 24 + 56
 	_knowledge_btn.pressed.connect(_open_knowledge_menu)
-	_root.add_child(_knowledge_btn)
 
 
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
@@ -935,9 +945,19 @@ func _make_bar(w: float, h: float, color: Color) -> ProgressBar:
 	return bar
 
 
-func _make_circle_btn(text: String, size: float, bg_col: Color) -> Button:
-	var btn := Button.new()
-	btn.text = text
+func _make_circle_btn(name: String, text: String, size: float, bg_col: Color) -> Button:
+	var btn: Button
+	var is_new = false
+	if _root.has_node(name):
+		btn = _root.get_node(name) as Button
+	else:
+		btn = Button.new()
+		btn.name = name
+		is_new = true
+		
+	if text != "":
+		btn.text = text
+		
 	btn.custom_minimum_size = Vector2(size, size)
 	
 	var normal := StyleBoxFlat.new()
@@ -963,6 +983,10 @@ func _make_circle_btn(text: String, size: float, bg_col: Color) -> Button:
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_stylebox_override("pressed", pressed)
 	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	
+	if is_new:
+		_root.add_child(btn)
+		
 	return btn
 
 func _draw_attack_icon() -> void:

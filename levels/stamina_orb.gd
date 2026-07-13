@@ -7,7 +7,7 @@ extends Area3D
 # ── Constants ─────────────────────────────────────────────────────────────────
 const STAMINA_GRANT := 35.0
 const COLLECT_TIME  := 1.5    # seconds to complete collection
-const INTERACT_DIST := 4.5    # max distance to show ring and allow tap
+const INTERACT_DIST := 2.0    # max distance to show ring and allow tap
 const MOVE_TOLERANCE:= 0.3    # how much player can move before cancelling
 
 const ORB_COLOR     := Color(0.58, 0.00, 1.00)

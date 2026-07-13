@@ -1,0 +1,120 @@
+[gd_scene format=3 uid="uid://cx4vj1g5x4vj"]
+
+[ext_resource type="Script" uid="uid://d3eh7xrsdcw3o" path="res://ui/hud.gd" id="1_hud"]
+
+[node name="GameHUD" type="CanvasLayer" unique_id=1074067742]
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="." unique_id=772453360]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="AttackBtn" type="Button" parent="Root" unique_id=1714451753]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -160.0
+offset_top = -160.0
+offset_right = -40.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 64
+text = "🦵"
+
+[node name="Skill1Btn" type="Button" parent="Root" unique_id=2008274620]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -270.0
+offset_top = -140.0
+offset_right = -190.0
+offset_bottom = -60.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 48
+text = "👅"
+
+[node name="JumpBtn" type="Button" parent="Root" unique_id=306466901]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -232.0
+offset_top = -232.0
+offset_right = -152.0
+offset_bottom = -152.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 48
+text = "🦘"
+
+[node name="Skill3Btn" type="Button" parent="Root" unique_id=213063568]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -270.0
+offset_right = -60.0
+offset_bottom = -190.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 48
+disabled = true
+text = "☣️"
+
+[node name="InteractBtn" type="Button" parent="Root" unique_id=1632529331]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -294.0
+offset_top = -350.0
+offset_right = -224.0
+offset_bottom = -280.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 32
+text = "🖐️"
+
+[node name="MenuBtn" type="Button" parent="Root" unique_id=687239629]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -80.0
+offset_top = 24.0
+offset_right = -24.0
+offset_bottom = 80.0
+grow_horizontal = 0
+
+[node name="KnowledgeBtn" type="Button" parent="Root" unique_id=1708936329]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -152.0
+offset_top = 24.0
+offset_right = -96.0
+offset_bottom = 80.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 28
+text = "📖"

@@ -1,7 +1,7 @@
 class_name MosquitoSwarm
 extends EnemyBase
 
-@export var damage_per_second: float = 5.0
+@export var damage_per_second: float = 2.0
 @export var attack_range: float = 2.0
 
 var _attack_timer: float = 0.0
