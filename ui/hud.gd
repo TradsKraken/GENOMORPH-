@@ -20,7 +20,7 @@ var _hp_bar:     ProgressBar
 var _hp_lbl:     Label
 var _stam_bar:   ProgressBar
 var _stam_lbl:   Label
-var _exp_bar:    ProgressBar
+var _exp_bar:    Control
 var _lvl_lbl:    Label
 var _status_group: Control
 
@@ -152,12 +152,42 @@ func _build_player_status() -> void:
 	stam_box.add_child(_stam_bar)
 	bars_vbox.add_child(stam_box)
 
-	# EXP Bar (Very thin)
-	var exp_box := Control.new()
-	exp_box.custom_minimum_size = Vector2(220, 6)
-	_exp_bar = _make_bar(220, 6, C_EXP)
-	exp_box.add_child(_exp_bar)
-	bars_vbox.add_child(exp_box)
+	# EXP Bar (Radial around badge)
+	var exp_script = GDScript.new()
+	exp_script.source_code = """extends Control
+var max_value: float = 100.0:
+	set(v):
+		max_value = v
+		queue_redraw()
+var value: float = 0.0:
+	set(v):
+		value = v
+		queue_redraw()
+var color: Color = Color.WHITE
+
+func _draw():
+	var center = size / 2.0
+	var radius = size.x / 2.0 + 3.0
+	var start_angle = -PI / 2.0
+	var progress = 0.0
+	if max_value > 0:
+		progress = clamp(value / max_value, 0.0, 1.0)
+	var end_angle = start_angle + progress * PI * 2.0
+	
+	draw_arc(center, radius, 0, PI * 2.0, 64, Color(0.1, 0.1, 0.1, 0.8), 4.0, true)
+	if progress > 0:
+		draw_arc(center, radius, start_angle, end_angle, 64, color, 4.0, true)
+"""
+	exp_script.reload()
+	
+	_exp_bar = Control.new()
+	_exp_bar.set_script(exp_script)
+	_exp_bar.set("color", C_EXP)
+	_exp_bar.custom_minimum_size = Vector2(80, 80)
+	_exp_bar.position = badge.position
+	_exp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_exp_bar.z_index = 1
+	_status_group.add_child(_exp_bar)
 
 
 # ── Action Buttons ────────────────────────────────────────────────────────────
