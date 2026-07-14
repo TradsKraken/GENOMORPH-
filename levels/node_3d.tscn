@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://cnlehuwylep2x" path="res://Models/ASSETS.glb" id="15_i75r5"]
 [ext_resource type="Script" uid="uid://dxdlwxa8t8qti" path="res://levels/prologue_manager.gd" id="15_prologue"]
 [ext_resource type="Texture2D" uid="uid://bf378gxebv5dn" path="res://Models/ASSETS_Lilypad_BaseColor.png" id="16_lls77"]
+[ext_resource type="PackedScene" uid="uid://5y8sfa5eo585" path="res://Models/TRASH_PLANTS ASSETS.glb" id="17_lls77"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -756,25 +757,25 @@ directional_shadow_max_distance = 45.0
 transform = Transform3D(-0.74, 0, -1.11736895e-07, 0, 0.74, 0, 1.11736895e-07, 0, -0.74, 0.6908264, -8.351471, 0.42462158)
 script = ExtResource("11_auto_col")
 
-[node name="2_004" parent="Ground" index="4" unique_id=1832378138]
+[node name="2_004" parent="Ground" index="4" unique_id=106566734]
 transform = Transform3D(0.13904239, 0, 3.5527137e-15, 0, 0.17909488, 0, 0, 0, 0.18819863, 20.005009, 12.139927, 392.4309)
 
-[node name="Tree_lp_11_030" parent="Ground" index="10" unique_id=1620777945]
+[node name="Tree_lp_11_030" parent="Ground" index="10" unique_id=1430361356]
 transform = Transform3D(-0.008205542, 0, 0.30493045, 0, 0.3050411, 0, -0.30493045, 0, -0.008205542, 82.054245, 15.026714, -129.05547)
 
-[node name="Tree_lp_11_022" parent="Ground" index="150" unique_id=23939872]
+[node name="Tree_lp_11_022" parent="Ground" index="150" unique_id=947086346]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.931206, 0, 5.1259995e-06)
 
-[node name="Tree_lp_11_008" parent="Ground" index="223" unique_id=682157021]
+[node name="Tree_lp_11_008" parent="Ground" index="223" unique_id=299698667]
 transform = Transform3D(0.13827032, 0, -0.67526686, 0, 0.6892779, 0, 0.67526686, 0, 0.13827032, 97.15318, 14.936287, 144.37451)
 
-[node name="Tree_lp_11_064" parent="Ground" index="232" unique_id=525592737]
+[node name="Tree_lp_11_064" parent="Ground" index="232" unique_id=1207767360]
 transform = Transform3D(-0.19937584, 0, -0.32449877, 0, 0.38085464, 0, 0.32449877, 0, -0.19937584, 46.09379, 13.966772, -129.80249)
 
-[node name="GRASS_074" parent="Ground" index="379" unique_id=1518254357]
+[node name="GRASS_074" parent="Ground" index="379" unique_id=1579357104]
 transform = Transform3D(-0.27762857, 0, -0.24012755, 0, 0.3670682, 0, 0.24012755, 0, -0.27762857, 50.97146, 10.229657, -121.028366)
 
-[node name="Cylinder_031" parent="Ground" index="616" unique_id=1270537397]
+[node name="Cylinder_031" parent="Ground" index="616" unique_id=379034504]
 transform = Transform3D(0.0029738164, 0, 0.293618, 0, 0.293633, 0, -0.293618, 0, 0.0029738164, 98.56372, 15.705477, -54.303932)
 
 [node name="Frog NPC" parent="." unique_id=980342005 instance=ExtResource("7_4b24i")]
@@ -871,56 +872,56 @@ script = ExtResource("15_prologue")
 [node name="ASSETS" parent="." unique_id=34848698 instance=ExtResource("15_i75r5")]
 transform = Transform3D(-6.119594e-09, 0, 0.14, 0, 0.14, 0, -0.14, 0, -6.119594e-09, -148.92902, -1.3786087, -56.809784)
 
-[node name="Plant_Small" type="MeshInstance3D" parent="ASSETS/Plant_Small" parent_id_path=PackedInt32Array(34848698, 771713707) index="0" unique_id=1333659519]
+[node name="Plant_Small" type="MeshInstance3D" parent="ASSETS/Plant_Small" parent_id_path=PackedInt32Array(34848698, 1856548499) index="0" unique_id=1333659519]
 transform = Transform3D(7.990332, 0, 4.2632564e-13, 0, 7.990332, 0, -4.2632564e-13, 0, 7.990332, -79.89641, -0.32253587, 106.73077)
 mesh = SubResource("ArrayMesh_dbvk5")
 
-[node name="group1143783783" parent="ASSETS" index="2" unique_id=1339857289]
+[node name="group1143783783" parent="ASSETS" index="2" unique_id=1600652425]
 transform = Transform3D(8.207678, -2.0857458, 0, 0, 0, -8.468549, 2.0857458, 8.207678, 0, 0, 0, 0)
 
-[node name="group1279790214" parent="ASSETS" index="4" unique_id=598715199]
+[node name="group1279790214" parent="ASSETS" index="4" unique_id=1476683951]
 transform = Transform3D(8.468549, 0, 0, 0, 0, -8.468549, 0, 8.468549, 0, 0, 47.98155, 0)
 
 [node name="group1279790214" type="MeshInstance3D" parent="ASSETS/group1279790214" index="0" unique_id=1281754401]
 transform = Transform3D(-1.6518689, 0, 8.305881, 8.305881, 0, 1.6518689, 0, 8.468548, 0, -58.21953, 111.3108, 7.5185347)
 mesh = SubResource("ArrayMesh_a6rcn")
 
-[node name="group1637931058" parent="ASSETS" index="6" unique_id=1380514119]
+[node name="group1637931058" parent="ASSETS" index="6" unique_id=382652999]
 transform = Transform3D(8.468549, 0, 0, 0, 0, -8.468549, 0, 8.468549, 0, 2.895996, 0, 0)
 
 [node name="group1637931058" type="MeshInstance3D" parent="ASSETS/group1637931058" index="0" unique_id=153891289]
 transform = Transform3D(5.9608774, 1.5427018, -5.814153, -5.4022403, -2.2272918, -6.1295485, -2.6457756, 8.023444, -0.58363825, -57.334526, 113.162285, -5.3143373)
 mesh = SubResource("ArrayMesh_sa61a")
 
-[node name="group203695626" parent="ASSETS" index="9" unique_id=2119941002]
+[node name="group203695626" parent="ASSETS" index="9" unique_id=1784302605]
 transform = Transform3D(8.468549, 0, 0, 0, 0, -8.468549, 0, 8.468549, 0, 0, 13.975433, 0)
 
 [node name="group203695626" type="MeshInstance3D" parent="ASSETS/group203695626" index="0" unique_id=837725927]
 transform = Transform3D(2.0302207, 7.0598564, 4.213424, -8.20562, 2.01032, 0.5854255, -0.5121676, -4.222953, 7.3226147, -50.12339, 104.34687, -1.1149709)
 mesh = SubResource("ArrayMesh_oiil8")
 
-[node name="group352370893" parent="ASSETS" index="11" unique_id=578560126]
+[node name="group352370893" parent="ASSETS" index="11" unique_id=465271143]
 transform = Transform3D(8.458975, 0.018639809, -0.40213162, -0.40214878, 0.007492138, -8.458992, -0.018263074, 8.468527, 0.008368672, 0, 29.9987, 0)
 
-[node name="group405281105" parent="ASSETS" index="12" unique_id=2133556989]
+[node name="group405281105" parent="ASSETS" index="12" unique_id=568918828]
 transform = Transform3D(8.468549, 0, 0, 0, 0, -8.468549, 0, 8.468549, 0, 0, 61.076824, 0)
 
 [node name="group405281105" type="MeshInstance3D" parent="ASSETS/group405281105" index="0" unique_id=2058129080]
 transform = Transform3D(7.8861656, -2.9088202, 1.0312512, 3.0862124, 7.4328747, -2.635145, 3.4889493e-07, 2.8297472, 7.9817834, -69.47012, 100.51704, 3.57087)
 mesh = SubResource("ArrayMesh_ci02i")
 
-[node name="TreeBranch_429" type="MeshInstance3D" parent="ASSETS/TreeBranch_429" parent_id_path=PackedInt32Array(34848698, 997482538) index="0" unique_id=473006740]
+[node name="TreeBranch_429" type="MeshInstance3D" parent="ASSETS/TreeBranch_429" parent_id_path=PackedInt32Array(34848698, 2017863273) index="0" unique_id=473006740]
 transform = Transform3D(0.99996275, -0.0003909918, 0.00865401, -0.0002753943, -0.9999113, -0.013353837, 0.008658483, 0.013351008, -0.9998735, -463.34674, 947.1856, -47.50264)
 mesh = SubResource("ArrayMesh_ecgkb")
 
-[node name="group104413426" parent="ASSETS" index="17" unique_id=1037406203]
+[node name="group104413426" parent="ASSETS" index="17" unique_id=1348023101]
 transform = Transform3D(12.086759, 5.684342e-14, 0, 0, 0, -12.086759, -5.684342e-14, 12.086759, 0, -6.1035156e-05, 24.64964, 17.66272)
 
 [node name="group104413426" type="MeshInstance3D" parent="ASSETS/group104413426" index="0" unique_id=1742232218]
 transform = Transform3D(10.237749, -3.592922e-07, -6.4248095, -4.710426, 8.219646, -7.5059285, 4.3692174, 8.861547, 6.962221, -27.787165, 66.90378, 1.4423032)
 mesh = SubResource("ArrayMesh_st7wq")
 
-[node name="Circle_003" parent="ASSETS" index="18" unique_id=1855101668]
+[node name="Circle_003" parent="ASSETS" index="18" unique_id=1355782016]
 transform = Transform3D(-0.63560617, 0, -0.42827395, 0, 0.7664291, 0, 0.42827395, 0, -0.63560617, -27.45462, 11.844071, -0.19567871)
 
 [node name="Circle_003" type="MeshInstance3D" parent="ASSETS/Circle_003" index="0" unique_id=544621126]
@@ -950,6 +951,9 @@ mesh = SubResource("ArrayMesh_evb3t")
 [node name="LilyPad2" type="MeshInstance3D" parent="ASSETS" unique_id=1532256947]
 transform = Transform3D(0.9836712, 0.117276326, -0.13651991, -0.1387842, 0.011325374, -0.99025774, -0.114587665, 0.9930353, 0.027416496, -716.23267, 5.3338246, 1043.947)
 mesh = SubResource("ArrayMesh_evb3t")
+
+[node name="TRASH_PLANTS ASSETS" parent="." unique_id=2005333289 instance=ExtResource("17_lls77")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -154.6813, 0, -55.851078)
 
 [editable path="Ground"]
 [editable path="ASSETS"]
