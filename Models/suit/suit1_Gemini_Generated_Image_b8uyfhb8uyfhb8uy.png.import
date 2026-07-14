@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b425g68qctlly"
-path.s3tc="res://.godot/imported/suit1_Gemini_Generated_Image_xvg5cexvg5cexvg5.png-d1152134fef5732ce84b0d9d363e936f.s3tc.ctex"
-path.etc2="res://.godot/imported/suit1_Gemini_Generated_Image_xvg5cexvg5cexvg5.png-d1152134fef5732ce84b0d9d363e936f.etc2.ctex"
+uid="uid://jxf04jhle7dt"
+path.s3tc="res://.godot/imported/suit1_Gemini_Generated_Image_b8uyfhb8uyfhb8uy.png-1fa8f77ddf6c472e02dee1e913ea98a8.s3tc.ctex"
+path.etc2="res://.godot/imported/suit1_Gemini_Generated_Image_b8uyfhb8uyfhb8uy.png-1fa8f77ddf6c472e02dee1e913ea98a8.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "175ad345af57f1324b16b14b5192cf6c"
+"md5": "13f39dbb480450e7f3de33acd77045c1"
 }
 
 [deps]
 
-source_file="res://Models/suit/suit1_Gemini_Generated_Image_xvg5cexvg5cexvg5.png"
-dest_files=["res://.godot/imported/suit1_Gemini_Generated_Image_xvg5cexvg5cexvg5.png-d1152134fef5732ce84b0d9d363e936f.s3tc.ctex", "res://.godot/imported/suit1_Gemini_Generated_Image_xvg5cexvg5cexvg5.png-d1152134fef5732ce84b0d9d363e936f.etc2.ctex"]
+source_file="res://Models/suit/suit1_Gemini_Generated_Image_b8uyfhb8uyfhb8uy.png"
+dest_files=["res://.godot/imported/suit1_Gemini_Generated_Image_b8uyfhb8uyfhb8uy.png-1fa8f77ddf6c472e02dee1e913ea98a8.s3tc.ctex", "res://.godot/imported/suit1_Gemini_Generated_Image_b8uyfhb8uyfhb8uy.png-1fa8f77ddf6c472e02dee1e913ea98a8.etc2.ctex"]
 
 [params]
 
