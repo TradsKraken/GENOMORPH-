@@ -740,6 +740,8 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_2ekr4")
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_qwc0f"]
+
 [node name="Node3D" type="Node3D" unique_id=2040944572]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=191560905]
@@ -950,6 +952,22 @@ mesh = SubResource("ArrayMesh_evb3t")
 [node name="LilyPad2" type="MeshInstance3D" parent="ASSETS" unique_id=1532256947]
 transform = Transform3D(0.9836712, 0.117276326, -0.13651991, -0.1387842, 0.011325374, -0.99025774, -0.114587665, 0.9930353, 0.027416496, -716.23267, 5.3338246, 1043.947)
 mesh = SubResource("ArrayMesh_evb3t")
+
+[node name="tut5" type="Area3D" parent="." unique_id=1942929831]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30.195557, -1.0952454, -68.35043)
+script = ExtResource("14_g4oow")
+trigger_type = 4
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="tut5" unique_id=1929319773]
+transform = Transform3D(24.46, 0, 0, 0, 24.46, 0, 0, 0, 24.46, 0, 5.385254, -5.8897705)
+shape = SubResource("BoxShape3D_qwc0f")
+
+[node name="EnemySpawner" parent="tut5" unique_id=1764864158 instance=ExtResource("13_oag3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.4024734, -0.48861694, -6.853668)
+enemy_scene = ExtResource("2_nap4l")
+respawn_delay = 1.5
+max_spawns = 5
+spawn_asleep_initially = true
 
 [editable path="Ground"]
 [editable path="ASSETS"]
