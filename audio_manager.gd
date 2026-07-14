@@ -1,6 +1,7 @@
 extends Node
 
 var bgm_player: AudioStreamPlayer
+var ambiance_player: AudioStreamPlayer
 var sfx_players: Array[AudioStreamPlayer] = []
 var next_sfx_player: int = 0
 
@@ -17,6 +18,11 @@ func _ready() -> void:
 	bgm_player.bus = "Master"
 	add_child(bgm_player)
 	bgm_player.play()
+	
+	ambiance_player = AudioStreamPlayer.new()
+	ambiance_player.stream = load("res://audio/ambiance.ogg")
+	ambiance_player.bus = "Master"
+	add_child(ambiance_player)
 	
 	# Generate SFX
 	sounds["jump"] = _generate_sfx("jump")
@@ -39,6 +45,10 @@ func play_sfx(sound_name: String, pitch: float = 1.0, volume_db: float = 0.0) ->
 		p.volume_db = volume_db
 		p.play()
 		next_sfx_player = (next_sfx_player + 1) % sfx_players.size()
+
+func play_ambiance() -> void:
+	if ambiance_player and not ambiance_player.playing:
+		ambiance_player.play()
 
 func _generate_bgm() -> AudioStreamWAV:
 	var stream = AudioStreamWAV.new()

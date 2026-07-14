@@ -61,6 +61,9 @@ func _ready() -> void:
 
 	# ── Spawn game systems at runtime (avoids UID-less .tscn references) ──────
 	if not is_main_menu:
+		if AudioManager and AudioManager.has_method("play_ambiance"):
+			AudioManager.play_ambiance()
+			
 		var hud_scene := load("res://ui/hud.tscn") as PackedScene
 		if hud_scene:
 			var hud = hud_scene.instantiate()
