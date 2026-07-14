@@ -7,7 +7,7 @@ extends Area3D
 # ── Constants ─────────────────────────────────────────────────────────────────
 const STAMINA_GRANT := 35.0
 const COLLECT_TIME  := 1.5    # seconds to complete collection
-const INTERACT_DIST := 2.0    # max distance to show ring and allow tap
+const INTERACT_DIST := 3.0    # max distance to show ring and allow tap
 const MOVE_TOLERANCE:= 0.3    # how much player can move before cancelling
 
 const ORB_COLOR     := Color(0.58, 0.00, 1.00)
@@ -26,6 +26,9 @@ var _is_near:        bool  = false
 var _was_near:       bool  = false
 var _bob_time:       float = 0.0
 var _collected:      bool  = false
+var _is_magnetizing: bool = false
+var velocity:        Vector3 = Vector3.ZERO
+var _floor_y:        float = -999.0
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
@@ -35,6 +38,19 @@ func _ready() -> void:
 	_build_mesh()
 	_build_light()
 	_build_collision()
+	call_deferred("_find_floor")
+
+func _find_floor() -> void:
+	var space := get_world_3d().direct_space_state
+	if space:
+		var query := PhysicsRayQueryParameters3D.create(global_position, global_position + Vector3.DOWN * 20.0, 1)
+		var result := space.intersect_ray(query)
+		if result:
+			_floor_y = result.position.y + 0.3
+		else:
+			_floor_y = global_position.y - 1.0
+	else:
+		_floor_y = global_position.y - 1.0
 
 
 func _build_mesh() -> void:
@@ -92,28 +108,43 @@ func _process(delta: float) -> void:
 		if players.size() > 0:
 			_player = players[0] as Node3D
 
-	# Distance check
-	if _player != null:
-		var dist := global_position.distance_to(_player.global_position)
-		_is_near = dist < INTERACT_DIST
+	if _is_magnetizing and _player != null:
+		var target_pos = _player.global_position + Vector3(0, 1.0, 0)
+		var dir = (target_pos - global_position).normalized()
+		global_position += dir * 18.0 * delta
+		if global_position.distance_to(target_pos) < 1.0:
+			_apply_stamina()
 	else:
-		_is_near = false
+		if _player != null:
+			var dist := global_position.distance_to(_player.global_position)
+			_is_near = dist < INTERACT_DIST
+		else:
+			_is_near = false
 
-	# Logic
-	if _is_near and not _was_near:
-		var hud := get_tree().get_first_node_in_group("hud")
-		if hud and hud.has_method("show_interact"):
-			hud.show_interact("Collect", _collect, self)
-	elif not _is_near and _was_near:
-		var hud := get_tree().get_first_node_in_group("hud")
-		if hud and hud.has_method("hide_interact"):
-			hud.hide_interact(self)
+		if _is_near and not _was_near:
+			var hud := get_tree().get_first_node_in_group("hud")
+			if hud and hud.has_method("show_interact"):
+				hud.show_interact("Collect", _collect, self)
+		elif not _is_near and _was_near:
+			var hud := get_tree().get_first_node_in_group("hud")
+			if hud and hud.has_method("hide_interact"):
+				hud.hide_interact(self)
+				
+		_was_near = _is_near
+
+		if velocity.length_squared() > 0.01 or global_position.y > _floor_y:
+			velocity.y -= 25.0 * delta
+			global_position += velocity * delta
+			velocity.x = lerp(velocity.x, 0.0, delta * 2.5)
+			velocity.z = lerp(velocity.z, 0.0, delta * 2.5)
 			
-	_was_near = _is_near
+			if global_position.y <= _floor_y:
+				global_position.y = _floor_y
+				velocity.y = -velocity.y * 0.45
+				if abs(velocity.y) < 2.0:
+					velocity.y = 0.0
 
 	var s := 1.0 + sin(_bob_time * 3.0) * 0.03
-	_mesh.scale = Vector3(s, s, s)
-
 	_mesh.scale = Vector3(s, s, s)
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -130,14 +161,18 @@ func _show_float_text(text: String, color: Color) -> void:
 # ── Collection ────────────────────────────────────────────────────────────────
 
 func _collect() -> void:
-	if _collected:
+	if _is_magnetizing:
 		return
-	_collected  = true
+	_is_magnetizing = true
 	
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("hide_interact"):
 		hud.hide_interact(self)
 
+func _apply_stamina() -> void:
+	if _collected: return
+	_collected = true
+	_is_magnetizing = false
 	PlayerData.gain_stamina(STAMINA_GRANT)
 	_show_float_text("+%d ⚡" % int(STAMINA_GRANT), Color(0.65, 0.30, 1.00))
 

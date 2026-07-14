@@ -3,23 +3,11 @@ extends Node3D
 @export var interact_distance: float = 4.0
 @export var prompt_text: String = "Tap to talk"
 
-var _label: Label3D
 var _anim_player: AnimationPlayer
 var _is_talking: bool = false
-var _can_interact: bool = false
+var _was_near: bool = false
 
 func _ready() -> void:
-	# Create a floating 3D text label above the frog dynamically
-	_label = Label3D.new()
-	_label.text = prompt_text
-	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	_label.no_depth_test = true # Ensure it draws on top of other objects
-	_label.position = Vector3(0, 1.5, 0) # Height above the frog
-	_label.font_size = 100
-	_label.outline_size = 8
-	_label.visible = false
-	add_child(_label)
-
 	# Find the animation player and play the idle animation
 	_anim_player = _find_anim_player(self)
 	if _anim_player:
@@ -30,29 +18,33 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if _is_talking:
-		_label.visible = false
-		_can_interact = false
+		if _was_near:
+			var hud := get_tree().get_first_node_in_group("hud")
+			if hud and hud.has_method("hide_interact"):
+				hud.hide_interact(self)
+			_was_near = false
 		return
 		
-	# Check distance to the player to show/hide the prompt
+	# Check distance to the player
+	var _is_near = false
 	var player = get_tree().get_first_node_in_group("player")
 	if player:
 		var dist = global_position.distance_to(player.global_position)
-		if dist <= interact_distance:
-			_label.visible = true
-			_can_interact = true
-		else:
-			_label.visible = false
-			_can_interact = false
-
-func _unhandled_input(event: InputEvent) -> void:
-	if _can_interact and not _is_talking:
-		if (event is InputEventScreenTouch and event.pressed) or event.is_action_pressed("attack") or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed):
-			_start_dialog()
+		_is_near = dist <= interact_distance
+		
+	if _is_near and not _was_near:
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("show_interact"):
+			hud.show_interact("Talk", _start_dialog, self)
+	elif not _is_near and _was_near:
+		var hud := get_tree().get_first_node_in_group("hud")
+		if hud and hud.has_method("hide_interact"):
+			hud.hide_interact(self)
+			
+	_was_near = _is_near
 
 func _start_dialog() -> void:
 	_is_talking = true
-	_label.visible = false
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("show_subtitle"):
 		hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')

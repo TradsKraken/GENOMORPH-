@@ -374,10 +374,13 @@ func _attack() -> void:
 	_heal_timer = 0.0
 	if animation_player:
 		animation_player.play("FrogArmature|Frog_Attack", 0.1)
+		
+	# Show visual range
+	var attack_range = 4.0
+	_show_attack_range(attack_range, Color(1.0, 0.2, 0.2))
 	
 	# MVP Attack Logic: Damage closest enemy in front
-	var attack_range = 4.0
-	var damage = 5.0
+	var damage = PlayerData.attack_power # Use the new stat
 	var closest_enemy = null
 	var closest_dist = attack_range
 	
@@ -407,9 +410,12 @@ func _skill1() -> void:
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
 	AudioManager.play_sfx("whip", randf_range(0.9, 1.1))
-	# Sticky Tongue Whip: Damage closest enemy at short range
+	
 	var attack_range = 5.0
-	var damage = 10.0
+	_show_attack_range(attack_range, Color(0.2, 0.6, 1.0))
+	
+	# Sticky Tongue Whip: Damage closest enemy at short range
+	var damage = PlayerData.attack_power * 2.0
 	var closest_enemy = null
 	var closest_dist = attack_range
 	
@@ -475,6 +481,36 @@ func _animate_tongue(target_pos: Vector3) -> void:
 	tween.finished.connect(func():
 		tongue_pivot.queue_free()
 	)
+
+func _show_attack_range(radius: float, color: Color) -> void:
+	var mesh_inst = MeshInstance3D.new()
+	var torus = TorusMesh.new()
+	torus.inner_radius = radius - 0.15
+	torus.outer_radius = radius
+	torus.rings = 32
+	torus.ring_segments = 8
+	mesh_inst.mesh = torus
+	
+	var mat = StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(color.r, color.g, color.b, 0.8)
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 2.0
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mesh_inst.material_override = mat
+	
+	get_tree().current_scene.add_child(mesh_inst)
+	mesh_inst.global_position = global_position + Vector3(0, 0.1, 0)
+	
+	# Animate expanding and fading out
+	mesh_inst.scale = Vector3(0.1, 1.0, 0.1)
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(mesh_inst, "scale", Vector3(1.0, 1.0, 1.0), 0.15).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	tween.tween_property(mat, "albedo_color:a", 0.0, 0.35).set_delay(0.05)
+	
+	tween.chain().tween_callback(mesh_inst.queue_free)
 
 
 # ── Animation ────────────────────────────────────────────────────────────────
