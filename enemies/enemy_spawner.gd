@@ -16,6 +16,9 @@ extends Node3D
 ## If >= 0, overrides the spawned enemy's damage_per_second
 @export var enemy_damage_override: float = -1.0
 
+## NodePath to the next objective to point to when this nest is cleared
+@export var next_objective_path: NodePath
+
 var _living_enemies: Array[Node3D] = []
 var _is_nest_cleared: bool = false
 
@@ -90,6 +93,12 @@ func _on_nest_cleared() -> void:
 		if cam:
 			var scr := cam.unproject_position(global_position + Vector3(0, 2.0, 0))
 			hud.show_float_text("NEST CLEARED!", scr, Color.GREEN)
+			
+	if not next_objective_path.is_empty():
+		var next_obj = get_node_or_null(next_objective_path)
+		if next_obj:
+			PlayerData.set_objective(next_obj)
+
 	
 	# The nest is dead, remove the spawner
 	queue_free()

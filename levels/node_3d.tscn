@@ -988,6 +988,7 @@ enemy_scene = ExtResource("2_nap4l")
 respawn_delay = 1.0
 spawn_asleep_initially = true
 enemy_damage_override = 0.5
+next_objective_path = NodePath("../../Frog NPC")
 
 [node name="mosquito1" parent="." unique_id=970387258 instance=ExtResource("12_x7tiv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.66313, 4.021881, -17.946228)

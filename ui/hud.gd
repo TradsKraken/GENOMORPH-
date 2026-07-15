@@ -79,6 +79,7 @@ func _ready() -> void:
 	_build_menu_panel()
 	_build_tutorial_panel()
 	_build_subtitle_panel()
+	_build_objective_arrow()
 	_connect_signals()
 
 func _input(event: InputEvent) -> void:
@@ -592,6 +593,68 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.add_child(_subtitle_label)
 
 	_root.add_child(_subtitle_panel)
+
+func _build_objective_arrow() -> void:
+	var arrow_script = GDScript.new()
+	arrow_script.source_code = """extends Control
+var target_node: Node3D = null
+
+func _process(delta: float) -> void:
+	if not is_instance_valid(target_node):
+		visible = false
+		return
+		
+	var cam = get_viewport().get_camera_3d()
+	if not cam:
+		visible = false
+		return
+		
+	visible = true
+	var center = get_viewport_rect().size / 2.0
+	
+	# Try to find screen pos
+	var is_behind = cam.is_position_behind(target_node.global_position)
+	var screen_pos = cam.unproject_position(target_node.global_position)
+	
+	var dir: Vector2
+	if is_behind:
+		# If behind, push the arrow to the edge of the screen opposite the target
+		dir = (center - screen_pos).normalized()
+	else:
+		dir = (screen_pos - center).normalized()
+		
+	# Place arrow in a circle around center
+	var radius = 200.0
+	position = center + dir * radius
+	rotation = dir.angle() + PI/2.0
+	queue_redraw()
+
+func _draw() -> void:
+	# Draw a sleek triangle pointing UP (which means towards dir since we rotated by dir.angle() + PI/2)
+	var points = PackedVector2Array([
+		Vector2(0, -20),
+		Vector2(-15, 15),
+		Vector2(0, 5),
+		Vector2(15, 15)
+	])
+	var colors = PackedColorArray([Color(0.2, 0.9, 0.3, 0.8), Color(0.1, 0.7, 0.2, 0.8), Color(0.1, 0.7, 0.2, 0.8), Color(0.1, 0.7, 0.2, 0.8)])
+	draw_polygon(points, colors)
+	
+	points.append(Vector2(0, -20))
+	draw_polyline(points, Color.BLACK, 2.0, true)
+"""
+	arrow_script.reload()
+	
+	var arrow = Control.new()
+	arrow.set_script(arrow_script)
+	arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(arrow)
+	
+	PlayerData.objective_changed.connect(func(target):
+		arrow.set("target_node", target)
+	)
+	arrow.set("target_node", PlayerData.current_objective)
+
 
 func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> void:
 	var color_hex = "40c0ff" # Default Sterling blue

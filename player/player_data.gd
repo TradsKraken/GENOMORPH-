@@ -8,6 +8,13 @@ signal health_changed(value: float, maximum: float)
 signal stamina_changed(value: float, maximum: float)
 signal exp_changed(value: float, needed: float)
 signal level_changed(new_level: int)
+signal objective_changed(target_node: Node3D)
+
+var current_objective: Node3D = null
+
+func set_objective(target: Node3D) -> void:
+	current_objective = target
+	objective_changed.emit(target)
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
 var max_health: float  = 100.0
