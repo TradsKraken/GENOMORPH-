@@ -397,6 +397,13 @@ func _attack() -> void:
 		var to_enemy = global_position.direction_to(closest_enemy.global_position)
 		rotation.y = atan2(to_enemy.x, to_enemy.z)
 		
+		# Dash towards enemy if they are further away than 1.5 units
+		if closest_dist > 1.5:
+			var target_pos = closest_enemy.global_position - to_enemy * 1.5
+			target_pos.y = global_position.y
+			var dash_tween = create_tween()
+			dash_tween.tween_property(self, "global_position", target_pos, 0.1)
+		
 		# Deal damage
 		closest_enemy.take_damage(damage)
 	

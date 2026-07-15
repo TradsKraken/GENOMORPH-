@@ -19,13 +19,9 @@ func _ready() -> void:
 	# Center panel
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_panel.custom_minimum_size = Vector2(700, 500)
-	
-	# Center it properly
-	_panel.offset_left = -350
-	_panel.offset_right = 350
-	_panel.offset_top = -250
-	_panel.offset_bottom = 250
 	
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.1, 0.1, 0.15, 0.95)

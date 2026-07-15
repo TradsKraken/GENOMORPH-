@@ -573,17 +573,20 @@ func _build_quest_panel() -> void:
 	_quest_panel.visible = false
 	
 	_quest_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_quest_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_quest_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_quest_panel.custom_minimum_size = Vector2(500, 400)
 	
 	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.05, 0.1, 0.1, 0.95)
-	bg.border_color = Color(0.2, 0.8, 0.5)
-	bg.set_border_width_all(2)
-	bg.set_corner_radius_all(8)
-	bg.content_margin_left = 24
-	bg.content_margin_right = 24
-	bg.content_margin_top = 24
-	bg.content_margin_bottom = 24
+	bg.bg_color = Color(0.03, 0.05, 0.07, 0.95)
+	bg.border_color = Color(0.1, 0.8, 0.9, 0.6)
+	bg.set_border_width_all(1)
+	bg.border_width_top = 4
+	bg.set_corner_radius_all(12)
+	bg.content_margin_left = 32
+	bg.content_margin_right = 32
+	bg.content_margin_top = 32
+	bg.content_margin_bottom = 32
 	_quest_panel.add_theme_stylebox_override("panel", bg)
 	
 	var vbox := VBoxContainer.new()
@@ -594,12 +597,14 @@ func _build_quest_panel() -> void:
 	title.text = "QUEST LOG"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
 	vbox.add_child(title)
 	
 	var desc := RichTextLabel.new()
 	desc.name = "QuestDesc"
 	desc.bbcode_enabled = true
 	desc.fit_content = true
+	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	desc.add_theme_font_size_override("normal_font_size", 18)
 	desc.text = "[color=#aaaaaa]Current Objective:[/color]\n"
 	vbox.add_child(desc)
@@ -835,8 +840,14 @@ func _draw() -> void:
 	arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(arrow)
 	
-	PlayerData.objective_changed.connect(func(target):
-		arrow.set("target_node", target)
+	var update_arrow = func(target):
+		if is_instance_valid(arrow):
+			arrow.set("target_node", target)
+			
+	PlayerData.objective_changed.connect(update_arrow)
+	arrow.tree_exited.connect(func(): 
+		if PlayerData.objective_changed.is_connected(update_arrow):
+			PlayerData.objective_changed.disconnect(update_arrow)
 	)
 	arrow.set("target_node", PlayerData.current_objective)
 

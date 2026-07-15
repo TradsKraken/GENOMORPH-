@@ -18,7 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://bf378gxebv5dn" path="res://Models/ASSETS_Lilypad_BaseColor.png" id="16_lls77"]
 [ext_resource type="PackedScene" uid="uid://5y8sfa5eo585" path="res://Models/TRASH_PLANTS ASSETS.glb" id="17_lls77"]
 [ext_resource type="Texture2D" uid="uid://ct3xcuwlraqke" path="res://Models/TRASH_PLANTS ASSETS_PUSHILIN_Cattail.png" id="18_aetnv"]
-[ext_resource type="Script" path="res://levels/environment_manager.gd" id="99_env_mgr"]
+[ext_resource type="Script" uid="uid://dbm2umm7uj7ac" path="res://levels/environment_manager.gd" id="99_env_mgr"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
