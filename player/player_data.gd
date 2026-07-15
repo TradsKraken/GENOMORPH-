@@ -9,11 +9,21 @@ signal stamina_changed(value: float, maximum: float)
 signal exp_changed(value: float, needed: float)
 signal level_changed(new_level: int)
 signal objective_changed(target_node: Node3D)
+signal genome_collected(current: int, total: int)
 
 var current_objective: Node3D = null
+var current_objective_text: String = ""
 
-func set_objective(target: Node3D) -> void:
+func set_objective(target: Node3D, text: String = "") -> void:
 	current_objective = target
+	
+	if text != "":
+		current_objective_text = text
+	elif target and "objective_text" in target:
+		current_objective_text = target.objective_text
+	else:
+		current_objective_text = ""
+		
 	objective_changed.emit(target)
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
@@ -35,8 +45,13 @@ var speed: float = 4.0
 var inventory: Array = []
 var genome_fragments: int = 0
 var has_seen_prologue: bool = false
+var max_genome_fragments: int = 12
 
 var current_scene_path: String = "res://levels/node_3d.tscn"
+
+func add_genome_fragment() -> void:
+	genome_fragments = mini(genome_fragments + 1, max_genome_fragments)
+	genome_collected.emit(genome_fragments, max_genome_fragments)
 
 
 # ── Stamina API ───────────────────────────────────────────────────────────────
@@ -169,7 +184,7 @@ func get_save_preview(slot: int) -> Dictionary:
 					"biome_name": data.get("biome_name", "Unknown Region"),
 					"active_form": data.get("active_form", "Unknown Form"),
 					"genome_fragments": data.get("genome_fragments", 0),
-					"max_genome_fragments": data.get("max_genome_fragments", 4)
+					"max_genome_fragments": data.get("max_genome_fragments", 12)
 				}
 	return {}
 
@@ -203,7 +218,7 @@ func save_game(slot: int = -1) -> void:
 		"speed": speed,
 		"inventory": inventory,
 		"genome_fragments": genome_fragments,
-		"max_genome_fragments": 4, # Default to 4 for now
+		"max_genome_fragments": max_genome_fragments,
 		"has_seen_prologue": has_seen_prologue,
 		"unlocked_knowledge": unlocked_knowledge,
 		"current_scene_path": current_scene_path,

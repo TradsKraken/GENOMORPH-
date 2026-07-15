@@ -19,6 +19,8 @@ extends Node3D
 ## NodePath to the next objective to point to when this nest is cleared
 @export var next_objective_path: NodePath
 
+@export var objective_text: String = "Clear the mosquito nest"
+
 var _living_enemies: Array[Node3D] = []
 var _is_nest_cleared: bool = false
 

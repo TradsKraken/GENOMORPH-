@@ -34,13 +34,5 @@ func _process(delta: float) -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
-		PlayerData.genome_fragments += 1
-		
-		var hud = get_tree().get_first_node_in_group("hud")
-		if hud and hud.has_method("show_float_text"):
-			var cam = get_viewport().get_camera_3d()
-			if cam:
-				var scr = cam.unproject_position(global_position)
-				hud.show_float_text("GENOME FRAGMENT ACQUIRED", scr, Color(0.2, 1.0, 0.5))
-				
+		PlayerData.add_genome_fragment()
 		queue_free()

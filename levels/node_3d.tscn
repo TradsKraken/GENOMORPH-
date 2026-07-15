@@ -18,6 +18,7 @@
 [ext_resource type="Texture2D" uid="uid://bf378gxebv5dn" path="res://Models/ASSETS_Lilypad_BaseColor.png" id="16_lls77"]
 [ext_resource type="PackedScene" uid="uid://5y8sfa5eo585" path="res://Models/TRASH_PLANTS ASSETS.glb" id="17_lls77"]
 [ext_resource type="Texture2D" uid="uid://ct3xcuwlraqke" path="res://Models/TRASH_PLANTS ASSETS_PUSHILIN_Cattail.png" id="18_aetnv"]
+[ext_resource type="Script" path="res://levels/environment_manager.gd" id="99_env_mgr"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 
@@ -858,6 +859,7 @@ shadow_mesh = SubResource("ArrayMesh_tfa5e")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=191560905]
 environment = SubResource("Environment_1")
+script = ExtResource("99_env_mgr")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=357907381]
 transform = Transform3D(0.7071068, -0.49999994, 0.5000001, 0, 0.70710695, 0.7071067, -0.7071068, -0.49999994, 0.5000001, -7.5842896, 38.17108, 23.704346)
@@ -971,6 +973,7 @@ shape = SubResource("BoxShape3D_qgxk8")
 transform = Transform3D(0.531915, 0, 0, 0, 0.531915, 0, 0, 0, 0.531915, 0, -2.4931886, 0)
 enemy_scene = ExtResource("2_nap4l")
 spawn_asleep_initially = true
+next_objective_path = NodePath("../../Frog NPC")
 
 [node name="tut2" type="Area3D" parent="." unique_id=128122477]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2908325, 0, 49.47048)
@@ -988,7 +991,7 @@ enemy_scene = ExtResource("2_nap4l")
 respawn_delay = 1.0
 spawn_asleep_initially = true
 enemy_damage_override = 0.5
-next_objective_path = NodePath("../../Frog NPC")
+next_objective_path = NodePath("../../tut3")
 
 [node name="mosquito1" parent="." unique_id=970387258 instance=ExtResource("12_x7tiv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48.66313, 4.021881, -17.946228)

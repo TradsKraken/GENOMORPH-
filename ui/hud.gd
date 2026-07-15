@@ -51,6 +51,13 @@ var _subtitle_tween: Tween
 var _jump_highlight_tw: Tween
 var _attack_highlight_tw: Tween
 
+var _quest_tracker_lbl: RichTextLabel
+var _quest_btn: Button
+var _quest_panel: PanelContainer
+var _genome_popup_panel: PanelContainer
+var _genome_popup_label: RichTextLabel
+var _genome_popup_tween: Tween
+
 var _walkthrough_steps: Array = []
 var _current_step_index: int = 0
 var _active_highlight_nodes: Array = []
@@ -80,9 +87,15 @@ func _ready() -> void:
 	_build_tutorial_panel()
 	_build_subtitle_panel()
 	_build_objective_arrow()
+	_build_genome_popup()
 	_connect_signals()
 
 func _input(event: InputEvent) -> void:
+	if _genome_popup_panel and _genome_popup_panel.visible and _genome_popup_panel.modulate.a > 0.5:
+		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+			if event.is_pressed():
+				_hide_genome_popup()
+				
 	if _subtitle_panel and _subtitle_panel.visible and _subtitle_panel.modulate.a > 0.5:
 		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 			if event.is_pressed():
@@ -160,6 +173,17 @@ func _build_player_status() -> void:
 	stam_box.add_child(_stam_bar)
 	bars_vbox.add_child(stam_box)
 
+	# Quest Tracker Label
+	_quest_tracker_lbl = RichTextLabel.new()
+	_quest_tracker_lbl.bbcode_enabled = true
+	_quest_tracker_lbl.fit_content = true
+	_quest_tracker_lbl.scroll_active = false
+	_quest_tracker_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_quest_tracker_lbl.add_theme_font_size_override("normal_font_size", 14)
+	_quest_tracker_lbl.custom_minimum_size = Vector2(300, 20)
+	_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
+	bars_vbox.add_child(_quest_tracker_lbl)
+
 	# EXP Bar (Radial around badge)
 	var exp_script = GDScript.new()
 	exp_script.source_code = """extends Control
@@ -196,9 +220,73 @@ func _draw():
 	_exp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_exp_bar.z_index = 1
 	_status_group.add_child(_exp_bar)
+	
+	_root.add_child(_status_group)
 
+func _build_genome_popup() -> void:
+	_genome_popup_panel = PanelContainer.new()
+	_genome_popup_panel.visible = false
+	_genome_popup_panel.modulate.a = 0.0
+	
+	_genome_popup_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_genome_popup_panel.custom_minimum_size = Vector2(600, 200)
+	
+	_genome_popup_panel.set_anchor(SIDE_LEFT, 0.5)
+	_genome_popup_panel.set_anchor(SIDE_RIGHT, 0.5)
+	_genome_popup_panel.set_anchor(SIDE_TOP, 0.5)
+	_genome_popup_panel.set_anchor(SIDE_BOTTOM, 0.5)
+	_genome_popup_panel.offset_left = -300
+	_genome_popup_panel.offset_right = 300
+	_genome_popup_panel.offset_top = -100
+	_genome_popup_panel.offset_bottom = 100
+	
+	_genome_popup_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.02, 0.1, 0.05, 0.95)
+	bg.border_color = Color(0.2, 1.0, 0.5, 0.8)
+	bg.set_border_width_all(4)
+	bg.set_corner_radius_all(8)
+	bg.content_margin_left   = 32.0
+	bg.content_margin_right  = 32.0
+	bg.content_margin_top    = 48.0
+	bg.content_margin_bottom = 48.0
+	_genome_popup_panel.add_theme_stylebox_override("panel", bg)
+	
+	_genome_popup_label = RichTextLabel.new()
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+	_genome_popup_label.add_theme_font_override("normal_font", tech_font)
+	_genome_popup_label.add_theme_font_override("bold_font", tech_font)
+	_genome_popup_label.bbcode_enabled = true
+	_genome_popup_label.fit_content = true
+	_genome_popup_label.scroll_active = false
+	_genome_popup_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_genome_popup_label.add_theme_font_size_override("normal_font_size", 24)
+	_genome_popup_label.add_theme_font_size_override("bold_font_size", 36)
+	_genome_popup_panel.add_child(_genome_popup_label)
+	
+	_root.add_child(_genome_popup_panel)
 
-# ── Action Buttons ────────────────────────────────────────────────────────────
+func show_genome_popup(current: int, total: int) -> void:
+	var percent = int((float(current) / float(total)) * 100.0)
+	_genome_popup_label.text = "[center][b][color=#33ff88]GENOME FRAGMENT RECOVERED[/color][/b]\n\n[font_size=24]Suit Reconstruction: " + str(percent) + "%[/font_size]\n\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
+	
+	if _genome_popup_tween and _genome_popup_tween.is_valid():
+		_genome_popup_tween.kill()
+		
+	_genome_popup_panel.visible = true
+	_genome_popup_tween = create_tween()
+	_genome_popup_tween.tween_property(_genome_popup_panel, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
+
+func _hide_genome_popup() -> void:
+	if _genome_popup_tween and _genome_popup_tween.is_valid():
+		_genome_popup_tween.kill()
+	_genome_popup_tween = create_tween()
+	_genome_popup_tween.tween_property(_genome_popup_panel, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE)
+	_genome_popup_tween.tween_callback(func(): _genome_popup_panel.visible = false)
+
+# ── Action Buttons (Right / Bottom Right) ────────────────────────────────────────────────────────────
 
 func _build_action_buttons() -> void:
 	# 1. Primary Attack Button (Webbed Lunge)
@@ -342,6 +430,21 @@ func _build_action_buttons() -> void:
 		
 	_knowledge_btn.pressed.connect(_open_knowledge_menu)
 
+	# Quest Button (Top Right, left of Knowledge Button)
+	var quest_is_new = not _root.has_node("QuestBtn")
+	_quest_btn = _make_circle_btn("QuestBtn", "!", 56, C_BTN_NORM)
+	_quest_btn.add_theme_font_size_override("font_size", 28)
+	if quest_is_new:
+		_quest_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_quest_btn.set_anchor(SIDE_TOP, 0.0)
+		_quest_btn.set_anchor(SIDE_LEFT, 1.0)
+		_quest_btn.set_anchor(SIDE_BOTTOM, 0.0)
+		# Position it to the left of knowledge btn (-24 - 56 - 16 - 56 - 16)
+		_quest_btn.offset_right  = -24 - 56 - 16 - 56 - 16
+		_quest_btn.offset_top    = 24
+		_quest_btn.offset_left   = -24 - 56 - 16 - 56 - 16 - 56
+		_quest_btn.offset_bottom = 24 + 56
+	_quest_btn.pressed.connect(_open_quest_menu)
 
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
 
@@ -460,8 +563,68 @@ func _build_menu_panel() -> void:
 
 	_root.add_child(_menu_panel)
 
+func _build_quest_panel() -> void:
+	if has_node("QuestPanel"):
+		_quest_panel = get_node("QuestPanel")
+		return
+		
+	_quest_panel = PanelContainer.new()
+	_quest_panel.name = "QuestPanel"
+	_quest_panel.visible = false
+	
+	_quest_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_quest_panel.custom_minimum_size = Vector2(500, 400)
+	
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.05, 0.1, 0.1, 0.95)
+	bg.border_color = Color(0.2, 0.8, 0.5)
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(8)
+	bg.content_margin_left = 24
+	bg.content_margin_right = 24
+	bg.content_margin_top = 24
+	bg.content_margin_bottom = 24
+	_quest_panel.add_theme_stylebox_override("panel", bg)
+	
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 16)
+	_quest_panel.add_child(vbox)
+	
+	var title := Label.new()
+	title.text = "QUEST LOG"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 24)
+	vbox.add_child(title)
+	
+	var desc := RichTextLabel.new()
+	desc.name = "QuestDesc"
+	desc.bbcode_enabled = true
+	desc.fit_content = true
+	desc.add_theme_font_size_override("normal_font_size", 18)
+	desc.text = "[color=#aaaaaa]Current Objective:[/color]\n"
+	vbox.add_child(desc)
+	
+	var close_btn := Button.new()
+	close_btn.text = "CLOSE"
+	close_btn.custom_minimum_size = Vector2(0, 40)
+	close_btn.pressed.connect(func(): _quest_panel.visible = false)
+	vbox.add_child(close_btn)
+	
+	add_child(_quest_panel)
 
-# ── Tutorial Panel ────────────────────────────────────────────────────────────
+func _open_quest_menu() -> void:
+	if not _quest_panel:
+		_build_quest_panel()
+	
+	var desc = _quest_panel.get_node("VBoxContainer/QuestDesc")
+	if desc:
+		var txt = PlayerData.current_objective_text
+		if txt == "": txt = "No active quest."
+		desc.text = "[color=#aaaaaa]Current Objective:[/color]\n\n" + txt
+		
+	_quest_panel.visible = true
+
+# ── Tutorial / Subtitle Panels ────────────────────────────────────────────────────────────
 
 func _build_tutorial_panel() -> void:
 	_tutorial_panel = PanelContainer.new()
@@ -612,19 +775,41 @@ func _process(delta: float) -> void:
 	visible = true
 	var center = get_viewport_rect().size / 2.0
 	
+	var actual_target: Node3D = target_node
+	if "enemy_scene" in actual_target and actual_target.has_method("_activate_next_enemy"):
+		var enemies = actual_target.get("_living_enemies")
+		if enemies != null and enemies.size() > 0:
+			var best = null
+			for e in enemies:
+				if is_instance_valid(e) and not e.is_queued_for_deletion():
+					if "is_active" in e and e.is_active:
+						best = e
+						break
+			if best == null:
+				for e in enemies:
+					if is_instance_valid(e) and not e.is_queued_for_deletion():
+						best = e
+						break
+			if best != null:
+				actual_target = best
+
 	# Try to find screen pos
-	var is_behind = cam.is_position_behind(target_node.global_position)
-	var screen_pos = cam.unproject_position(target_node.global_position)
+	var is_behind = cam.is_position_behind(actual_target.global_position)
+	var screen_pos = cam.unproject_position(actual_target.global_position)
 	
 	var dir: Vector2
+	var radius = 200.0
+	
 	if is_behind:
 		# If behind, push the arrow to the edge of the screen opposite the target
 		dir = (center - screen_pos).normalized()
 	else:
 		dir = (screen_pos - center).normalized()
+		var dist = center.distance_to(screen_pos)
+		# Bring the arrow closer if the target is near the center, up to a max of 200px
+		radius = min(200.0, max(20.0, dist - 25.0))
 		
-	# Place arrow in a circle around center
-	var radius = 200.0
+	# Place arrow in a circle around center or closer to the target
 	position = center + dir * radius
 	rotation = dir.angle() + PI/2.0
 	queue_redraw()
@@ -903,9 +1088,11 @@ func _connect_signals() -> void:
 	pd.stamina_changed.connect(_on_stamina)
 	pd.exp_changed.connect(_on_exp)
 	pd.level_changed.connect(_on_level)
-	pd.knowledge_unlocked.connect(_on_knowledge_unlocked)
+	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
+	PlayerData.genome_collected.connect(show_genome_popup)
+	PlayerData.objective_changed.connect(_on_objective_changed)
 	
-	# Init
+	# Initial states
 	_hp_bar.max_value   = pd.max_health
 	_hp_bar.value       = pd.health
 	_hp_lbl.text        = "%d / %d" % [roundi(pd.health), roundi(pd.max_health)]
@@ -1001,8 +1188,15 @@ func _on_knowledge_unlocked(id: String) -> void:
 			_knowledge_badge.text = str(_unread_knowledge_count)
 			_knowledge_badge.visible = true
 
+func _on_objective_changed(target: Node3D) -> void:
+	if _quest_tracker_lbl:
+		var txt = PlayerData.current_objective_text
+		if txt == "":
+			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]None[/color]"
+		else:
+			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]" + txt + "[/color]"
 
-# ── Floating Rewards ──────────────────────────────────────────────────────────
+# ── Notifications / Menus ──────────────────────────────────────────────────────────
 
 func show_float_text(text: String, screen_pos: Vector2, color: Color = Color.WHITE) -> void:
 	var lbl := Label.new()

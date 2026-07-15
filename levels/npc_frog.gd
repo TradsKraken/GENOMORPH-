@@ -2,6 +2,7 @@ extends Node3D
 
 @export var interact_distance: float = 4.0
 @export var prompt_text: String = "Tap to talk"
+@export var objective_text: String = "Talk to Lolo Palaka"
 
 var _anim_player: AnimationPlayer
 var _is_talking: bool = false
