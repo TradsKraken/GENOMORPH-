@@ -37,6 +37,8 @@ var _menu_btn:   Button
 var _menu_panel: Control
 var _menu_open:  bool = false
 var _knowledge_btn: Button
+var _knowledge_badge: Label
+var _unread_knowledge_count: int = 0
 
 var _tutorial_panel: PanelContainer
 var _tutorial_title: Label
@@ -314,6 +316,29 @@ func _build_action_buttons() -> void:
 		_knowledge_btn.offset_top    = 24
 		_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
 		_knowledge_btn.offset_bottom = 24 + 56
+		
+	_knowledge_badge = _knowledge_btn.get_node_or_null("NotificationBadge")
+	if not is_instance_valid(_knowledge_badge):
+		_knowledge_badge = Label.new()
+		_knowledge_badge.name = "NotificationBadge"
+		_knowledge_badge.add_theme_font_size_override("font_size", 14)
+		_knowledge_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_knowledge_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		var badge_style = StyleBoxFlat.new()
+		badge_style.bg_color = Color(0.9, 0.2, 0.2)
+		badge_style.corner_radius_top_left = 12
+		badge_style.corner_radius_top_right = 12
+		badge_style.corner_radius_bottom_left = 12
+		badge_style.corner_radius_bottom_right = 12
+		_knowledge_badge.add_theme_stylebox_override("normal", badge_style)
+		_knowledge_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		_knowledge_badge.offset_left = -20
+		_knowledge_badge.offset_right = 4
+		_knowledge_badge.offset_top = -4
+		_knowledge_badge.offset_bottom = 20
+		_knowledge_badge.visible = false
+		_knowledge_btn.add_child(_knowledge_badge)
+		
 	_knowledge_btn.pressed.connect(_open_knowledge_menu)
 
 
@@ -884,6 +909,9 @@ func _toggle_menu() -> void:
 		)
 
 func _open_knowledge_menu() -> void:
+	_unread_knowledge_count = 0
+	if is_instance_valid(_knowledge_badge):
+		_knowledge_badge.visible = false
 	get_tree().paused = true
 	var menu = load("res://ui/knowledge_menu.gd").new()
 	_root.add_child(menu)
@@ -904,6 +932,11 @@ func _on_knowledge_unlocked(id: String) -> void:
 		var icon = data.get("icon", "")
 		var screen_pos = Vector2(get_viewport().size.x / 2.0, 150) # top center
 		show_float_text("NEW KNOWLEDGE: " + icon + " " + title, screen_pos, Color(0.9, 0.8, 0.4))
+		
+		_unread_knowledge_count += 1
+		if is_instance_valid(_knowledge_badge):
+			_knowledge_badge.text = str(_unread_knowledge_count)
+			_knowledge_badge.visible = true
 
 
 # ── Floating Rewards ──────────────────────────────────────────────────────────

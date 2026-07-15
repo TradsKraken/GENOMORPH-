@@ -30,6 +30,7 @@ func _on_body_entered(body: Node3D) -> void:
 		1: # Nest1_Attack
 			if hud.has_method("reveal_attack"): hud.reveal_attack()
 			if hud.has_method("show_subtitle"): hud.show_subtitle("Sterling", "I'm reading an invasive cluster ahead. Mosquito swarm. The ecosystem can't filter them out anymore. Clear them out—a basic strike will disrupt the swarm.")
+			PlayerData.unlock_knowledge("mosquito")
 		2: # Nest2_Dodge
 			if hud.has_method("flash_dodge"): hud.flash_dodge()
 			if hud.has_method("show_subtitle"): hud.show_subtitle("Sterling", "Careful! This cluster is aggressive. Use your form's natural agility to evade before you strike.")
@@ -52,8 +53,8 @@ func _activate_children() -> void:
 			if "is_active" in child:
 				child.is_active = true
 		elif child is EnemySpawner:
-			if is_instance_valid(child._current_enemy) and "is_active" in child._current_enemy:
-				child._current_enemy.is_active = true
+			if child.has_method("activate"):
+				child.activate()
 
 func _start_minigame() -> void:
 	for path in minigame_enemies:

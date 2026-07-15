@@ -87,10 +87,10 @@ func _do_level_up() -> void:
 
 const KNOWLEDGE_DB: Dictionary = {
 	"mosquito": {
-		"title": "Giant Mosquito",
+		"title": "Mosquito",
 		"category": "Species",
 		"icon": "⬡",
-		"desc": "A heavily mutated, blood-sucking insect. It flies in erratic patterns and drains stamina as well as health. Avoid its stinger!"
+		"desc": "Mosquitoes can become highly invasive when introduced to non-native environments. They aggressively outcompete native species for breeding sites in stagnant water and disrupt local food webs. Furthermore, they act as prolific vectors for diseases, which can decimate local wildlife populations that lack natural immunity."
 	},
 	"swamp": {
 		"title": "Toxic Swamp",

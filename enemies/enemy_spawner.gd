@@ -5,54 +5,84 @@ extends Node3D
 @export var respawn_delay: float = 3.0
 
 ## Set to 0 for infinite spawns. Set to a positive number (e.g. 3) to clear a nest after 3 kills.
-@export var max_spawns: int = 0
+@export var max_spawns: int = 3
 
 ## If true, the very first enemy spawned will have is_active = false. It must be woken up by a script or trigger zone. Subsequent respawns will always be active.
 @export var spawn_asleep_initially: bool = false
 
-var _spawn_count: int = 0
-var _current_enemy: Node3D = null
+## Radius to spread out spawned enemies so they don't overlap exactly
+@export var spawn_radius: float = 2.0
+
+## If >= 0, overrides the spawned enemy's damage_per_second
+@export var enemy_damage_override: float = -1.0
+
+var _living_enemies: Array[Node3D] = []
+var _is_nest_cleared: bool = false
 
 func _ready() -> void:
-	_spawn_enemy()
-
-func _spawn_enemy() -> void:
 	if not is_inside_tree() or enemy_scene == null:
 		return
 		
-	# Check if we reached the maximum spawn limit for this nest
-	if max_spawns > 0 and _spawn_count >= max_spawns:
-		_on_nest_cleared()
-		return
+	if max_spawns <= 0:
+		max_spawns = 1
 		
-	_current_enemy = enemy_scene.instantiate()
-	_current_enemy.global_position = global_position
-	if "is_active" in _current_enemy:
-		if _spawn_count == 0 and spawn_asleep_initially:
-			_current_enemy.is_active = false
-		else:
-			_current_enemy.is_active = true
-	get_tree().current_scene.call_deferred("add_child", _current_enemy)
-	
-	_spawn_count += 1
-	
-	# Listen for when the enemy is destroyed (killed)
-	_current_enemy.tree_exited.connect(_on_enemy_died)
+	# Spawn all enemies at once
+	for i in range(max_spawns):
+		_spawn_enemy(i)
+		
+	if not spawn_asleep_initially:
+		_activate_next_enemy()
 
-func _on_enemy_died() -> void:
-	# If the level is reloading, the spawner is not in the tree anymore, so ignore it
-	if not is_inside_tree():
+func _spawn_enemy(index: int) -> void:
+	var enemy = enemy_scene.instantiate()
+	
+	# Position in a circle around the spawner
+	var angle = (float(index) / max_spawns) * TAU
+	var offset = Vector3(cos(angle), 0, sin(angle)) * spawn_radius
+	enemy.global_position = global_position + offset
+	
+	if "is_active" in enemy:
+		enemy.is_active = false # Always start asleep, activate sequentially
+		
+	if enemy_damage_override >= 0.0 and "damage_per_second" in enemy:
+		enemy.damage_per_second = enemy_damage_override
+		
+	get_tree().current_scene.call_deferred("add_child", enemy)
+	
+	_living_enemies.append(enemy)
+	enemy.tree_exited.connect(func(): _on_enemy_died(enemy))
+
+func activate() -> void:
+	_activate_next_enemy()
+
+func _activate_next_enemy() -> void:
+	# Filter out any that were deleted externally or didn't exist
+	_living_enemies = _living_enemies.filter(func(e): return is_instance_valid(e) and not e.is_queued_for_deletion())
+	
+	# Wake up the first alive one
+	if _living_enemies.size() > 0:
+		var next_enemy = _living_enemies[0]
+		if "is_active" in next_enemy:
+			next_enemy.is_active = true
+
+func _on_enemy_died(enemy: Node3D) -> void:
+	_living_enemies.erase(enemy)
+	
+	if not is_inside_tree() or _is_nest_cleared:
 		return
 		
 	var tree = get_tree()
 	if tree == null:
 		return
 		
-	# Start respawn timer
-	var timer = tree.create_timer(respawn_delay)
-	timer.timeout.connect(_spawn_enemy)
+	if _living_enemies.size() > 0:
+		var timer = tree.create_timer(respawn_delay)
+		timer.timeout.connect(_activate_next_enemy)
+	else:
+		_on_nest_cleared()
 
 func _on_nest_cleared() -> void:
+	_is_nest_cleared = true
 	# Give the player visual feedback that the nest is completely destroyed
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("show_float_text"):
