@@ -14,7 +14,7 @@ func _ready() -> void:
 	var bgm_stream = _generate_bgm()
 	bgm_player = AudioStreamPlayer.new()
 	bgm_player.stream = bgm_stream
-	bgm_player.volume_db = -12.0
+	bgm_player.volume_db = -30.0 # Lowered to reduce buzzing hum
 	bgm_player.bus = "Master"
 	add_child(bgm_player)
 	bgm_player.play()
@@ -65,8 +65,8 @@ func _generate_bgm() -> AudioStreamWAV:
 	
 	for i in range(length):
 		var t = float(i) / 22050.0
-		# Simple minor drone chord
-		var val = sin(t * 110.0 * TAU) * 0.2 + sin(t * 130.81 * TAU) * 0.1 + sin(t * 164.81 * TAU) * 0.1
+		# Rounded frequencies to integer or .5 to prevent phase clipping on a 2.0s loop
+		var val = sin(t * 110.0 * TAU) * 0.2 + sin(t * 131.0 * TAU) * 0.1 + sin(t * 165.0 * TAU) * 0.1
 		var sample = int(clampf(val, -1.0, 1.0) * 32767.0)
 		data[i * 2] = sample & 0xFF
 		data[i * 2 + 1] = (sample >> 8) & 0xFF
