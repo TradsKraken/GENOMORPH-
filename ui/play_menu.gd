@@ -45,6 +45,7 @@ func _ready() -> void:
 	
 	_vbox = VBoxContainer.new()
 	_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_vbox.mouse_filter = Control.MOUSE_FILTER_PASS
 	_vbox.add_theme_constant_override("separation", 24)
 	_scroll.add_child(_vbox)
 	
@@ -75,6 +76,7 @@ func _show_main_actions() -> void:
 	new_game_btn.text = "New Game"
 	new_game_btn.add_theme_font_size_override("font_size", 36)
 	new_game_btn.custom_minimum_size = Vector2(0, 80)
+	new_game_btn.mouse_filter = Control.MOUSE_FILTER_PASS
 	new_game_btn.pressed.connect(func():
 		_show_slot_selection(false)
 	)
@@ -84,6 +86,7 @@ func _show_main_actions() -> void:
 	load_game_btn.text = "Load Game"
 	load_game_btn.add_theme_font_size_override("font_size", 36)
 	load_game_btn.custom_minimum_size = Vector2(0, 80)
+	load_game_btn.mouse_filter = Control.MOUSE_FILTER_PASS
 	
 	# Check if ANY slot exists
 	var any_save = false
@@ -108,6 +111,7 @@ func _show_main_actions() -> void:
 	close_btn.text = "Cancel"
 	close_btn.add_theme_font_size_override("font_size", 36)
 	close_btn.custom_minimum_size = Vector2(0, 80)
+	close_btn.mouse_filter = Control.MOUSE_FILTER_PASS
 	close_btn.pressed.connect(func():
 		closed.emit()
 		queue_free()
@@ -120,11 +124,13 @@ func _show_slot_selection(is_loading: bool) -> void:
 	
 	var center := CenterContainer.new()
 	center.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center.mouse_filter = Control.MOUSE_FILTER_PASS
 	
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 24)
 	grid.add_theme_constant_override("v_separation", 24)
+	grid.mouse_filter = Control.MOUSE_FILTER_PASS
 	center.add_child(grid)
 	
 	for i in range(1, 5):
@@ -142,6 +148,7 @@ func _show_slot_selection(is_loading: bool) -> void:
 	back_btn.text = "Back"
 	back_btn.add_theme_font_size_override("font_size", 36)
 	back_btn.custom_minimum_size = Vector2(0, 80)
+	back_btn.mouse_filter = Control.MOUSE_FILTER_PASS
 	back_btn.pressed.connect(_show_main_actions)
 	_vbox.add_child(back_btn)
 
@@ -149,6 +156,7 @@ func _create_save_slot_card(slot_idx: int, preview: Dictionary, is_loading: bool
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(320, 220)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.mouse_filter = Control.MOUSE_FILTER_PASS
 	
 	var is_empty = preview.is_empty()
 	
@@ -168,14 +176,17 @@ func _create_save_slot_card(slot_idx: int, preview: Dictionary, is_loading: bool
 	margin.add_theme_constant_override("margin_right", 20)
 	margin.add_theme_constant_override("margin_top", 20)
 	margin.add_theme_constant_override("margin_bottom", 20)
+	margin.mouse_filter = Control.MOUSE_FILTER_PASS
 	card.add_child(margin)
 	
 	var vbox := VBoxContainer.new()
 	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.mouse_filter = Control.MOUSE_FILTER_PASS
 	margin.add_child(vbox)
 	
 	var header_hbox := HBoxContainer.new()
+	header_hbox.mouse_filter = Control.MOUSE_FILTER_PASS
 	vbox.add_child(header_hbox)
 	
 	var file_lbl := Label.new()
@@ -198,11 +209,13 @@ func _create_save_slot_card(slot_idx: int, preview: Dictionary, is_loading: bool
 	var body_vbox := VBoxContainer.new()
 	body_vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	body_vbox.mouse_filter = Control.MOUSE_FILTER_PASS
 	vbox.add_child(body_vbox)
 	
 	var action_btn := Button.new()
 	action_btn.custom_minimum_size = Vector2(0, 50)
 	action_btn.add_theme_font_size_override("font_size", 24)
+	action_btn.mouse_filter = Control.MOUSE_FILTER_PASS
 	
 	if is_empty:
 		var empty_lbl := Label.new()
