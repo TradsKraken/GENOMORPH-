@@ -55,6 +55,7 @@ func _activate_children() -> void:
 		elif child is EnemySpawner:
 			if child.has_method("activate"):
 				child.activate()
+			PlayerData.set_objective(child)
 
 func _start_minigame() -> void:
 	for path in minigame_enemies:
