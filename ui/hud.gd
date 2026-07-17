@@ -88,7 +88,14 @@ func _ready() -> void:
 	_build_subtitle_panel()
 	_build_objective_arrow()
 	_build_genome_popup()
+
 	_connect_signals()
+
+func _set_owner_recursive(node: Node, r: Node) -> void:
+	if node != r and node.owner == null:
+		node.owner = r
+	for child in node.get_children():
+		_set_owner_recursive(child, r)
 
 func _input(event: InputEvent) -> void:
 	if _genome_popup_panel and _genome_popup_panel.visible and _genome_popup_panel.modulate.a > 0.5:
@@ -108,14 +115,30 @@ func _input(event: InputEvent) -> void:
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
 
 func _build_player_status() -> void:
+	if _root.has_node("StatusGroup"):
+		_status_group = _root.get_node("StatusGroup")
+		var badge = _status_group.get_node("Badge")
+		var bars_vbox = _status_group.get_node("BarsVBox")
+		_hp_bar = bars_vbox.get_node("HpBox/HpBar")
+		_hp_lbl = bars_vbox.get_node("HpBox/HpLbl")
+		_stam_bar = bars_vbox.get_node("StamBox/StamBar")
+		_exp_bar = _status_group.get_node("ExpBar")
+		_lvl_lbl = badge.get_node("LvlVBox/LvlLbl")
+		_quest_tracker_lbl = bars_vbox.get_node("QuestTrackerLbl")
+		if badge and not badge.gui_input.is_connected(_on_badge_gui_input):
+			badge.gui_input.connect(_on_badge_gui_input)
+		return
+
 	# Group container
 	_status_group = Control.new()
+	_status_group.name = "StatusGroup"
 	_status_group.position = Vector2(24, 24)
 	_status_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_status_group)
 
 	# Level Badge (Circular)
 	var badge := PanelContainer.new()
+	badge.name = "Badge"
 	badge.custom_minimum_size = Vector2(80, 80)
 	badge.position = Vector2(0, 0)
 	badge.z_index = 2
@@ -133,21 +156,25 @@ func _build_player_status() -> void:
 	_status_group.add_child(badge)
 
 	var lvl_vbox := VBoxContainer.new()
+	lvl_vbox.name = "LvlVBox"
 	lvl_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	lvl_vbox.add_theme_constant_override("separation", -4)
 	badge.add_child(lvl_vbox)
 
 	var lvl_title := _make_label("LVL", 12, Color(0.7, 0.7, 0.7))
+	lvl_title.name = "LvlTitle"
 	lvl_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lvl_vbox.add_child(lvl_title)
 
 	_lvl_lbl = _make_label("1", 24, Color.WHITE)
+	_lvl_lbl.name = "LvlLbl"
 	_lvl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_lvl_lbl.add_theme_font_override("font", ThemeDB.fallback_font)
 	lvl_vbox.add_child(_lvl_lbl)
 
 	# Bars Container (Offset to the right of the badge)
 	var bars_vbox := VBoxContainer.new()
+	bars_vbox.name = "BarsVBox"
 	bars_vbox.position = Vector2(65, 12)
 	bars_vbox.add_theme_constant_override("separation", 8)
 	bars_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -156,9 +183,12 @@ func _build_player_status() -> void:
 
 	# Health Bar
 	var hp_box := Control.new()
+	hp_box.name = "HpBox"
 	hp_box.custom_minimum_size = Vector2(300, 24)
 	_hp_bar = _make_bar(300, 24, C_HP)
+	_hp_bar.name = "HpBar"
 	_hp_lbl = _make_label("100 / 100", 14, Color.WHITE)
+	_hp_lbl.name = "HpLbl"
 	_hp_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_hp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hp_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -168,13 +198,16 @@ func _build_player_status() -> void:
 
 	# Stamina Bar
 	var stam_box := Control.new()
+	stam_box.name = "StamBox"
 	stam_box.custom_minimum_size = Vector2(220, 16)
 	_stam_bar = _make_bar(220, 16, C_STAM)
+	_stam_bar.name = "StamBar"
 	stam_box.add_child(_stam_bar)
 	bars_vbox.add_child(stam_box)
 
 	# Quest Tracker Label
 	_quest_tracker_lbl = RichTextLabel.new()
+	_quest_tracker_lbl.name = "QuestTrackerLbl"
 	_quest_tracker_lbl.bbcode_enabled = true
 	_quest_tracker_lbl.fit_content = true
 	_quest_tracker_lbl.scroll_active = false
@@ -213,6 +246,7 @@ func _draw():
 	exp_script.reload()
 	
 	_exp_bar = Control.new()
+	_exp_bar.name = "ExpBar"
 	_exp_bar.set_script(exp_script)
 	_exp_bar.set("color", C_EXP)
 	_exp_bar.custom_minimum_size = Vector2(80, 80)
@@ -224,7 +258,13 @@ func _draw():
 	_root.add_child(_status_group)
 
 func _build_genome_popup() -> void:
+	if _root.has_node("GenomePopupPanel"):
+		_genome_popup_panel = _root.get_node("GenomePopupPanel")
+		_genome_popup_label = _genome_popup_panel.get_node("GenomePopupLabel")
+		return
+
 	_genome_popup_panel = PanelContainer.new()
+	_genome_popup_panel.name = "GenomePopupPanel"
 	_genome_popup_panel.visible = false
 	_genome_popup_panel.modulate.a = 0.0
 	
@@ -254,6 +294,7 @@ func _build_genome_popup() -> void:
 	_genome_popup_panel.add_theme_stylebox_override("panel", bg)
 	
 	_genome_popup_label = RichTextLabel.new()
+	_genome_popup_label.name = "GenomePopupLabel"
 	var tech_font := SystemFont.new()
 	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
 	_genome_popup_label.add_theme_font_override("normal_font", tech_font)
@@ -449,10 +490,22 @@ func _build_action_buttons() -> void:
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
 
 func _build_menu_panel() -> void:
+	if _root.has_node("MenuPanel"):
+		_menu_panel = _root.get_node("MenuPanel")
+		var margin = _menu_panel.get_node_or_null("MarginContainer")
+		if margin:
+			var vbox = margin.get_node_or_null("VBoxContainer")
+			if vbox:
+				var btn_resume = vbox.get_node_or_null("BtnResume")
+				if btn_resume and not btn_resume.pressed.is_connected(_toggle_menu):
+					btn_resume.pressed.connect(_toggle_menu)
+		return
+
 	var tech_font := SystemFont.new()
 	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
 
 	_menu_panel = Control.new()
+	_menu_panel.name = "MenuPanel"
 	_menu_panel.visible = false
 	_menu_panel.modulate.a = 0.0
 	
@@ -486,6 +539,7 @@ func _build_menu_panel() -> void:
 	_menu_panel.add_child(borders)
 
 	var margin := MarginContainer.new()
+	margin.name = "MarginContainer"
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 32)
 	margin.add_theme_constant_override("margin_right", 32)
@@ -528,6 +582,7 @@ func _build_menu_panel() -> void:
 		b.add_theme_stylebox_override("pressed", sb_h)
 
 	var btn_resume := _panel_btn("Resume Game")
+	btn_resume.name = "BtnResume"
 	btn_resume.pressed.connect(_toggle_menu)
 	style_btn.call(btn_resume, Color(0.1, 0.9, 0.7))
 	vbox.add_child(btn_resume)
@@ -632,7 +687,18 @@ func _open_quest_menu() -> void:
 # ── Tutorial / Subtitle Panels ────────────────────────────────────────────────────────────
 
 func _build_tutorial_panel() -> void:
+	if _root.has_node("TutorialPanel"):
+		_tutorial_panel = _root.get_node("TutorialPanel")
+		var vbox = _tutorial_panel.get_node("VBoxContainer")
+		_tutorial_title = vbox.get_node("TutorialTitle")
+		_tutorial_desc = vbox.get_node("TutorialDesc")
+		var btn = vbox.get_node_or_null("BtnGotIt")
+		if btn and not btn.pressed.is_connected(_hide_tutorial):
+			btn.pressed.connect(_hide_tutorial)
+		return
+
 	_tutorial_panel = PanelContainer.new()
+	_tutorial_panel.name = "TutorialPanel"
 	_tutorial_panel.visible = false
 	_tutorial_panel.modulate.a = 0.0
 	
@@ -658,21 +724,25 @@ func _build_tutorial_panel() -> void:
 	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
 
 	var vbox := VBoxContainer.new()
+	vbox.name = "VBoxContainer"
 	vbox.add_theme_constant_override("separation", 24)
 	_tutorial_panel.add_child(vbox)
 
 	_tutorial_title = _make_label("TUTORIAL", 24, Color(0.1, 0.9, 0.7))
+	_tutorial_title.name = "TutorialTitle"
 	_tutorial_title.add_theme_font_override("font", tech_font)
 	_tutorial_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(_tutorial_title)
 
 	_tutorial_desc = _make_label("Tutorial text goes here.", 18, Color(0.8, 1.0, 0.9))
+	_tutorial_desc.name = "TutorialDesc"
 	_tutorial_desc.add_theme_font_override("font", tech_font)
 	_tutorial_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_tutorial_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(_tutorial_desc)
 
 	var btn_got_it := _panel_btn("ACKNOWLEDGE", Color(0.1, 0.9, 0.7))
+	btn_got_it.name = "BtnGotIt"
 	btn_got_it.add_theme_font_override("font", tech_font)
 	
 	var sb := StyleBoxFlat.new()
@@ -718,7 +788,13 @@ func _hide_tutorial() -> void:
 # ── Subtitle System ───────────────────────────────────────────────────────────
 
 func _build_subtitle_panel() -> void:
+	if _root.has_node("SubtitlePanel"):
+		_subtitle_panel = _root.get_node("SubtitlePanel")
+		_subtitle_label = _subtitle_panel.get_node("SubtitleLabel")
+		return
+
 	_subtitle_panel = PanelContainer.new()
+	_subtitle_panel.name = "SubtitlePanel"
 	_subtitle_panel.visible = false
 	_subtitle_panel.modulate.a = 0.0
 	
@@ -748,6 +824,7 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.add_theme_stylebox_override("panel", bg)
 
 	_subtitle_label = RichTextLabel.new()
+	_subtitle_label.name = "SubtitleLabel"
 	var tech_font := SystemFont.new()
 	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
 	_subtitle_label.add_theme_font_override("normal_font", tech_font)
@@ -763,6 +840,19 @@ func _build_subtitle_panel() -> void:
 	_root.add_child(_subtitle_panel)
 
 func _build_objective_arrow() -> void:
+	if _root.has_node("ObjectiveArrow"):
+		var arrow = _root.get_node("ObjectiveArrow")
+		var update_arrow = func(target):
+			if is_instance_valid(arrow):
+				arrow.set("target_node", target)
+		PlayerData.objective_changed.connect(update_arrow)
+		arrow.tree_exited.connect(func(): 
+			if PlayerData.objective_changed.is_connected(update_arrow):
+				PlayerData.objective_changed.disconnect(update_arrow)
+		)
+		arrow.set("target_node", PlayerData.current_objective)
+		return
+
 	var arrow_script = GDScript.new()
 	arrow_script.source_code = """extends Control
 var target_node: Node3D = null
@@ -836,6 +926,7 @@ func _draw() -> void:
 	arrow_script.reload()
 	
 	var arrow = Control.new()
+	arrow.name = "ObjectiveArrow"
 	arrow.set_script(arrow_script)
 	arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(arrow)
@@ -979,7 +1070,12 @@ func flash_dodge() -> void:
 # ── Cancel Zone ───────────────────────────────────────────────────────────────
 
 func _build_cancel_zone() -> void:
+	if _root.has_node("CancelZone"):
+		_cancel_zone = _root.get_node("CancelZone")
+		return
+
 	_cancel_zone = Label.new()
+	_cancel_zone.name = "CancelZone"
 	_cancel_zone.text = "X\nCANCEL"
 	_cancel_zone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_cancel_zone.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
