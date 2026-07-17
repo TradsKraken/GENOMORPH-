@@ -490,11 +490,9 @@ func _build_action_buttons() -> void:
 
 func _build_menu_panel() -> void:
 	if _root.has_node("MenuPanel"):
-		_menu_panel = _root.find_child("MenuPanel", true, false)
-		var btn_resume = _root.find_child("BtnResume", true, false)
-		if btn_resume and not btn_resume.pressed.is_connected(_toggle_menu):
-			btn_resume.pressed.connect(_toggle_menu)
-		return
+		var old_menu = _root.get_node("MenuPanel")
+		old_menu.name = "MenuPanel_Old"
+		old_menu.queue_free()
 
 	var tech_font := SystemFont.new()
 	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
@@ -615,8 +613,10 @@ func _build_menu_panel() -> void:
 
 func _build_quest_panel() -> void:
 	if has_node("QuestPanel"):
-		_quest_panel = _root.find_child("QuestPanel", true, false)
-		return
+		var old_quest = find_child("QuestPanel", true, false)
+		if old_quest:
+			old_quest.name = "QuestPanel_Old"
+			old_quest.queue_free()
 		
 	_quest_panel = PanelContainer.new()
 	_quest_panel.name = "QuestPanel"

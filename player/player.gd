@@ -363,11 +363,20 @@ func _trigger_splashdown_aoe() -> void:
 			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
 			hud.show_float_text("SPLASH!", scr, Color.CYAN)
 			
+	var hit_any = false
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if enemy.has_method("take_damage") and not enemy.is_dead:
 			var dist = global_position.distance_to(enemy.global_position)
 			if dist <= splash_radius:
 				enemy.take_damage(splash_damage)
+				_spawn_hit_particles(enemy.global_position, 1.5)
+				hit_any = true
+				
+	if hit_any:
+		_apply_hit_stop(0.08, 0.05)
+		var cam = get_viewport().get_camera_3d()
+		if cam and cam.has_method("add_trauma"):
+			cam.add_trauma(0.6)
 
 func _attack() -> void:
 	_time_since_combat = 0.0
@@ -406,6 +415,11 @@ func _attack() -> void:
 		
 		# Deal damage
 		closest_enemy.take_damage(damage)
+		_spawn_hit_particles(closest_enemy.global_position, 1.0)
+		_apply_hit_stop(0.05, 0.1)
+		var cam = get_viewport().get_camera_3d()
+		if cam and cam.has_method("add_trauma"):
+			cam.add_trauma(0.3)
 	
 	pass
 
@@ -440,6 +454,11 @@ func _skill1() -> void:
 		
 		# Deal damage
 		closest_enemy.take_damage(damage)
+		_spawn_hit_particles(closest_enemy.global_position, 1.2)
+		_apply_hit_stop(0.06, 0.1)
+		var cam = get_viewport().get_camera_3d()
+		if cam and cam.has_method("add_trauma"):
+			cam.add_trauma(0.4)
 		
 		# Visual Tongue Animation
 		_animate_tongue(closest_enemy.global_position)
@@ -519,6 +538,52 @@ func _show_attack_range(radius: float, color: Color) -> void:
 	
 	tween.chain().tween_callback(mesh_inst.queue_free)
 
+
+# ── Game Feel (Juice) ─────────────────────────────────────────────────────────
+
+func _apply_hit_stop(duration: float = 0.05, time_scale: float = 0.1) -> void:
+	Engine.time_scale = time_scale
+	var timer = get_tree().create_timer(duration, true, false, true)
+	timer.timeout.connect(func():
+		Engine.time_scale = 1.0
+	)
+
+func _spawn_hit_particles(pos: Vector3, scale_mult: float = 1.0) -> void:
+	var particles = GPUParticles3D.new()
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color(0.2, 0.9, 0.4) # Bright green slime
+	mat.emission_enabled = true
+	mat.emission = Color(0.2, 0.9, 0.4)
+	mat.emission_energy_multiplier = 2.0
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	
+	var mesh = SphereMesh.new()
+	mesh.radius = 0.1
+	mesh.height = 0.2
+	particles.draw_pass_1 = mesh
+	particles.material_override = mat
+	
+	var p_mat = ParticleProcessMaterial.new()
+	p_mat.direction = Vector3(0, 1, 0)
+	p_mat.spread = 90.0
+	p_mat.initial_velocity_min = 3.0 * scale_mult
+	p_mat.initial_velocity_max = 6.0 * scale_mult
+	p_mat.scale_min = 0.5 * scale_mult
+	p_mat.scale_max = 1.5 * scale_mult
+	p_mat.gravity = Vector3(0, -9.8, 0)
+	
+	particles.process_material = p_mat
+	particles.emitting = true
+	particles.one_shot = true
+	particles.explosiveness = 0.9
+	particles.amount = int(10 * scale_mult)
+	particles.lifetime = 0.6
+	
+	get_tree().current_scene.add_child(particles)
+	particles.global_position = pos
+	
+	var timer = get_tree().create_timer(1.0, false)
+	timer.timeout.connect(particles.queue_free)
 
 # ── Animation ────────────────────────────────────────────────────────────────
 

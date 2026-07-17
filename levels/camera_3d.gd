@@ -35,6 +35,13 @@ var _player: Node3D = null
 var _last_ground_y: float = 0.0
 var _target_ground_y: float = 0.0
 
+var _shake_trauma: float = 0.0
+@export var trauma_decay: float = 1.5
+@export var max_shake_offset: float = 1.0
+
+func add_trauma(amount: float) -> void:
+	_shake_trauma = min(_shake_trauma + amount, 1.0)
+
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
@@ -132,9 +139,21 @@ func _apply_position(weight: float) -> void:
 	)
 	var target_pos := ground_pos + offset
 
-	global_position = global_position.lerp(target_pos, clampf(weight, 0.0, 1.0))
+	var unshifted_pos = global_position.lerp(target_pos, clampf(weight, 0.0, 1.0))
+
+	var shake_offset := Vector3.ZERO
+	if _shake_trauma > 0:
+		var amt = _shake_trauma * _shake_trauma
+		shake_offset = Vector3(
+			randf_range(-1.0, 1.0) * max_shake_offset * amt,
+			randf_range(-1.0, 1.0) * max_shake_offset * amt,
+			randf_range(-1.0, 1.0) * max_shake_offset * amt
+		)
+		_shake_trauma = max(0.0, _shake_trauma - trauma_decay * get_process_delta_time())
+		
+	global_position = unshifted_pos + shake_offset
 
 	# To prevent the camera from swiveling/tilting when the player moves,
-	# we look at a point relative to the camera's CURRENT position.
+	# we look at a point relative to the camera's CURRENT position (excluding shake).
 	# This keeps the camera angle completely rigid while it slides into place.
-	look_at(global_position - offset, Vector3.UP)
+	look_at(unshifted_pos - offset, Vector3.UP)
