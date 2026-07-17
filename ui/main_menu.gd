@@ -168,8 +168,8 @@ func _spawn_background_world() -> void:
 	sub_viewport.handle_input_locally = false
 	sub_viewport_container.add_child(sub_viewport)
 	
-	# Load the 3D world
-	var world_scene = load("res://levels/node_3d.tscn")
+	# Optionally pre-load the world scene in the background
+	var world_scene = load("res://levels/node_3d.scn")
 	var world = world_scene.instantiate()
 	
 	# Find the camera and set it to main menu mode
@@ -263,7 +263,7 @@ func _on_new_game_pressed() -> void:
 		PlayerData.reset_data(slot)
 		_anim_player.play("exit")
 		await _anim_player.animation_finished
-		get_tree().change_scene_to_file("res://levels/node_3d.tscn")
+		get_tree().change_scene_to_file("res://levels/node_3d.scn")
 	)
 	play_menu.load_game.connect(func(slot: int):
 		if PlayerData.has_save_file(slot):

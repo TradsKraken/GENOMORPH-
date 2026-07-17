@@ -3,7 +3,7 @@ extends EditorScript
 
 func _run():
 	print("Starting extraction...")
-	var scene = load("res://levels/node_3d.tscn")
+	var scene = load("res://levels/node_3d.scn")
 	if not scene:
 		print("Failed to load scene.")
 		return
@@ -29,7 +29,7 @@ func _run():
 		var new_scene = PackedScene.new()
 		var pack_err = new_scene.pack(node)
 		if pack_err == OK:
-			var save_err = ResourceSaver.save(new_scene, "res://levels/node_3d.tscn")
+			var save_err = ResourceSaver.save(new_scene, "res://levels/node_3d.scn")
 			if save_err == OK:
 				print("Successfully updated scene. Extracted " + str(saved_count) + " meshes.")
 			else:

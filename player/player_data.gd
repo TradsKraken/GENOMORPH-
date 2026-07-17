@@ -47,7 +47,7 @@ var genome_fragments: int = 0
 var has_seen_prologue: bool = false
 var max_genome_fragments: int = 12
 
-var current_scene_path: String = "res://levels/node_3d.tscn"
+var current_scene_path: String = "res://levels/node_3d.scn"
 
 func add_genome_fragment() -> void:
 	genome_fragments = mini(genome_fragments + 1, max_genome_fragments)
@@ -265,7 +265,9 @@ func load_game(slot: int = -1) -> bool:
 				for k in loaded_knowledge:
 					unlocked_knowledge.append(str(k))
 					
-				current_scene_path = data.get("current_scene_path", "res://levels/node_3d.tscn")
+				current_scene_path = data.get("current_scene_path", "res://levels/node_3d.scn")
+				if current_scene_path == "res://levels/node_3d.tscn":
+					current_scene_path = "res://levels/node_3d.scn"
 				
 				health_changed.emit(health, max_health)
 				stamina_changed.emit(stamina, max_stamina)
@@ -293,7 +295,7 @@ func reset_data(slot: int = -1) -> void:
 	has_seen_prologue = false
 	unlocked_knowledge.clear()
 	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])
-	current_scene_path = "res://levels/node_3d.tscn"
+	current_scene_path = "res://levels/node_3d.scn"
 	
 	health_changed.emit(health, max_health)
 	stamina_changed.emit(stamina, max_stamina)
