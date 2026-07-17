@@ -3,6 +3,7 @@ extends EnemyBase
 
 @export var damage_per_second: float = 2.0
 @export var attack_range: float = 2.0
+@export var aggro_range: float = 15.0
 
 var _attack_timer: float = 0.0
 
@@ -37,10 +38,17 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 var is_active: bool = false
 
 func _process_movement(delta: float) -> void:
-	if not is_active or target == null:
+	if target == null:
 		return
 		
 	var dist = global_position.distance_to(target.global_position)
+	
+	# Wake up if the player is within aggro range
+	if not is_active and dist <= aggro_range:
+		is_active = true
+		
+	if not is_active:
+		return
 	
 	# Always face the target horizontally
 	var face_dir = global_position.direction_to(target.global_position)

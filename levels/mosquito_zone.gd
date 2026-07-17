@@ -8,10 +8,6 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
-		for enemy in get_tree().get_nodes_in_group("enemies"):
-			if enemy is MosquitoSwarm:
-				enemy.is_active = true
-				
 		if not _tutorial_shown:
 			_tutorial_shown = true
 			var hud := get_tree().get_first_node_in_group("hud")
@@ -20,6 +16,4 @@ func _on_body_entered(body: Node3D) -> void:
 
 func _on_body_exited(body: Node3D) -> void:
 	if body.is_in_group("player"):
-		for enemy in get_tree().get_nodes_in_group("enemies"):
-			if enemy is MosquitoSwarm:
-				enemy.is_active = false
+		pass

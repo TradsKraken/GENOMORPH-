@@ -116,15 +116,14 @@ func _input(event: InputEvent) -> void:
 
 func _build_player_status() -> void:
 	if _root.has_node("StatusGroup"):
-		_status_group = _root.get_node("StatusGroup")
-		var badge = _status_group.get_node("Badge")
-		var bars_vbox = _status_group.get_node("BarsVBox")
-		_hp_bar = bars_vbox.get_node("HpBox/HpBar")
-		_hp_lbl = bars_vbox.get_node("HpBox/HpLbl")
-		_stam_bar = bars_vbox.get_node("StamBox/StamBar")
-		_exp_bar = _status_group.get_node("ExpBar")
-		_lvl_lbl = badge.get_node("LvlVBox/LvlLbl")
-		_quest_tracker_lbl = bars_vbox.get_node("QuestTrackerLbl")
+		_status_group = _root.find_child("StatusGroup", true, false)
+		var badge = _root.find_child("Badge", true, false)
+		_hp_bar = _root.find_child("HpBar", true, false)
+		_hp_lbl = _root.find_child("HpLbl", true, false)
+		_stam_bar = _root.find_child("StamBar", true, false)
+		_exp_bar = _root.find_child("ExpBar", true, false)
+		_lvl_lbl = _root.find_child("LvlLbl", true, false)
+		_quest_tracker_lbl = _root.find_child("QuestTrackerLbl", true, false)
 		if badge and not badge.gui_input.is_connected(_on_badge_gui_input):
 			badge.gui_input.connect(_on_badge_gui_input)
 		return
@@ -259,8 +258,8 @@ func _draw():
 
 func _build_genome_popup() -> void:
 	if _root.has_node("GenomePopupPanel"):
-		_genome_popup_panel = _root.get_node("GenomePopupPanel")
-		_genome_popup_label = _genome_popup_panel.get_node("GenomePopupLabel")
+		_genome_popup_panel = _root.find_child("GenomePopupPanel", true, false)
+		_genome_popup_label = _root.find_child("GenomePopupLabel", true, false)
 		return
 
 	_genome_popup_panel = PanelContainer.new()
@@ -447,7 +446,7 @@ func _build_action_buttons() -> void:
 		_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
 		_knowledge_btn.offset_bottom = 24 + 56
 		
-	_knowledge_badge = _knowledge_btn.get_node_or_null("NotificationBadge")
+	_knowledge_badge = _root.find_child("NotificationBadge", true, false)
 	if not is_instance_valid(_knowledge_badge):
 		_knowledge_badge = Label.new()
 		_knowledge_badge.name = "NotificationBadge"
@@ -491,14 +490,10 @@ func _build_action_buttons() -> void:
 
 func _build_menu_panel() -> void:
 	if _root.has_node("MenuPanel"):
-		_menu_panel = _root.get_node("MenuPanel")
-		var margin = _menu_panel.get_node_or_null("MarginContainer")
-		if margin:
-			var vbox = margin.get_node_or_null("VBoxContainer")
-			if vbox:
-				var btn_resume = vbox.get_node_or_null("BtnResume")
-				if btn_resume and not btn_resume.pressed.is_connected(_toggle_menu):
-					btn_resume.pressed.connect(_toggle_menu)
+		_menu_panel = _root.find_child("MenuPanel", true, false)
+		var btn_resume = _root.find_child("BtnResume", true, false)
+		if btn_resume and not btn_resume.pressed.is_connected(_toggle_menu):
+			btn_resume.pressed.connect(_toggle_menu)
 		return
 
 	var tech_font := SystemFont.new()
@@ -620,7 +615,7 @@ func _build_menu_panel() -> void:
 
 func _build_quest_panel() -> void:
 	if has_node("QuestPanel"):
-		_quest_panel = get_node("QuestPanel")
+		_quest_panel = _root.find_child("QuestPanel", true, false)
 		return
 		
 	_quest_panel = PanelContainer.new()
@@ -676,8 +671,8 @@ func _open_quest_menu() -> void:
 	if not _quest_panel:
 		_build_quest_panel()
 	
-	var desc = _quest_panel.get_node("VBoxContainer/QuestDesc")
-	if desc:
+	var desc = _root.find_child("QuestDesc", true, false)
+	if desc and desc is RichTextLabel:
 		var txt = PlayerData.current_objective_text
 		if txt == "": txt = "No active quest."
 		desc.text = "[color=#aaaaaa]Current Objective:[/color]\n\n" + txt
@@ -688,11 +683,10 @@ func _open_quest_menu() -> void:
 
 func _build_tutorial_panel() -> void:
 	if _root.has_node("TutorialPanel"):
-		_tutorial_panel = _root.get_node("TutorialPanel")
-		var vbox = _tutorial_panel.get_node("VBoxContainer")
-		_tutorial_title = vbox.get_node("TutorialTitle")
-		_tutorial_desc = vbox.get_node("TutorialDesc")
-		var btn = vbox.get_node_or_null("BtnGotIt")
+		_tutorial_panel = _root.find_child("TutorialPanel", true, false)
+		_tutorial_title = _root.find_child("TutorialTitle", true, false)
+		_tutorial_desc = _root.find_child("TutorialDesc", true, false)
+		var btn = _root.find_child("BtnGotIt", true, false)
 		if btn and not btn.pressed.is_connected(_hide_tutorial):
 			btn.pressed.connect(_hide_tutorial)
 		return
@@ -789,8 +783,8 @@ func _hide_tutorial() -> void:
 
 func _build_subtitle_panel() -> void:
 	if _root.has_node("SubtitlePanel"):
-		_subtitle_panel = _root.get_node("SubtitlePanel")
-		_subtitle_label = _subtitle_panel.get_node("SubtitleLabel")
+		_subtitle_panel = _root.find_child("SubtitlePanel", true, false)
+		_subtitle_label = _root.find_child("SubtitleLabel", true, false)
 		return
 
 	_subtitle_panel = PanelContainer.new()
@@ -841,7 +835,7 @@ func _build_subtitle_panel() -> void:
 
 func _build_objective_arrow() -> void:
 	if _root.has_node("ObjectiveArrow"):
-		var arrow = _root.get_node("ObjectiveArrow")
+		var arrow = _root.find_child("ObjectiveArrow", true, false)
 		var update_arrow = func(target):
 			if is_instance_valid(arrow):
 				arrow.set("target_node", target)
@@ -1071,7 +1065,7 @@ func flash_dodge() -> void:
 
 func _build_cancel_zone() -> void:
 	if _root.has_node("CancelZone"):
-		_cancel_zone = _root.get_node("CancelZone")
+		_cancel_zone = _root.find_child("CancelZone", true, false)
 		return
 
 	_cancel_zone = Label.new()
@@ -1357,7 +1351,7 @@ func _make_circle_btn(name: String, text: String, size: float, bg_col: Color) ->
 	var btn: Button
 	var is_new = false
 	if _root.has_node(name):
-		btn = _root.get_node(name) as Button
+		btn = _root.find_child(name, true, false) as Button
 	else:
 		btn = Button.new()
 		btn.name = name
