@@ -161,3 +161,83 @@ func _apply_position(weight: float) -> void:
 	# we look at a point relative to the camera's CURRENT position (excluding shake).
 	# This keeps the camera angle completely rigid while it slides into place.
 	look_at(unshifted_pos - offset, Vector3.UP)
+
+	_handle_occlusion(get_process_delta_time())
+
+# ── Occlusion Fading ──────────────────────────────────────────────────────────
+
+var _faded_objects := {}
+
+func _handle_occlusion(delta: float) -> void:
+	if _player == null: return
+	
+	var space_state = _player.get_world_3d().direct_space_state
+	
+	# 1. Reset all targets to fully visible
+	for mesh in _faded_objects.keys():
+		if is_instance_valid(mesh):
+			_faded_objects[mesh].target_alpha = 1.0
+			
+	var current_pos = global_position
+	var target_pos = _player.global_position + Vector3(0, 1.0, 0) # Raycast to player's chest
+	
+	var exclude = [_player.get_rid()]
+	
+	# 2. Cast rays to find all obstructing objects
+	for i in range(5): # Check up to 5 overlapping obstacles
+		var query = PhysicsRayQueryParameters3D.create(current_pos, target_pos)
+		query.exclude = exclude
+		var result = space_state.intersect_ray(query)
+		
+		if result:
+			exclude.append(result.rid)
+			var collider = result.collider
+			if collider is StaticBody3D:
+				var mesh_node = collider.get_parent()
+				if mesh_node is MeshInstance3D:
+					_mark_mesh_for_fade(mesh_node)
+		else:
+			break
+			
+	# 3. Process fading animations
+	var meshes_to_remove = []
+	for mesh in _faded_objects.keys():
+		if not is_instance_valid(mesh):
+			meshes_to_remove.append(mesh)
+			continue
+			
+		var data = _faded_objects[mesh]
+		var all_restored = true
+		
+		for i in range(mesh.mesh.get_surface_count()):
+			var mat = mesh.get_surface_override_material(i)
+			if mat and mat is StandardMaterial3D:
+				mat.albedo_color.a = move_toward(mat.albedo_color.a, data.target_alpha, delta * 3.0) # Fade speed
+				if mat.albedo_color.a < 0.99:
+					all_restored = false
+					
+		# If it's fully opaque again, remove the material overrides to restore performance
+		if data.target_alpha == 1.0 and all_restored:
+			for i in range(mesh.mesh.get_surface_count()):
+				mesh.set_surface_override_material(i, null)
+			meshes_to_remove.append(mesh)
+			
+	# Clean up dictionary
+	for mesh in meshes_to_remove:
+		_faded_objects.erase(mesh)
+
+func _mark_mesh_for_fade(mesh: MeshInstance3D) -> void:
+	if not _faded_objects.has(mesh):
+		if mesh.mesh == null: return
+		
+		for i in range(mesh.mesh.get_surface_count()):
+			var orig_mat = mesh.mesh.surface_get_material(i)
+			if orig_mat is StandardMaterial3D:
+				# Duplicate the material so we only fade this specific tree, not all trees!
+				var new_mat = orig_mat.duplicate()
+				new_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				mesh.set_surface_override_material(i, new_mat)
+				
+		_faded_objects[mesh] = { "target_alpha": 0.15 } # 15% opacity when fully faded
+	else:
+		_faded_objects[mesh].target_alpha = 0.15

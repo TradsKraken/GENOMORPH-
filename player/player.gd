@@ -365,7 +365,7 @@ func _trigger_splashdown_aoe() -> void:
 			
 	var hit_any = false
 	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if enemy.has_method("take_damage") and not enemy.is_dead:
+		if enemy.has_method("take_damage") and not enemy.get("is_dead"):
 			var dist = global_position.distance_to(enemy.global_position)
 			if dist <= splash_radius:
 				enemy.take_damage(splash_damage)
@@ -394,7 +394,7 @@ func _attack() -> void:
 	var closest_dist = attack_range
 	
 	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if enemy.has_method("take_damage") and not enemy.is_dead:
+		if enemy.has_method("take_damage") and not enemy.get("is_dead"):
 			var dist = global_position.distance_to(enemy.global_position)
 			if dist < closest_dist:
 				closest_enemy = enemy
@@ -441,7 +441,7 @@ func _skill1() -> void:
 	var closest_dist = attack_range
 	
 	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if enemy.has_method("take_damage") and not enemy.is_dead:
+		if enemy.has_method("take_damage") and not enemy.get("is_dead"):
 			var dist = global_position.distance_to(enemy.global_position)
 			if dist < closest_dist:
 				closest_enemy = enemy

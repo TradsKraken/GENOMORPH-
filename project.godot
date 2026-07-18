@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="GENOMORPH"
-config/version="0.1.8"
+config/version="0.1.16"
 run/main_scene="res://ui/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://assets/Geno_Icon.png"
@@ -21,6 +21,7 @@ config/icon="res://assets/Geno_Icon.png"
 PlayerData="*res://player/player_data.gd"
 SettingsManager="*res://tools/settings_manager.gd"
 AudioManager="*res://audio/audio_manager.gd"
+EnvironmentManager="*res://levels/environment_manager.gd"
 
 [display]
 
@@ -46,3 +47,6 @@ pointing/emulate_touch_from_mouse=true
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="mobile"
 textures/vram_compression/import_etc2_astc=true
+lights_and_shadows/directional_shadow/size.mobile=4096
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality.mobile=3
+lights_and_shadows/directional_shadow/16_bits=false
