@@ -3,7 +3,7 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://buepn8rg1t4g7"
+uid="uid://cweb5k8nappht"
 path="res://.godot/imported/FINAL TERRAIN LEVEL 1.glb-4a6f12d743477900b0cadb176e8a6671.scn"
 
 [deps]
@@ -35,7 +35,7 @@ animation/fps=30
 animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
-import_script/path=""
+import_script/path="res://tools/terrain_post_import.gd"
 materials/extract=0
 materials/extract_format=0
 materials/extract_path=""

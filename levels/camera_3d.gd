@@ -36,8 +36,12 @@ var _last_ground_y: float = 0.0
 var _target_ground_y: float = 0.0
 
 var _shake_trauma: float = 0.0
+
+@export_group("Screen Shake")
+## How fast the camera stops shaking (higher = stops faster)
 @export var trauma_decay: float = 1.5
-@export var max_shake_offset: float = 1.0
+## The maximum distance the camera can shake. Lower this for a less intense shake.
+@export var max_shake_offset: float = 0.3
 
 func add_trauma(amount: float) -> void:
 	_shake_trauma = min(_shake_trauma + amount, 1.0)

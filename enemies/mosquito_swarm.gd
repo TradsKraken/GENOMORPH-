@@ -9,6 +9,9 @@ var _attack_timer: float = 0.0
 
 func _ready() -> void:
 	super._ready()
+	# Flying enemies need Floating mode so they don't get stuck on terrain!
+	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
+	
 	# Override base values
 	max_health = 100.0
 	health = max_health
@@ -56,15 +59,53 @@ func _process_movement(delta: float) -> void:
 	if face_dir.length_squared() > 0.001:
 		face_dir = face_dir.normalized()
 		look_at(global_position + face_dir, Vector3.UP)
-		# Some models face +Z (backwards) by default. To fix this, you could rotate the mesh by 180 deg (PI) around Y,
-		# but standard look_at assumes -Z is forward. We'll stick to standard look_at.
 	
 	# Move towards target (skip if passive)
 	if not is_passive and dist > attack_range * 0.9:
+		# --- OBSTACLE AVOIDANCE ---
+		var move_dir = face_dir
+		var space_state = get_world_3d().direct_space_state
+		var ray_length = 3.0
+		
+		var exclude_rids = [self.get_rid()]
+		if target is CollisionObject3D:
+			exclude_rids.append(target.get_rid())
+			
+		var forward_query = PhysicsRayQueryParameters3D.create(global_position, global_position + face_dir * ray_length)
+		forward_query.exclude = exclude_rids
+		
+		# If straight path is blocked, find the best alternative direction
+		if space_state.intersect_ray(forward_query):
+			var best_dir = face_dir
+			var best_score = -999.0
+			
+			# Check 12 directions in a circle
+			for i in range(12):
+				var angle = i * (TAU / 12.0)
+				var dir = Vector3(cos(angle), 0, sin(angle))
+				var score = dir.dot(face_dir) # Prefer moving towards target
+				
+				var query = PhysicsRayQueryParameters3D.create(global_position, global_position + dir * ray_length)
+				query.exclude = exclude_rids
+				var result = space_state.intersect_ray(query)
+				
+				if result:
+					var dist_to_hit = global_position.distance_to(result.position)
+					score -= (ray_length - dist_to_hit) * 5.0 # Heavy penalty if blocked
+					
+				if score > best_score:
+					best_score = score
+					best_dir = dir
+					
+			move_dir = best_dir.normalized()
+		
 		# Slight vertical bobbing
 		var target_y = target.global_position.y + 1.0
+		if space_state.intersect_ray(forward_query):
+			target_y += 2.5 # Fly up to get over the obstacle!
+			
 		var y_diff = target_y - global_position.y
-		velocity = Vector3(face_dir.x * speed, y_diff * 2.0, face_dir.z * speed)
+		velocity = Vector3(move_dir.x * speed, y_diff * 2.0, move_dir.z * speed)
 		
 		move_and_slide()
 	else:
