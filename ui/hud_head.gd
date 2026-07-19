@@ -1,4 +1,3 @@
-﻿class_name GameHUD
 extends CanvasLayer
 
 ## Clean, modern game HUD.

@@ -1,7 +1,7 @@
-[gd_scene format=4]
+[gd_scene format=4 uid="uid://cx4vj1g5x4vj"]
 
-[ext_resource type="Script" path="res://ui/hud.gd" id="1_276te"]
-[ext_resource type="Shader" path="res://ui/scanlines.gdshader" id="2_546lt"]
+[ext_resource type="Script" uid="uid://d3eh7xrsdcw3o" path="res://ui/hud.gd" id="1_276te"]
+[ext_resource type="Shader" uid="uid://1v1r7fud6vev" path="res://ui/scanlines.gdshader" id="2_546lt"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7ihmi"]
 bg_color = Color(0.08, 0.08, 0.1, 0.9)
@@ -16,6 +16,7 @@ corner_radius_bottom_right = 40
 corner_radius_bottom_left = 40
 shadow_color = Color(0, 0, 0, 0.3)
 shadow_size = 4
+shadow_offset = Vector2(0, 4)
 
 [sub_resource type="Image" id="Image_en2x2"]
 data = {
@@ -67,6 +68,9 @@ data = PackedByteArray("d09GMgABAAAAAPpkABEAAAACT2gAAPoBAAEAAAAAAAAAAAAAAAAAAAAA
 font_name = "Open Sans SemiBold"
 style_name = "SemiBold"
 font_weight = 600
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
 cache/0/variation_coordinates = {}
 cache/0/face_index = 0
 cache/0/embolden = 0.0
@@ -83,212 +87,212 @@ cache/0/16/0/underline_thickness = 0.390625
 cache/0/16/0/scale = 1.0
 cache/0/16/0/textures/0/offsets = PackedInt32Array(252, 0, 4, 16, 242, 16, 14, 19, 20, 35, 236, 16)
 cache/0/16/0/textures/0/image = SubResource("Image_q43x7")
-cache/0/16/0/glyphs/47/advance = Vector2(8.703125, 21.796875)
+cache/0/16/0/glyphs/47/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/47/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/47/size = Vector2(10, 14)
 cache/0/16/0/glyphs/47/uv_rect = Rect2(1, 1, 10, 14)
 cache/0/16/0/glyphs/47/texture_idx = 0
-cache/0/16/0/glyphs/57/advance = Vector2(9.96875, 21.796875)
+cache/0/16/0/glyphs/57/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/57/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/57/size = Vector2(12, 14)
 cache/0/16/0/glyphs/57/uv_rect = Rect2(13, 1, 12, 14)
 cache/0/16/0/glyphs/57/texture_idx = 0
-cache/0/16/0/glyphs/20/advance = Vector2(9.15625, 21.796875)
+cache/0/16/0/glyphs/20/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/20/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/20/size = Vector2(8, 14)
 cache/0/16/0/glyphs/20/uv_rect = Rect2(27, 1, 8, 14)
 cache/0/16/0/glyphs/20/texture_idx = 0
-cache/0/16/0/glyphs/19/advance = Vector2(9.15625, 21.796875)
+cache/0/16/0/glyphs/19/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/19/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/19/size = Vector2(11, 14)
 cache/0/16/0/glyphs/19/uv_rect = Rect2(37, 1, 11, 14)
 cache/0/16/0/glyphs/19/texture_idx = 0
-cache/0/16/0/glyphs/3/advance = Vector2(4.15625, 21.796875)
+cache/0/16/0/glyphs/3/advance = Vector2(4, 22)
 cache/0/16/0/glyphs/3/offset = Vector2(0, 0)
 cache/0/16/0/glyphs/3/size = Vector2(0, 0)
 cache/0/16/0/glyphs/3/uv_rect = Rect2(0, 0, 0, 0)
 cache/0/16/0/glyphs/3/texture_idx = -1
-cache/0/16/0/glyphs/18/advance = Vector2(6.25, 21.796875)
+cache/0/16/0/glyphs/18/advance = Vector2(6, 22)
 cache/0/16/0/glyphs/18/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/18/size = Vector2(9, 14)
 cache/0/16/0/glyphs/18/uv_rect = Rect2(50, 1, 9, 14)
 cache/0/16/0/glyphs/18/texture_idx = 0
-cache/0/16/0/glyphs/38/advance = Vector2(10.140625, 21.796875)
+cache/0/16/0/glyphs/38/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/38/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/38/size = Vector2(12, 14)
 cache/0/16/0/glyphs/38/uv_rect = Rect2(61, 1, 12, 14)
 cache/0/16/0/glyphs/38/texture_idx = 0
-cache/0/16/0/glyphs/88/advance = Vector2(10.171875, 21.796875)
+cache/0/16/0/glyphs/88/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/88/offset = Vector2(0, -10)
 cache/0/16/0/glyphs/88/size = Vector2(10, 11)
 cache/0/16/0/glyphs/88/uv_rect = Rect2(75, 1, 10, 11)
 cache/0/16/0/glyphs/88/texture_idx = 0
-cache/0/16/0/glyphs/85/advance = Vector2(6.90625, 21.796875)
+cache/0/16/0/glyphs/85/advance = Vector2(7, 22)
 cache/0/16/0/glyphs/85/offset = Vector2(0, -10)
 cache/0/16/0/glyphs/85/size = Vector2(8, 11)
 cache/0/16/0/glyphs/85/uv_rect = Rect2(87, 1, 8, 11)
 cache/0/16/0/glyphs/85/texture_idx = 0
-cache/0/16/0/glyphs/72/advance = Vector2(9.21875, 21.796875)
+cache/0/16/0/glyphs/72/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/72/offset = Vector2(-1, -10)
 cache/0/16/0/glyphs/72/size = Vector2(11, 11)
 cache/0/16/0/glyphs/72/uv_rect = Rect2(97, 1, 11, 11)
 cache/0/16/0/glyphs/72/texture_idx = 0
-cache/0/16/0/glyphs/81/advance = Vector2(10.171875, 21.796875)
+cache/0/16/0/glyphs/81/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/81/offset = Vector2(0, -10)
 cache/0/16/0/glyphs/81/size = Vector2(10, 11)
 cache/0/16/0/glyphs/81/uv_rect = Rect2(110, 1, 10, 11)
 cache/0/16/0/glyphs/81/texture_idx = 0
-cache/0/16/0/glyphs/87/advance = Vector2(6.328125, 21.796875)
+cache/0/16/0/glyphs/87/advance = Vector2(6, 22)
 cache/0/16/0/glyphs/87/offset = Vector2(-1, -12)
 cache/0/16/0/glyphs/87/size = Vector2(8, 13)
 cache/0/16/0/glyphs/87/uv_rect = Rect2(122, 1, 8, 13)
 cache/0/16/0/glyphs/87/texture_idx = 0
-cache/0/16/0/glyphs/52/advance = Vector2(12.59375, 21.796875)
+cache/0/16/0/glyphs/52/advance = Vector2(13, 22)
 cache/0/16/0/glyphs/52/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/52/size = Vector2(14, 17)
 cache/0/16/0/glyphs/52/uv_rect = Rect2(1, 17, 14, 17)
 cache/0/16/0/glyphs/52/texture_idx = 0
-cache/0/16/0/glyphs/86/advance = Vector2(7.796875, 21.796875)
+cache/0/16/0/glyphs/86/advance = Vector2(8, 22)
 cache/0/16/0/glyphs/86/offset = Vector2(-1, -10)
 cache/0/16/0/glyphs/86/size = Vector2(10, 11)
 cache/0/16/0/glyphs/86/uv_rect = Rect2(132, 1, 10, 11)
 cache/0/16/0/glyphs/86/texture_idx = 0
-cache/0/16/0/glyphs/29/advance = Vector2(4.390625, 21.796875)
+cache/0/16/0/glyphs/29/advance = Vector2(4, 22)
 cache/0/16/0/glyphs/29/offset = Vector2(0, -10)
 cache/0/16/0/glyphs/29/size = Vector2(5, 11)
 cache/0/16/0/glyphs/29/uv_rect = Rect2(144, 1, 5, 11)
 cache/0/16/0/glyphs/29/texture_idx = 0
-cache/0/16/0/glyphs/4/advance = Vector2(4.40625, 21.796875)
+cache/0/16/0/glyphs/4/advance = Vector2(4, 22)
 cache/0/16/0/glyphs/4/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/4/size = Vector2(5, 14)
 cache/0/16/0/glyphs/4/uv_rect = Rect2(151, 1, 5, 14)
 cache/0/16/0/glyphs/4/texture_idx = 0
-cache/0/16/0/glyphs/59/advance = Vector2(9.96875, 21.796875)
+cache/0/16/0/glyphs/59/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/59/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/59/size = Vector2(12, 14)
 cache/0/16/0/glyphs/59/uv_rect = Rect2(158, 1, 12, 14)
 cache/0/16/0/glyphs/59/texture_idx = 0
-cache/0/16/0/glyphs/36/advance = Vector2(10.578125, 21.796875)
+cache/0/16/0/glyphs/36/advance = Vector2(11, 22)
 cache/0/16/0/glyphs/36/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/36/size = Vector2(13, 14)
 cache/0/16/0/glyphs/36/uv_rect = Rect2(172, 1, 13, 14)
 cache/0/16/0/glyphs/36/texture_idx = 0
-cache/0/16/0/glyphs/49/advance = Vector2(12.53125, 21.796875)
+cache/0/16/0/glyphs/49/advance = Vector2(13, 22)
 cache/0/16/0/glyphs/49/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/49/size = Vector2(13, 14)
 cache/0/16/0/glyphs/49/uv_rect = Rect2(187, 1, 13, 14)
 cache/0/16/0/glyphs/49/texture_idx = 0
-cache/0/16/0/glyphs/40/advance = Vector2(8.9375, 21.796875)
+cache/0/16/0/glyphs/40/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/40/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/40/size = Vector2(9, 14)
 cache/0/16/0/glyphs/40/uv_rect = Rect2(202, 1, 9, 14)
 cache/0/16/0/glyphs/40/texture_idx = 0
-cache/0/16/0/glyphs/51/advance = Vector2(9.84375, 21.796875)
+cache/0/16/0/glyphs/51/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/51/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/51/size = Vector2(11, 14)
 cache/0/16/0/glyphs/51/uv_rect = Rect2(213, 1, 11, 14)
 cache/0/16/0/glyphs/51/texture_idx = 0
-cache/0/16/0/glyphs/56/advance = Vector2(11.890625, 21.796875)
+cache/0/16/0/glyphs/56/advance = Vector2(12, 22)
 cache/0/16/0/glyphs/56/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/56/size = Vector2(12, 14)
 cache/0/16/0/glyphs/56/uv_rect = Rect2(226, 1, 12, 14)
 cache/0/16/0/glyphs/56/texture_idx = 0
-cache/0/16/0/glyphs/54/advance = Vector2(8.796875, 21.796875)
+cache/0/16/0/glyphs/54/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/54/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/54/size = Vector2(11, 14)
 cache/0/16/0/glyphs/54/uv_rect = Rect2(240, 1, 11, 14)
 cache/0/16/0/glyphs/54/texture_idx = 0
-cache/0/16/0/glyphs/39/advance = Vector2(11.734375, 21.796875)
+cache/0/16/0/glyphs/39/advance = Vector2(12, 22)
 cache/0/16/0/glyphs/39/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/39/size = Vector2(12, 14)
 cache/0/16/0/glyphs/39/uv_rect = Rect2(17, 17, 12, 14)
 cache/0/16/0/glyphs/39/texture_idx = 0
-cache/0/16/0/glyphs/53/advance = Vector2(10.21875, 21.796875)
+cache/0/16/0/glyphs/53/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/53/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/53/size = Vector2(12, 14)
 cache/0/16/0/glyphs/53/uv_rect = Rect2(31, 17, 12, 14)
 cache/0/16/0/glyphs/53/texture_idx = 0
-cache/0/16/0/glyphs/80/advance = Vector2(15.265625, 21.796875)
+cache/0/16/0/glyphs/80/advance = Vector2(15, 22)
 cache/0/16/0/glyphs/80/offset = Vector2(0, -10)
 cache/0/16/0/glyphs/80/size = Vector2(16, 11)
 cache/0/16/0/glyphs/80/uv_rect = Rect2(45, 17, 16, 11)
 cache/0/16/0/glyphs/80/texture_idx = 0
-cache/0/16/0/glyphs/42/advance = Vector2(11.609375, 21.796875)
+cache/0/16/0/glyphs/42/advance = Vector2(12, 22)
 cache/0/16/0/glyphs/42/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/42/size = Vector2(13, 14)
 cache/0/16/0/glyphs/42/uv_rect = Rect2(63, 17, 13, 14)
 cache/0/16/0/glyphs/42/texture_idx = 0
-cache/0/16/0/glyphs/68/advance = Vector2(9.28125, 21.796875)
+cache/0/16/0/glyphs/68/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/68/offset = Vector2(-1, -10)
 cache/0/16/0/glyphs/68/size = Vector2(11, 11)
 cache/0/16/0/glyphs/68/uv_rect = Rect2(78, 17, 11, 11)
 cache/0/16/0/glyphs/68/texture_idx = 0
-cache/0/16/0/glyphs/76/advance = Vector2(4.46875, 21.796875)
+cache/0/16/0/glyphs/76/advance = Vector2(4, 22)
 cache/0/16/0/glyphs/76/offset = Vector2(0, -14)
 cache/0/16/0/glyphs/76/size = Vector2(5, 15)
 cache/0/16/0/glyphs/76/uv_rect = Rect2(91, 17, 5, 15)
 cache/0/16/0/glyphs/76/texture_idx = 0
-cache/0/16/0/glyphs/74/advance = Vector2(8.875, 21.796875)
+cache/0/16/0/glyphs/74/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/74/offset = Vector2(-1, -10)
 cache/0/16/0/glyphs/74/size = Vector2(11, 15)
 cache/0/16/0/glyphs/74/uv_rect = Rect2(98, 17, 11, 15)
 cache/0/16/0/glyphs/74/texture_idx = 0
-cache/0/16/0/glyphs/89/advance = Vector2(8.546875, 21.796875)
+cache/0/16/0/glyphs/89/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/89/offset = Vector2(-1, -10)
 cache/0/16/0/glyphs/89/size = Vector2(11, 11)
 cache/0/16/0/glyphs/89/uv_rect = Rect2(111, 17, 11, 11)
 cache/0/16/0/glyphs/89/texture_idx = 0
-cache/0/16/0/glyphs/48/advance = Vector2(14.75, 21.796875)
+cache/0/16/0/glyphs/48/advance = Vector2(15, 22)
 cache/0/16/0/glyphs/48/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/48/size = Vector2(15, 14)
 cache/0/16/0/glyphs/48/uv_rect = Rect2(124, 17, 15, 14)
 cache/0/16/0/glyphs/48/texture_idx = 0
-cache/0/16/0/glyphs/55/advance = Vector2(9.046875, 21.796875)
+cache/0/16/0/glyphs/55/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/55/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/55/size = Vector2(11, 14)
 cache/0/16/0/glyphs/55/uv_rect = Rect2(141, 17, 11, 14)
 cache/0/16/0/glyphs/55/texture_idx = 0
-cache/0/16/0/glyphs/50/advance = Vector2(12.59375, 21.796875)
+cache/0/16/0/glyphs/50/advance = Vector2(13, 22)
 cache/0/16/0/glyphs/50/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/50/size = Vector2(14, 14)
 cache/0/16/0/glyphs/50/uv_rect = Rect2(154, 17, 14, 14)
 cache/0/16/0/glyphs/50/texture_idx = 0
-cache/0/16/0/glyphs/44/advance = Vector2(4.890625, 21.796875)
+cache/0/16/0/glyphs/44/advance = Vector2(5, 22)
 cache/0/16/0/glyphs/44/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/44/size = Vector2(5, 14)
 cache/0/16/0/glyphs/44/uv_rect = Rect2(170, 17, 5, 14)
 cache/0/16/0/glyphs/44/texture_idx = 0
-cache/0/16/0/glyphs/82/advance = Vector2(9.765625, 21.796875)
+cache/0/16/0/glyphs/82/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/82/offset = Vector2(-1, -10)
 cache/0/16/0/glyphs/82/size = Vector2(11, 11)
 cache/0/16/0/glyphs/82/uv_rect = Rect2(177, 17, 11, 11)
 cache/0/16/0/glyphs/82/texture_idx = 0
-cache/0/16/0/glyphs/79/advance = Vector2(4.46875, 21.796875)
+cache/0/16/0/glyphs/79/advance = Vector2(4, 22)
 cache/0/16/0/glyphs/79/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/79/size = Vector2(5, 14)
 cache/0/16/0/glyphs/79/uv_rect = Rect2(190, 17, 5, 14)
 cache/0/16/0/glyphs/79/texture_idx = 0
-cache/0/16/0/glyphs/91/advance = Vector2(8.8125, 21.796875)
+cache/0/16/0/glyphs/91/advance = Vector2(9, 22)
 cache/0/16/0/glyphs/91/offset = Vector2(-1, -10)
 cache/0/16/0/glyphs/91/size = Vector2(11, 11)
 cache/0/16/0/glyphs/91/uv_rect = Rect2(197, 17, 11, 11)
 cache/0/16/0/glyphs/91/texture_idx = 0
-cache/0/16/0/glyphs/75/advance = Vector2(10.171875, 21.796875)
+cache/0/16/0/glyphs/75/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/75/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/75/size = Vector2(10, 14)
 cache/0/16/0/glyphs/75/uv_rect = Rect2(210, 17, 10, 14)
 cache/0/16/0/glyphs/75/texture_idx = 0
-cache/0/16/0/glyphs/17/advance = Vector2(4.390625, 21.796875)
+cache/0/16/0/glyphs/17/advance = Vector2(4, 22)
 cache/0/16/0/glyphs/17/offset = Vector2(0, -4)
 cache/0/16/0/glyphs/17/size = Vector2(5, 5)
 cache/0/16/0/glyphs/17/uv_rect = Rect2(222, 17, 5, 5)
 cache/0/16/0/glyphs/17/texture_idx = 0
-cache/0/16/0/glyphs/46/advance = Vector2(10.21875, 21.796875)
+cache/0/16/0/glyphs/46/advance = Vector2(10, 22)
 cache/0/16/0/glyphs/46/offset = Vector2(0, -13)
 cache/0/16/0/glyphs/46/size = Vector2(12, 14)
 cache/0/16/0/glyphs/46/uv_rect = Rect2(229, 17, 12, 14)
 cache/0/16/0/glyphs/46/texture_idx = 0
-cache/0/16/0/glyphs/58/advance = Vector2(15.125, 21.796875)
+cache/0/16/0/glyphs/58/advance = Vector2(15, 22)
 cache/0/16/0/glyphs/58/offset = Vector2(-1, -13)
 cache/0/16/0/glyphs/58/size = Vector2(18, 14)
 cache/0/16/0/glyphs/58/uv_rect = Rect2(1, 36, 18, 14)
@@ -300,12 +304,12 @@ cache/0/12/0/underline_thickness = 0.296875
 cache/0/12/0/scale = 1.0
 cache/0/12/0/textures/0/offsets = PackedInt32Array(22, 0, 234, 13)
 cache/0/12/0/textures/0/image = SubResource("Image_en2x2")
-cache/0/12/0/glyphs/47/advance = Vector2(6.515625, 16.34375)
+cache/0/12/0/glyphs/47/advance = Vector2(7, 16)
 cache/0/12/0/glyphs/47/offset = Vector2(0, -10)
 cache/0/12/0/glyphs/47/size = Vector2(8, 11)
 cache/0/12/0/glyphs/47/uv_rect = Rect2(1, 1, 8, 11)
 cache/0/12/0/glyphs/47/texture_idx = 0
-cache/0/12/0/glyphs/57/advance = Vector2(7.484375, 16.34375)
+cache/0/12/0/glyphs/57/advance = Vector2(7, 16)
 cache/0/12/0/glyphs/57/offset = Vector2(-1, -10)
 cache/0/12/0/glyphs/57/size = Vector2(10, 11)
 cache/0/12/0/glyphs/57/uv_rect = Rect2(11, 1, 10, 11)
@@ -329,92 +333,92 @@ cache/0/14/0/underline_thickness = 0.34375
 cache/0/14/0/scale = 1.0
 cache/0/14/0/textures/0/offsets = PackedInt32Array(176, 0, 80, 14, 15, 14, 241, 17)
 cache/0/14/0/textures/0/image = SubResource("Image_1v5rv")
-cache/0/14/0/glyphs/20/advance = Vector2(8, 19.0625)
+cache/0/14/0/glyphs/20/advance = Vector2(8, 19)
 cache/0/14/0/glyphs/20/offset = Vector2(0, -11)
 cache/0/14/0/glyphs/20/size = Vector2(7, 12)
 cache/0/14/0/glyphs/20/uv_rect = Rect2(1, 1, 7, 12)
 cache/0/14/0/glyphs/20/texture_idx = 0
-cache/0/14/0/glyphs/19/advance = Vector2(8, 19.0625)
+cache/0/14/0/glyphs/19/advance = Vector2(8, 19)
 cache/0/14/0/glyphs/19/offset = Vector2(-1, -11)
 cache/0/14/0/glyphs/19/size = Vector2(10, 12)
 cache/0/14/0/glyphs/19/uv_rect = Rect2(10, 1, 10, 12)
 cache/0/14/0/glyphs/19/texture_idx = 0
-cache/0/14/0/glyphs/3/advance = Vector2(3.640625, 19.0625)
+cache/0/14/0/glyphs/3/advance = Vector2(4, 19)
 cache/0/14/0/glyphs/3/offset = Vector2(0, 0)
 cache/0/14/0/glyphs/3/size = Vector2(0, 0)
 cache/0/14/0/glyphs/3/uv_rect = Rect2(0, 0, 0, 0)
 cache/0/14/0/glyphs/3/texture_idx = -1
-cache/0/14/0/glyphs/18/advance = Vector2(5.46875, 19.0625)
+cache/0/14/0/glyphs/18/advance = Vector2(5, 19)
 cache/0/14/0/glyphs/18/offset = Vector2(-1, -11)
 cache/0/14/0/glyphs/18/size = Vector2(8, 12)
 cache/0/14/0/glyphs/18/uv_rect = Rect2(22, 1, 8, 12)
 cache/0/14/0/glyphs/18/texture_idx = 0
-cache/0/14/0/glyphs/38/advance = Vector2(8.875, 19.0625)
+cache/0/14/0/glyphs/38/advance = Vector2(9, 19)
 cache/0/14/0/glyphs/38/offset = Vector2(-1, -11)
 cache/0/14/0/glyphs/38/size = Vector2(11, 12)
 cache/0/14/0/glyphs/38/uv_rect = Rect2(32, 1, 11, 12)
 cache/0/14/0/glyphs/38/texture_idx = 0
-cache/0/14/0/glyphs/88/advance = Vector2(8.890625, 19.0625)
+cache/0/14/0/glyphs/88/advance = Vector2(9, 19)
 cache/0/14/0/glyphs/88/offset = Vector2(0, -9)
 cache/0/14/0/glyphs/88/size = Vector2(9, 10)
 cache/0/14/0/glyphs/88/uv_rect = Rect2(45, 1, 9, 10)
 cache/0/14/0/glyphs/88/texture_idx = 0
-cache/0/14/0/glyphs/85/advance = Vector2(6.046875, 19.0625)
+cache/0/14/0/glyphs/85/advance = Vector2(6, 19)
 cache/0/14/0/glyphs/85/offset = Vector2(0, -9)
 cache/0/14/0/glyphs/85/size = Vector2(7, 10)
 cache/0/14/0/glyphs/85/uv_rect = Rect2(56, 1, 7, 10)
 cache/0/14/0/glyphs/85/texture_idx = 0
-cache/0/14/0/glyphs/72/advance = Vector2(8.0625, 19.0625)
+cache/0/14/0/glyphs/72/advance = Vector2(8, 19)
 cache/0/14/0/glyphs/72/offset = Vector2(-1, -9)
 cache/0/14/0/glyphs/72/size = Vector2(10, 10)
 cache/0/14/0/glyphs/72/uv_rect = Rect2(65, 1, 10, 10)
 cache/0/14/0/glyphs/72/texture_idx = 0
-cache/0/14/0/glyphs/81/advance = Vector2(8.890625, 19.0625)
+cache/0/14/0/glyphs/81/advance = Vector2(9, 19)
 cache/0/14/0/glyphs/81/offset = Vector2(0, -9)
 cache/0/14/0/glyphs/81/size = Vector2(9, 10)
 cache/0/14/0/glyphs/81/uv_rect = Rect2(77, 1, 9, 10)
 cache/0/14/0/glyphs/81/texture_idx = 0
-cache/0/14/0/glyphs/87/advance = Vector2(5.53125, 19.0625)
+cache/0/14/0/glyphs/87/advance = Vector2(6, 19)
 cache/0/14/0/glyphs/87/offset = Vector2(-1, -11)
 cache/0/14/0/glyphs/87/size = Vector2(8, 12)
 cache/0/14/0/glyphs/87/uv_rect = Rect2(88, 1, 8, 12)
 cache/0/14/0/glyphs/87/texture_idx = 0
-cache/0/14/0/glyphs/52/advance = Vector2(11.015625, 19.0625)
+cache/0/14/0/glyphs/52/advance = Vector2(11, 19)
 cache/0/14/0/glyphs/52/offset = Vector2(-1, -11)
 cache/0/14/0/glyphs/52/size = Vector2(13, 15)
 cache/0/14/0/glyphs/52/uv_rect = Rect2(1, 15, 13, 15)
 cache/0/14/0/glyphs/52/texture_idx = 0
-cache/0/14/0/glyphs/86/advance = Vector2(6.8125, 19.0625)
+cache/0/14/0/glyphs/86/advance = Vector2(7, 19)
 cache/0/14/0/glyphs/86/offset = Vector2(-1, -9)
 cache/0/14/0/glyphs/86/size = Vector2(9, 10)
 cache/0/14/0/glyphs/86/uv_rect = Rect2(98, 1, 9, 10)
 cache/0/14/0/glyphs/86/texture_idx = 0
-cache/0/14/0/glyphs/29/advance = Vector2(3.828125, 19.0625)
+cache/0/14/0/glyphs/29/advance = Vector2(4, 19)
 cache/0/14/0/glyphs/29/offset = Vector2(-1, -9)
 cache/0/14/0/glyphs/29/size = Vector2(5, 10)
 cache/0/14/0/glyphs/29/uv_rect = Rect2(109, 1, 5, 10)
 cache/0/14/0/glyphs/29/texture_idx = 0
-cache/0/14/0/glyphs/59/advance = Vector2(8.71875, 19.0625)
+cache/0/14/0/glyphs/59/advance = Vector2(9, 19)
 cache/0/14/0/glyphs/59/offset = Vector2(-1, -11)
 cache/0/14/0/glyphs/59/size = Vector2(11, 12)
 cache/0/14/0/glyphs/59/uv_rect = Rect2(116, 1, 11, 12)
 cache/0/14/0/glyphs/59/texture_idx = 0
-cache/0/14/0/glyphs/36/advance = Vector2(9.25, 19.0625)
+cache/0/14/0/glyphs/36/advance = Vector2(9, 19)
 cache/0/14/0/glyphs/36/offset = Vector2(-1, -11)
 cache/0/14/0/glyphs/36/size = Vector2(12, 12)
 cache/0/14/0/glyphs/36/uv_rect = Rect2(129, 1, 12, 12)
 cache/0/14/0/glyphs/36/texture_idx = 0
-cache/0/14/0/glyphs/49/advance = Vector2(10.96875, 19.0625)
+cache/0/14/0/glyphs/49/advance = Vector2(11, 19)
 cache/0/14/0/glyphs/49/offset = Vector2(0, -11)
 cache/0/14/0/glyphs/49/size = Vector2(11, 12)
 cache/0/14/0/glyphs/49/uv_rect = Rect2(143, 1, 11, 12)
 cache/0/14/0/glyphs/49/texture_idx = 0
-cache/0/14/0/glyphs/40/advance = Vector2(7.8125, 19.0625)
+cache/0/14/0/glyphs/40/advance = Vector2(8, 19)
 cache/0/14/0/glyphs/40/offset = Vector2(0, -11)
 cache/0/14/0/glyphs/40/size = Vector2(8, 12)
 cache/0/14/0/glyphs/40/uv_rect = Rect2(156, 1, 8, 12)
 cache/0/14/0/glyphs/40/texture_idx = 0
-cache/0/14/0/glyphs/47/advance = Vector2(7.609375, 19.0625)
+cache/0/14/0/glyphs/47/advance = Vector2(8, 19)
 cache/0/14/0/glyphs/47/offset = Vector2(0, -11)
 cache/0/14/0/glyphs/47/size = Vector2(9, 12)
 cache/0/14/0/glyphs/47/uv_rect = Rect2(166, 1, 9, 12)
@@ -449,17 +453,33 @@ cache/0/28/0/glyphs/4/texture_idx = 0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m0eg6"]
 bg_color = Color(0.04, 0.04, 0.06, 0.65)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.7, 0.88, 1, 0.6)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 2
+shadow_offset = Vector2(0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b00kl"]
 bg_color = Color(1, 0.23137255, 0.36078432, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.55, 0.78, 1, 0.4)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_so1yu"]
 bg_color = Color(0.04, 0.04, 0.06, 0.65)
@@ -470,10 +490,18 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_65xic"]
 bg_color = Color(0.5803922, 0, 1, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.55, 0.78, 1, 0.4)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
 
 [sub_resource type="GDScript" id="GDScript_mp5xd"]
 script/source = "extends Control
@@ -898,9 +926,9 @@ corner_radius_bottom_left = 40
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_c0s23"]
 shader = ExtResource("2_546lt")
-shader_parameter/scroll_offset = null
-shader_parameter/line_density = null
-shader_parameter/line_alpha = null
+shader_parameter/scroll_offset = 0.0
+shader_parameter/line_density = 80.0
+shader_parameter/line_alpha = 0.07
 
 [sub_resource type="GDScript" id="GDScript_02ok7"]
 script/source = "extends Control
@@ -920,6 +948,7 @@ func _draw():
 
 [sub_resource type="SystemFont" id="SystemFont_181g7"]
 font_names = PackedStringArray("Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace")
+subpixel_positioning = 0
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_c4sk3"]
 color = Color(0.1, 0.9, 0.7, 0.3)
@@ -961,12 +990,17 @@ border_color = Color(0.8, 1, 0.9, 1)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tjq0m"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rn3yl"]
+content_margin_left = 32.0
+content_margin_top = 32.0
+content_margin_right = 32.0
+content_margin_bottom = 32.0
 bg_color = Color(0.04, 0.08, 0.12, 0.9)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.32000002, 0.4, 0.35999998, 0.4)
+shadow_size = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_58juc"]
 bg_color = Color(0.1, 0.3, 0.25, 0.9)
@@ -1011,14 +1045,23 @@ shadow_size = 20
 
 [sub_resource type="SystemFont" id="SystemFont_mmgt5"]
 font_names = PackedStringArray("Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace")
+subpixel_positioning = 0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hb0si"]
+content_margin_left = 32.0
+content_margin_top = 48.0
+content_margin_right = 32.0
+content_margin_bottom = 48.0
 bg_color = Color(0.04, 0.08, 0.12, 0.9)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.1, 0.9, 0.7, 0.4)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m0f1j"]
 bg_color = Color(0.1, 0.3, 0.25, 0.9)
@@ -1044,6 +1087,7 @@ border_color = Color(0.1, 0.9, 0.7, 0.6)
 
 [sub_resource type="SystemFont" id="SystemFont_vcstc"]
 font_names = PackedStringArray("Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace")
+subpixel_positioning = 0
 
 [sub_resource type="GDScript" id="GDScript_qtbwn"]
 script/source = "extends Control
@@ -1134,6 +1178,7 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="SystemFont" id="SystemFont_6obdw"]
 font_names = PackedStringArray("Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace")
+subpixel_positioning = 0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ej5y8"]
 bg_color = Color(0.02, 0.04, 0.08, 0.95)
@@ -1159,6 +1204,8 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 
 [node name="StatusGroup" type="Control" parent="Root" unique_id=1418036865]
@@ -1183,16 +1230,16 @@ alignment = 1
 
 [node name="LvlTitle" type="Label" parent="Root/StatusGroup/Badge/LvlVBox" unique_id=230707632]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 12
 text = "LVL"
 horizontal_alignment = 1
 
 [node name="LvlLbl" type="Label" parent="Root/StatusGroup/Badge/LvlVBox" unique_id=1057355044]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("FontFile_ff8ar")
 theme_override_font_sizes/font_size = 24
-theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "1"
 horizontal_alignment = 1
 
@@ -1225,8 +1272,8 @@ show_percentage = false
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
 text = "100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -1274,11 +1321,11 @@ offset_left = -160.0
 offset_top = -160.0
 offset_right = -40.0
 offset_bottom = -40.0
+theme_override_font_sizes/font_size = 64
 theme_override_styles/normal = SubResource("StyleBoxFlat_u6vop")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_xtm2r")
 theme_override_styles/hover = SubResource("StyleBoxFlat_kc1f2")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_6mpex")
-theme_override_font_sizes/font_size = 64
 text = "🦵"
 
 [node name="Skill1Btn" type="Button" parent="Root" unique_id=2042517563]
@@ -1292,11 +1339,11 @@ offset_left = -270.0
 offset_top = -140.0
 offset_right = -190.0
 offset_bottom = -60.0
+theme_override_font_sizes/font_size = 48
 theme_override_styles/normal = SubResource("StyleBoxFlat_mlhsj")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_x3e77")
 theme_override_styles/hover = SubResource("StyleBoxFlat_exqf6")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_3ju8l")
-theme_override_font_sizes/font_size = 48
 text = "👅"
 
 [node name="JumpBtn" type="Button" parent="Root" unique_id=929207971]
@@ -1310,11 +1357,11 @@ offset_left = -232.0
 offset_top = -232.0
 offset_right = -152.0
 offset_bottom = -152.0
+theme_override_font_sizes/font_size = 48
 theme_override_styles/normal = SubResource("StyleBoxFlat_b1px6")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_c3smh")
 theme_override_styles/hover = SubResource("StyleBoxFlat_5jwjf")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_nso1x")
-theme_override_font_sizes/font_size = 48
 text = "🦘"
 
 [node name="Skill3Btn" type="Button" parent="Root" unique_id=2138859553]
@@ -1329,31 +1376,34 @@ offset_left = -140.0
 offset_top = -270.0
 offset_right = -60.0
 offset_bottom = -190.0
+theme_override_font_sizes/font_size = 48
 theme_override_styles/normal = SubResource("StyleBoxFlat_hyw70")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_cxdcy")
 theme_override_styles/hover = SubResource("StyleBoxFlat_6y3bq")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_4sr2e")
-theme_override_font_sizes/font_size = 48
 disabled = true
 text = "☣️"
 
 [node name="InteractBtn" type="Button" parent="Root" unique_id=1806450559]
 visible = false
 custom_minimum_size = Vector2(70, 70)
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -110.0
-offset_top = -370.0
-offset_right = -40.0
-offset_bottom = -300.0
+offset_left = -370.0
+offset_top = -315.0
+offset_right = -300.0
+offset_bottom = -245.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 32
 theme_override_styles/normal = SubResource("StyleBoxFlat_vjpmv")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_o8st7")
 theme_override_styles/hover = SubResource("StyleBoxFlat_mgoxf")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_0f6tk")
-theme_override_font_sizes/font_size = 32
 text = "🖐️"
 
 [node name="MenuBtn" type="Button" parent="Root" unique_id=2061783031]
@@ -1379,11 +1429,11 @@ offset_left = -276.0
 offset_top = 96.0
 offset_right = -220.0
 offset_bottom = 152.0
+theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_g4gvt")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_085mh")
 theme_override_styles/hover = SubResource("StyleBoxFlat_vqcky")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_s3csi")
-theme_override_font_sizes/font_size = 28
 text = "📖"
 
 [node name="NotificationBadge" type="Label" parent="Root/KnowledgeBtn" unique_id=2064324967]
@@ -1395,8 +1445,8 @@ offset_left = -20.0
 offset_top = -4.0
 offset_right = 4.0
 offset_bottom = 20.0
-theme_override_styles/normal = SubResource("StyleBoxFlat_csq0m")
 theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_csq0m")
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -1409,11 +1459,11 @@ offset_left = -276.0
 offset_top = 168.0
 offset_right = -220.0
 offset_bottom = 224.0
+theme_override_font_sizes/font_size = 28
 theme_override_styles/normal = SubResource("StyleBoxFlat_20o01")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_mbkme")
 theme_override_styles/hover = SubResource("StyleBoxFlat_3nhw0")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_nog46")
-theme_override_font_sizes/font_size = 28
 text = "!"
 
 [node name="CancelZone" type="Label" parent="Root" unique_id=1133534997]
@@ -1426,8 +1476,8 @@ offset_left = -232.0
 offset_top = 100.0
 offset_right = -152.0
 offset_bottom = 180.0
-theme_override_styles/normal = SubResource("StyleBoxFlat_kffyf")
 theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_kffyf")
 text = "X
 CANCEL"
 horizontal_alignment = 1
@@ -1483,9 +1533,9 @@ alignment = 1
 
 [node name="Label34376517233" type="Label" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=2127876247]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 24
-theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 text = "PAUSED"
 horizontal_alignment = 1
 
@@ -1496,53 +1546,53 @@ theme_override_styles/separator = SubResource("StyleBoxLine_c4sk3")
 [node name="BtnResume" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=259885788]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_x3pfg")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_uuxm1")
-theme_override_styles/hover = SubResource("StyleBoxFlat_uuxm1")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_kim1m")
 theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_x3pfg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_uuxm1")
+theme_override_styles/hover = SubResource("StyleBoxFlat_uuxm1")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_kim1m")
 text = "Resume Game"
 
 [node name="Button34594621050" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=74602187]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_0kwjg")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_48w0b")
-theme_override_styles/hover = SubResource("StyleBoxFlat_48w0b")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_tjq0m")
 theme_override_colors/font_color = Color(0.8, 1, 0.9, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_0kwjg")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_48w0b")
+theme_override_styles/hover = SubResource("StyleBoxFlat_48w0b")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_tjq0m")
 text = "Settings"
 
 [node name="Button34728838784" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=401676366]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_rn3yl")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_58juc")
-theme_override_styles/hover = SubResource("StyleBoxFlat_58juc")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_mbr7g")
 theme_override_colors/font_color = Color(0.8, 1, 0.9, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_rn3yl")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_58juc")
+theme_override_styles/hover = SubResource("StyleBoxFlat_58juc")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_mbr7g")
 text = "Save Game"
 
 [node name="Button34863056518" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=996360939]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_3nwcc")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_uq2qg")
-theme_override_styles/hover = SubResource("StyleBoxFlat_uq2qg")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_qchr1")
 theme_override_colors/font_color = Color(1, 0.2, 0.3, 1)
 theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_3nwcc")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_uq2qg")
+theme_override_styles/hover = SubResource("StyleBoxFlat_uq2qg")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_qchr1")
 text = "Main Menu"
 
 [node name="TutorialPanel" type="PanelContainer" parent="Root" unique_id=58008183]
@@ -1564,17 +1614,17 @@ theme_override_constants/separation = 24
 
 [node name="TutorialTitle" type="Label" parent="Root/TutorialPanel/VBoxContainer" unique_id=613058588]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 theme_override_fonts/font = SubResource("SystemFont_mmgt5")
 theme_override_font_sizes/font_size = 24
-theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 text = "TUTORIAL"
 horizontal_alignment = 1
 
 [node name="TutorialDesc" type="Label" parent="Root/TutorialPanel/VBoxContainer" unique_id=1819017428]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 1, 0.9, 1)
 theme_override_fonts/font = SubResource("SystemFont_mmgt5")
 theme_override_font_sizes/font_size = 18
-theme_override_colors/font_color = Color(0.8, 1, 0.9, 1)
 text = "Tutorial text goes here."
 horizontal_alignment = 1
 autowrap_mode = 3
@@ -1582,12 +1632,12 @@ autowrap_mode = 3
 [node name="BtnGotIt" type="Button" parent="Root/TutorialPanel/VBoxContainer" unique_id=1886329962]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
+theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
+theme_override_fonts/font = SubResource("SystemFont_mmgt5")
 theme_override_styles/normal = SubResource("StyleBoxFlat_hb0si")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_m0f1j")
 theme_override_styles/hover = SubResource("StyleBoxFlat_m0f1j")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_58h6h")
-theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
-theme_override_fonts/font = SubResource("SystemFont_mmgt5")
 text = "ACKNOWLEDGE"
 
 [node name="SubtitlePanel" type="PanelContainer" parent="Root" unique_id=796635178]
@@ -1611,8 +1661,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_pkypl")
 layout_mode = 2
 mouse_filter = 2
 theme_override_fonts/normal_font = SubResource("SystemFont_vcstc")
-theme_override_font_sizes/normal_font_size = 24
 theme_override_fonts/bold_font = SubResource("SystemFont_vcstc")
+theme_override_font_sizes/normal_font_size = 24
 theme_override_font_sizes/bold_font_size = 26
 bbcode_enabled = true
 fit_content = true
@@ -1643,8 +1693,8 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_fr0d1")
 layout_mode = 2
 mouse_filter = 2
 theme_override_fonts/normal_font = SubResource("SystemFont_6obdw")
-theme_override_font_sizes/normal_font_size = 24
 theme_override_fonts/bold_font = SubResource("SystemFont_6obdw")
+theme_override_font_sizes/normal_font_size = 24
 theme_override_font_sizes/bold_font_size = 36
 bbcode_enabled = true
 fit_content = true
@@ -1674,7 +1724,7 @@ stretch = true
 
 [node name="SubViewport36020684484" type="SubViewport" parent="Root/MinimapPanel/MarginContainer35953575616/SubViewportContainer35987130050" unique_id=1349840426]
 handle_input_locally = false
-size = Vector2i(2, 2)
+size = Vector2i(168, 168)
 render_target_update_mode = 4
 
 [node name="Camera3D36071016135" type="Camera3D" parent="Root/MinimapPanel/MarginContainer35953575616/SubViewportContainer35987130050/SubViewport36020684484" unique_id=114953366]

@@ -24,10 +24,16 @@ func _ready() -> void:
 	ambiance_player.bus = "Master"
 	add_child(ambiance_player)
 	
-	# Generate SFX
-	sounds["jump"] = _generate_sfx("jump")
-	sounds["whip"] = _generate_sfx("whip")
-	sounds["hit"] = _generate_sfx("hit")
+	# Load SFX files
+	sounds["jump"] = preload("res://audio/Frog Jump.ogg")
+	sounds["whip"] = preload("res://audio/Lunge.ogg")
+	sounds["hit"] = [
+		preload("res://audio/hit 1 .ogg"),
+		preload("res://audio/Hit 2.ogg"),
+		preload("res://audio/Hit 3.ogg")
+	]
+	
+	# Procedural fallbacks
 	sounds["error"] = _generate_sfx("error")
 	sounds["ui_click"] = _generate_sfx("ui_click")
 	
@@ -39,12 +45,21 @@ func _ready() -> void:
 
 func play_sfx(sound_name: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
 	if sound_name in sounds:
-		var p = sfx_players[next_sfx_player]
-		p.stream = sounds[sound_name]
-		p.pitch_scale = pitch
-		p.volume_db = volume_db
-		p.play()
-		next_sfx_player = (next_sfx_player + 1) % sfx_players.size()
+		var sound = sounds[sound_name]
+		var stream: AudioStream
+		
+		if sound is Array:
+			stream = sound.pick_random()
+		else:
+			stream = sound
+			
+		if stream:
+			var p = sfx_players[next_sfx_player]
+			p.stream = stream
+			p.pitch_scale = pitch
+			p.volume_db = volume_db
+			p.play()
+			next_sfx_player = (next_sfx_player + 1) % sfx_players.size()
 
 func play_ambiance() -> void:
 	if ambiance_player and not ambiance_player.playing:
