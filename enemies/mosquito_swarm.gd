@@ -33,10 +33,12 @@ func _ready() -> void:
 		var fly_sfx = AudioStreamPlayer3D.new()
 		fly_sfx.stream = AudioManager.sounds["mosquito_fly"]
 		fly_sfx.autoplay = true
-		fly_sfx.unit_size = 2.0
-		fly_sfx.max_distance = 20.0
+		fly_sfx.unit_size = 5.0
+		fly_sfx.max_distance = 40.0
+		fly_sfx.volume_db = 12.0
 		fly_sfx.bus = "Master"
 		add_child(fly_sfx)
+		fly_sfx.play()
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
