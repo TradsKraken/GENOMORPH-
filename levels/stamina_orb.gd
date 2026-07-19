@@ -174,6 +174,7 @@ func _apply_stamina() -> void:
 	_collected = true
 	_is_magnetizing = false
 	PlayerData.gain_stamina(STAMINA_GRANT)
+	AudioManager.play_sfx("stamina_collect", randf_range(0.9, 1.1))
 	_show_float_text("+%d ⚡" % int(STAMINA_GRANT), Color(0.65, 0.30, 1.00))
 
 	var tween := create_tween().set_parallel(true)

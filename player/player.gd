@@ -277,7 +277,7 @@ func start_aiming_jump() -> void:
 	
 func update_aim_jump(drag_vec: Vector2, is_cancelled: bool = false) -> void:
 	if not is_aiming_jump: return
-	var aim_range = 8.0 * PlayerData.jump_distance_multiplier
+	var aim_range = 8.0
 	_aim_offset = Vector3(drag_vec.x, 0, drag_vec.y) * aim_range
 	jump_target_pos = global_position + _aim_offset
 	jump_target_pos.y = global_position.y

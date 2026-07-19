@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dac3k5mfcp0ij"
+path="res://.godot/imported/orb mana.ogg-9f9124eed0f5e6721c4ce85a9be329f8.oggvorbisstr"
+
+[deps]
+
+source_file="res://audio/orb mana.ogg"
+dest_files=["res://.godot/imported/orb mana.ogg-9f9124eed0f5e6721c4ce85a9be329f8.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
