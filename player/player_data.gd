@@ -41,6 +41,7 @@ var skill_points: int  = 0
 var attack_power: float = 10.0
 var defense: float = 5.0
 var speed: float = 4.0
+var jump_distance_multiplier: float = 1.0
 
 var inventory: Array = []
 var genome_fragments: int = 0
@@ -104,6 +105,41 @@ func _do_level_up() -> void:
 	exp_to_next = 100.0 * pow(1.4, level - 1)
 	AudioManager.play_sfx("level_up")
 	level_changed.emit(level)
+
+func grant_suit_level(target_level: int) -> void:
+	if level >= target_level:
+		return
+		
+	var old_level = level
+	level = target_level
+	
+	for i in range(old_level + 1, target_level + 1):
+		match i:
+			2:
+				max_health *= 1.05
+				health = max_health
+				_show_perk_unlocked("Muscle Density", "Max HP +5%")
+			3:
+				attack_power *= 1.10
+				_show_perk_unlocked("Tongue Elasticity", "Tongue Whip DMG +10%")
+			4:
+				jump_distance_multiplier = 1.10
+				_show_perk_unlocked("Hind Leg Spring", "Jump Distance +10%")
+	
+	exp_to_next = 100.0 * pow(1.4, level - 1)
+	AudioManager.play_sfx("level_up")
+	level_changed.emit(level)
+	health_changed.emit(health, max_health)
+
+func _show_perk_unlocked(title: String, desc: String) -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_float_text"):
+		var player = get_tree().get_first_node_in_group("player")
+		if player:
+			var cam = player.get_viewport().get_camera_3d()
+			if cam:
+				var scr = cam.unproject_position(player.global_position + Vector3(0, 2.5, 0))
+				hud.show_float_text("PERK UNLOCKED:\n" + title + "\n" + desc, scr, Color(0.2, 1.0, 0.5))
 
 
 # ── Knowledge Base ────────────────────────────────────────────────────────────

@@ -5,7 +5,9 @@ class_name TutorialTrigger
 @export var minigame_enemies: Array[NodePath]
 
 var _triggered: bool = false
+var _reward_granted: bool = false
 var _active_enemies: Array[Node] = []
+var _tracked_enemies: Array[Node] = []
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
@@ -52,10 +54,15 @@ func _activate_children() -> void:
 		if child is EnemyBase:
 			if "is_active" in child:
 				child.is_active = true
+			_tracked_enemies.append(child)
 		elif child is EnemySpawner:
 			if child.has_method("activate"):
 				child.activate()
 			PlayerData.set_objective(child)
+			_tracked_enemies.append(child)
+			
+	if _tracked_enemies.size() > 0 and trigger_type != 4:
+		set_process(true)
 
 func _start_minigame() -> void:
 	for path in minigame_enemies:
@@ -75,13 +82,15 @@ func _start_minigame() -> void:
 	set_process(true)
 	
 func _process(delta: float) -> void:
-	if trigger_type != 4 or not _triggered:
+	if not _triggered or _reward_granted:
 		set_process(false)
 		return
 		
-	# Check if all active enemies and spawners are dead/cleared
+	var to_check = _active_enemies if trigger_type == 4 else _tracked_enemies
+	
+	# Check if all tracked enemies and spawners are dead/cleared
 	var all_dead = true
-	for enemy_or_spawner in _active_enemies:
+	for enemy_or_spawner in to_check:
 		if is_instance_valid(enemy_or_spawner):
 			if enemy_or_spawner is EnemyBase and not enemy_or_spawner.is_dead:
 				all_dead = false
@@ -91,9 +100,17 @@ func _process(delta: float) -> void:
 				all_dead = false
 				break
 			
-	if all_dead and _active_enemies.size() > 0:
+	if all_dead and to_check.size() > 0:
+		_reward_granted = true
 		set_process(false)
-		_spawn_reward()
+		
+		match trigger_type:
+			0: PlayerData.grant_suit_level(2)
+			1: PlayerData.grant_suit_level(2)
+			2: PlayerData.grant_suit_level(3)
+			4:
+				PlayerData.grant_suit_level(4)
+				_spawn_reward()
 
 func _spawn_reward() -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
