@@ -41,13 +41,6 @@ func _ready() -> void:
 		preload("res://audio/Hit 3.ogg")
 	]
 	
-	sounds["palaka_convo"] = [
-		preload("res://audio/frog convo 1.ogg"),
-		preload("res://audio/frog convo 2.ogg"),
-		preload("res://audio/frog convo 3.ogg"),
-		preload("res://audio/frog covo 4.ogg")
-	]
-	
 	# Procedural fallbacks
 	sounds["error"] = _generate_sfx("error")
 	sounds["ui_click"] = _generate_sfx("ui_click")
