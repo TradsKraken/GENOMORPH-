@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b1owbefbxiyit"
+path="res://.godot/imported/Mosquito flying sound.ogg-46747c6881b402bf4545ff49ea1fed50.oggvorbisstr"
+
+[deps]
+
+source_file="res://audio/Mosquito flying sound.ogg"
+dest_files=["res://.godot/imported/Mosquito flying sound.ogg-46747c6881b402bf4545ff49ea1fed50.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

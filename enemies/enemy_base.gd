@@ -107,6 +107,7 @@ func _process_movement(_delta: float) -> void:
 func _spawn_exp_orb() -> void:
 	var exp_script = load("res://levels/exp_orb.gd")
 	if exp_script:
+		AudioManager.play_sfx("exp_drop", randf_range(0.9, 1.1))
 		var orb_count := randi_range(5, 10)
 		for i in range(orb_count):
 			var orb = exp_script.new()

@@ -27,6 +27,16 @@ func _ready() -> void:
 			if anim:
 				anim.loop_mode = Animation.LOOP_LINEAR
 			anim_player.play(anims[0])
+			
+	# Add 3D audio for flying sound
+	if AudioManager.sounds.has("mosquito_fly") and AudioManager.sounds["mosquito_fly"] != null:
+		var fly_sfx = AudioStreamPlayer3D.new()
+		fly_sfx.stream = AudioManager.sounds["mosquito_fly"]
+		fly_sfx.autoplay = true
+		fly_sfx.unit_size = 2.0
+		fly_sfx.max_distance = 20.0
+		fly_sfx.bus = "Master"
+		add_child(fly_sfx)
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:

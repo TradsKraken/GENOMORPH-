@@ -1,0 +1,2 @@
+Children after create_trimesh_collision: 1
+- Plane_002_col (StaticBody3D)

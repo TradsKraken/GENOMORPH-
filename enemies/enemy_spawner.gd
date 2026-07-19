@@ -64,11 +64,10 @@ func _activate_next_enemy() -> void:
 	# Filter out any that were deleted externally or didn't exist
 	_living_enemies = _living_enemies.filter(func(e): return is_instance_valid(e) and not e.is_queued_for_deletion())
 	
-	# Wake up the first alive one
-	if _living_enemies.size() > 0:
-		var next_enemy = _living_enemies[0]
-		if "is_active" in next_enemy:
-			next_enemy.is_active = true
+	# Wake up ALL alive ones simultaneously so their AI takes over
+	for enemy in _living_enemies:
+		if "is_active" in enemy:
+			enemy.is_active = true
 
 func _on_enemy_died(enemy: Node3D) -> void:
 	_living_enemies.erase(enemy)

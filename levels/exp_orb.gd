@@ -156,6 +156,7 @@ func _collect() -> void:
 	_collected  = true
 
 	PlayerData.gain_exp(exp_grant)
+	AudioManager.play_sfx("exp_collect", randf_range(0.9, 1.1))
 	_show_float_text("+%d XP ★" % int(exp_grant), Color(1.00, 0.88, 0.10))
 
 	var tween := create_tween().set_parallel(true)

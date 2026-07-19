@@ -1,0 +1,3 @@
+Found Plane_002: Plane_002
+Is MeshInstance3D: true
+Children:

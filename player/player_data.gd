@@ -102,6 +102,7 @@ func _do_level_up() -> void:
 	level += 1
 	skill_points += 1
 	exp_to_next = 100.0 * pow(1.4, level - 1)
+	AudioManager.play_sfx("level_up")
 	level_changed.emit(level)
 
 

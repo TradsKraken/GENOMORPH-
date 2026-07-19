@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://s3fdkn7jmwuv"
+path="res://.godot/imported/tongue whip.ogg-71c26cf76430c4c47af91f99e9cfb852.oggvorbisstr"
+
+[deps]
+
+source_file="res://audio/tongue whip.ogg"
+dest_files=["res://.godot/imported/tongue whip.ogg-71c26cf76430c4c47af91f99e9cfb852.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

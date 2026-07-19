@@ -26,7 +26,13 @@ func _ready() -> void:
 	
 	# Load SFX files
 	sounds["jump"] = preload("res://audio/Frog Jump.ogg")
-	sounds["whip"] = preload("res://audio/Lunge.ogg")
+	sounds["whip"] = preload("res://audio/tongue whip.ogg")
+	sounds["lunge"] = preload("res://audio/Lunge.ogg")
+	sounds["exp_collect"] = preload("res://audio/exp collect.ogg")
+	sounds["exp_drop"] = preload("res://audio/exp_drop).ogg")
+	sounds["level_up"] = preload("res://audio/level up.ogg")
+	sounds["mosquito_fly"] = preload("res://audio/Mosquito flying sound.ogg")
+	
 	sounds["hit"] = [
 		preload("res://audio/hit 1 .ogg"),
 		preload("res://audio/Hit 2.ogg"),

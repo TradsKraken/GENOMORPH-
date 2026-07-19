@@ -71,6 +71,15 @@ func _start_dialog() -> void:
 		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Idle")
+			
+		# Proceed to tut5 (Minigame Arena) automatically after dialogue
+		var tut5 = get_tree().current_scene.find_child("tut5", true, false)
+		if tut5 and not tut5._triggered:
+			tut5._triggered = true # Prevent double trigger if player walks into it
+			if tut5.has_method("_activate_children"):
+				tut5._activate_children()
+			if tut5.trigger_type == 4 and tut5.has_method("_start_minigame"):
+				tut5._start_minigame()
 	
 	_is_talking = false
 

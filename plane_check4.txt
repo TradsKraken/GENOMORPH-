@@ -1,0 +1,4 @@
+Child count before: 0 after: 1
+Parent child count before: 215 after: 215
+Added node name: Plane_002_col
+Added node owner: FINAL TERRAIN LEVEL 1:<Node3D#46288340424>

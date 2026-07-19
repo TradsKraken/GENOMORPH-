@@ -384,6 +384,8 @@ func _attack() -> void:
 	if animation_player:
 		animation_player.play("FrogArmature|Frog_Attack", 0.1)
 		
+	AudioManager.play_sfx("lunge", randf_range(0.9, 1.1))
+		
 	# Show visual range
 	var attack_range = 4.0
 	_show_attack_range(attack_range, Color(1.0, 0.2, 0.2))

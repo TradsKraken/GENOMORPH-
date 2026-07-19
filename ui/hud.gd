@@ -1438,7 +1438,12 @@ func show_float_text(text: String, screen_pos: Vector2, color: Color = Color.WHI
 	lbl.add_theme_color_override("font_color", color)
 	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
 	lbl.add_theme_constant_override("outline_size", 4)
-	lbl.position = screen_pos + Vector2(-30, -20)
+	
+	# Add a slight random offset so simultaneous damage numbers don't perfectly overlap
+	var offset_x = randf_range(-20.0, 20.0)
+	var offset_y = randf_range(-15.0, 15.0)
+	lbl.position = screen_pos + Vector2(-30 + offset_x, -20 + offset_y)
+	
 	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(lbl)
 	
