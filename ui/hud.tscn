@@ -1149,19 +1149,19 @@ corner_radius_bottom_left = 12
 
 [sub_resource type="Environment" id="Environment_pptio"]
 
-[node name="GameHUD" type="CanvasLayer" unique_id=1070216408]
+[node name="GameHUD" type="CanvasLayer" unique_id=864580123]
 process_mode = 3
 layer = 10
 script = ExtResource("1_276te")
 
-[node name="Root" type="Control" parent="." unique_id=465129411]
+[node name="Root" type="Control" parent="." unique_id=1405930527]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="StatusGroup" type="Control" parent="Root" unique_id=391081641]
+[node name="StatusGroup" type="Control" parent="Root" unique_id=1418036865]
 anchors_preset = 0
 offset_left = 24.0
 offset_top = 24.0
@@ -1169,26 +1169,26 @@ offset_right = 24.0
 offset_bottom = 24.0
 mouse_filter = 2
 
-[node name="Badge" type="PanelContainer" parent="Root/StatusGroup" unique_id=1598601458]
+[node name="Badge" type="PanelContainer" parent="Root/StatusGroup" unique_id=11528203]
 z_index = 2
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 0
 mouse_default_cursor_shape = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_7ihmi")
 
-[node name="LvlVBox" type="VBoxContainer" parent="Root/StatusGroup/Badge" unique_id=2065661660]
+[node name="LvlVBox" type="VBoxContainer" parent="Root/StatusGroup/Badge" unique_id=1466931758]
 layout_mode = 2
 theme_override_constants/separation = -4
 alignment = 1
 
-[node name="LvlTitle" type="Label" parent="Root/StatusGroup/Badge/LvlVBox" unique_id=487465437]
+[node name="LvlTitle" type="Label" parent="Root/StatusGroup/Badge/LvlVBox" unique_id=230707632]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
 text = "LVL"
 horizontal_alignment = 1
 
-[node name="LvlLbl" type="Label" parent="Root/StatusGroup/Badge/LvlVBox" unique_id=1363728218]
+[node name="LvlLbl" type="Label" parent="Root/StatusGroup/Badge/LvlVBox" unique_id=1057355044]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontFile_ff8ar")
 theme_override_font_sizes/font_size = 24
@@ -1196,7 +1196,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "1"
 horizontal_alignment = 1
 
-[node name="BarsVBox" type="VBoxContainer" parent="Root/StatusGroup" unique_id=490597522]
+[node name="BarsVBox" type="VBoxContainer" parent="Root/StatusGroup" unique_id=846927120]
 z_index = 1
 layout_mode = 0
 offset_left = 65.0
@@ -1206,11 +1206,11 @@ offset_bottom = 12.0
 mouse_filter = 2
 theme_override_constants/separation = 8
 
-[node name="HpBox" type="Control" parent="Root/StatusGroup/BarsVBox" unique_id=2128290162]
+[node name="HpBox" type="Control" parent="Root/StatusGroup/BarsVBox" unique_id=1568538590]
 custom_minimum_size = Vector2(300, 24)
 layout_mode = 2
 
-[node name="HpBar" type="ProgressBar" parent="Root/StatusGroup/BarsVBox/HpBox" unique_id=162627273]
+[node name="HpBar" type="ProgressBar" parent="Root/StatusGroup/BarsVBox/HpBox" unique_id=1886171595]
 custom_minimum_size = Vector2(300, 24)
 layout_mode = 0
 anchor_right = 1.0
@@ -1221,7 +1221,7 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_b00kl")
 value = 100.0
 show_percentage = false
 
-[node name="HpLbl" type="Label" parent="Root/StatusGroup/BarsVBox/HpBox" unique_id=1401250847]
+[node name="HpLbl" type="Label" parent="Root/StatusGroup/BarsVBox/HpBox" unique_id=1386414413]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1231,11 +1231,11 @@ text = "100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="StamBox" type="Control" parent="Root/StatusGroup/BarsVBox" unique_id=1339437793]
+[node name="StamBox" type="Control" parent="Root/StatusGroup/BarsVBox" unique_id=1574754793]
 custom_minimum_size = Vector2(220, 16)
 layout_mode = 2
 
-[node name="StamBar" type="ProgressBar" parent="Root/StatusGroup/BarsVBox/StamBox" unique_id=1734018087]
+[node name="StamBar" type="ProgressBar" parent="Root/StatusGroup/BarsVBox/StamBox" unique_id=1934297042]
 custom_minimum_size = Vector2(220, 16)
 layout_mode = 0
 anchor_right = 1.0
@@ -1246,7 +1246,7 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_65xic")
 value = 100.0
 show_percentage = false
 
-[node name="QuestTrackerLbl" type="RichTextLabel" parent="Root/StatusGroup/BarsVBox" unique_id=1080899516]
+[node name="QuestTrackerLbl" type="RichTextLabel" parent="Root/StatusGroup/BarsVBox" unique_id=416283486]
 custom_minimum_size = Vector2(300, 20)
 layout_mode = 2
 mouse_filter = 2
@@ -1256,14 +1256,14 @@ text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
 fit_content = true
 scroll_active = false
 
-[node name="ExpBar" type="Control" parent="Root/StatusGroup" unique_id=90372199]
+[node name="ExpBar" type="Control" parent="Root/StatusGroup" unique_id=1294888602]
 z_index = 1
 custom_minimum_size = Vector2(80, 80)
 anchors_preset = 0
 mouse_filter = 2
 script = SubResource("GDScript_mp5xd")
 
-[node name="AttackBtn" type="Button" parent="Root" unique_id=1337454992]
+[node name="AttackBtn" type="Button" parent="Root" unique_id=1330561369]
 custom_minimum_size = Vector2(120, 120)
 layout_mode = 0
 anchor_left = 1.0
@@ -1281,7 +1281,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_6mpex")
 theme_override_font_sizes/font_size = 64
 text = "🦵"
 
-[node name="Skill1Btn" type="Button" parent="Root" unique_id=672308352]
+[node name="Skill1Btn" type="Button" parent="Root" unique_id=2042517563]
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 0
 anchor_left = 1.0
@@ -1299,7 +1299,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_3ju8l")
 theme_override_font_sizes/font_size = 48
 text = "👅"
 
-[node name="JumpBtn" type="Button" parent="Root" unique_id=611606043]
+[node name="JumpBtn" type="Button" parent="Root" unique_id=929207971]
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 0
 anchor_left = 1.0
@@ -1317,7 +1317,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_nso1x")
 theme_override_font_sizes/font_size = 48
 text = "🦘"
 
-[node name="Skill3Btn" type="Button" parent="Root" unique_id=93958739]
+[node name="Skill3Btn" type="Button" parent="Root" unique_id=2138859553]
 modulate = Color(0.5, 0.5, 0.5, 0.5)
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 0
@@ -1337,7 +1337,7 @@ theme_override_font_sizes/font_size = 48
 disabled = true
 text = "☣️"
 
-[node name="InteractBtn" type="Button" parent="Root" unique_id=851996865]
+[node name="InteractBtn" type="Button" parent="Root" unique_id=1806450559]
 visible = false
 custom_minimum_size = Vector2(70, 70)
 layout_mode = 0
@@ -1356,7 +1356,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_0f6tk")
 theme_override_font_sizes/font_size = 32
 text = "🖐️"
 
-[node name="MenuBtn" type="Button" parent="Root" unique_id=1087594147]
+[node name="MenuBtn" type="Button" parent="Root" unique_id=2061783031]
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 0
 anchor_left = 1.0
@@ -1370,7 +1370,7 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_3y3rt")
 theme_override_styles/hover = SubResource("StyleBoxFlat_5rocq")
 theme_override_styles/focus = SubResource("StyleBoxEmpty_2u3la")
 
-[node name="KnowledgeBtn" type="Button" parent="Root" unique_id=1902906723]
+[node name="KnowledgeBtn" type="Button" parent="Root" unique_id=267248072]
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 0
 anchor_left = 1.0
@@ -1386,7 +1386,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_s3csi")
 theme_override_font_sizes/font_size = 28
 text = "📖"
 
-[node name="NotificationBadge" type="Label" parent="Root/KnowledgeBtn" unique_id=1756222085]
+[node name="NotificationBadge" type="Label" parent="Root/KnowledgeBtn" unique_id=2064324967]
 visible = false
 layout_mode = 0
 anchor_left = 1.0
@@ -1400,7 +1400,7 @@ theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="QuestBtn" type="Button" parent="Root" unique_id=52617400]
+[node name="QuestBtn" type="Button" parent="Root" unique_id=887509686]
 custom_minimum_size = Vector2(56, 56)
 layout_mode = 0
 anchor_left = 1.0
@@ -1416,7 +1416,7 @@ theme_override_styles/focus = SubResource("StyleBoxEmpty_nog46")
 theme_override_font_sizes/font_size = 28
 text = "!"
 
-[node name="CancelZone" type="Label" parent="Root" unique_id=968740173]
+[node name="CancelZone" type="Label" parent="Root" unique_id=1133534997]
 visible = false
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 0
@@ -1433,7 +1433,7 @@ CANCEL"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MenuPanel" type="Control" parent="Root" unique_id=240713633]
+[node name="MenuPanel" type="Control" parent="Root" unique_id=785916749]
 visible = false
 modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(360, 440)
@@ -1447,27 +1447,27 @@ offset_top = -220.0
 offset_right = 180.0
 offset_bottom = 220.0
 
-[node name="ColorRect34074527332" type="ColorRect" parent="Root/MenuPanel" unique_id=1991527345]
+[node name="ColorRect34074527332" type="ColorRect" parent="Root/MenuPanel" unique_id=1333924142]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.02, 0.04, 0.08, 0.95)
 
-[node name="ColorRect34108081766" type="ColorRect" parent="Root/MenuPanel" unique_id=1770672961]
+[node name="ColorRect34108081766" type="ColorRect" parent="Root/MenuPanel" unique_id=2012445976]
 material = SubResource("ShaderMaterial_c0s23")
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 
-[node name="Control34259076713" type="Control" parent="Root/MenuPanel" unique_id=28927009]
+[node name="Control34259076713" type="Control" parent="Root/MenuPanel" unique_id=1760029313]
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = SubResource("GDScript_02ok7")
 
-[node name="MarginContainer" type="MarginContainer" parent="Root/MenuPanel" unique_id=512236899]
+[node name="MarginContainer" type="MarginContainer" parent="Root/MenuPanel" unique_id=283529947]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -1476,12 +1476,12 @@ theme_override_constants/margin_top = 32
 theme_override_constants/margin_right = 32
 theme_override_constants/margin_bottom = 32
 
-[node name="VBoxContainer34342962799" type="VBoxContainer" parent="Root/MenuPanel/MarginContainer" unique_id=640673307]
+[node name="VBoxContainer34342962799" type="VBoxContainer" parent="Root/MenuPanel/MarginContainer" unique_id=2008136914]
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="Label34376517233" type="Label" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=417396920]
+[node name="Label34376517233" type="Label" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=2127876247]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 24
@@ -1489,11 +1489,11 @@ theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 text = "PAUSED"
 horizontal_alignment = 1
 
-[node name="HSeparator34410071667" type="HSeparator" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=1829547923]
+[node name="HSeparator34410071667" type="HSeparator" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=640729196]
 layout_mode = 2
 theme_override_styles/separator = SubResource("StyleBoxLine_c4sk3")
 
-[node name="BtnResume" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=509380343]
+[node name="BtnResume" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=259885788]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_x3pfg")
@@ -1506,7 +1506,7 @@ theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
 text = "Resume Game"
 
-[node name="Button34594621050" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=1813105661]
+[node name="Button34594621050" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=74602187]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_0kwjg")
@@ -1519,7 +1519,7 @@ theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
 text = "Settings"
 
-[node name="Button34728838784" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=1755679547]
+[node name="Button34728838784" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=401676366]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_rn3yl")
@@ -1532,7 +1532,7 @@ theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
 text = "Save Game"
 
-[node name="Button34863056518" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=1880128649]
+[node name="Button34863056518" type="Button" parent="Root/MenuPanel/MarginContainer/VBoxContainer34342962799" unique_id=996360939]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_3nwcc")
@@ -1545,7 +1545,7 @@ theme_override_fonts/font = SubResource("SystemFont_181g7")
 theme_override_font_sizes/font_size = 18
 text = "Main Menu"
 
-[node name="TutorialPanel" type="PanelContainer" parent="Root" unique_id=1211478650]
+[node name="TutorialPanel" type="PanelContainer" parent="Root" unique_id=58008183]
 visible = false
 modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(400, 0)
@@ -1558,11 +1558,11 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_j07uv")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Root/TutorialPanel" unique_id=1240803068]
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/TutorialPanel" unique_id=1174339244]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="TutorialTitle" type="Label" parent="Root/TutorialPanel/VBoxContainer" unique_id=1969981789]
+[node name="TutorialTitle" type="Label" parent="Root/TutorialPanel/VBoxContainer" unique_id=613058588]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_mmgt5")
 theme_override_font_sizes/font_size = 24
@@ -1570,7 +1570,7 @@ theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 text = "TUTORIAL"
 horizontal_alignment = 1
 
-[node name="TutorialDesc" type="Label" parent="Root/TutorialPanel/VBoxContainer" unique_id=825771232]
+[node name="TutorialDesc" type="Label" parent="Root/TutorialPanel/VBoxContainer" unique_id=1819017428]
 layout_mode = 2
 theme_override_fonts/font = SubResource("SystemFont_mmgt5")
 theme_override_font_sizes/font_size = 18
@@ -1579,7 +1579,7 @@ text = "Tutorial text goes here."
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="BtnGotIt" type="Button" parent="Root/TutorialPanel/VBoxContainer" unique_id=665019260]
+[node name="BtnGotIt" type="Button" parent="Root/TutorialPanel/VBoxContainer" unique_id=1886329962]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_hb0si")
@@ -1590,7 +1590,7 @@ theme_override_colors/font_color = Color(0.1, 0.9, 0.7, 1)
 theme_override_fonts/font = SubResource("SystemFont_mmgt5")
 text = "ACKNOWLEDGE"
 
-[node name="SubtitlePanel" type="PanelContainer" parent="Root" unique_id=1780984169]
+[node name="SubtitlePanel" type="PanelContainer" parent="Root" unique_id=796635178]
 visible = false
 modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(800, 100)
@@ -1607,7 +1607,7 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pkypl")
 
-[node name="SubtitleLabel" type="RichTextLabel" parent="Root/SubtitlePanel" unique_id=1085926810]
+[node name="SubtitleLabel" type="RichTextLabel" parent="Root/SubtitlePanel" unique_id=224990735]
 layout_mode = 2
 mouse_filter = 2
 theme_override_fonts/normal_font = SubResource("SystemFont_vcstc")
@@ -1618,12 +1618,12 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="ObjectiveArrow" type="Control" parent="Root" unique_id=1599391584]
+[node name="ObjectiveArrow" type="Control" parent="Root" unique_id=275350716]
 anchors_preset = 0
 mouse_filter = 2
 script = SubResource("GDScript_qtbwn")
 
-[node name="GenomePopupPanel" type="PanelContainer" parent="Root" unique_id=683724446]
+[node name="GenomePopupPanel" type="PanelContainer" parent="Root" unique_id=1108797932]
 visible = false
 modulate = Color(1, 1, 1, 0)
 custom_minimum_size = Vector2(600, 200)
@@ -1639,7 +1639,7 @@ offset_bottom = 100.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_fr0d1")
 
-[node name="GenomePopupLabel" type="RichTextLabel" parent="Root/GenomePopupPanel" unique_id=1675576389]
+[node name="GenomePopupLabel" type="RichTextLabel" parent="Root/GenomePopupPanel" unique_id=1333690428]
 layout_mode = 2
 mouse_filter = 2
 theme_override_fonts/normal_font = SubResource("SystemFont_6obdw")
@@ -1650,7 +1650,7 @@ bbcode_enabled = true
 fit_content = true
 scroll_active = false
 
-[node name="MinimapPanel" type="PanelContainer" parent="Root" unique_id=1848994488]
+[node name="MinimapPanel" type="PanelContainer" parent="Root" unique_id=1112173218]
 custom_minimum_size = Vector2(180, 180)
 layout_mode = 0
 anchor_left = 1.0
@@ -1659,26 +1659,25 @@ offset_left = -204.0
 offset_top = 24.0
 offset_right = -24.0
 offset_bottom = 204.0
-mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ej5y8")
 
-[node name="MarginContainer35953575616" type="MarginContainer" parent="Root/MinimapPanel" unique_id=2002200193]
+[node name="MarginContainer35953575616" type="MarginContainer" parent="Root/MinimapPanel" unique_id=1131875235]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 4
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 4
 
-[node name="SubViewportContainer35987130050" type="SubViewportContainer" parent="Root/MinimapPanel/MarginContainer35953575616" unique_id=1399814420]
+[node name="SubViewportContainer35987130050" type="SubViewportContainer" parent="Root/MinimapPanel/MarginContainer35953575616" unique_id=175635072]
 layout_mode = 2
 stretch = true
 
-[node name="SubViewport36020684484" type="SubViewport" parent="Root/MinimapPanel/MarginContainer35953575616/SubViewportContainer35987130050" unique_id=688222530]
+[node name="SubViewport36020684484" type="SubViewport" parent="Root/MinimapPanel/MarginContainer35953575616/SubViewportContainer35987130050" unique_id=1349840426]
 handle_input_locally = false
 size = Vector2i(2, 2)
 render_target_update_mode = 4
 
-[node name="Camera3D36071016135" type="Camera3D" parent="Root/MinimapPanel/MarginContainer35953575616/SubViewportContainer35987130050/SubViewport36020684484" unique_id=1087763590]
+[node name="Camera3D36071016135" type="Camera3D" parent="Root/MinimapPanel/MarginContainer35953575616/SubViewportContainer35987130050/SubViewport36020684484" unique_id=114953366]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0)
 environment = SubResource("Environment_pptio")
 projection = 1
@@ -1687,10 +1686,10 @@ size = 60.0
 near = 0.1
 far = 400.0
 
-[node name="CenterContainer36154902220" type="CenterContainer" parent="Root/MinimapPanel" unique_id=1370417554]
+[node name="CenterContainer36154902220" type="CenterContainer" parent="Root/MinimapPanel" unique_id=1808501499]
 layout_mode = 2
 
-[node name="ColorRect36121347786" type="ColorRect" parent="Root/MinimapPanel/CenterContainer36154902220" unique_id=156014135]
+[node name="ColorRect36121347786" type="ColorRect" parent="Root/MinimapPanel/CenterContainer36154902220" unique_id=374539214]
 custom_minimum_size = Vector2(6, 6)
 layout_mode = 2
 color = Color(1, 0.2, 0.3, 1)

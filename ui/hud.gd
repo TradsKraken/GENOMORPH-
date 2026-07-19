@@ -65,6 +65,15 @@ var _active_highlight_tweens: Dictionary = {}
 
 var _minimap_camera: Camera3D
 var _minimap_viewport: SubViewport
+var _minimap_panel: PanelContainer
+var _is_minimap_expanded: bool = false
+var _minimap_drag_active: bool = false
+var _minimap_last_mouse_pos: Vector2
+var _minimap_drag_distance: float = 0.0
+var _minimap_cam_offset: Vector3 = Vector3.ZERO
+var _minimap_original_rect: Rect2
+var _minimap_original_zoom: float
+var _minimap_tween: Tween
 
 signal subtitle_dismissed
 
@@ -121,8 +130,8 @@ func _process(delta: float) -> void:
 	if is_instance_valid(_minimap_camera):
 		var player = get_tree().get_first_node_in_group("player")
 		if is_instance_valid(player):
-			# Follow player from above
-			_minimap_camera.global_position = Vector3(player.global_position.x, 150.0, player.global_position.z)
+			# Follow player from above, plus any drag offset if expanded
+			_minimap_camera.global_position = Vector3(player.global_position.x, 150.0, player.global_position.z) + _minimap_cam_offset
 
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
@@ -273,29 +282,30 @@ func _build_minimap() -> void:
 		var old = _root.get_node("MinimapPanel")
 		old.queue_free()
 		
-	var minimap_panel = PanelContainer.new()
-	minimap_panel.name = "MinimapPanel"
-	minimap_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	minimap_panel.custom_minimum_size = Vector2(180, 180)
-	minimap_panel.offset_right = -24
-	minimap_panel.offset_top = 24
-	minimap_panel.offset_left = -204
-	minimap_panel.offset_bottom = 204
-	minimap_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_minimap_panel = PanelContainer.new()
+	_minimap_panel.name = "MinimapPanel"
+	_minimap_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_minimap_panel.custom_minimum_size = Vector2(180, 180)
+	_minimap_panel.offset_right = -24
+	_minimap_panel.offset_top = 24
+	_minimap_panel.offset_left = -204
+	_minimap_panel.offset_bottom = 204
+	_minimap_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_minimap_panel.gui_input.connect(_on_minimap_gui_input)
 	
 	var style = StyleBoxFlat.new()
 	style.bg_color = Color(0.02, 0.04, 0.08, 0.95)
 	style.border_color = Color(0.1, 0.9, 0.7, 0.6)
 	style.set_border_width_all(2)
 	style.set_corner_radius_all(12)
-	minimap_panel.add_theme_stylebox_override("panel", style)
+	_minimap_panel.add_theme_stylebox_override("panel", style)
 	
 	var margin = MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 4)
 	margin.add_theme_constant_override("margin_right", 4)
 	margin.add_theme_constant_override("margin_top", 4)
 	margin.add_theme_constant_override("margin_bottom", 4)
-	minimap_panel.add_child(margin)
+	_minimap_panel.add_child(margin)
 	
 	var sub_container = SubViewportContainer.new()
 	sub_container.stretch = true
@@ -325,9 +335,61 @@ func _build_minimap() -> void:
 	icon.set_anchors_preset(Control.PRESET_CENTER)
 	var icon_container = CenterContainer.new()
 	icon_container.add_child(icon)
-	minimap_panel.add_child(icon_container)
+	_minimap_panel.add_child(icon_container)
 	
-	_root.add_child(minimap_panel)
+	_root.add_child(_minimap_panel)
+
+func _on_minimap_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_minimap_drag_active = true
+				_minimap_last_mouse_pos = event.position
+				_minimap_drag_distance = 0.0
+			else:
+				_minimap_drag_active = false
+				if _minimap_drag_distance < 10.0:
+					_toggle_minimap_expanded()
+	elif event is InputEventMouseMotion and _minimap_drag_active:
+		var delta = event.position - _minimap_last_mouse_pos
+		_minimap_last_mouse_pos = event.position
+		_minimap_drag_distance += delta.length()
+		
+		if _is_minimap_expanded:
+			var pixels_per_unit = _minimap_panel.size.y / _minimap_camera.size
+			var world_delta_x = -delta.x / pixels_per_unit
+			var world_delta_z = -delta.y / pixels_per_unit
+			_minimap_cam_offset += Vector3(world_delta_x, 0, world_delta_z)
+
+func _toggle_minimap_expanded() -> void:
+	_is_minimap_expanded = not _is_minimap_expanded
+	
+	if _minimap_tween and _minimap_tween.is_valid():
+		_minimap_tween.kill()
+	_minimap_tween = create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_minimap_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	
+	if _is_minimap_expanded:
+		get_tree().paused = true
+		_minimap_original_rect = Rect2(_minimap_panel.position, _minimap_panel.size)
+		_minimap_original_zoom = _minimap_camera.size
+		
+		var vp_size = get_viewport().get_visible_rect().size
+		var target_size = Vector2(min(600, vp_size.x * 0.8), min(600, vp_size.y * 0.8))
+		var target_pos = (vp_size - target_size) / 2.0
+		
+		_minimap_tween.parallel().tween_property(_minimap_panel, "custom_minimum_size", target_size, 0.3)
+		_minimap_tween.parallel().tween_property(_minimap_panel, "size", target_size, 0.3)
+		_minimap_tween.parallel().tween_property(_minimap_panel, "position", target_pos, 0.3)
+		_minimap_tween.parallel().tween_property(_minimap_camera, "size", _minimap_original_zoom * 2.0, 0.3)
+	else:
+		get_tree().paused = false
+		_minimap_cam_offset = Vector3.ZERO
+		
+		_minimap_tween.parallel().tween_property(_minimap_panel, "custom_minimum_size", _minimap_original_rect.size, 0.3)
+		_minimap_tween.parallel().tween_property(_minimap_panel, "size", _minimap_original_rect.size, 0.3)
+		_minimap_tween.parallel().tween_property(_minimap_panel, "position", _minimap_original_rect.position, 0.3)
+		_minimap_tween.parallel().tween_property(_minimap_camera, "size", _minimap_original_zoom, 0.3)
 
 func _build_genome_popup() -> void:
 	if _root.has_node("GenomePopupPanel"):
