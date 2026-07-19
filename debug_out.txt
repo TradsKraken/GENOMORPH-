@@ -1,0 +1,986 @@
+FINAL TERRAIN LEVEL 1 (Node3D) 
+  Tree_lp_11_007 (MeshInstance3D) cast_shadow=1 faces=468 
+    Tree_lp_11_007_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_044 (MeshInstance3D) cast_shadow=1 faces=1140 
+    Tree_lp_11_044_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  2_002 (MeshInstance3D) cast_shadow=1 faces=482157 
+    2_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  2_003 (MeshInstance3D) cast_shadow=1 faces=3 
+    2_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_039 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_039_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_061 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_061_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_002 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RootNode (Node3D) 
+    Grass_Wispy_Tall (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_001 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_002 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_003 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_004 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_005 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_006 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_007 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_008 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_009 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_010 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_011 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_152 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_153 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_154 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_155 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_156 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_157 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_158 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_159 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_160 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_161 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_162 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_163 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_164 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_165 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_166 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_167 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_168 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_169 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_170 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_171 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_172 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_173 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_174 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_175 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_176 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_177 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_178 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_179 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_180 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_181 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_182 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_183 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_184 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_185 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_186 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_187 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_188 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_189 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_190 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_191 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_192 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_193 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_194 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_195 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_196 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_197 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_198 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_199 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_200 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_201 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_202 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_203 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_204 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_205 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_206 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_207 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_208 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_209 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_210 (MeshInstance3D) cast_shadow=2 faces=1866 
+  Tree_lp_11_004 (MeshInstance3D) cast_shadow=1 faces=1140 
+    Tree_lp_11_004_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plane_002 (MeshInstance3D) cast_shadow=1 faces=61062 
+    Plane_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_020 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_020_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_002 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_003 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RootNode_001 (Node3D) 
+    Grass_Wispy_Tall_012 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_013 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_014 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_015 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_016 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_017 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_018 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_019 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_020 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_021 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_022 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_023 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_024 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_025 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_026 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_027 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_028 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_029 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_030 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_031 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_032 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_033 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_034 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_035 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_036 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_037 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_038 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_039 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_040 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_041 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_042 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_043 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_044 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_045 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_046 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_047 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_048 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_049 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_050 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_051 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_052 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_053 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_054 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_055 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_056 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_057 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_058 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_059 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_060 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_061 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_062 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_063 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_064 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_065 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_066 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_067 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_068 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_069 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_070 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_071 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_072 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_073 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_074 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_075 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_076 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_077 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_078 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_079 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_080 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_081 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_082 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_083 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_084 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_085 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_086 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_087 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_088 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_089 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_090 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_091 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_092 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_093 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_094 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_095 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_096 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_097 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_098 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_099 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_100 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_101 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_102 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_103 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_104 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_105 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_106 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_107 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_108 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_109 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_110 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_111 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_112 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_113 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_114 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_115 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_116 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_117 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_118 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_119 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_120 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_121 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_122 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_123 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_124 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_125 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_126 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_127 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_128 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_129 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_130 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_131 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_132 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_133 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_134 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_135 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_136 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_137 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_138 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_139 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_140 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_141 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_142 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_143 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_144 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_145 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_146 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_147 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_148 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_149 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_150 (MeshInstance3D) cast_shadow=2 faces=1866 
+    Grass_Wispy_Tall_151 (MeshInstance3D) cast_shadow=2 faces=1866 
+  Tree_lp_11_006 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_006_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_009 (MeshInstance3D) cast_shadow=1 faces=1548 
+    Tree_lp_11_009_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_003 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_004 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_004_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_010 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_010_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_013 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_013_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_015 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_015_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_006 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_006_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_007 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_007_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_008 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_008_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_001 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_016 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_016_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_019 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_019_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_026 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_026_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_027 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_027_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_001 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_002 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_003 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_004 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_004_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_005 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_005_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_006 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_006_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_009 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_009_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_010 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_010_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_011 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_011_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_012 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_012_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_013 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_013_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_014 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_014_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_015 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_015_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_016 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_016_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_017 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_017_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_018 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_018_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_019 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_019_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  lily_pad_005 (MeshInstance3D) cast_shadow=1 faces=642 
+    lily_pad_005_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  lily_pad_006 (MeshInstance3D) cast_shadow=1 faces=642 
+    lily_pad_006_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  lily_pad_007 (MeshInstance3D) cast_shadow=1 faces=642 
+    lily_pad_007_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RootNode_006 (Node3D) 
+    Environment_LargeBones (MeshInstance3D) cast_shadow=1 faces=5040 
+      Environment_LargeBones_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+  group911862867 (MeshInstance3D) cast_shadow=1 faces=2148 
+    group911862867_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RootNode_007 (Node3D) 
+    Mushroom_Common (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_001 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_001_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_002 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_002_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_003 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_003_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_004 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_004_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_005 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_005_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_006 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_006_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_007 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_007_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_008 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_008_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_009 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_009_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Mushroom_Common_010 (MeshInstance3D) cast_shadow=1 faces=2640 
+      Mushroom_Common_010_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+  Tumbleweed_001 (MeshInstance3D) cast_shadow=1 faces=3612 
+    Tumbleweed_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RootNode_008 (Node3D) 
+    Resource_Rock_2 (MeshInstance3D) cast_shadow=1 faces=1764 
+      Resource_Rock_2_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_001 (MeshInstance3D) cast_shadow=1 faces=1764 
+      Resource_Rock_2_001_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_006 (MeshInstance3D) cast_shadow=1 faces=27 
+      Resource_Rock_2_006_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_008 (MeshInstance3D) cast_shadow=1 faces=12 
+      Resource_Rock_2_008_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_010 (MeshInstance3D) cast_shadow=1 faces=15 
+      Resource_Rock_2_010_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_014 (MeshInstance3D) cast_shadow=1 faces=12 
+      Resource_Rock_2_014_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_021 (MeshInstance3D) cast_shadow=1 faces=36 
+      Resource_Rock_2_021_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_023 (MeshInstance3D) cast_shadow=1 faces=6 
+      Resource_Rock_2_023_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_024 (MeshInstance3D) cast_shadow=1 faces=12 
+      Resource_Rock_2_024_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_028 (MeshInstance3D) cast_shadow=1 faces=12 
+      Resource_Rock_2_028_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_030 (MeshInstance3D) cast_shadow=1 faces=6 
+      Resource_Rock_2_030_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_031 (MeshInstance3D) cast_shadow=1 faces=6 
+      Resource_Rock_2_031_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_035 (MeshInstance3D) cast_shadow=1 faces=27 
+      Resource_Rock_2_035_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_036 (MeshInstance3D) cast_shadow=1 faces=9 
+      Resource_Rock_2_036_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_041 (MeshInstance3D) cast_shadow=1 faces=27 
+      Resource_Rock_2_041_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_042 (MeshInstance3D) cast_shadow=1 faces=9 
+      Resource_Rock_2_042_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_047 (MeshInstance3D) cast_shadow=1 faces=27 
+      Resource_Rock_2_047_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_048 (MeshInstance3D) cast_shadow=1 faces=9 
+      Resource_Rock_2_048_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_051 (MeshInstance3D) cast_shadow=1 faces=12 
+      Resource_Rock_2_051_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_056 (MeshInstance3D) cast_shadow=1 faces=12 
+      Resource_Rock_2_056_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_066 (MeshInstance3D) cast_shadow=1 faces=6 
+      Resource_Rock_2_066_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_068 (MeshInstance3D) cast_shadow=1 faces=15 
+      Resource_Rock_2_068_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_072 (MeshInstance3D) cast_shadow=1 faces=12 
+      Resource_Rock_2_072_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_074 (MeshInstance3D) cast_shadow=1 faces=6 
+      Resource_Rock_2_074_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_075 (MeshInstance3D) cast_shadow=1 faces=6 
+      Resource_Rock_2_075_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_080 (MeshInstance3D) cast_shadow=1 faces=27 
+      Resource_Rock_2_080_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_081 (MeshInstance3D) cast_shadow=1 faces=9 
+      Resource_Rock_2_081_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_082 (MeshInstance3D) cast_shadow=1 faces=42 
+      Resource_Rock_2_082_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_083 (MeshInstance3D) cast_shadow=1 faces=27 
+      Resource_Rock_2_083_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_084 (MeshInstance3D) cast_shadow=1 faces=9 
+      Resource_Rock_2_084_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_085 (MeshInstance3D) cast_shadow=1 faces=27 
+      Resource_Rock_2_085_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_086 (MeshInstance3D) cast_shadow=1 faces=18 
+      Resource_Rock_2_086_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+    Resource_Rock_2_087 (MeshInstance3D) cast_shadow=1 faces=9 
+      Resource_Rock_2_087_col (StaticBody3D) 
+        CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_002 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_003 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_004 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_004_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_029 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_029_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_005 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_005_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_006 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_006_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_008 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_008_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_009 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_009_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_032 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_032_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_010 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_010_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_034 (MeshInstance3D) cast_shadow=1 faces=1548 
+    Tree_lp_11_034_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_036 (MeshInstance3D) cast_shadow=1 faces=1548 
+    Tree_lp_11_036_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_020 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_020_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_021 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_021_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_022 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_022_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_023 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_023_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_024 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_024_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_025 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_025_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RootNode_009 (Node3D) 
+    Grass_Common_Tall (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_001 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_002 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_003 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_004 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_005 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_006 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_007 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_008 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_009 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_010 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_011 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_012 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_013 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_014 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_015 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_016 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_017 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_018 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_019 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_020 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_021 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_022 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_023 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_024 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_025 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_026 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_027 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_028 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_029 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_030 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_033 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_034 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_037 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_038 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_039 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_040 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_041 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_042 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_043 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_044 (MeshInstance3D) cast_shadow=2 faces=978 
+    Grass_Common_Tall_045 (MeshInstance3D) cast_shadow=2 faces=978 
+  Cattail_026 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_026_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_027 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_027_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_028 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_028_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_029 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_029_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_007 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_007_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_008 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_008_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_009 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_009_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_010 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_010_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_030 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_030_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_031 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_031_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_032 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_032_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_033 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_033_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_034 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_034_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_035 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_035_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Plant_Small_011 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_011_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RootNode_010 (Node3D) 
+  Plant_Small_012 (MeshInstance3D) cast_shadow=1 faces=1392 
+    Plant_Small_012_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  lily_pad_001 (MeshInstance3D) cast_shadow=1 faces=642 
+    lily_pad_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  lily_pad_002 (MeshInstance3D) cast_shadow=1 faces=642 
+    lily_pad_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_037 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_037_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cylinder_002 (MeshInstance3D) cast_shadow=1 faces=3816 
+    Cylinder_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cylinder_003 (MeshInstance3D) cast_shadow=1 faces=3816 
+    Cylinder_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_036 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_036_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_037 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_037_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_038 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_038_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_038 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_038_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_039 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_039_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_040 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_040_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_041 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_041_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_042 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_042_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_043 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_043_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_044 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_044_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Prop_Barrel (MeshInstance3D) cast_shadow=1 faces=1920 
+    Prop_Barrel_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Prop_Barrel_001 (MeshInstance3D) cast_shadow=1 faces=1920 
+    Prop_Barrel_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Prop_Barrel_002 (MeshInstance3D) cast_shadow=1 faces=1920 
+    Prop_Barrel_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Prop_Barrel_003 (MeshInstance3D) cast_shadow=1 faces=1920 
+    Prop_Barrel_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  model (MeshInstance3D) cast_shadow=1 faces=5820 
+    model_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  FishBone (MeshInstance3D) cast_shadow=1 faces=1764 
+    FishBone_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  FishBone_001 (MeshInstance3D) cast_shadow=1 faces=1764 
+    FishBone_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  FishBone_002 (MeshInstance3D) cast_shadow=1 faces=1764 
+    FishBone_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  model_003 (MeshInstance3D) cast_shadow=1 faces=5820 
+    model_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cylinder_042 (MeshInstance3D) cast_shadow=1 faces=135 
+    Cylinder_042_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cylinder_006 (MeshInstance3D) cast_shadow=1 faces=135 
+    Cylinder_006_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cube_014 (MeshInstance3D) cast_shadow=1 faces=252 
+    Cube_014_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1819006870 (MeshInstance3D) cast_shadow=1 faces=648 
+    group1819006870_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1819006870_001 (MeshInstance3D) cast_shadow=1 faces=648 
+    group1819006870_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_040 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_040_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_008 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_008_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_014 (MeshInstance3D) cast_shadow=1 faces=1140 
+    Tree_lp_11_014_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_021 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_021_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_001 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_001 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_005 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_005_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_012 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_012_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_017 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_017_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_022 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_022_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_023 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_023_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_024 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_024_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_025 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_025_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_028 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_028_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_030 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_030_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_033 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_033_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_035 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_035_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_041 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_041_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  tree_roots_Cylinder_007 (MeshInstance3D) cast_shadow=1 faces=2199 
+    tree_roots_Cylinder_007_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  RubbishBins_517 (MeshInstance3D) cast_shadow=1 faces=18312 
+    RubbishBins_517_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group104413426 (MeshInstance3D) cast_shadow=1 faces=546 
+    group104413426_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1143783783 (MeshInstance3D) cast_shadow=1 faces=300 
+    group1143783783_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1198732575 (MeshInstance3D) cast_shadow=1 faces=234 
+    group1198732575_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1279790214 (MeshInstance3D) cast_shadow=1 faces=966 
+    group1279790214_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1373108668 (MeshInstance3D) cast_shadow=1 faces=300 
+    group1373108668_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  TREE LOG (MeshInstance3D) cast_shadow=1 faces=780 
+    TREE LOG_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group174772603 (MeshInstance3D) cast_shadow=1 faces=390 
+    group174772603_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1926466534 (MeshInstance3D) cast_shadow=1 faces=1200 
+    group1926466534_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group203695626 (MeshInstance3D) cast_shadow=1 faces=732 
+    group203695626_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group2137913344 (MeshInstance3D) cast_shadow=1 faces=96 
+    group2137913344_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group352370893 (MeshInstance3D) cast_shadow=1 faces=732 
+    group352370893_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group405281105 (MeshInstance3D) cast_shadow=1 faces=390 
+    group405281105_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group663708940 (MeshInstance3D) cast_shadow=1 faces=966 
+    group663708940_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group84866608 (MeshInstance3D) cast_shadow=1 faces=576 
+    group84866608_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Prop_Barrel_004 (MeshInstance3D) cast_shadow=1 faces=1920 
+    Prop_Barrel_004_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group104413426_002 (MeshInstance3D) cast_shadow=1 faces=546 
+    group104413426_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_043 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_043_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Prop_Barrel_005 (MeshInstance3D) cast_shadow=1 faces=1920 
+    Prop_Barrel_005_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_045 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_045_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_046 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_046_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_047 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_047_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_048 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_048_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_049 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_049_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_050 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_050_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_051 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_051_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_052 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_052_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_053 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_053_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_054 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_054_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_055 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_055_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1819006870_003 (MeshInstance3D) cast_shadow=1 faces=648 
+    group1819006870_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1819006870_002 (MeshInstance3D) cast_shadow=1 faces=648 
+    group1819006870_002_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_005 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_005_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_045 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_045_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_046 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_046_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_047 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_047_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_048 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_048_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_049 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_049_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_050 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_050_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cattail_051 (MeshInstance3D) cast_shadow=1 faces=1419 
+    Cattail_051_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_056 (MeshInstance3D) cast_shadow=1 faces=1500 
+    Tree_lp_11_056_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group203695626_001 (MeshInstance3D) cast_shadow=1 faces=732 
+    group203695626_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  group1279790214_001 (MeshInstance3D) cast_shadow=1 faces=966 
+    group1279790214_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cube_029 (MeshInstance3D) cast_shadow=1 faces=1131 
+    Cube_029_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_031 (Node3D) 
+  Tree_lp_11_011 (MeshInstance3D) cast_shadow=1 faces=1404 
+    Tree_lp_11_011_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Tree_lp_11_160 (Node3D) 
+  Tree_lp_11_165 (Node3D) 
+  Tree_lp_11_180 (Node3D) 
+  Tree_lp_11_237 (Node3D) 
+  Tree_lp_11_260 (Node3D) 
+  Tree_lp_11_042 (Node3D) 
+  Tree_lp_11_060 (MeshInstance3D) cast_shadow=1 faces=1788 
+    Tree_lp_11_060_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cube_030 (MeshInstance3D) cast_shadow=1 faces=222 
+    Cube_030_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Icosphere_023 (MeshInstance3D) cast_shadow=1 faces=240 
+    Icosphere_023_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Icosphere_024 (MeshInstance3D) cast_shadow=1 faces=240 
+    Icosphere_024_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Icosphere_001 (MeshInstance3D) cast_shadow=1 faces=240 
+    Icosphere_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  GRASS_001 (MeshInstance3D) cast_shadow=2 faces=4674 
+  GRASS_224 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_004 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_008 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_009 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_010 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_011 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_012 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_013 (MeshInstance3D) cast_shadow=2 faces=26676 
+  GRASS_023 (MeshInstance3D) cast_shadow=2 faces=26676 
+  Cube_009 (MeshInstance3D) cast_shadow=1 faces=96 
+    Cube_009_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cube_023 (MeshInstance3D) cast_shadow=1 faces=96 
+    Cube_023_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cube_006 (MeshInstance3D) cast_shadow=1 faces=972 
+    Cube_006_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cube_007 (MeshInstance3D) cast_shadow=1 faces=486 
+    Cube_007_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Cube_001 (MeshInstance3D) cast_shadow=1 faces=972 
+    Cube_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Island01_Cylinder_001 (MeshInstance3D) cast_shadow=1 faces=66 
+    Island01_Cylinder_001_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Island01_Cylinder_003 (MeshInstance3D) cast_shadow=1 faces=66 
+    Island01_Cylinder_003_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 
+  Island01_Cylinder_004 (MeshInstance3D) cast_shadow=1 faces=66 
+    Island01_Cylinder_004_col (StaticBody3D) 
+      CollisionShape3D (CollisionShape3D) 

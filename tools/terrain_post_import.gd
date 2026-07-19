@@ -1,20 +1,43 @@
 @tool
 extends EditorScenePostImport
 
+var log_file
+
 func _post_import(scene):
-	_process_nodes(scene)
+	log_file = FileAccess.open("res://import_debug.txt", FileAccess.WRITE)
+	log_file.store_line("STARTING IMPORT FOR: " + scene.name)
+	_process_nodes(scene, scene)
+	log_file.store_line("IMPORT FINISHED")
+	log_file.close()
 	return scene
 
-func _process_nodes(node: Node):
+func _process_nodes(node: Node, root: Node):
 	if node is MeshInstance3D:
 		var n = node.name.to_lower()
+		log_file.store_line("Processing Mesh: " + n)
 		# 1. Add collisions (ignore grass)
 		if not ("grass" in n or "leaf" in n or "flower" in n):
-			if node.mesh != null and node.mesh.get_faces().size() >= 3:
+			if node.mesh != null:
 				if "rock" in n:
 					node.create_convex_collision(true, true)
+					log_file.store_line(" -> Created convex collision")
 				else:
 					node.create_trimesh_collision()
+					log_file.store_line(" -> Created trimesh collision")
+				
+				# Fix owner for generated collision nodes so they get saved!
+				var collision_count = 0
+				for child in node.get_children():
+					if child is CollisionObject3D:
+						collision_count += 1
+						child.owner = root
+						for shape in child.get_children():
+							shape.owner = root
+				log_file.store_line(" -> Set owner for " + str(collision_count) + " collision nodes")
+			else:
+				log_file.store_line(" -> Skipping collision (mesh is null)")
+		else:
+			log_file.store_line(" -> Skipping collision (grass/leaf/flower)")
 			
 		# 3. Fix transparency and shadows
 		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
@@ -48,4 +71,4 @@ func _process_nodes(node: Node):
 		return # Don't process children of a deleted node
 			
 	for child in node.get_children():
-		_process_nodes(child)
+		_process_nodes(child, root)

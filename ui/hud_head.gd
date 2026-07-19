@@ -1,0 +1,1487 @@
+﻿class_name GameHUD
+extends CanvasLayer
+
+## Clean, modern game HUD.
+## Sleek bars, circular badges, translucent backgrounds.
+
+# ── Colors & Styling ──────────────────────────────────────────────────────────
+
+const C_HP       := Color("#ff3b5c")
+const C_STAM     := Color("#9400ff")
+const C_EXP      := Color("#ffb31a")
+const C_BG_DARK  := Color(0.04, 0.04, 0.06, 0.65)
+const C_BTN_NORM := Color(0.12, 0.13, 0.18, 0.75)
+const C_BTN_PRSS := Color(0.85, 0.88, 0.95, 0.90)
+
+# ── Node refs ─────────────────────────────────────────────────────────────────
+
+var _root:       Control
+var _hp_bar:     ProgressBar
+var _hp_lbl:     Label
+var _stam_bar:   ProgressBar
+var _stam_lbl:   Label
+var _exp_bar:    Control
+var _lvl_lbl:    Label
+var _status_group: Control
+
+var _interact_btn: Button
+var _current_interact_source: Node
+var _interact_callback: Callable
+
+var _attack_btn: Button
+var _skill1_btn: Button
+var _jump_btn:   Button
+var _skill3_btn: Button
+var _cancel_zone: Label
+var _menu_btn:   Button
+var _menu_panel: Control
+var _menu_open:  bool = false
+var _knowledge_btn: Button
+var _knowledge_badge: Label
+var _unread_knowledge_count: int = 0
+
+var _tutorial_panel: PanelContainer
+var _tutorial_title: Label
+var _tutorial_desc:  Label
+
+var _subtitle_panel: PanelContainer
+var _subtitle_label: RichTextLabel
+var _subtitle_tween: Tween
+
+var _jump_highlight_tw: Tween
+var _attack_highlight_tw: Tween
+
+var _quest_tracker_lbl: RichTextLabel
+var _quest_btn: Button
+var _quest_panel: PanelContainer
+var _genome_popup_panel: PanelContainer
+var _genome_popup_label: RichTextLabel
+var _genome_popup_tween: Tween
+
+var _walkthrough_steps: Array = []
+var _current_step_index: int = 0
+var _active_highlight_nodes: Array = []
+var _active_highlight_tweens: Dictionary = {}
+
+signal subtitle_dismissed
+
+# ── Lifecycle ─────────────────────────────────────────────────────────────────
+
+func _ready() -> void:
+	layer = 10
+	process_mode = PROCESS_MODE_ALWAYS
+	add_to_group("hud")
+
+	if has_node("Root"):
+		_root = get_node("Root")
+	else:
+		_root = Control.new()
+		_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(_root)
+
+	_build_player_status()
+	_build_action_buttons()
+	_build_cancel_zone()
+	_build_menu_panel()
+	_build_tutorial_panel()
+	_build_subtitle_panel()
+	_build_objective_arrow()
+	_build_genome_popup()
+
+	_connect_signals()
+
+func _set_owner_recursive(node: Node, r: Node) -> void:
+	if node != r and node.owner == null:
+		node.owner = r
+	for child in node.get_children():
+		_set_owner_recursive(child, r)
+
+func _input(event: InputEvent) -> void:
+	if _genome_popup_panel and _genome_popup_panel.visible and _genome_popup_panel.modulate.a > 0.5:
+		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+			if event.is_pressed():
+				_hide_genome_popup()
+				
+	if _subtitle_panel and _subtitle_panel.visible and _subtitle_panel.modulate.a > 0.5:
+		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+			if event.is_pressed():
+				hide_subtitle()
+				# Accept the event so it doesn't trigger jumping or attacking if they tap the subtitle area
+				# Alternatively, let them attack/jump while dismissing. 
+				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
+
+
+# ── Player Status (Top Left) ──────────────────────────────────────────────────
+
+func _build_player_status() -> void:
+	if _root.has_node("StatusGroup"):
+		_status_group = _root.find_child("StatusGroup", true, false)
+		var badge = _root.find_child("Badge", true, false)
+		_hp_bar = _root.find_child("HpBar", true, false)
+		_hp_lbl = _root.find_child("HpLbl", true, false)
+		_stam_bar = _root.find_child("StamBar", true, false)
+		_exp_bar = _root.find_child("ExpBar", true, false)
+		_lvl_lbl = _root.find_child("LvlLbl", true, false)
+		_quest_tracker_lbl = _root.find_child("QuestTrackerLbl", true, false)
+		if badge and not badge.gui_input.is_connected(_on_badge_gui_input):
+			badge.gui_input.connect(_on_badge_gui_input)
+		return
+
+	# Group container
+	_status_group = Control.new()
+	_status_group.name = "StatusGroup"
+	_status_group.position = Vector2(24, 24)
+	_status_group.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_status_group)
+
+	# Level Badge (Circular)
+	var badge := PanelContainer.new()
+	badge.name = "Badge"
+	badge.custom_minimum_size = Vector2(80, 80)
+	badge.position = Vector2(0, 0)
+	badge.z_index = 2
+	
+	var badge_bg := StyleBoxFlat.new()
+	badge_bg.bg_color = Color(0.08, 0.08, 0.1, 0.9)
+	badge_bg.border_color = C_EXP
+	badge_bg.set_border_width_all(2)
+	badge_bg.set_corner_radius_all(40)
+	badge_bg.shadow_color = Color(0, 0, 0, 0.3)
+	badge_bg.shadow_size = 4
+	badge.add_theme_stylebox_override("panel", badge_bg)
+	badge.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	badge.gui_input.connect(_on_badge_gui_input)
+	_status_group.add_child(badge)
+
+	var lvl_vbox := VBoxContainer.new()
+	lvl_vbox.name = "LvlVBox"
+	lvl_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	lvl_vbox.add_theme_constant_override("separation", -4)
+	badge.add_child(lvl_vbox)
+
+	var lvl_title := _make_label("LVL", 12, Color(0.7, 0.7, 0.7))
+	lvl_title.name = "LvlTitle"
+	lvl_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lvl_vbox.add_child(lvl_title)
+
+	_lvl_lbl = _make_label("1", 24, Color.WHITE)
+	_lvl_lbl.name = "LvlLbl"
+	_lvl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_lvl_lbl.add_theme_font_override("font", ThemeDB.fallback_font)
+	lvl_vbox.add_child(_lvl_lbl)
+
+	# Bars Container (Offset to the right of the badge)
+	var bars_vbox := VBoxContainer.new()
+	bars_vbox.name = "BarsVBox"
+	bars_vbox.position = Vector2(65, 12)
+	bars_vbox.add_theme_constant_override("separation", 8)
+	bars_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bars_vbox.z_index = 1
+	_status_group.add_child(bars_vbox)
+
+	# Health Bar
+	var hp_box := Control.new()
+	hp_box.name = "HpBox"
+	hp_box.custom_minimum_size = Vector2(300, 24)
+	_hp_bar = _make_bar(300, 24, C_HP)
+	_hp_bar.name = "HpBar"
+	_hp_lbl = _make_label("100 / 100", 14, Color.WHITE)
+	_hp_lbl.name = "HpLbl"
+	_hp_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_hp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hp_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hp_box.add_child(_hp_bar)
+	hp_box.add_child(_hp_lbl)
+	bars_vbox.add_child(hp_box)
+
+	# Stamina Bar
+	var stam_box := Control.new()
+	stam_box.name = "StamBox"
+	stam_box.custom_minimum_size = Vector2(220, 16)
+	_stam_bar = _make_bar(220, 16, C_STAM)
+	_stam_bar.name = "StamBar"
+	stam_box.add_child(_stam_bar)
+	bars_vbox.add_child(stam_box)
+
+	# Quest Tracker Label
+	_quest_tracker_lbl = RichTextLabel.new()
+	_quest_tracker_lbl.name = "QuestTrackerLbl"
+	_quest_tracker_lbl.bbcode_enabled = true
+	_quest_tracker_lbl.fit_content = true
+	_quest_tracker_lbl.scroll_active = false
+	_quest_tracker_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_quest_tracker_lbl.add_theme_font_size_override("normal_font_size", 14)
+	_quest_tracker_lbl.custom_minimum_size = Vector2(300, 20)
+	_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
+	bars_vbox.add_child(_quest_tracker_lbl)
+
+	# EXP Bar (Radial around badge)
+	var exp_script = GDScript.new()
+	exp_script.source_code = """extends Control
+var max_value: float = 100.0:
+	set(v):
+		max_value = v
+		queue_redraw()
+var value: float = 0.0:
+	set(v):
+		value = v
+		queue_redraw()
+var color: Color = Color.WHITE
+
+func _draw():
+	var center = size / 2.0
+	var radius = size.x / 2.0 + 3.0
+	var start_angle = -PI / 2.0
+	var progress = 0.0
+	if max_value > 0:
+		progress = clamp(value / max_value, 0.0, 1.0)
+	var end_angle = start_angle + progress * PI * 2.0
+	
+	draw_arc(center, radius, 0, PI * 2.0, 64, Color(0.1, 0.1, 0.1, 0.8), 4.0, true)
+	if progress > 0:
+		draw_arc(center, radius, start_angle, end_angle, 64, color, 4.0, true)
+"""
+	exp_script.reload()
+	
+	_exp_bar = Control.new()
+	_exp_bar.name = "ExpBar"
+	_exp_bar.set_script(exp_script)
+	_exp_bar.set("color", C_EXP)
+	_exp_bar.custom_minimum_size = Vector2(80, 80)
+	_exp_bar.position = badge.position
+	_exp_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_exp_bar.z_index = 1
+	_status_group.add_child(_exp_bar)
+	
+	_root.add_child(_status_group)
+
+func _build_genome_popup() -> void:
+	if _root.has_node("GenomePopupPanel"):
+		_genome_popup_panel = _root.find_child("GenomePopupPanel", true, false)
+		_genome_popup_label = _root.find_child("GenomePopupLabel", true, false)
+		return
+
+	_genome_popup_panel = PanelContainer.new()
+	_genome_popup_panel.name = "GenomePopupPanel"
+	_genome_popup_panel.visible = false
+	_genome_popup_panel.modulate.a = 0.0
+	
+	_genome_popup_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_genome_popup_panel.custom_minimum_size = Vector2(600, 200)
+	
+	_genome_popup_panel.set_anchor(SIDE_LEFT, 0.5)
+	_genome_popup_panel.set_anchor(SIDE_RIGHT, 0.5)
+	_genome_popup_panel.set_anchor(SIDE_TOP, 0.5)
+	_genome_popup_panel.set_anchor(SIDE_BOTTOM, 0.5)
+	_genome_popup_panel.offset_left = -300
+	_genome_popup_panel.offset_right = 300
+	_genome_popup_panel.offset_top = -100
+	_genome_popup_panel.offset_bottom = 100
+	
+	_genome_popup_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.02, 0.1, 0.05, 0.95)
+	bg.border_color = Color(0.2, 1.0, 0.5, 0.8)
+	bg.set_border_width_all(4)
+	bg.set_corner_radius_all(8)
+	bg.content_margin_left   = 32.0
+	bg.content_margin_right  = 32.0
+	bg.content_margin_top    = 48.0
+	bg.content_margin_bottom = 48.0
+	_genome_popup_panel.add_theme_stylebox_override("panel", bg)
+	
+	_genome_popup_label = RichTextLabel.new()
+	_genome_popup_label.name = "GenomePopupLabel"
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+	_genome_popup_label.add_theme_font_override("normal_font", tech_font)
+	_genome_popup_label.add_theme_font_override("bold_font", tech_font)
+	_genome_popup_label.bbcode_enabled = true
+	_genome_popup_label.fit_content = true
+	_genome_popup_label.scroll_active = false
+	_genome_popup_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_genome_popup_label.add_theme_font_size_override("normal_font_size", 24)
+	_genome_popup_label.add_theme_font_size_override("bold_font_size", 36)
+	_genome_popup_panel.add_child(_genome_popup_label)
+	
+	_root.add_child(_genome_popup_panel)
+
+func show_genome_popup(current: int, total: int) -> void:
+	var percent = int((float(current) / float(total)) * 100.0)
+	_genome_popup_label.text = "[center][b][color=#33ff88]GENOME FRAGMENT RECOVERED[/color][/b]\n\n[font_size=24]Suit Reconstruction: " + str(percent) + "%[/font_size]\n\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
+	
+	if _genome_popup_tween and _genome_popup_tween.is_valid():
+		_genome_popup_tween.kill()
+		
+	_genome_popup_panel.visible = true
+	_genome_popup_tween = create_tween()
+	_genome_popup_tween.tween_property(_genome_popup_panel, "modulate:a", 1.0, 0.4).set_trans(Tween.TRANS_SINE)
+
+func _hide_genome_popup() -> void:
+	if _genome_popup_tween and _genome_popup_tween.is_valid():
+		_genome_popup_tween.kill()
+	_genome_popup_tween = create_tween()
+	_genome_popup_tween.tween_property(_genome_popup_panel, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE)
+	_genome_popup_tween.tween_callback(func(): _genome_popup_panel.visible = false)
+
+# ── Action Buttons (Right / Bottom Right) ────────────────────────────────────────────────────────────
+
+func _build_action_buttons() -> void:
+	# 1. Primary Attack Button (Webbed Lunge)
+	# Largest button, outermost bottom-right
+	var attack_is_new = not _root.has_node("AttackBtn")
+	_attack_btn = _make_circle_btn("AttackBtn", "🦵", 120, C_BTN_NORM)
+	_attack_btn.add_theme_font_size_override("font_size", 64)
+	if attack_is_new:
+		_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_attack_btn.set_anchor(SIDE_LEFT, 1.0)
+		_attack_btn.set_anchor(SIDE_TOP, 1.0)
+		_attack_btn.offset_right  = -40
+		_attack_btn.offset_bottom = -40
+		_attack_btn.offset_left   = -160
+		_attack_btn.offset_top    = -160
+	_attack_btn.button_down.connect(func():
+		stop_highlight_attack()
+		Input.action_press("attack")
+	)
+	_attack_btn.button_up.connect(func():   Input.action_release("attack"))
+
+	# 2. Skill 1 Button (Sticky Tongue Whip)
+	# Medium, directly to the left of Primary Attack
+	var skill1_is_new = not _root.has_node("Skill1Btn")
+	_skill1_btn = _make_circle_btn("Skill1Btn", "👅", 80, C_BTN_NORM)
+	_skill1_btn.add_theme_font_size_override("font_size", 48)
+	if skill1_is_new:
+		_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_skill1_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_skill1_btn.set_anchor(SIDE_LEFT, 1.0)
+		_skill1_btn.set_anchor(SIDE_TOP, 1.0)
+		_skill1_btn.offset_right  = -190
+		_skill1_btn.offset_bottom = -60
+		_skill1_btn.offset_left   = -270
+		_skill1_btn.offset_top    = -140
+	_skill1_btn.button_down.connect(func(): Input.action_press("skill1"))
+	_skill1_btn.button_up.connect(func():   Input.action_release("skill1"))
+
+	# 3. Skill 2 Button (Splashdown Jump)
+	# Medium, directly above Skill 1, forming the center of the UI arc
+	var jump_is_new = not _root.has_node("JumpBtn")
+	_jump_btn = _make_circle_btn("JumpBtn", "🦘", 80, C_BTN_NORM)
+	_jump_btn.add_theme_font_size_override("font_size", 48)
+	if jump_is_new:
+		_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_jump_btn.set_anchor(SIDE_LEFT, 1.0)
+		_jump_btn.set_anchor(SIDE_TOP, 1.0)
+		_jump_btn.offset_right  = -152
+		_jump_btn.offset_bottom = -152
+		_jump_btn.offset_left   = -232
+		_jump_btn.offset_top    = -232
+	_jump_btn.gui_input.connect(_on_jump_btn_input)
+
+	# 4. Skill 3 Button (Cutaneous Respiration - Ultimate)
+	# Medium, top of the curved arc (directly above Primary Attack)
+	var skill3_is_new = not _root.has_node("Skill3Btn")
+	_skill3_btn = _make_circle_btn("Skill3Btn", "☣️", 80, C_BTN_NORM)
+	_skill3_btn.add_theme_font_size_override("font_size", 48)
+	if skill3_is_new:
+		_skill3_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_skill3_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_skill3_btn.set_anchor(SIDE_LEFT, 1.0)
+		_skill3_btn.set_anchor(SIDE_TOP, 1.0)
+		_skill3_btn.offset_right  = -60
+		_skill3_btn.offset_bottom = -190
+		_skill3_btn.offset_left   = -140
+		_skill3_btn.offset_top    = -270
+	_skill3_btn.disabled = true
+	_skill3_btn.modulate = Color(0.5, 0.5, 0.5, 0.5) # Locked visual state
+
+	# 5. Interact Button
+	var interact_is_new = not _root.has_node("InteractBtn")
+	_interact_btn = _make_circle_btn("InteractBtn", "🖐️", 70, C_BTN_NORM)
+	_interact_btn.add_theme_font_size_override("font_size", 32)
+	if interact_is_new:
+		_interact_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_interact_btn.set_anchor(SIDE_BOTTOM, 1.0)
+		_interact_btn.set_anchor(SIDE_LEFT, 1.0)
+		_interact_btn.set_anchor(SIDE_TOP, 1.0)
+		_interact_btn.offset_right  = -40
+		_interact_btn.offset_bottom = -300
+		_interact_btn.offset_left   = -110
+		_interact_btn.offset_top    = -370
+	_interact_btn.visible = false
+	_interact_btn.pressed.connect(_on_interact_pressed)
+
+
+
+	# Menu Button (Top Right)
+	var menu_is_new = not _root.has_node("MenuBtn")
+	_menu_btn = _make_circle_btn("MenuBtn", "", 56, C_BTN_NORM)
+	if menu_is_new:
+		_menu_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_menu_btn.set_anchor(SIDE_TOP, 0.0)
+		_menu_btn.set_anchor(SIDE_LEFT, 1.0)
+		_menu_btn.set_anchor(SIDE_BOTTOM, 0.0)
+		_menu_btn.offset_right  = -24
+		_menu_btn.offset_top    = 24
+		_menu_btn.offset_left   = -24 - 56
+		_menu_btn.offset_bottom = 24 + 56
+	_menu_btn.pressed.connect(_toggle_menu)
+	_menu_btn.draw.connect(_draw_pause_icon)
+
+	# Knowledge Button (Top Right, left of Menu Button)
+	var knowledge_is_new = not _root.has_node("KnowledgeBtn")
+	_knowledge_btn = _make_circle_btn("KnowledgeBtn", "📖", 56, C_BTN_NORM)
+	_knowledge_btn.add_theme_font_size_override("font_size", 28)
+	if knowledge_is_new:
+		_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
+		_knowledge_btn.set_anchor(SIDE_LEFT, 1.0)
+		_knowledge_btn.set_anchor(SIDE_BOTTOM, 0.0)
+		_knowledge_btn.offset_right  = -24 - 56 - 16
+		_knowledge_btn.offset_top    = 24
+		_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
+		_knowledge_btn.offset_bottom = 24 + 56
+		
+	_knowledge_badge = _root.find_child("NotificationBadge", true, false)
+	if not is_instance_valid(_knowledge_badge):
+		_knowledge_badge = Label.new()
+		_knowledge_badge.name = "NotificationBadge"
+		_knowledge_badge.add_theme_font_size_override("font_size", 14)
+		_knowledge_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_knowledge_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		var badge_style = StyleBoxFlat.new()
+		badge_style.bg_color = Color(0.9, 0.2, 0.2)
+		badge_style.corner_radius_top_left = 12
+		badge_style.corner_radius_top_right = 12
+		badge_style.corner_radius_bottom_left = 12
+		badge_style.corner_radius_bottom_right = 12
+		_knowledge_badge.add_theme_stylebox_override("normal", badge_style)
+		_knowledge_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+		_knowledge_badge.offset_left = -20
+		_knowledge_badge.offset_right = 4
+		_knowledge_badge.offset_top = -4
+		_knowledge_badge.offset_bottom = 20
+		_knowledge_badge.visible = false
+		_knowledge_btn.add_child(_knowledge_badge)
+		
+	_knowledge_btn.pressed.connect(_open_knowledge_menu)
+
+	# Quest Button (Top Right, left of Knowledge Button)
+	var quest_is_new = not _root.has_node("QuestBtn")
+	_quest_btn = _make_circle_btn("QuestBtn", "!", 56, C_BTN_NORM)
+	_quest_btn.add_theme_font_size_override("font_size", 28)
+	if quest_is_new:
+		_quest_btn.set_anchor(SIDE_RIGHT, 1.0)
+		_quest_btn.set_anchor(SIDE_TOP, 0.0)
+		_quest_btn.set_anchor(SIDE_LEFT, 1.0)
+		_quest_btn.set_anchor(SIDE_BOTTOM, 0.0)
+		# Position it to the left of knowledge btn (-24 - 56 - 16 - 56 - 16)
+		_quest_btn.offset_right  = -24 - 56 - 16 - 56 - 16
+		_quest_btn.offset_top    = 24
+		_quest_btn.offset_left   = -24 - 56 - 16 - 56 - 16 - 56
+		_quest_btn.offset_bottom = 24 + 56
+	_quest_btn.pressed.connect(_open_quest_menu)
+
+# ── Menu Panel (Centered) ─────────────────────────────────────────────────────
+
+func _build_menu_panel() -> void:
+	if _root.has_node("MenuPanel"):
+		var old_menu = _root.get_node("MenuPanel")
+		old_menu.name = "MenuPanel_Old"
+		old_menu.queue_free()
+
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+
+	_menu_panel = Control.new()
+	_menu_panel.name = "MenuPanel"
+	_menu_panel.visible = false
+	_menu_panel.modulate.a = 0.0
+	
+	_menu_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_menu_panel.custom_minimum_size = Vector2(360, 440)
+	_menu_panel.offset_left   = -180
+	_menu_panel.offset_right  = 180
+	_menu_panel.offset_top    = -220
+	_menu_panel.offset_bottom = 220
+
+	var panel_bg := ColorRect.new()
+	panel_bg.color = Color(0.02, 0.04, 0.08, 0.95)
+	panel_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_menu_panel.add_child(panel_bg)
+	
+	var scanlines := ColorRect.new()
+	scanlines.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var scan_mat := ShaderMaterial.new()
+	scan_mat.shader = load("res://ui/scanlines.gdshader")
+	scanlines.material = scan_mat
+	scanlines.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_menu_panel.add_child(scanlines)
+	
+	var borders := Control.new()
+	borders.set_anchors_preset(Control.PRESET_FULL_RECT)
+	borders.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var b_script := GDScript.new()
+	b_script.source_code = "extends Control\nfunc _draw():\n\tvar c = Color(0.1, 0.9, 0.7, 0.9)\n\tvar r = get_rect().size\n\tvar l = 16.0\n\tvar t = 2.0\n\tdraw_rect(Rect2(0,0,l,t), c); draw_rect(Rect2(0,0,t,l), c)\n\tdraw_rect(Rect2(r.x-l,0,l,t), c); draw_rect(Rect2(r.x-t,0,t,l), c)\n\tdraw_rect(Rect2(0,r.y-t,l,t), c); draw_rect(Rect2(0,r.y-l,t,l), c)\n\tdraw_rect(Rect2(r.x-l,r.y-t,l,t), c); draw_rect(Rect2(r.x-t,r.y-l,t,l), c)\n\tvar c2 = Color(0.1, 0.9, 0.7, 0.4)\n\tfor p in [Vector2(20,20), Vector2(r.x-20,20), Vector2(20,r.y-20), Vector2(r.x-20,r.y-20)]:\n\t\tdraw_line(p-Vector2(6,0), p+Vector2(6,0), c2, 1)\n\t\tdraw_line(p-Vector2(0,6), p+Vector2(0,6), c2, 1)"
+	b_script.reload()
+	borders.set_script(b_script)
+	_menu_panel.add_child(borders)
+
+	var margin := MarginContainer.new()
+	margin.name = "MarginContainer"
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 32)
+	margin.add_theme_constant_override("margin_right", 32)
+	margin.add_theme_constant_override("margin_top", 32)
+	margin.add_theme_constant_override("margin_bottom", 32)
+	_menu_panel.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 16)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	margin.add_child(vbox)
+
+	var title := _make_label("PAUSED", 24, Color(0.1, 0.9, 0.7))
+	title.add_theme_font_override("font", tech_font)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+	
+	var sep := HSeparator.new()
+	var sep_style := StyleBoxLine.new()
+	sep_style.color = Color(0.1, 0.9, 0.7, 0.3)
+	sep_style.thickness = 1
+	sep.add_theme_stylebox_override("separator", sep_style)
+	vbox.add_child(sep)
+
+	var style_btn = func(b: Button, color: Color = Color(0.8, 1.0, 0.9)):
+		b.add_theme_font_override("font", tech_font)
+		b.add_theme_font_size_override("font_size", 18)
+		b.add_theme_color_override("font_color", color)
+		b.add_theme_color_override("font_hover_color", Color.WHITE)
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.04, 0.08, 0.12, 0.9)
+		sb.border_color = color * 0.4
+		sb.set_border_width_all(1)
+		sb.set_corner_radius_all(0)
+		b.add_theme_stylebox_override("normal", sb)
+		var sb_h := sb.duplicate()
+		sb_h.bg_color = Color(0.1, 0.3, 0.25, 0.9)
+		sb_h.border_color = color
+		b.add_theme_stylebox_override("hover", sb_h)
+		b.add_theme_stylebox_override("pressed", sb_h)
+
+	var btn_resume := _panel_btn("Resume Game")
+	btn_resume.name = "BtnResume"
+	btn_resume.pressed.connect(_toggle_menu)
+	style_btn.call(btn_resume, Color(0.1, 0.9, 0.7))
+	vbox.add_child(btn_resume)
+
+	var btn_settings := _panel_btn("Settings")
+	btn_settings.pressed.connect(func():
+		var settings = preload("res://ui/settings_menu.gd").new()
+		_root.add_child(settings)
+	)
+	style_btn.call(btn_settings)
+	vbox.add_child(btn_settings)
+
+	var btn_save := _panel_btn("Save Game")
+	btn_save.pressed.connect(func():
+		PlayerData.save_game()
+		btn_save.text = "Saved!"
+		get_tree().create_timer(1.0).timeout.connect(func():
+			if is_instance_valid(btn_save):
+				btn_save.text = "Save Game"
+		)
+	)
+	style_btn.call(btn_save)
+	vbox.add_child(btn_save)
+
+	var btn_quit := _panel_btn("Main Menu", Color(1.0, 0.2, 0.3))
+	btn_quit.pressed.connect(func():
+		PlayerData.save_game()
+		get_tree().paused = false
+		get_tree().change_scene_to_file("res://ui/main_menu.tscn")
+	)
+	style_btn.call(btn_quit, Color(1.0, 0.2, 0.3))
+	vbox.add_child(btn_quit)
+
+	_root.add_child(_menu_panel)
+
+func _build_quest_panel() -> void:
+	if has_node("QuestPanel"):
+		var old_quest = find_child("QuestPanel", true, false)
+		if old_quest:
+			old_quest.name = "QuestPanel_Old"
+			old_quest.queue_free()
+		
+	_quest_panel = PanelContainer.new()
+	_quest_panel.name = "QuestPanel"
+	_quest_panel.visible = false
+	
+	_quest_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_quest_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_quest_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_quest_panel.custom_minimum_size = Vector2(500, 400)
+	
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.03, 0.05, 0.07, 0.95)
+	bg.border_color = Color(0.1, 0.8, 0.9, 0.6)
+	bg.set_border_width_all(1)
+	bg.border_width_top = 4
+	bg.set_corner_radius_all(12)
+	bg.content_margin_left = 32
+	bg.content_margin_right = 32
+	bg.content_margin_top = 32
+	bg.content_margin_bottom = 32
+	_quest_panel.add_theme_stylebox_override("panel", bg)
+	
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 16)
+	_quest_panel.add_child(vbox)
+	
+	var title := Label.new()
+	title.text = "QUEST LOG"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
+	vbox.add_child(title)
+	
+	var desc := RichTextLabel.new()
+	desc.name = "QuestDesc"
+	desc.bbcode_enabled = true
+	desc.fit_content = true
+	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	desc.add_theme_font_size_override("normal_font_size", 18)
+	desc.text = "[color=#aaaaaa]Current Objective:[/color]\n"
+	vbox.add_child(desc)
+	
+	var close_btn := Button.new()
+	close_btn.text = "CLOSE"
+	close_btn.custom_minimum_size = Vector2(0, 40)
+	close_btn.pressed.connect(func(): _quest_panel.visible = false)
+	vbox.add_child(close_btn)
+	
+	add_child(_quest_panel)
+
+func _open_quest_menu() -> void:
+	if not _quest_panel:
+		_build_quest_panel()
+	
+	var desc = _root.find_child("QuestDesc", true, false)
+	if desc and desc is RichTextLabel:
+		var txt = PlayerData.current_objective_text
+		if txt == "": txt = "No active quest."
+		desc.text = "[color=#aaaaaa]Current Objective:[/color]\n\n" + txt
+		
+	_quest_panel.visible = true
+
+# ── Tutorial / Subtitle Panels ────────────────────────────────────────────────────────────
+
+func _build_tutorial_panel() -> void:
+	if _root.has_node("TutorialPanel"):
+		_tutorial_panel = _root.find_child("TutorialPanel", true, false)
+		_tutorial_title = _root.find_child("TutorialTitle", true, false)
+		_tutorial_desc = _root.find_child("TutorialDesc", true, false)
+		var btn = _root.find_child("BtnGotIt", true, false)
+		if btn and not btn.pressed.is_connected(_hide_tutorial):
+			btn.pressed.connect(_hide_tutorial)
+		return
+
+	_tutorial_panel = PanelContainer.new()
+	_tutorial_panel.name = "TutorialPanel"
+	_tutorial_panel.visible = false
+	_tutorial_panel.modulate.a = 0.0
+	
+	_tutorial_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_tutorial_panel.custom_minimum_size = Vector2(400, 0)
+	_tutorial_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_tutorial_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.02, 0.04, 0.08, 0.85)
+	bg.border_color = Color(0.1, 0.9, 0.7, 0.6)
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(0)
+	bg.shadow_color = Color(0, 0, 0, 0.6)
+	bg.shadow_size = 20
+	bg.content_margin_left   = 32.0
+	bg.content_margin_right  = 32.0
+	bg.content_margin_top    = 32.0
+	bg.content_margin_bottom = 32.0
+	_tutorial_panel.add_theme_stylebox_override("panel", bg)
+
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBoxContainer"
+	vbox.add_theme_constant_override("separation", 24)
+	_tutorial_panel.add_child(vbox)
+
+	_tutorial_title = _make_label("TUTORIAL", 24, Color(0.1, 0.9, 0.7))
+	_tutorial_title.name = "TutorialTitle"
+	_tutorial_title.add_theme_font_override("font", tech_font)
+	_tutorial_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(_tutorial_title)
+
+	_tutorial_desc = _make_label("Tutorial text goes here.", 18, Color(0.8, 1.0, 0.9))
+	_tutorial_desc.name = "TutorialDesc"
+	_tutorial_desc.add_theme_font_override("font", tech_font)
+	_tutorial_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_tutorial_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(_tutorial_desc)
+
+	var btn_got_it := _panel_btn("ACKNOWLEDGE", Color(0.1, 0.9, 0.7))
+	btn_got_it.name = "BtnGotIt"
+	btn_got_it.add_theme_font_override("font", tech_font)
+	
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.04, 0.08, 0.12, 0.9)
+	sb.border_color = Color(0.1, 0.9, 0.7, 0.4)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(0)
+	btn_got_it.add_theme_stylebox_override("normal", sb)
+	
+	var sb_h := sb.duplicate()
+	sb_h.bg_color = Color(0.1, 0.3, 0.25, 0.9)
+	sb_h.border_color = Color(0.1, 0.9, 0.7)
+	btn_got_it.add_theme_stylebox_override("hover", sb_h)
+	btn_got_it.add_theme_stylebox_override("pressed", sb_h)
+	
+	btn_got_it.pressed.connect(_hide_tutorial)
+	vbox.add_child(btn_got_it)
+
+	_root.add_child(_tutorial_panel)
+
+func show_tutorial(title: String, text: String) -> void:
+	_tutorial_title.text = title
+	_tutorial_desc.text = text
+	get_tree().paused = true
+	_tutorial_panel.modulate.a = 0.0
+	_tutorial_panel.visible = true
+	var tw := create_tween()
+	tw.tween_property(_tutorial_panel, "modulate:a", 1.0, 0.2)
+
+func _hide_tutorial() -> void:
+	if _walkthrough_steps.size() > 0 and _current_step_index < _walkthrough_steps.size():
+		_advance_walkthrough_step()
+		return
+		
+	var tw := create_tween()
+	tw.tween_property(_tutorial_panel, "modulate:a", 0.0, 0.15)
+	tw.tween_callback(func():
+		_tutorial_panel.visible = false
+		get_tree().paused = false
+	)
+
+
+# ── Subtitle System ───────────────────────────────────────────────────────────
+
+func _build_subtitle_panel() -> void:
+	if _root.has_node("SubtitlePanel"):
+		_subtitle_panel = _root.find_child("SubtitlePanel", true, false)
+		_subtitle_label = _root.find_child("SubtitleLabel", true, false)
+		return
+
+	_subtitle_panel = PanelContainer.new()
+	_subtitle_panel.name = "SubtitlePanel"
+	_subtitle_panel.visible = false
+	_subtitle_panel.modulate.a = 0.0
+	
+	_subtitle_panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_subtitle_panel.custom_minimum_size = Vector2(800, 100)
+	
+	_subtitle_panel.set_anchor(SIDE_LEFT, 0.5)
+	_subtitle_panel.set_anchor(SIDE_RIGHT, 0.5)
+	_subtitle_panel.set_anchor(SIDE_BOTTOM, 1.0)
+	_subtitle_panel.offset_left = -400
+	_subtitle_panel.offset_right = 400
+	_subtitle_panel.offset_bottom = -40
+	_subtitle_panel.offset_top = -40
+	_subtitle_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	
+	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.02, 0.04, 0.08, 0.85)
+	bg.border_color = Color(0.1, 0.9, 0.7, 0.6)
+	bg.set_border_width_all(2)
+	bg.set_corner_radius_all(0)
+	bg.content_margin_left   = 24.0
+	bg.content_margin_right  = 24.0
+	bg.content_margin_top    = 24.0
+	bg.content_margin_bottom = 32.0
+	_subtitle_panel.add_theme_stylebox_override("panel", bg)
+
+	_subtitle_label = RichTextLabel.new()
+	_subtitle_label.name = "SubtitleLabel"
+	var tech_font := SystemFont.new()
+	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
+	_subtitle_label.add_theme_font_override("normal_font", tech_font)
+	_subtitle_label.add_theme_font_override("bold_font", tech_font)
+	_subtitle_label.bbcode_enabled = true
+	_subtitle_label.fit_content = true
+	_subtitle_label.scroll_active = false
+	_subtitle_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_subtitle_label.add_theme_font_size_override("normal_font_size", 24)
+	_subtitle_label.add_theme_font_size_override("bold_font_size", 26)
+	_subtitle_panel.add_child(_subtitle_label)
+
+	_root.add_child(_subtitle_panel)
+
+func _build_objective_arrow() -> void:
+	if _root.has_node("ObjectiveArrow"):
+		var arrow = _root.find_child("ObjectiveArrow", true, false)
+		var update_arrow = func(target):
+			if is_instance_valid(arrow):
+				arrow.set("target_node", target)
+		PlayerData.objective_changed.connect(update_arrow)
+		arrow.tree_exited.connect(func(): 
+			if PlayerData.objective_changed.is_connected(update_arrow):
+				PlayerData.objective_changed.disconnect(update_arrow)
+		)
+		arrow.set("target_node", PlayerData.current_objective)
+		return
+
+	var arrow_script = GDScript.new()
+	arrow_script.source_code = """extends Control
+var target_node: Node3D = null
+
+func _process(delta: float) -> void:
+	if not is_instance_valid(target_node):
+		visible = false
+		return
+		
+	var cam = get_viewport().get_camera_3d()
+	if not cam:
+		visible = false
+		return
+		
+	visible = true
+	var center = get_viewport_rect().size / 2.0
+	
+	var actual_target: Node3D = target_node
+	if "enemy_scene" in actual_target and actual_target.has_method("_activate_next_enemy"):
+		var enemies = actual_target.get("_living_enemies")
+		if enemies != null and enemies.size() > 0:
+			var best = null
+			for e in enemies:
+				if is_instance_valid(e) and not e.is_queued_for_deletion():
+					if "is_active" in e and e.is_active:
+						best = e
+						break
+			if best == null:
+				for e in enemies:
+					if is_instance_valid(e) and not e.is_queued_for_deletion():
+						best = e
+						break
+			if best != null:
+				actual_target = best
+
+	# Try to find screen pos
+	var is_behind = cam.is_position_behind(actual_target.global_position)
+	var screen_pos = cam.unproject_position(actual_target.global_position)
+	
+	var dir: Vector2
+	var radius = 200.0
+	
+	if is_behind:
+		# If behind, push the arrow to the edge of the screen opposite the target
+		dir = (center - screen_pos).normalized()
+	else:
+		dir = (screen_pos - center).normalized()
+		var dist = center.distance_to(screen_pos)
+		# Bring the arrow closer if the target is near the center, up to a max of 200px
+		radius = min(200.0, max(20.0, dist - 25.0))
+		
+	# Place arrow in a circle around center or closer to the target
+	position = center + dir * radius
+	rotation = dir.angle() + PI/2.0
+	queue_redraw()
+
+func _draw() -> void:
+	# Draw a sleek triangle pointing UP (which means towards dir since we rotated by dir.angle() + PI/2)
+	var points = PackedVector2Array([
+		Vector2(0, -20),
+		Vector2(-15, 15),
+		Vector2(0, 5),
+		Vector2(15, 15)
+	])
+	var colors = PackedColorArray([Color(0.2, 0.9, 0.3, 0.8), Color(0.1, 0.7, 0.2, 0.8), Color(0.1, 0.7, 0.2, 0.8), Color(0.1, 0.7, 0.2, 0.8)])
+	draw_polygon(points, colors)
+	
+	points.append(Vector2(0, -20))
+	draw_polyline(points, Color.BLACK, 2.0, true)
+"""
+	arrow_script.reload()
+	
+	var arrow = Control.new()
+	arrow.name = "ObjectiveArrow"
+	arrow.set_script(arrow_script)
+	arrow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(arrow)
+	
+	var update_arrow = func(target):
+		if is_instance_valid(arrow):
+			arrow.set("target_node", target)
+			
+	PlayerData.objective_changed.connect(update_arrow)
+	arrow.tree_exited.connect(func(): 
+		if PlayerData.objective_changed.is_connected(update_arrow):
+			PlayerData.objective_changed.disconnect(update_arrow)
+	)
+	arrow.set("target_node", PlayerData.current_objective)
+
+
+func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> void:
+	var color_hex = "40c0ff" # Default Sterling blue
+	if speaker == "Lolo Palaka":
+		color_hex = "40ff80" # Greenish for Palaka
+		
+	_subtitle_label.text = "[center][b][color=#" + color_hex + "]" + speaker + ":[/color][/b] " + text + "\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
+	
+	if _subtitle_tween and _subtitle_tween.is_valid():
+		_subtitle_tween.kill()
+		
+	_subtitle_panel.visible = true
+	_subtitle_tween = create_tween()
+	_subtitle_tween.tween_property(_subtitle_panel, "modulate:a", 1.0, 0.3)
+	
+func hide_subtitle() -> void:
+	if _subtitle_tween and _subtitle_tween.is_valid():
+		_subtitle_tween.kill()
+	_subtitle_tween = create_tween()
+	_subtitle_tween.tween_property(_subtitle_panel, "modulate:a", 0.0, 0.2)
+	_subtitle_tween.tween_callback(func(): 
+		_subtitle_panel.visible = false
+		subtitle_dismissed.emit()
+	)
+
+# ── Tutorial UI Controls ──────────────────────────────────────────────────────
+
+func hide_action_buttons() -> void:
+	if _attack_btn: _attack_btn.modulate.a = 0.0
+	if _jump_btn:   _jump_btn.modulate.a = 0.0
+	if _skill1_btn: _skill1_btn.modulate.a = 0.0
+	if _skill3_btn: _skill3_btn.modulate.a = 0.0
+	
+func start_ui_walkthrough(steps: Array) -> void:
+	_walkthrough_steps = steps
+	_current_step_index = 0
+	_advance_walkthrough_step()
+
+func _advance_walkthrough_step() -> void:
+	for node in _active_highlight_nodes:
+		stop_highlight_node(node)
+	_active_highlight_nodes.clear()
+	
+	if _current_step_index >= _walkthrough_steps.size():
+		_hide_tutorial()
+		return
+		
+	var step = _walkthrough_steps[_current_step_index]
+	_current_step_index += 1
+	
+	if step.has("nodes"):
+		for node_name in step.nodes:
+			var node = get(node_name)
+			if node and node is Control:
+				_active_highlight_nodes.append(node)
+				highlight_node(node)
+				if node.modulate.a < 1.0:
+					var tw = create_tween()
+					tw.tween_property(node, "modulate:a", 1.0, 1.0)
+				
+	show_tutorial(step.get("title", "TUTORIAL"), step.get("text", ""))
+
+func highlight_node(node: Control) -> void:
+	if not node: return
+	
+	node.pivot_offset = node.size / 2.0
+	if _active_highlight_tweens.has(node) and _active_highlight_tweens[node].is_valid():
+		_active_highlight_tweens[node].kill()
+		
+	var tw = create_tween().set_loops()
+	tw.tween_property(node, "scale", Vector2(1.15, 1.15), 0.4).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate", Color(1.2, 1.5, 2.0, 1.0), 0.4)
+	tw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.4)
+	
+	_active_highlight_tweens[node] = tw
+
+func stop_highlight_node(node: Control) -> void:
+	if not node: return
+	
+	if _active_highlight_tweens.has(node):
+		var tw = _active_highlight_tweens[node]
+		if tw and tw.is_valid():
+			tw.kill()
+		_active_highlight_tweens.erase(node)
+		
+	var rtw = create_tween()
+	rtw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.1)
+	rtw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.1)
+
+	
+func reveal_jump() -> void:
+	if _jump_btn:
+		if _jump_btn.modulate.a < 1.0:
+			var tw = create_tween()
+			tw.tween_property(_jump_btn, "modulate:a", 1.0, 1.0)
+		highlight_node(_jump_btn)
+		
+func reveal_attack() -> void:
+	if _attack_btn:
+		if _attack_btn.modulate.a < 1.0:
+			var tw = create_tween()
+			tw.tween_property(_attack_btn, "modulate:a", 1.0, 1.0)
+		highlight_node(_attack_btn)
+		
+func highlight_jump() -> void:
+	highlight_node(_jump_btn)
+
+func stop_highlight_jump() -> void:
+	stop_highlight_node(_jump_btn)
+
+func highlight_attack() -> void:
+	highlight_node(_attack_btn)
+
+func stop_highlight_attack() -> void:
+	stop_highlight_node(_attack_btn)
+		
+func flash_dodge() -> void:
+	if _jump_btn:
+		var tw = create_tween()
+		for i in range(3):
+			tw.tween_property(_jump_btn, "modulate", Color(1.0, 0.5, 0.5, 1.0), 0.15)
+			tw.tween_property(_jump_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.15)
+
+
+# ── Cancel Zone ───────────────────────────────────────────────────────────────
+
+func _build_cancel_zone() -> void:
+	if _root.has_node("CancelZone"):
+		_cancel_zone = _root.find_child("CancelZone", true, false)
+		return
+
+	_cancel_zone = Label.new()
+	_cancel_zone.name = "CancelZone"
+	_cancel_zone.text = "X\nCANCEL"
+	_cancel_zone.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_cancel_zone.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_cancel_zone.add_theme_font_size_override("font_size", 14) # Smaller font prevents stretching
+	
+	_cancel_zone.custom_minimum_size = Vector2(80, 80)
+	
+	# Lock all 4 anchors to the top right to strictly enforce the 80x80 size
+	_cancel_zone.set_anchor(SIDE_RIGHT, 1.0)
+	_cancel_zone.set_anchor(SIDE_TOP, 0.0)
+	_cancel_zone.set_anchor(SIDE_LEFT, 1.0)
+	_cancel_zone.set_anchor(SIDE_BOTTOM, 0.0)
+	
+	_cancel_zone.offset_right = -152
+	_cancel_zone.offset_left = -232 # perfectly aligned vertically with Skill 2
+	_cancel_zone.offset_top = 100
+	_cancel_zone.offset_bottom = 180 # exactly 80 tall
+	
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.8, 0.1, 0.1, 0.6)
+	bg.set_corner_radius_all(40) # Half of 80 = perfect circle
+	bg.border_color = Color(1, 0.3, 0.3, 1)
+	bg.set_border_width_all(3)
+	_cancel_zone.add_theme_stylebox_override("normal", bg)
+	
+	_cancel_zone.visible = false
+	_root.add_child(_cancel_zone)
+
+# ── Interact API ──────────────────────────────────────────────────────────────
+
+func show_interact(text: String, callback: Callable, source: Node) -> void:
+	_current_interact_source = source
+	_interact_callback = callback
+	_interact_btn.visible = true
+	# if text != "": _interact_btn.text = text
+
+func hide_interact(source: Node) -> void:
+	if _current_interact_source == source:
+		_interact_btn.visible = false
+		_current_interact_source = null
+		_interact_callback = Callable()
+
+func _on_interact_pressed() -> void:
+	if _interact_callback.is_valid():
+		_interact_callback.call()
+
+
+
+# ── Action Button Logic ───────────────────────────────────────────────────────
+
+var _is_aiming_jump: bool = false
+var _jump_start_pos: Vector2
+
+func _on_jump_btn_input(event: InputEvent) -> void:
+	var player = get_tree().get_first_node_in_group("player")
+	if player == null: return
+	
+	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+		if event.is_pressed():
+			stop_highlight_jump()
+			_is_aiming_jump = true
+			_jump_start_pos = event.position
+			if _cancel_zone: _cancel_zone.visible = true
+			if player.has_method("start_aiming_jump"):
+				player.start_aiming_jump()
+		else:
+			if _is_aiming_jump:
+				_is_aiming_jump = false
+				if _cancel_zone: _cancel_zone.visible = false
+				
+				# Check visual cancel zone intersection
+				var is_cancelled = false
+				var global_touch_pos = _jump_btn.get_global_position() + event.position
+				if _cancel_zone and _cancel_zone.get_global_rect().has_point(global_touch_pos):
+					is_cancelled = true
+				
+				if is_cancelled:
+					if player.has_method("cancel_aiming_jump"):
+						player.cancel_aiming_jump()
+				else:
+					var drag_dist = event.position.distance_to(_jump_start_pos)
+					var is_quick_tap = drag_dist < 20.0
+					if player.has_method("execute_splash_jump"):
+						player.execute_splash_jump(is_quick_tap)
+					
+	elif event is InputEventScreenDrag or (event is InputEventMouseMotion and _is_aiming_jump):
+		if _is_aiming_jump:
+			var is_cancelled = false
+			var global_touch_pos = _jump_btn.get_global_position() + event.position
+			if _cancel_zone and _cancel_zone.get_global_rect().has_point(global_touch_pos):
+				is_cancelled = true
+				
+			# Highlight cancel zone when hovering
+			if _cancel_zone:
+				var bg = _cancel_zone.get_theme_stylebox("normal") as StyleBoxFlat
+				if is_cancelled:
+					bg.bg_color = Color(1.0, 0.2, 0.2, 0.95)
+					bg.set_border_width_all(6)
+				else:
+					bg.bg_color = Color(0.8, 0.1, 0.1, 0.6)
+					bg.set_border_width_all(3)
+			
+			var max_drag = 80.0
+			var drag_vec = (event.position - _jump_start_pos) / max_drag
+			if drag_vec.length() > 1.0:
+				drag_vec = drag_vec.normalized()
+				
+			var mapped_vec = Vector2(drag_vec.x, drag_vec.y)
+			if player.has_method("update_aim_jump"):
+				player.update_aim_jump(mapped_vec, is_cancelled)
+
+# ── Signals ───────────────────────────────────────────────────────────────────
+
+func _connect_signals() -> void:
+	var pd = PlayerData
+	pd.health_changed.connect(_on_health)
+	pd.stamina_changed.connect(_on_stamina)
+	pd.exp_changed.connect(_on_exp)
+	pd.level_changed.connect(_on_level)
+	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
+	PlayerData.genome_collected.connect(show_genome_popup)
+	PlayerData.objective_changed.connect(_on_objective_changed)
+	
+	# Initial states
+	_hp_bar.max_value   = pd.max_health
+	_hp_bar.value       = pd.health
+	_hp_lbl.text        = "%d / %d" % [roundi(pd.health), roundi(pd.max_health)]
+	
+	_stam_bar.max_value = pd.max_stamina
+	_stam_bar.value     = pd.stamina
+	
+	_exp_bar.max_value  = pd.exp_to_next
+	_exp_bar.value      = pd.experience
+	_lvl_lbl.text       = str(pd.level)
+
+
+func _on_health(value: float, maximum: float) -> void:
+	_hp_bar.max_value = maximum
+	var tw := create_tween()
+	tw.tween_property(_hp_bar, "value", value, 0.15).set_trans(Tween.TRANS_SINE)
+	_hp_lbl.text = "%d / %d" % [roundi(value), roundi(maximum)]
+
+
+func _on_stamina(value: float, maximum: float) -> void:
+	_stam_bar.max_value = maximum
+	_stam_bar.value = value
+	
+	if _skill1_btn:
+		if value < 25.0:
+			_skill1_btn.modulate = Color(0.3, 0.3, 0.3, 0.8)
+		else:
+			_skill1_btn.modulate = Color.WHITE
+			
+	if _jump_btn:
+		if value < 30.0:
+			_jump_btn.modulate = Color(0.3, 0.3, 0.3, 0.8)
+		else:
+			_jump_btn.modulate = Color.WHITE
+
+
+func _on_exp(value: float, needed: float) -> void:
+	_exp_bar.max_value = needed
+	var tw := create_tween()
+	tw.tween_property(_exp_bar, "value", value, 0.25).set_trans(Tween.TRANS_SINE)
+
+
+func _on_level(new_level: int) -> void:
+	_lvl_lbl.text = str(new_level)
+	var tw := create_tween()
+	tw.tween_property(_lvl_lbl, "modulate", C_EXP, 0.1)
+	tw.tween_property(_lvl_lbl, "modulate", Color.WHITE, 0.5)
+
+
+func _toggle_menu() -> void:
+	_menu_open = !_menu_open
+	if _menu_open:
+		get_tree().paused = true
+		_menu_panel.modulate.a = 0.0
+		_menu_panel.visible = true
+		var tw := create_tween()
+		tw.tween_property(_menu_panel, "modulate:a", 1.0, 0.15)
+	else:
+		var tw := create_tween()
+		tw.tween_property(_menu_panel, "modulate:a", 0.0, 0.1)
+		tw.tween_callback(func():
+			_menu_panel.visible = false
+			get_tree().paused = false
+		)
+
+func _open_knowledge_menu() -> void:
+	_unread_knowledge_count = 0
+	if is_instance_valid(_knowledge_badge):
+		_knowledge_badge.visible = false
+	get_tree().paused = true
+	var menu = load("res://ui/knowledge_menu.gd").new()
+	_root.add_child(menu)
+	
+func _on_badge_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+		_open_character_menu()
+
+func _open_character_menu() -> void:
+	get_tree().paused = true
+	var menu = load("res://ui/character_menu.gd").new()
+	_root.add_child(menu)
+	
+func _on_knowledge_unlocked(id: String) -> void:
+	if id in PlayerData.KNOWLEDGE_DB:
+		var data = PlayerData.KNOWLEDGE_DB[id]
+		var title = data.get("title", "Unknown")
+		var icon = data.get("icon", "")
+		var screen_pos = Vector2(get_viewport().size.x / 2.0, 150) # top center
+		show_float_text("NEW KNOWLEDGE: " + icon + " " + title, screen_pos, Color(0.9, 0.8, 0.4))
+		
+		_unread_knowledge_count += 1
+		if is_instance_valid(_knowledge_badge):
+			_knowledge_badge.text = str(_unread_knowledge_count)
+			_knowledge_badge.visible = true
+
+func _on_objective_changed(target: Node3D) -> void:
+	if _quest_tracker_lbl:
+		var txt = PlayerData.current_objective_text
+		if txt == "":
+			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]None[/color]"
+		else:
+			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]" + txt + "[/color]"
+
+# ── Notifications / Menus ──────────────────────────────────────────────────────────
+
+func show_float_text(text: String, screen_pos: Vector2, color: Color = Color.WHITE) -> void:
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.add_theme_font_size_override("font_size", 20)
+	lbl.add_theme_color_override("font_color", color)
+	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	lbl.add_theme_constant_override("outline_size", 4)
+	lbl.position = screen_pos + Vector2(-30, -20)
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(lbl)
+	
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(lbl, "position:y", lbl.position.y - 60.0, 1.2).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "modulate:a", 0.0, 1.2).set_delay(0.3)
+	tw.finished.connect(lbl.queue_free)
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+func _make_label(text: String, size: int, color: Color) -> Label:
+	var lbl := Label.new()
+	lbl.text = text
+	lbl.add_theme_font_size_override("font_size", size)
+	lbl.add_theme_color_override("font_color", color)
+	return lbl
+
+
+func _make_bar(w: float, h: float, color: Color) -> ProgressBar:
+	var bar := ProgressBar.new()
+	bar.custom_minimum_size = Vector2(w, h)
+	bar.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bar.show_percentage = false
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var r := int(h / 2.0)
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = C_BG_DARK
+	bg.set_corner_radius_all(r)
+	
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = color
+	fill.set_corner_radius_all(r)
+	
+	bar.add_theme_stylebox_override("background", bg)
+	bar.add_theme_stylebox_override("fill", fill)
+	return bar
+
+
+func _make_circle_btn(name: String, text: String, size: float, bg_col: Color) -> Button:
+	var btn: Button
+	var is_new = false
+	if _root.has_node(name):
+		btn = _root.find_child(name, true, false) as Button
+	else:
+		btn = Button.new()
+		btn.name = name
+		is_new = true
+		
+	if text != "":
+		btn.text = text
+		
+	btn.custom_minimum_size = Vector2(size, size)
+	
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.05, 0.07, 0.15, 0.50)
+	normal.set_corner_radius_all(int(size / 2.0))
+	normal.border_color = Color(0.55, 0.78, 1.0, 0.40)
+	normal.set_border_width_all(3)
+	normal.shadow_color = Color(0, 0, 0, 0.4)
+	normal.shadow_size = 8
+	normal.shadow_offset = Vector2(0, 4)
+	normal.anti_aliasing = true
+	
+	var pressed := normal.duplicate() as StyleBoxFlat
+	pressed.bg_color = Color(0.18, 0.42, 0.90, 0.90)
+	pressed.border_color = Color(0.70, 0.88, 1.0, 0.60)
+	pressed.shadow_size = 2
+	pressed.shadow_offset = Vector2(0, 1)
+	
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = normal.bg_color.lightened(0.1)
+	
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", pressed)
+	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	
+	if is_new:
+		_root.add_child(btn)
+		
+	return btn
+
+func _draw_attack_icon() -> void:
+	var center = _attack_btn.size / 2.0
+	var col = Color(1, 1, 1, 0.85)
+	if _attack_btn.is_pressed() or _attack_btn.is_hovered():
+		col = Color.WHITE
+		
+	var thick = 8.0
+	# Sword handle
+	_attack_btn.draw_line(center + Vector2(-15, 15), center + Vector2(-30, 30), col, thick, true)
+	# Sword crossguard
+	_attack_btn.draw_line(center + Vector2(-25, 10), center + Vector2(-10, 25), col, thick, true)
+	# Sword blade
+	_attack_btn.draw_line(center + Vector2(-15, 15), center + Vector2(25, -25), col, thick + 2.0, true)
+
+func _draw_jump_icon() -> void:
+	var center = _jump_btn.size / 2.0
+	var col = Color(1, 1, 1, 0.85)
+	if _jump_btn.is_pressed() or _jump_btn.is_hovered():
+		col = Color.WHITE
+		
+	var thick = 6.0
+	var pts = PackedVector2Array([
+		center + Vector2(-14, 5),
+		center + Vector2(0, -9),
+		center + Vector2(14, 5)
+	])
+	_jump_btn.draw_polyline(pts, col, thick, true)
+
+func _draw_pause_icon() -> void:
+	var center = _menu_btn.size / 2.0
+	var col = Color(1, 1, 1, 0.85)
+	if _menu_btn.is_pressed() or _menu_btn.is_hovered():
+		col = Color.WHITE
+		
+	var w = 6.0
+	var h = 20.0
+	var spacing = 14.0
+	var r1 = Rect2(center.x - spacing/2.0 - w/2.0, center.y - h/2.0, w, h)
+	var r2 = Rect2(center.x + spacing/2.0 - w/2.0, center.y - h/2.0, w, h)
+	
+	# Draw rounded rectangles for the pause icon
+	var style = StyleBoxFlat.new()
+	style.bg_color = col
+	style.set_corner_radius_all(3)
+	style.anti_aliasing = true
+	style.draw(_menu_btn.get_canvas_item(), r1)
+	style.draw(_menu_btn.get_canvas_item(), r2)
+
+
+func _panel_btn(text: String, col: Color = Color.WHITE) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	btn.custom_minimum_size = Vector2(0, 48)
+	
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = Color(0.12, 0.12, 0.16, 0.8)
+	normal.set_corner_radius_all(8)
+	
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.18, 0.18, 0.24, 0.9)
+	
+	btn.add_theme_stylebox_override("normal", normal)
+	btn.add_theme_stylebox_override("hover", hover)
+	btn.add_theme_stylebox_override("pressed", hover)
+	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	btn.add_theme_color_override("font_color", col)
+	return btn
+
+# ── Prologue Sequence ─────────────────────────────────────────────────────────
+
+func play_boot_sequence() -> void:
+	var boot_overlay = ColorRect.new()
+	boot_overlay.color = Color.BLACK
+	boot_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	boot_overlay.z_index = 100
+	_root.add_child(boot_overlay)
+	
+	for child in _root.get_children():
+		if child != boot_overlay and child != _subtitle_panel:
+			child.modulate.a = 0.0
+			
+	var tw = create_tween()
+	tw.tween_interval(2.0)
+	tw.tween_property(boot_overlay, "color:a", 0.0, 3.0)
+	
+	tw.tween_callback(func():
+		var hud_tw = create_tween()
+		for child in _root.get_children():
+			if child != boot_overlay and child != _subtitle_panel and child != _menu_panel and child != _tutorial_panel:
+				hud_tw.tween_property(child, "modulate:a", 1.0, 0.5)
+				hud_tw.tween_interval(0.2)
+	).set_delay(2.0)
+	
+	tw.tween_callback(boot_overlay.queue_free).set_delay(1.0)

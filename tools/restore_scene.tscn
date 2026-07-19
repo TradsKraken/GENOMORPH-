@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3qg0s0j7q0q0"]
+
+[ext_resource type="Script" path="res://tools/restore_scene.gd" id="1_rest"]
+
+[node name="RestoreScene" type="Node"]
+script = ExtResource("1_rest")

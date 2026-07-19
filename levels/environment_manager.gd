@@ -58,6 +58,7 @@ func _ready() -> void:
 	
 	if get_tree().current_scene:
 		_force_shadows(get_tree().current_scene)
+		_force_collisions(get_tree().current_scene)
 	
 	PlayerData.genome_collected.connect(_on_genome_collected)
 	
@@ -80,6 +81,20 @@ func _force_shadows(node: Node) -> void:
 				
 	for child in node.get_children():
 		_force_shadows(child)
+
+func _force_collisions(node: Node) -> void:
+	if node is MeshInstance3D and "plane_002" in node.name.to_lower():
+		var has_col = false
+		for c in node.get_children():
+			if c is CollisionObject3D:
+				has_col = true
+				break
+		if not has_col:
+			print("Runtime: Generating missing collision for Plane_002")
+			node.create_trimesh_collision()
+			
+	for child in node.get_children():
+		_force_collisions(child)
 
 func _fix_material_for_shadows(mat: Material, node_name: String) -> void:
 	if mat is StandardMaterial3D:

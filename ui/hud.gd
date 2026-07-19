@@ -63,6 +63,9 @@ var _current_step_index: int = 0
 var _active_highlight_nodes: Array = []
 var _active_highlight_tweens: Dictionary = {}
 
+var _minimap_camera: Camera3D
+var _minimap_viewport: SubViewport
+
 signal subtitle_dismissed
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
@@ -70,7 +73,8 @@ signal subtitle_dismissed
 func _ready() -> void:
 	layer = 10
 	process_mode = PROCESS_MODE_ALWAYS
-	add_to_group("hud")
+	if is_inside_tree():
+		add_to_group("hud")
 
 	if has_node("Root"):
 		_root = get_node("Root")
@@ -88,8 +92,10 @@ func _ready() -> void:
 	_build_subtitle_panel()
 	_build_objective_arrow()
 	_build_genome_popup()
+	_build_minimap()
 
-	_connect_signals()
+	if not Engine.is_editor_hint():
+		_connect_signals()
 
 func _set_owner_recursive(node: Node, r: Node) -> void:
 	if node != r and node.owner == null:
@@ -110,6 +116,14 @@ func _input(event: InputEvent) -> void:
 				# Accept the event so it doesn't trigger jumping or attacking if they tap the subtitle area
 				# Alternatively, let them attack/jump while dismissing. 
 				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
+
+
+func _process(delta: float) -> void:
+	if is_instance_valid(_minimap_camera):
+		var player = get_tree().get_first_node_in_group("player")
+		if is_instance_valid(player):
+			# Follow player from above
+			_minimap_camera.global_position = Vector3(player.global_position.x, 150.0, player.global_position.z)
 
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
@@ -255,6 +269,21 @@ func _draw():
 	_status_group.add_child(_exp_bar)
 	
 	_root.add_child(_status_group)
+
+func _build_minimap() -> void:
+	if _root.has_node("MinimapPanel"):
+		var minimap_panel = _root.get_node("MinimapPanel")
+		_minimap_viewport = minimap_panel.get_node("MarginContainer/SubViewportContainer/SubViewport")
+		_minimap_camera = _minimap_viewport.get_node("Camera3D")
+		
+		# Share the main 3D world
+		if is_inside_tree():
+			_minimap_viewport.world_3d = get_tree().root.get_viewport().world_3d
+		_minimap_camera.rotation_degrees = Vector3(-90, 0, 0)
+		# Turn off environmental fog for a clear minimap view
+		_minimap_camera.environment = Environment.new()
+		_minimap_camera.environment.background_mode = Environment.BG_CLEAR_COLOR
+		_minimap_camera.environment.ambient_light_source = Environment.AMBIENT_SOURCE_DISABLED
 
 func _build_genome_popup() -> void:
 	if _root.has_node("GenomePopupPanel"):
@@ -420,15 +449,14 @@ func _build_action_buttons() -> void:
 	# Menu Button (Top Right)
 	var menu_is_new = not _root.has_node("MenuBtn")
 	_menu_btn = _make_circle_btn("MenuBtn", "", 56, C_BTN_NORM)
-	if menu_is_new:
-		_menu_btn.set_anchor(SIDE_RIGHT, 1.0)
-		_menu_btn.set_anchor(SIDE_TOP, 0.0)
-		_menu_btn.set_anchor(SIDE_LEFT, 1.0)
-		_menu_btn.set_anchor(SIDE_BOTTOM, 0.0)
-		_menu_btn.offset_right  = -24
-		_menu_btn.offset_top    = 24
-		_menu_btn.offset_left   = -24 - 56
-		_menu_btn.offset_bottom = 24 + 56
+	_menu_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_menu_btn.set_anchor(SIDE_TOP, 0.0)
+	_menu_btn.set_anchor(SIDE_LEFT, 1.0)
+	_menu_btn.set_anchor(SIDE_BOTTOM, 0.0)
+	_menu_btn.offset_right  = -220
+	_menu_btn.offset_top    = 24
+	_menu_btn.offset_left   = -276
+	_menu_btn.offset_bottom = 80
 	_menu_btn.pressed.connect(_toggle_menu)
 	_menu_btn.draw.connect(_draw_pause_icon)
 
@@ -436,15 +464,14 @@ func _build_action_buttons() -> void:
 	var knowledge_is_new = not _root.has_node("KnowledgeBtn")
 	_knowledge_btn = _make_circle_btn("KnowledgeBtn", "📖", 56, C_BTN_NORM)
 	_knowledge_btn.add_theme_font_size_override("font_size", 28)
-	if knowledge_is_new:
-		_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
-		_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
-		_knowledge_btn.set_anchor(SIDE_LEFT, 1.0)
-		_knowledge_btn.set_anchor(SIDE_BOTTOM, 0.0)
-		_knowledge_btn.offset_right  = -24 - 56 - 16
-		_knowledge_btn.offset_top    = 24
-		_knowledge_btn.offset_left   = -24 - 56 - 16 - 56
-		_knowledge_btn.offset_bottom = 24 + 56
+	_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_knowledge_btn.set_anchor(SIDE_TOP, 0.0)
+	_knowledge_btn.set_anchor(SIDE_LEFT, 1.0)
+	_knowledge_btn.set_anchor(SIDE_BOTTOM, 0.0)
+	_knowledge_btn.offset_right  = -220
+	_knowledge_btn.offset_top    = 96
+	_knowledge_btn.offset_left   = -276
+	_knowledge_btn.offset_bottom = 152
 		
 	_knowledge_badge = _root.find_child("NotificationBadge", true, false)
 	if not is_instance_valid(_knowledge_badge):
@@ -474,16 +501,15 @@ func _build_action_buttons() -> void:
 	var quest_is_new = not _root.has_node("QuestBtn")
 	_quest_btn = _make_circle_btn("QuestBtn", "!", 56, C_BTN_NORM)
 	_quest_btn.add_theme_font_size_override("font_size", 28)
-	if quest_is_new:
-		_quest_btn.set_anchor(SIDE_RIGHT, 1.0)
-		_quest_btn.set_anchor(SIDE_TOP, 0.0)
-		_quest_btn.set_anchor(SIDE_LEFT, 1.0)
-		_quest_btn.set_anchor(SIDE_BOTTOM, 0.0)
-		# Position it to the left of knowledge btn (-24 - 56 - 16 - 56 - 16)
-		_quest_btn.offset_right  = -24 - 56 - 16 - 56 - 16
-		_quest_btn.offset_top    = 24
-		_quest_btn.offset_left   = -24 - 56 - 16 - 56 - 16 - 56
-		_quest_btn.offset_bottom = 24 + 56
+	_quest_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_quest_btn.set_anchor(SIDE_TOP, 0.0)
+	_quest_btn.set_anchor(SIDE_LEFT, 1.0)
+	_quest_btn.set_anchor(SIDE_BOTTOM, 0.0)
+	# Position it vertically below knowledge btn
+	_quest_btn.offset_right  = -220
+	_quest_btn.offset_top    = 168
+	_quest_btn.offset_left   = -276
+	_quest_btn.offset_bottom = 224
 	_quest_btn.pressed.connect(_open_quest_menu)
 
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
@@ -1351,7 +1377,7 @@ func _make_circle_btn(name: String, text: String, size: float, bg_col: Color) ->
 	var btn: Button
 	var is_new = false
 	if _root.has_node(name):
-		btn = _root.find_child(name, true, false) as Button
+		return _root.find_child(name, true, false) as Button
 	else:
 		btn = Button.new()
 		btn.name = name
