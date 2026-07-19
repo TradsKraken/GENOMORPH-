@@ -48,6 +48,8 @@ func _spawn_enemy(index: int) -> void:
 	
 	if "is_active" in enemy:
 		enemy.is_active = false # Always start asleep, activate sequentially
+	if "can_auto_wake" in enemy:
+		enemy.can_auto_wake = false # Spawner controls activation
 		
 	if enemy_damage_override >= 0.0 and "damage_per_second" in enemy:
 		enemy.damage_per_second = enemy_damage_override

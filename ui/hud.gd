@@ -1209,16 +1209,16 @@ func _build_cancel_zone() -> void:
 	
 	_cancel_zone.custom_minimum_size = Vector2(80, 80)
 	
-	# Lock all 4 anchors to the top right to strictly enforce the 80x80 size
+	# Lock all 4 anchors to the bottom right
 	_cancel_zone.set_anchor(SIDE_RIGHT, 1.0)
-	_cancel_zone.set_anchor(SIDE_TOP, 0.0)
+	_cancel_zone.set_anchor(SIDE_BOTTOM, 1.0)
 	_cancel_zone.set_anchor(SIDE_LEFT, 1.0)
-	_cancel_zone.set_anchor(SIDE_BOTTOM, 0.0)
+	_cancel_zone.set_anchor(SIDE_TOP, 1.0)
 	
 	_cancel_zone.offset_right = -152
 	_cancel_zone.offset_left = -232 # perfectly aligned vertically with Skill 2
-	_cancel_zone.offset_top = 100
-	_cancel_zone.offset_bottom = 180 # exactly 80 tall
+	_cancel_zone.offset_bottom = -350
+	_cancel_zone.offset_top = -430 # exactly 80 tall and placed above the jump button
 	
 	var bg = StyleBoxFlat.new()
 	bg.bg_color = Color(0.8, 0.1, 0.1, 0.6)

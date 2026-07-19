@@ -48,6 +48,7 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 	return null
 
 @export var is_passive: bool = false
+@export var can_auto_wake: bool = true
 var is_active: bool = false
 
 func _process_movement(delta: float) -> void:
@@ -57,7 +58,7 @@ func _process_movement(delta: float) -> void:
 	var dist = global_position.distance_to(target.global_position)
 	
 	# Wake up if the player is within aggro range
-	if not is_active and dist <= aggro_range:
+	if not is_active and can_auto_wake and dist <= aggro_range:
 		is_active = true
 		
 	if not is_active:
