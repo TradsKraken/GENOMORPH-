@@ -33,6 +33,7 @@ func _ready() -> void:
 	sounds["level_up"] = preload("res://audio/level up.ogg")
 	sounds["mosquito_fly"] = preload("res://audio/Mosquito flying sound.ogg")
 	sounds["stamina_collect"] = preload("res://audio/orb mana.ogg")
+	sounds["message"] = preload("res://audio/message notifacation.ogg")
 	
 	sounds["hit"] = [
 		preload("res://audio/hit 1 .ogg"),

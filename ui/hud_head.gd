@@ -940,6 +940,9 @@ func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> voi
 	var color_hex = "40c0ff" # Default Sterling blue
 	if speaker == "Lolo Palaka":
 		color_hex = "40ff80" # Greenish for Palaka
+	elif "Sterling" in speaker:
+		if AudioManager.has_method("play_sfx"):
+			AudioManager.play_sfx("message")
 		
 	_subtitle_label.text = "[center][b][color=#" + color_hex + "]" + speaker + ":[/color][/b] " + text + "\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
 	
