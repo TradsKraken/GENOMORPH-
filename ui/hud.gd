@@ -73,13 +73,13 @@ signal subtitle_dismissed
 func _ready() -> void:
 	layer = 10
 	process_mode = PROCESS_MODE_ALWAYS
-	if is_inside_tree():
-		add_to_group("hud")
+	add_to_group("hud")
 
 	if has_node("Root"):
 		_root = get_node("Root")
 	else:
 		_root = Control.new()
+		_root.name = "Root"
 		_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(_root)
@@ -94,8 +94,7 @@ func _ready() -> void:
 	_build_genome_popup()
 	_build_minimap()
 
-	if not Engine.is_editor_hint():
-		_connect_signals()
+	_connect_signals()
 
 func _set_owner_recursive(node: Node, r: Node) -> void:
 	if node != r and node.owner == null:
@@ -268,22 +267,67 @@ func _draw():
 	_exp_bar.z_index = 1
 	_status_group.add_child(_exp_bar)
 	
-	_root.add_child(_status_group)
 
 func _build_minimap() -> void:
 	if _root.has_node("MinimapPanel"):
-		var minimap_panel = _root.get_node("MinimapPanel")
-		_minimap_viewport = minimap_panel.get_node("MarginContainer/SubViewportContainer/SubViewport")
-		_minimap_camera = _minimap_viewport.get_node("Camera3D")
+		var old = _root.get_node("MinimapPanel")
+		old.queue_free()
 		
-		# Share the main 3D world
-		if is_inside_tree():
-			_minimap_viewport.world_3d = get_tree().root.get_viewport().world_3d
-		_minimap_camera.rotation_degrees = Vector3(-90, 0, 0)
-		# Turn off environmental fog for a clear minimap view
-		_minimap_camera.environment = Environment.new()
-		_minimap_camera.environment.background_mode = Environment.BG_CLEAR_COLOR
-		_minimap_camera.environment.ambient_light_source = Environment.AMBIENT_SOURCE_DISABLED
+	var minimap_panel = PanelContainer.new()
+	minimap_panel.name = "MinimapPanel"
+	minimap_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	minimap_panel.custom_minimum_size = Vector2(180, 180)
+	minimap_panel.offset_right = -24
+	minimap_panel.offset_top = 24
+	minimap_panel.offset_left = -204
+	minimap_panel.offset_bottom = 204
+	minimap_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.02, 0.04, 0.08, 0.95)
+	style.border_color = Color(0.1, 0.9, 0.7, 0.6)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(12)
+	minimap_panel.add_theme_stylebox_override("panel", style)
+	
+	var margin = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 4)
+	margin.add_theme_constant_override("margin_right", 4)
+	margin.add_theme_constant_override("margin_top", 4)
+	margin.add_theme_constant_override("margin_bottom", 4)
+	minimap_panel.add_child(margin)
+	
+	var sub_container = SubViewportContainer.new()
+	sub_container.stretch = true
+	margin.add_child(sub_container)
+	
+	_minimap_viewport = SubViewport.new()
+	# Share the main 3D world
+	_minimap_viewport.world_3d = get_tree().root.get_viewport().world_3d
+	_minimap_viewport.transparent_bg = false
+	_minimap_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	sub_container.add_child(_minimap_viewport)
+	
+	_minimap_camera = Camera3D.new()
+	_minimap_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	_minimap_camera.size = 60.0 # Adjust to zoom in/out
+	_minimap_camera.near = 0.1
+	_minimap_camera.far = 400.0
+	_minimap_camera.rotation_degrees = Vector3(-90, 0, 0)
+	# Turn off environmental fog for a clear minimap view
+	_minimap_camera.environment = Environment.new()
+	_minimap_viewport.add_child(_minimap_camera)
+	
+	# Add a small player icon directly inside the minimap UI center
+	var icon = ColorRect.new()
+	icon.color = Color(1.0, 0.2, 0.3, 1.0) # Red dot for player
+	icon.custom_minimum_size = Vector2(6, 6)
+	icon.set_anchors_preset(Control.PRESET_CENTER)
+	var icon_container = CenterContainer.new()
+	icon_container.add_child(icon)
+	minimap_panel.add_child(icon_container)
+	
+	_root.add_child(minimap_panel)
 
 func _build_genome_popup() -> void:
 	if _root.has_node("GenomePopupPanel"):
@@ -1377,7 +1421,7 @@ func _make_circle_btn(name: String, text: String, size: float, bg_col: Color) ->
 	var btn: Button
 	var is_new = false
 	if _root.has_node(name):
-		return _root.find_child(name, true, false) as Button
+		btn = _root.find_child(name, true, false) as Button
 	else:
 		btn = Button.new()
 		btn.name = name

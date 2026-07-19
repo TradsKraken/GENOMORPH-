@@ -20,6 +20,9 @@ func _init():
 	hud._build_menu_panel()
 	hud._build_tutorial_panel()
 	hud._build_subtitle_panel()
+	hud._build_objective_arrow()
+	hud._build_genome_popup()
+	hud._build_minimap()
 	
 	hud._status_group.name = "StatusGroup"
 	hud._attack_btn.name = "AttackBtn"

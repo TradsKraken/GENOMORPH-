@@ -1,0 +1,4 @@
+[gd_scene format=3 uid="uid://baker"]
+[ext_resource type="Script" path="res://tools/baker.gd" id="1_baker"]
+[node name="Baker" type="Node"]
+script = ExtResource("1_baker")
