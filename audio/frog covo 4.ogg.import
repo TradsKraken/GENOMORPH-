@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bgcsr1gukcciu"
+path="res://.godot/imported/frog covo 4.ogg-2ca08430bd23758278420fbf473f2989.oggvorbisstr"
+
+[deps]
+
+source_file="res://audio/frog covo 4.ogg"
+dest_files=["res://.godot/imported/frog covo 4.ogg-2ca08430bd23758278420fbf473f2989.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
