@@ -1752,7 +1752,7 @@ func play_boot_sequence() -> void:
 	_root.add_child(boot_overlay)
 	
 	for child in _root.get_children():
-		if child != boot_overlay and child != _subtitle_panel:
+		if child is CanvasItem and child != boot_overlay and child != _subtitle_panel:
 			child.modulate.a = 0.0
 			
 	var tw = create_tween()
@@ -1762,7 +1762,7 @@ func play_boot_sequence() -> void:
 	tw.tween_callback(func():
 		var hud_tw = create_tween()
 		for child in _root.get_children():
-			if child != boot_overlay and child != _subtitle_panel and child != _menu_panel and child != _tutorial_panel:
+			if child is CanvasItem and child != boot_overlay and child != _subtitle_panel and child != _menu_panel and child != _tutorial_panel:
 				hud_tw.tween_property(child, "modulate:a", 1.0, 0.5)
 				hud_tw.tween_interval(0.2)
 	).set_delay(2.0)
