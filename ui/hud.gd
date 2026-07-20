@@ -128,6 +128,7 @@ func _input(event: InputEvent) -> void:
 
 func add_minimap_marker(node: Node3D, color: Color = Color(0.2, 1.0, 0.4), hover: bool = true) -> void:
 	if not is_instance_valid(_marker_layer): return
+	if _minimap_markers.has(node): return
 	var icon = Control.new()
 	icon.custom_minimum_size = Vector2(10, 10)
 	var script = GDScript.new()

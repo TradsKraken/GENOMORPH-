@@ -94,9 +94,10 @@ func _start_dialog() -> void:
 				if "is_main_quest" in f and not f.is_main_quest:
 					hud.add_minimap_marker(f, Color(0.2, 1.0, 0.4))
 					
-		if hud.has_method("show_tutorial"):
-			hud.show_tutorial("NEW OBJECTIVE", "I have synced their life signatures to your minimap. Follow the bouncing green triangles to find the remaining frogs.")
-			if hud.has_signal("tutorial_dismissed"): await hud.tutorial_dismissed
+		if not ("has_seen_minimap_tutorial" in PlayerData) or not PlayerData.has_seen_minimap_tutorial:
+			_wait_for_movement_and_show_tutorial(hud)
+		# Clear the objective arrow but keep the quest text
+		PlayerData.set_objective(null, "Find the remaining frogs")
 		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Idle")
@@ -124,4 +125,23 @@ func _find_anim_player(node: Node) -> AnimationPlayer:
 		if result:
 			return result
 	return null
+
+func _wait_for_movement_and_show_tutorial(hud: Node) -> void:
+	if not hud.has_method("show_tutorial"): return
+	
+	var player = get_tree().get_first_node_in_group("player")
+	if not player: return
+	
+	# Wait for a short delay so any residual input is ignored
+	await get_tree().create_timer(1.0).timeout
+	
+	# Wait until player starts moving
+	while is_instance_valid(player) and player.velocity.length() < 0.5:
+		await get_tree().process_frame
+		
+	if "has_seen_minimap_tutorial" in PlayerData:
+		PlayerData.has_seen_minimap_tutorial = true
+		
+	if is_instance_valid(hud):
+		hud.show_tutorial("MAP UPDATED", "Follow the bouncing green triangles on your minimap to locate the remaining frogs.")
 

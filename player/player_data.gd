@@ -18,9 +18,10 @@ var message_log: Array[String] = []
 
 func add_message(speaker: String, text: String, color: String = "ffffff") -> void:
 	var entry = "[b][color=#" + color + "]" + speaker + ":[/color][/b] " + text
-	message_log.append(entry)
-	if message_log.size() > 50:
-		message_log.pop_front()
+	if not message_log.has(entry):
+		message_log.append(entry)
+		if message_log.size() > 50:
+			message_log.pop_front()
 
 func set_objective(target: Node3D, text: String = "") -> void:
 	current_objective = target
@@ -53,6 +54,7 @@ var speed: float = 4.0
 var inventory: Array = []
 var genome_fragments: int = 0
 var has_seen_prologue: bool = false
+var has_seen_minimap_tutorial: bool = false
 var max_genome_fragments: int = 12
 
 var current_scene_path: String = "res://levels/node_3d.scn"
