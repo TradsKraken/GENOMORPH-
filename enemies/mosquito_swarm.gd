@@ -51,7 +51,12 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 
 @export var is_passive: bool = false
 @export var can_auto_wake: bool = true
-var is_active: bool = false
+var is_active: bool = false:
+	set(value):
+		if value != is_active:
+			is_active = value
+			if is_active:
+				show_on_minimap()
 
 func _process_movement(delta: float) -> void:
 	if target == null:
@@ -62,7 +67,6 @@ func _process_movement(delta: float) -> void:
 	# Wake up if the player is within aggro range
 	if not is_active and can_auto_wake and dist <= aggro_range:
 		is_active = true
-		show_on_minimap()
 		
 	if not is_active:
 		return
