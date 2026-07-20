@@ -83,6 +83,7 @@ func _ready() -> void:
 	call_deferred("_find_joystick")
 	
 	_build_reticle()
+	_hide_from_minimap(self)
 	
 	if animation_player == null:
 		animation_player = _find_animation_player(self)
@@ -100,6 +101,12 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 		if result != null:
 			return result
 	return null
+
+func _hide_from_minimap(node: Node) -> void:
+	if node is VisualInstance3D:
+		node.layers = 524288
+	for child in node.get_children():
+		_hide_from_minimap(child)
 
 func _build_reticle() -> void:
 	_reticle = Decal.new()

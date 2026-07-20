@@ -70,6 +70,7 @@ func _build_mesh() -> void:
 	_orb_mat.roughness = 0.12
 	_orb_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_mesh.material_override = _orb_mat
+	_mesh.layers = 524288
 	add_child(_mesh)
 
 

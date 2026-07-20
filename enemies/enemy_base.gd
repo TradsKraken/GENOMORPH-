@@ -22,6 +22,13 @@ func _ready() -> void:
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		target = players[0]
+		
+	call_deferred("_add_to_minimap")
+
+func _add_to_minimap() -> void:
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("add_minimap_marker"):
+		hud.add_minimap_marker(self, Color(1.0, 0.1, 0.1), false) # Red triangle for enemies, no hover
 
 func _create_health_bar() -> void:
 	# Background

@@ -75,6 +75,7 @@ var _minimap_original_rect: Rect2
 var _minimap_original_zoom: float
 var _minimap_tween: Tween
 var _minimap_markers: Dictionary = {}
+var _player_icon_container: CenterContainer
 
 signal subtitle_dismissed
 
@@ -123,12 +124,38 @@ func _input(event: InputEvent) -> void:
 			if event.is_pressed():
 				hide_subtitle()
 
-func add_minimap_marker(node: Node3D, color: Color = Color(0.2, 1.0, 0.4)) -> void:
+func add_minimap_marker(node: Node3D, color: Color = Color(0.2, 1.0, 0.4), hover: bool = true) -> void:
 	if not is_instance_valid(_marker_layer): return
 	var icon = Control.new()
 	icon.custom_minimum_size = Vector2(10, 10)
 	var script = GDScript.new()
-	script.source_code = """extends Control
+	
+	if hover:
+		script.source_code = """extends Control
+var color: Color = Color.WHITE
+var time: float = 0.0
+var offset_time: float = 0.0
+
+func _ready():
+	offset_time = randf() * 10.0
+
+func _process(delta: float):
+	time += delta * 4.0
+	queue_redraw()
+
+func _draw():
+	var bounce = sin(time + offset_time) * 3.0
+	var offset_vec = Vector2(0, bounce)
+	var center = size / 2.0
+	var points = PackedVector2Array([
+		Vector2(0, 0) + offset_vec,
+		Vector2(size.x, 0) + offset_vec,
+		Vector2(center.x, size.y) + offset_vec
+	])
+	draw_polygon(points, PackedColorArray([color, color, color]))
+"""
+	else:
+		script.source_code = """extends Control
 var color: Color = Color.WHITE
 func _draw():
 	var center = size / 2.0
@@ -155,8 +182,14 @@ func _process(delta: float) -> void:
 			# Follow player from above, plus any drag offset if expanded
 			_minimap_camera.global_position = Vector3(player.global_position.x, 150.0, player.global_position.z) + _minimap_cam_offset
 			
-			# Update minimap markers
+			# Update player icon offset
 			var pixels_per_unit = _minimap_panel.size.y / _minimap_camera.size
+			if is_instance_valid(_player_icon_container):
+				var p_offset_x = -_minimap_cam_offset.x * pixels_per_unit
+				var p_offset_y = -_minimap_cam_offset.z * pixels_per_unit
+				_player_icon_container.position = _minimap_panel.size / 2.0 + Vector2(p_offset_x, p_offset_y) - _player_icon_container.size / 2.0
+				
+			# Update minimap markers
 			for target in _minimap_markers.keys():
 				var icon_container = _minimap_markers[target]
 				if not is_instance_valid(target) or target.is_queued_for_deletion():
@@ -384,14 +417,16 @@ func _build_minimap() -> void:
 	
 	# Add a small player icon directly inside the minimap UI center
 	var icon = ColorRect.new()
-	icon.color = Color(1.0, 0.2, 0.3, 1.0) # Red dot for player
+	icon.color = Color(0.2, 0.8, 1.0, 1.0) # Cyan dot for player
 	icon.custom_minimum_size = Vector2(6, 6)
 	icon.set_anchors_preset(Control.PRESET_CENTER)
-	var icon_container = CenterContainer.new()
-	icon_container.add_child(icon)
-	_minimap_panel.add_child(icon_container)
+	_player_icon_container = CenterContainer.new()
+	_player_icon_container.add_child(icon)
+	_marker_layer.add_child(_player_icon_container)
 	
 	_root.add_child(_minimap_panel)
+	
+	_minimap_camera.cull_mask = 524287 # 0xFFFFF ^ (1 << 19) to hide Layer 20
 
 func _on_minimap_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
@@ -839,7 +874,8 @@ func _build_quest_panel() -> void:
 	var desc := RichTextLabel.new()
 	desc.name = "QuestDesc"
 	desc.bbcode_enabled = true
-	desc.fit_content = true
+	desc.fit_content = false
+	desc.scroll_active = true
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	desc.add_theme_font_size_override("normal_font_size", 18)
 	desc.text = "[color=#aaaaaa]Current Objective:[/color]\n"
@@ -857,11 +893,19 @@ func _open_quest_menu() -> void:
 	if not _quest_panel:
 		_build_quest_panel()
 	
-	var desc = _root.find_child("QuestDesc", true, false)
+	var desc = _quest_panel.find_child("QuestDesc", true, false)
 	if desc and desc is RichTextLabel:
 		var txt = PlayerData.current_objective_text
 		if txt == "": txt = "No active quest."
-		desc.text = "[color=#aaaaaa]Current Objective:[/color]\n\n" + txt
+		
+		var full_text = "[color=#aaaaaa]Current Objective:[/color]\n" + txt + "\n\n"
+		
+		if PlayerData.message_log.size() > 0:
+			full_text += "[color=#aaaaaa]--- DIALOGUE LOG ---[/color]\n\n"
+			for msg in PlayerData.message_log:
+				full_text += msg + "\n\n"
+				
+		desc.text = full_text
 		
 	_quest_panel.visible = true
 
@@ -1132,6 +1176,8 @@ func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> voi
 	elif "Sterling" in speaker:
 		if AudioManager.has_method("play_sfx"):
 			AudioManager.play_sfx("message")
+			
+	PlayerData.add_message(speaker, text, color_hex)
 		
 	_subtitle_label.text = "[center][b][color=#" + color_hex + "]" + speaker + ":[/color][/b] " + text + "\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
 	

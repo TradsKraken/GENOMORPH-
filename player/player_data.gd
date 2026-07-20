@@ -14,6 +14,14 @@ signal genome_collected(current: int, total: int)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
 
+var message_log: Array[String] = []
+
+func add_message(speaker: String, text: String, color: String = "ffffff") -> void:
+	var entry = "[b][color=#" + color + "]" + speaker + ":[/color][/b] " + text
+	message_log.append(entry)
+	if message_log.size() > 50:
+		message_log.pop_front()
+
 func set_objective(target: Node3D, text: String = "") -> void:
 	current_objective = target
 	
