@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://2jvanuhn7udu"
-path="res://.godot/imported/haloan.glb-92133f3b2b0f5138562a50f118e9edb5.scn"
+uid="uid://bjtssb2ynot78"
+path="res://.godot/imported/MOnitor lizard.glb-08a5df4fa8196bc1e6c0d5017644fe74.scn"
 
 [deps]
 
-source_file="res://Models/haloan/haloan.glb"
-dest_files=["res://.godot/imported/haloan.glb-92133f3b2b0f5138562a50f118e9edb5.scn"]
+source_file="res://Models/haloan/MOnitor lizard.glb"
+dest_files=["res://.godot/imported/MOnitor lizard.glb-08a5df4fa8196bc1e6c0d5017644fe74.scn"]
 
 [params]
 

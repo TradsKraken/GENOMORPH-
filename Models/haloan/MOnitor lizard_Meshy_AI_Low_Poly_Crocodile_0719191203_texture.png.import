@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://clnae5bbfetik"
-path.s3tc="res://.godot/imported/haloan_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-626c3edd9c5985f3276781383796bb0f.s3tc.ctex"
-path.etc2="res://.godot/imported/haloan_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-626c3edd9c5985f3276781383796bb0f.etc2.ctex"
+uid="uid://cdy1ej1ytsk12"
+path.s3tc="res://.godot/imported/MOnitor lizard_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-81c61022a72d50fa8fa867c5184a443c.s3tc.ctex"
+path.etc2="res://.godot/imported/MOnitor lizard_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-81c61022a72d50fa8fa867c5184a443c.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -15,8 +15,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Models/haloan/haloan_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png"
-dest_files=["res://.godot/imported/haloan_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-626c3edd9c5985f3276781383796bb0f.s3tc.ctex", "res://.godot/imported/haloan_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-626c3edd9c5985f3276781383796bb0f.etc2.ctex"]
+source_file="res://Models/haloan/MOnitor lizard_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png"
+dest_files=["res://.godot/imported/MOnitor lizard_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-81c61022a72d50fa8fa867c5184a443c.s3tc.ctex", "res://.godot/imported/MOnitor lizard_Meshy_AI_Low_Poly_Crocodile_0719191203_texture.png-81c61022a72d50fa8fa867c5184a443c.etc2.ctex"]
 
 [params]
 
