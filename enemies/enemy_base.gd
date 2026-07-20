@@ -23,12 +23,15 @@ func _ready() -> void:
 	if players.size() > 0:
 		target = players[0]
 		
-	call_deferred("_add_to_minimap")
-
-func _add_to_minimap() -> void:
+func show_on_minimap() -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("add_minimap_marker"):
-		hud.add_minimap_marker(self, Color(1.0, 0.1, 0.1), false) # Red triangle for enemies, no hover
+		hud.add_minimap_marker(self, Color(1.0, 0.1, 0.1), false)
+
+func hide_from_minimap() -> void:
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("remove_minimap_marker"):
+		hud.remove_minimap_marker(self)
 
 func _create_health_bar() -> void:
 	# Background

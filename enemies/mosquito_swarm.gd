@@ -62,6 +62,7 @@ func _process_movement(delta: float) -> void:
 	# Wake up if the player is within aggro range
 	if not is_active and can_auto_wake and dist <= aggro_range:
 		is_active = true
+		show_on_minimap()
 		
 	if not is_active:
 		return

@@ -76,6 +76,7 @@ var _minimap_original_zoom: float
 var _minimap_tween: Tween
 var _minimap_markers: Dictionary = {}
 var _player_icon_container: CenterContainer
+var _fog_manager: Node
 
 signal subtitle_dismissed
 
@@ -175,10 +176,20 @@ func _draw():
 	_marker_layer.add_child(icon_container)
 	_minimap_markers[node] = icon_container
 
+func remove_minimap_marker(node: Node3D) -> void:
+	if _minimap_markers.has(node):
+		var icon_container = _minimap_markers[node]
+		if is_instance_valid(icon_container):
+			icon_container.queue_free()
+		_minimap_markers.erase(node)
+
 func _process(delta: float) -> void:
 	if is_instance_valid(_minimap_camera):
 		var player = get_tree().get_first_node_in_group("player")
 		if is_instance_valid(player):
+			if is_instance_valid(_fog_manager):
+				_fog_manager.update_fog(player.global_position)
+				
 			# Follow player from above, plus any drag offset if expanded
 			_minimap_camera.global_position = Vector3(player.global_position.x, 150.0, player.global_position.z) + _minimap_cam_offset
 			
@@ -427,6 +438,36 @@ func _build_minimap() -> void:
 	_root.add_child(_minimap_panel)
 	
 	_minimap_camera.cull_mask = 524287 # 0xFFFFF ^ (1 << 19) to hide Layer 20
+	
+	# --- FOG OF WAR ---
+	_fog_manager = load("res://ui/minimap_fog.gd").new()
+	_fog_manager.name = "MinimapFog"
+	_root.add_child(_fog_manager)
+	
+	var fog_plane = MeshInstance3D.new()
+	var plane_mesh = PlaneMesh.new()
+	plane_mesh.size = Vector2(500, 500)
+	fog_plane.mesh = plane_mesh
+	fog_plane.position = Vector3(0, 140, 0)
+	fog_plane.layers = 1024 # Layer 11
+	
+	var shader = Shader.new()
+	shader.code = """
+shader_type spatial;
+render_mode unshaded, depth_draw_never;
+uniform sampler2D fog_mask;
+void fragment() {
+	ALBEDO = vec3(0.02, 0.04, 0.08); // Dark fog color
+	float mask = texture(fog_mask, UV).r;
+	ALPHA = mask * 0.95; // Slight transparency even at max fog
+}
+"""
+	var mat = ShaderMaterial.new()
+	mat.shader = shader
+	mat.set_shader_parameter("fog_mask", _fog_manager.get_texture())
+	fog_plane.material_override = mat
+	
+	_minimap_viewport.add_child(fog_plane)
 
 func _on_minimap_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

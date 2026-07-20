@@ -69,6 +69,9 @@ func _ready() -> void:
 
 	# Snap to position immediately on the first frame.
 	_apply_position(1.0)
+	
+	# Hide Layer 11 (Fog of War) from the main camera
+	cull_mask = 1047551 # 0xFFFFF ^ 1024
 
 	# ── Spawn game systems at runtime (avoids UID-less .tscn references) ──────
 	if not is_main_menu:
