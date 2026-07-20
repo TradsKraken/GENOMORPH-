@@ -50,8 +50,7 @@ func _on_body_entered(body: Node3D) -> void:
 func _activate_children() -> void:
 	for child in get_children():
 		if child is EnemyBase:
-			if "is_active" in child:
-				child.is_active = true
+			pass # Let them wake up naturally via their own aggro_range
 		elif child is EnemySpawner:
 			if child.has_method("activate"):
 				child.activate()

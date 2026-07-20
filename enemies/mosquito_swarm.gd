@@ -6,6 +6,7 @@ extends EnemyBase
 @export var aggro_range: float = 15.0
 
 var _attack_timer: float = 0.0
+var _wake_delay: float = 0.0
 
 func _ready() -> void:
 	super._ready()
@@ -15,8 +16,10 @@ func _ready() -> void:
 	# Override base values
 	max_health = 100.0
 	health = max_health
-	speed = 4.0
+	speed = randf_range(3.0, 5.5) # Randomize speed so they don't fly in sync
 	exp_value = 15.0
+	aggro_range = randf_range(12.0, 18.0) # Randomize aggro range so they wake up individually
+	_wake_delay = randf_range(0.0, 1.5) # Random delay before waking up
 	
 	# Find and play the mosquito animation
 	var anim_player = _find_animation_player(self)
@@ -66,7 +69,10 @@ func _process_movement(delta: float) -> void:
 	
 	# Wake up if the player is within aggro range
 	if not is_active and can_auto_wake and dist <= aggro_range:
-		is_active = true
+		if _wake_delay > 0.0:
+			_wake_delay -= delta
+		else:
+			is_active = true
 		
 	if not is_active:
 		return
