@@ -94,8 +94,9 @@ func _start_dialog() -> void:
 				if "is_main_quest" in f and not f.is_main_quest:
 					hud.add_minimap_marker(f, Color(0.2, 1.0, 0.4))
 					
-		hud.show_subtitle("Sterling", '"I have synced their life signatures to your minimap. Follow the bouncing green triangles to find the remaining frogs."')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+		if hud.has_method("show_tutorial"):
+			hud.show_tutorial("NEW OBJECTIVE", "I have synced their life signatures to your minimap. Follow the bouncing green triangles to find the remaining frogs.")
+			if hud.has_signal("tutorial_dismissed"): await hud.tutorial_dismissed
 		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Idle")

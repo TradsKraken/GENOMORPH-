@@ -79,6 +79,7 @@ var _player_icon_container: CenterContainer
 var _fog_manager: Node
 
 signal subtitle_dismissed
+signal tutorial_dismissed
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
@@ -735,7 +736,7 @@ func _build_action_buttons() -> void:
 
 	# Quest Button (Top Right, left of Knowledge Button)
 	var quest_is_new = not _root.has_node("QuestBtn")
-	_quest_btn = _make_circle_btn("QuestBtn", "!", 56, C_BTN_NORM)
+	_quest_btn = _make_circle_btn("QuestBtn", "💬", 56, C_BTN_NORM)
 	_quest_btn.add_theme_font_size_override("font_size", 28)
 	_quest_btn.set_anchor(SIDE_RIGHT, 1.0)
 	_quest_btn.set_anchor(SIDE_TOP, 0.0)
@@ -906,7 +907,7 @@ func _build_quest_panel() -> void:
 	_quest_panel.add_child(vbox)
 	
 	var title := Label.new()
-	title.text = "QUEST LOG"
+	title.text = "DIALOGUE LOG"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
 	title.add_theme_color_override("font_color", Color(0.4, 0.9, 1.0))
@@ -919,7 +920,7 @@ func _build_quest_panel() -> void:
 	desc.scroll_active = true
 	desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	desc.add_theme_font_size_override("normal_font_size", 18)
-	desc.text = "[color=#aaaaaa]Current Objective:[/color]\n"
+	desc.text = ""
 	vbox.add_child(desc)
 	
 	var close_btn := Button.new()
@@ -936,19 +937,22 @@ func _open_quest_menu() -> void:
 	
 	var desc = _quest_panel.find_child("QuestDesc", true, false)
 	if desc and desc is RichTextLabel:
-		var txt = PlayerData.current_objective_text
-		if txt == "": txt = "No active quest."
-		
-		var full_text = "[color=#aaaaaa]Current Objective:[/color]\n" + txt + "\n\n"
-		
-		if PlayerData.message_log.size() > 0:
-			full_text += "[color=#aaaaaa]--- DIALOGUE LOG ---[/color]\n\n"
-			for msg in PlayerData.message_log:
-				full_text += msg + "\n\n"
-				
+		var full_text = ""
+		for msg in PlayerData.message_log:
+			full_text += msg + "\n\n"
+			
+		if full_text == "":
+			full_text = "No dialogue yet."
+			
 		desc.text = full_text
 		
 	_quest_panel.visible = true
+	
+	if desc and desc is RichTextLabel:
+		await get_tree().process_frame
+		var scrollbar = desc.get_v_scroll_bar()
+		if scrollbar:
+			scrollbar.value = scrollbar.max_value
 
 # ── Tutorial / Subtitle Panels ────────────────────────────────────────────────────────────
 
@@ -1047,6 +1051,7 @@ func _hide_tutorial() -> void:
 	tw.tween_callback(func():
 		_tutorial_panel.visible = false
 		get_tree().paused = false
+		tutorial_dismissed.emit()
 	)
 
 
