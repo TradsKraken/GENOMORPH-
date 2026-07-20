@@ -74,6 +74,7 @@ var _minimap_cam_offset: Vector3 = Vector3.ZERO
 var _minimap_original_rect: Rect2
 var _minimap_original_zoom: float
 var _minimap_tween: Tween
+var _minimap_markers: Dictionary = {}
 
 signal subtitle_dismissed
 
@@ -121,10 +122,31 @@ func _input(event: InputEvent) -> void:
 		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 			if event.is_pressed():
 				hide_subtitle()
-				# Accept the event so it doesn't trigger jumping or attacking if they tap the subtitle area
-				# Alternatively, let them attack/jump while dismissing. 
-				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
 
+func add_minimap_marker(node: Node3D, color: Color = Color(0.2, 1.0, 0.4)) -> void:
+	if not is_instance_valid(_marker_layer): return
+	var icon = Control.new()
+	icon.custom_minimum_size = Vector2(10, 10)
+	var script = GDScript.new()
+	script.source_code = """extends Control
+var color: Color = Color.WHITE
+func _draw():
+	var center = size / 2.0
+	var points = PackedVector2Array([
+		Vector2(0, 0),
+		Vector2(size.x, 0),
+		Vector2(center.x, size.y)
+	])
+	draw_polygon(points, PackedColorArray([color, color, color]))
+"""
+	script.reload()
+	icon.set_script(script)
+	icon.set("color", color)
+	
+	var icon_container = CenterContainer.new()
+	icon_container.add_child(icon)
+	_marker_layer.add_child(icon_container)
+	_minimap_markers[node] = icon_container
 
 func _process(delta: float) -> void:
 	if is_instance_valid(_minimap_camera):
@@ -132,6 +154,31 @@ func _process(delta: float) -> void:
 		if is_instance_valid(player):
 			# Follow player from above, plus any drag offset if expanded
 			_minimap_camera.global_position = Vector3(player.global_position.x, 150.0, player.global_position.z) + _minimap_cam_offset
+			
+			# Update minimap markers
+			var pixels_per_unit = _minimap_panel.size.y / _minimap_camera.size
+			for target in _minimap_markers.keys():
+				var icon_container = _minimap_markers[target]
+				if not is_instance_valid(target) or target.is_queued_for_deletion():
+					if is_instance_valid(icon_container): icon_container.queue_free()
+					_minimap_markers.erase(target)
+					continue
+					
+				var world_offset = target.global_position - _minimap_camera.global_position
+				var ui_x = world_offset.x * pixels_per_unit
+				var ui_y = world_offset.z * pixels_per_unit
+				
+				var offset = Vector2(ui_x, ui_y)
+				var max_radius = (min(_minimap_panel.size.x, _minimap_panel.size.y) / 2.0) - 10.0
+				
+				if abs(offset.x) > max_radius or abs(offset.y) > max_radius:
+					var scale_x = max_radius / abs(offset.x) if abs(offset.x) > 0 else 1.0
+					var scale_y = max_radius / abs(offset.y) if abs(offset.y) > 0 else 1.0
+					var min_scale = min(scale_x, scale_y)
+					offset *= min_scale
+					
+				icon_container.position = _minimap_panel.size / 2.0 + offset - icon_container.size / 2.0
+
 
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
@@ -277,6 +324,8 @@ func _draw():
 	_status_group.add_child(_exp_bar)
 	
 
+var _marker_layer: Control
+
 func _build_minimap() -> void:
 	if _root.has_node("MinimapPanel"):
 		var old = _root.get_node("MinimapPanel")
@@ -317,6 +366,11 @@ func _build_minimap() -> void:
 	_minimap_viewport.transparent_bg = false
 	_minimap_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	sub_container.add_child(_minimap_viewport)
+	
+	_marker_layer = Control.new()
+	_marker_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_marker_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_minimap_panel.add_child(_marker_layer)
 	
 	_minimap_camera = Camera3D.new()
 	_minimap_camera.projection = Camera3D.PROJECTION_ORTHOGONAL

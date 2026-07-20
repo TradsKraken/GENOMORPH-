@@ -4,11 +4,22 @@ extends Node3D
 @export var prompt_text: String = "Tap to talk"
 @export var objective_text: String = "Talk to Lolo Palaka"
 
+@export_category("NPC Settings")
+@export var npc_name: String = "Lolo Palaka"
+@export var is_main_quest: bool = true
+
+var custom_dialogues: Array[String] = [
+	'"Please, the snakes and biters are everywhere! I can\'t even find clean water!"',
+	'"My tadpoles... I hope they are safe from those invasive predators."',
+	'"We used to sing here. Now we just hide..."'
+]
+
 var _anim_player: AnimationPlayer
 var _is_talking: bool = false
 var _was_near: bool = false
 
 func _ready() -> void:
+	add_to_group("npc_frog")
 	# Find the animation player and play the idle animation
 	_anim_player = _find_anim_player(self)
 	if _anim_player:
@@ -47,7 +58,11 @@ func _process(_delta: float) -> void:
 func _start_dialog() -> void:
 	_is_talking = true
 	var hud = get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_subtitle"):
+	if not hud or not hud.has_method("show_subtitle"):
+		_is_talking = false
+		return
+
+	if is_main_quest:
 		hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')
 		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 		
@@ -63,23 +78,37 @@ func _start_dialog() -> void:
 		hud.show_subtitle("Lolo Palaka", '"By remembering what we were made to do. A storm of them approaches our last clean pond. Words will not stop them, little frog. You must thin their numbers before they infect the water."')
 		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 		
+		hud.show_subtitle("Lolo Palaka", '"And it is not just me... there are others like us hiding out there in the marsh, terrified of these new predators. They need your help too."')
+		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Jump")
 		
-		hud.show_subtitle("Lolo Palaka", '"Show me what you can do. Clear the water!"')
+		hud.show_subtitle("Lolo Palaka", '"Please, find the others. Keep them safe until we can reclaim our home!"')
 		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+		
+		# Trigger minimap markers for all other frogs
+		if hud.has_method("add_minimap_marker"):
+			var frogs = get_tree().get_nodes_in_group("npc_frog")
+			for f in frogs:
+				if "is_main_quest" in f and not f.is_main_quest:
+					hud.add_minimap_marker(f, Color(0.2, 1.0, 0.4))
 		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Idle")
 			
-		# Proceed to tut5 (Minigame Arena) automatically after dialogue
-		var tut5 = get_tree().current_scene.find_child("tut5", true, false)
-		if tut5 and not tut5._triggered:
-			tut5._triggered = true # Prevent double trigger if player walks into it
-			if tut5.has_method("_activate_children"):
-				tut5._activate_children()
-			if tut5.trigger_type == 4 and tut5.has_method("_start_minigame"):
-				tut5._start_minigame()
+	else:
+		# Generic Frog Dialogue
+		var random_line = custom_dialogues[randi() % custom_dialogues.size()]
+		hud.show_subtitle(npc_name, random_line)
+		
+		if _anim_player:
+			_anim_player.play("FrogArmature|Frog_Jump")
+			
+		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+		
+		if _anim_player:
+			_anim_player.play("FrogArmature|Frog_Idle")
 	
 	_is_talking = false
 
@@ -91,3 +120,4 @@ func _find_anim_player(node: Node) -> AnimationPlayer:
 		if result:
 			return result
 	return null
+
