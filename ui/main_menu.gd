@@ -265,7 +265,7 @@ func _on_new_game_pressed() -> void:
 		await _anim_player.animation_finished
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
-		get_tree().change_scene_to_file("res://levels/node_3d.scn")
+		get_node("/root/SceneLoader").load_scene("res://levels/node_3d.scn")
 	)
 	play_menu.load_game.connect(func(slot: int):
 		if PlayerData.has_save_file(slot):
@@ -274,7 +274,7 @@ func _on_new_game_pressed() -> void:
 			await _anim_player.animation_finished
 			if AudioManager and AudioManager.has_method("play_game_bgm"):
 				AudioManager.play_game_bgm()
-			get_tree().change_scene_to_file(PlayerData.current_scene_path)
+			get_node("/root/SceneLoader").load_scene(PlayerData.current_scene_path)
 	)
 	add_child(play_menu)
 

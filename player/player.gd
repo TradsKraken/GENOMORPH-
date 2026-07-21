@@ -69,10 +69,12 @@ var _reticle: Decal
 var input_locked: bool = false
 var _time_since_combat: float = 5.0
 var _heal_timer: float = 0.0
+var _respawn_point: Vector3 = Vector3.ZERO
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	_respawn_point = global_position
 	rotation.y = PI
 	add_to_group("player")
 	if not InputMap.has_action("attack"):
@@ -156,6 +158,11 @@ func _physics_process(delta: float) -> void:
 	# ── Gravity ──────────────────────────────────────────────────────────────
 	if not is_on_floor():
 		velocity.y -= gravity * delta
+
+	# ── Fall Respawn ─────────────────────────────────────────────────────────
+	if global_position.y < -20.0:
+		global_position = _respawn_point
+		velocity = Vector3.ZERO
 
 	# ── Input direction (X-Z plane, top-down) ────────────────────────────────
 	var raw_input: Vector2
