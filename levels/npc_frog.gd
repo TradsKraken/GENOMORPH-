@@ -152,6 +152,8 @@ func _start_dialog() -> void:
 			PlayerData.set_objective(null, "Find the remaining frogs (" + str(PlayerData.frogs_helped) + "/" + str(PlayerData.total_frogs) + ")")
 		if hud.has_method("hide_zone_status"):
 			hud.hide_zone_status()
+		if hud.has_method("remove_minimap_marker"):
+			hud.remove_minimap_marker(self)
 
 	if is_main_quest:
 		hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')

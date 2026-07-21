@@ -27,6 +27,7 @@ var _status_group: Control
 var _interact_btn: Button
 var _current_interact_source: Node
 var _interact_callback: Callable
+var _interact_tween: Tween
 
 var _attack_btn: Button
 var _skill1_btn: Button
@@ -394,9 +395,10 @@ func _build_player_status() -> void:
 	_quest_tracker_lbl.fit_content = true
 	_quest_tracker_lbl.scroll_active = false
 	_quest_tracker_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_quest_tracker_lbl.add_theme_font_size_override("normal_font_size", 14)
-	_quest_tracker_lbl.custom_minimum_size = Vector2(300, 20)
-	_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
+	_quest_tracker_lbl.add_theme_font_size_override("normal_font_size", 20)
+	_quest_tracker_lbl.add_theme_font_size_override("bold_font_size", 20)
+	_quest_tracker_lbl.custom_minimum_size = Vector2(400, 30)
+	_quest_tracker_lbl.text = "[color=#ffcc00][b]Current Quest:[/b][/color] [color=#ffffff][/color]"
 	bars_vbox.add_child(_quest_tracker_lbl)
 
 	# EXP Bar (Radial around badge)
@@ -1456,10 +1458,20 @@ func show_interact(text: String, callback: Callable, source: Node) -> void:
 	_current_interact_source = source
 	_interact_callback = callback
 	_interact_btn.visible = true
+	_interact_btn.pivot_offset = _interact_btn.size / 2.0
+	
+	if _interact_tween and _interact_tween.is_valid():
+		_interact_tween.kill()
+	_interact_tween = create_tween().set_loops()
+	_interact_tween.tween_property(_interact_btn, "scale", Vector2(1.15, 1.15), 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_interact_tween.tween_property(_interact_btn, "scale", Vector2(1.0, 1.0), 0.6).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	# if text != "": _interact_btn.text = text
 
 func hide_interact(source: Node) -> void:
 	if _current_interact_source == source:
+		if _interact_tween and _interact_tween.is_valid():
+			_interact_tween.kill()
+		_interact_btn.scale = Vector2.ONE
 		_interact_btn.visible = false
 		_current_interact_source = null
 		_interact_callback = Callable()
@@ -1645,9 +1657,9 @@ func _on_objective_changed(target: Node3D) -> void:
 	if _quest_tracker_lbl:
 		var txt = PlayerData.current_objective_text
 		if txt == "":
-			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]None[/color]"
+			_quest_tracker_lbl.text = "[color=#ffcc00][b]Current Quest:[/b][/color] [color=#ffffff]None[/color]"
 		else:
-			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]" + txt + "[/color]"
+			_quest_tracker_lbl.text = "[color=#ffcc00][b]Current Quest:[/b][/color] [color=#ffffff]" + txt + "[/color]"
 
 # ── Notifications / Menus ──────────────────────────────────────────────────────────
 
