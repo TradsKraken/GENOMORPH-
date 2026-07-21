@@ -10,6 +10,10 @@ extends Node3D
 ## If true, the very first enemy spawned will have is_active = false. It must be woken up by a script or trigger zone. Subsequent respawns will always be active.
 @export var spawn_asleep_initially: bool = false
 
+## If true, sleeping enemies will wake up automatically when the player gets near. 
+## If false, they must be activated by a script (like a Tutorial Trigger).
+@export var auto_wake: bool = false
+
 ## Radius to spread out spawned enemies so they don't overlap exactly
 @export var spawn_radius: float = 2.0
 
@@ -36,7 +40,7 @@ func _ready() -> void:
 		_spawn_enemy(i)
 		
 	if not spawn_asleep_initially:
-		_activate_next_enemy()
+		call_deferred("_activate_next_enemy")
 
 func _spawn_enemy(index: int) -> void:
 	var enemy = enemy_scene.instantiate()
@@ -49,7 +53,7 @@ func _spawn_enemy(index: int) -> void:
 	if "is_active" in enemy:
 		enemy.is_active = false # Always start asleep, activate sequentially
 	if "can_auto_wake" in enemy:
-		enemy.can_auto_wake = false # Spawner controls activation
+		enemy.can_auto_wake = auto_wake
 		
 	if enemy_damage_override >= 0.0 and "damage_per_second" in enemy:
 		enemy.damage_per_second = enemy_damage_override
@@ -90,12 +94,14 @@ func _on_enemy_died(enemy: Node3D) -> void:
 func _on_nest_cleared() -> void:
 	_is_nest_cleared = true
 	# Give the player visual feedback that the nest is completely destroyed
-	var hud := get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_float_text"):
-		var cam := get_viewport().get_camera_3d()
-		if cam:
-			var scr := cam.unproject_position(global_position + Vector3(0, 2.0, 0))
-			hud.show_float_text("NEST CLEARED!", scr, Color.GREEN)
+	var tree = get_tree()
+	if tree:
+		var hud := tree.get_first_node_in_group("hud")
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 2.0, 0))
+				hud.show_float_text("NEST CLEARED!", scr, Color.GREEN)
 			
 	if not next_objective_path.is_empty():
 		var next_obj = get_node_or_null(next_objective_path)

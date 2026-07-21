@@ -18,8 +18,21 @@ var _anim_player: AnimationPlayer
 var _is_talking: bool = false
 var _was_near: bool = false
 
+@export var territory_radius: float = 25.0
+var is_helped: bool = false
+var _player_in_territory: bool = false
+var _territory_area: Area3D
+
 func _ready() -> void:
 	add_to_group("npc_frog")
+	# Look for a visual Area3D child to use instead of the hardcoded radius
+	for child in get_children():
+		if child is Area3D:
+			_territory_area = child
+			_territory_area.body_entered.connect(_on_body_entered)
+			_territory_area.body_exited.connect(_on_body_exited)
+			break
+			
 	# Find the animation player and play the idle animation
 	_anim_player = _find_anim_player(self)
 	if _anim_player:
@@ -27,6 +40,14 @@ func _ready() -> void:
 		if idle_anim:
 			idle_anim.loop_mode = Animation.LOOP_LINEAR
 		_anim_player.play("FrogArmature|Frog_Idle")
+
+func _on_body_entered(body: Node3D) -> void:
+	if body.is_in_group("player"):
+		_player_in_territory = true
+
+func _on_body_exited(body: Node3D) -> void:
+	if body.is_in_group("player"):
+		_player_in_territory = false
 
 func _process(_delta: float) -> void:
 	if _is_talking:
@@ -37,23 +58,83 @@ func _process(_delta: float) -> void:
 			_was_near = false
 		return
 		
-	# Check distance to the player
-	var _is_near = false
 	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		var dist = global_position.distance_to(player.global_position)
-		_is_near = dist <= interact_distance
-		
-	if _is_near and not _was_near:
-		var hud := get_tree().get_first_node_in_group("hud")
-		if hud and hud.has_method("show_interact"):
-			hud.show_interact("Talk", _start_dialog, self)
-	elif not _is_near and _was_near:
-		var hud := get_tree().get_first_node_in_group("hud")
-		if hud and hud.has_method("hide_interact"):
-			hud.hide_interact(self)
+	if not player: return
+	
+	var dist_to_player = global_position.distance_to(player.global_position)
+	var hud := get_tree().get_first_node_in_group("hud")
+	
+	var is_in_zone = false
+	if _territory_area:
+		is_in_zone = _player_in_territory
+	else:
+		is_in_zone = dist_to_player <= territory_radius
+		_player_in_territory = is_in_zone
+	
+	if is_in_zone and not is_helped:
+		var alive_enemies = 0
+		var all_enemies = get_tree().get_nodes_in_group("enemies")
+		for e in all_enemies:
+			if not is_instance_valid(e) or e.get("is_dead"):
+				continue
+				
+			var enemy_in_zone = false
+			if _territory_area:
+				# Use precise physics overlap if an Area3D exists
+				if _territory_area.overlaps_body(e):
+					enemy_in_zone = true
+			else:
+				# Fallback to distance
+				if global_position.distance_to(e.global_position) <= territory_radius:
+					enemy_in_zone = true
+					
+			if enemy_in_zone:
+				alive_enemies += 1
+				
+		if alive_enemies > 0:
+			if hud and hud.has_method("show_zone_status"):
+				hud.show_zone_status("Clear the area (" + str(alive_enemies) + " enemies remaining)")
 			
-	_was_near = _is_near
+			if _was_near:
+				if hud and hud.has_method("hide_interact"):
+					hud.hide_interact(self)
+				_was_near = false
+		else:
+			if hud and hud.has_method("show_zone_status"):
+				hud.show_zone_status("Talk to " + npc_name)
+				
+			if PlayerData.current_objective != self:
+				PlayerData.set_objective(self, "Talk to " + npc_name)
+				
+			var _is_near = dist_to_player <= interact_distance
+			if _is_near and not _was_near:
+				if hud and hud.has_method("show_interact"):
+					hud.show_interact("Talk", _start_dialog, self)
+			elif not _is_near and _was_near:
+				if hud and hud.has_method("hide_interact"):
+					hud.hide_interact(self)
+			_was_near = _is_near
+			
+	else:
+		if _player_in_territory:
+			_player_in_territory = false
+			if hud and hud.has_method("hide_zone_status"):
+				hud.hide_zone_status()
+				
+		var _is_near = dist_to_player <= interact_distance
+		if is_helped:
+			if _is_near and not _was_near:
+				if hud and hud.has_method("show_interact"):
+					hud.show_interact("Talk", _start_dialog, self)
+			elif not _is_near and _was_near:
+				if hud and hud.has_method("hide_interact"):
+					hud.hide_interact(self)
+			_was_near = _is_near
+		else:
+			if _was_near:
+				if hud and hud.has_method("hide_interact"):
+					hud.hide_interact(self)
+				_was_near = false
 
 func _start_dialog() -> void:
 	_is_talking = true
@@ -61,6 +142,14 @@ func _start_dialog() -> void:
 	if not hud or not hud.has_method("show_subtitle"):
 		_is_talking = false
 		return
+		
+	if not is_helped:
+		is_helped = true
+		PlayerData.frogs_helped += 1
+		if PlayerData.current_objective == self:
+			PlayerData.set_objective(null, "Find the remaining frogs (" + str(PlayerData.frogs_helped) + "/" + str(PlayerData.total_frogs) + ")")
+		if hud.has_method("hide_zone_status"):
+			hud.hide_zone_status()
 
 	if is_main_quest:
 		hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')
@@ -96,8 +185,6 @@ func _start_dialog() -> void:
 					
 		if not ("has_seen_minimap_tutorial" in PlayerData) or not PlayerData.has_seen_minimap_tutorial:
 			_wait_for_movement_and_show_tutorial(hud)
-		# Clear the objective arrow but keep the quest text
-		PlayerData.set_objective(null, "Find the remaining frogs")
 		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Idle")
@@ -144,4 +231,3 @@ func _wait_for_movement_and_show_tutorial(hud: Node) -> void:
 		
 	if is_instance_valid(hud):
 		hud.show_tutorial("MAP UPDATED", "Follow the bouncing green triangles on your minimap to locate the remaining frogs.")
-

@@ -4,6 +4,7 @@ extends CharacterBody3D
 @export var max_health: float = 50.0
 @export var speed: float = 0.3
 @export var exp_value: float = 10.0
+@export var enemy_level: int = 1
 
 var health: float
 var is_dead: bool = false
@@ -24,12 +25,16 @@ func _ready() -> void:
 		target = players[0]
 		
 func show_on_minimap() -> void:
-	var hud = get_tree().get_first_node_in_group("hud")
+	var tree = get_tree()
+	if not tree: return
+	var hud = tree.get_first_node_in_group("hud")
 	if hud and hud.has_method("add_minimap_marker"):
 		hud.add_minimap_marker(self, Color(1.0, 0.1, 0.1), false)
 
 func hide_from_minimap() -> void:
-	var hud = get_tree().get_first_node_in_group("hud")
+	var tree = get_tree()
+	if not tree: return
+	var hud = tree.get_first_node_in_group("hud")
 	if hud and hud.has_method("remove_minimap_marker"):
 		hud.remove_minimap_marker(self)
 

@@ -57,6 +57,9 @@ var has_seen_prologue: bool = false
 var has_seen_minimap_tutorial: bool = false
 var max_genome_fragments: int = 12
 
+var frogs_helped: int = 0
+var total_frogs: int = 4
+
 var current_scene_path: String = "res://levels/node_3d.scn"
 
 func add_genome_fragment() -> void:
@@ -230,6 +233,8 @@ func save_game(slot: int = -1) -> void:
 		"inventory": inventory,
 		"genome_fragments": genome_fragments,
 		"max_genome_fragments": max_genome_fragments,
+		"frogs_helped": frogs_helped,
+		"total_frogs": total_frogs,
 		"has_seen_prologue": has_seen_prologue,
 		"unlocked_knowledge": unlocked_knowledge,
 		"current_scene_path": current_scene_path,
@@ -269,6 +274,8 @@ func load_game(slot: int = -1) -> bool:
 				speed = data.get("speed", 4.0)
 				inventory = data.get("inventory", [])
 				genome_fragments = data.get("genome_fragments", 0)
+				frogs_helped = data.get("frogs_helped", 0)
+				total_frogs = data.get("total_frogs", 4)
 				has_seen_prologue = data.get("has_seen_prologue", false)
 				
 				var loaded_knowledge = data.get("unlocked_knowledge", [])
@@ -303,6 +310,8 @@ func reset_data(slot: int = -1) -> void:
 	speed = 4.0
 	inventory.clear()
 	genome_fragments = 0
+	frogs_helped = 0
+	total_frogs = 4
 	has_seen_prologue = false
 	unlocked_knowledge.clear()
 	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])

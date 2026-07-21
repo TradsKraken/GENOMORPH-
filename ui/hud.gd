@@ -58,6 +58,10 @@ var _genome_popup_panel: PanelContainer
 var _genome_popup_label: RichTextLabel
 var _genome_popup_tween: Tween
 
+var _zone_status_panel: PanelContainer
+var _zone_status_lbl: RichTextLabel
+var _zone_status_tween: Tween
+
 var _walkthrough_steps: Array = []
 var _current_step_index: int = 0
 var _active_highlight_nodes: Array = []
@@ -106,6 +110,7 @@ func _ready() -> void:
 	_build_objective_arrow()
 	_build_genome_popup()
 	_build_minimap()
+	_build_zone_status()
 
 	_connect_signals()
 
@@ -225,7 +230,70 @@ func _process(delta: float) -> void:
 					
 				icon_container.position = _minimap_panel.size / 2.0 + offset - icon_container.size / 2.0
 
+# ── Zone Status (Top Center) ──────────────────────────────────────────────────
 
+func _build_zone_status() -> void:
+	if _root.has_node("ZoneStatusPanel"):
+		_zone_status_panel = _root.find_child("ZoneStatusPanel", true, false)
+		_zone_status_lbl = _zone_status_panel.get_child(0) as RichTextLabel
+		return
+		
+	_zone_status_panel = PanelContainer.new()
+	_zone_status_panel.name = "ZoneStatusPanel"
+	_zone_status_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_zone_status_panel.offset_top = 32
+	_zone_status_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.08, 0.85)
+	style.border_color = Color(0.8, 0.8, 0.9, 0.5)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(16)
+	style.content_margin_left = 24
+	style.content_margin_right = 24
+	style.content_margin_top = 8
+	style.content_margin_bottom = 8
+	_zone_status_panel.add_theme_stylebox_override("panel", style)
+	
+	_zone_status_lbl = RichTextLabel.new()
+	_zone_status_lbl.name = "ZoneStatusLbl"
+	_zone_status_lbl.bbcode_enabled = true
+	_zone_status_lbl.fit_content = true
+	_zone_status_lbl.scroll_active = false
+	_zone_status_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_zone_status_lbl.add_theme_font_size_override("normal_font_size", 18)
+	_zone_status_lbl.add_theme_font_size_override("bold_font_size", 18)
+	_zone_status_lbl.custom_minimum_size = Vector2(250, 20)
+	
+	_zone_status_panel.add_child(_zone_status_lbl)
+	_root.add_child(_zone_status_panel)
+	
+	_zone_status_panel.visible = false
+	_zone_status_panel.modulate.a = 0.0
+
+func show_zone_status(text: String) -> void:
+	# Avoid redundant updates if text is same
+	var formatted_text = "[center][b]" + text + "[/b][/center]"
+	if _zone_status_lbl.text == formatted_text and _zone_status_panel.visible:
+		return
+		
+	_zone_status_lbl.text = formatted_text
+	_zone_status_panel.visible = true
+	
+	if _zone_status_tween and _zone_status_tween.is_valid():
+		_zone_status_tween.kill()
+	_zone_status_tween = create_tween()
+	_zone_status_tween.tween_property(_zone_status_panel, "modulate:a", 1.0, 0.3)
+
+func hide_zone_status() -> void:
+	if not _zone_status_panel.visible or _zone_status_panel.modulate.a == 0.0:
+		return
+		
+	if _zone_status_tween and _zone_status_tween.is_valid():
+		_zone_status_tween.kill()
+	_zone_status_tween = create_tween()
+	_zone_status_tween.tween_property(_zone_status_panel, "modulate:a", 0.0, 0.3)
+	_zone_status_tween.tween_callback(func(): _zone_status_panel.visible = false)
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
 
