@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dkdpa468ef1v7"]
 
-[ext_resource type="PackedScene" uid="uid://bnym7knvvbdpu" path="res://Models/Terrain/Terrain.glb" id="1_kqih2"]
+[ext_resource type="PackedScene" path="res://Models/LEVEL 1.glb" id="1_kqih2"]
 
 [node name="Terrain" unique_id=2011643875 instance=ExtResource("1_kqih2")]
 
