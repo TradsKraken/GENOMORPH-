@@ -5,8 +5,8 @@ extends WorldEnvironment
 var _dir_light: DirectionalLight3D
 
 # Toxic colors
-var toxic_fog_color = Color(0.25, 0.45, 0.25) # richer murky green
-var toxic_light_color = Color(0.85, 0.9, 0.6) # Brighter sickly sunlight for good contrast
+var toxic_fog_color = Color(0.3, 0.45, 0.35) # richer murky green
+var toxic_light_color = Color(0.9, 0.85, 0.65) # Warm, slightly murky sunlight
 var toxic_fog_density = 0.04
 
 # Clean colors
@@ -25,10 +25,9 @@ func _ready() -> void:
 		environment.tonemap_white = 1.0
 		
 		# Add Ambient Light to fill in the harsh pitch-black shadows
-		# INCREASE THE ENERGY BELOW IF SHADOWS ARE STILL TOO DARK!
 		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		environment.ambient_light_color = Color(0.6, 0.65, 0.75) # Brighter bluish tint
-		environment.ambient_light_energy = 1.0 # Higher energy = lighter shadows
+		environment.ambient_light_color = Color(0.65, 0.7, 0.8) # Muted sky blue
+		environment.ambient_light_energy = 0.8 # Lowered to prevent harsh, washed-out look
 		
 		# Bloom / Glow
 		environment.glow_enabled = true
@@ -43,7 +42,7 @@ func _ready() -> void:
 				
 				# ── FORCE SHADOWS ON ──
 				_dir_light.shadow_enabled = true
-				_dir_light.light_energy = 1.5 # Boost brightness to create high contrast with shadows
+				_dir_light.light_energy = 0.85 # Soften the harsh direct sunlight
 				_dir_light.shadow_bias = 0.015
 				_dir_light.shadow_blur = 1.5
 				

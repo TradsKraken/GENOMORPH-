@@ -61,6 +61,13 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 			return ap
 	return null
 
+func _apply_level_scaling() -> void:
+	super._apply_level_scaling()
+	
+	# +10% Damage per level
+	var level_multiplier = float(maxi(1, enemy_level)) - 1.0
+	damage_per_second += (damage_per_second * 0.10) * level_multiplier
+
 @export var is_passive: bool = false
 @export var can_auto_wake: bool = true
 var is_active: bool = false:
