@@ -10,14 +10,11 @@ var sounds: Dictionary = {}
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	
-	# Generate BGM
-	var bgm_stream = _generate_bgm()
 	bgm_player = AudioStreamPlayer.new()
-	bgm_player.stream = bgm_stream
-	bgm_player.volume_db = -30.0 # Lowered to reduce buzzing hum
 	bgm_player.bus = "Master"
 	add_child(bgm_player)
-	bgm_player.play()
+	
+	play_main_menu_bgm()
 	
 	ambiance_player = AudioStreamPlayer.new()
 	ambiance_player.stream = load("res://audio/ambiance.ogg")
@@ -57,6 +54,21 @@ func _ready() -> void:
 		p.bus = "Master"
 		add_child(p)
 		sfx_players.append(p)
+
+func play_main_menu_bgm() -> void:
+	if bgm_player.stream != null and bgm_player.stream.resource_path == "res://audio/Main Menu Background Music.ogg" and bgm_player.playing:
+		return
+	bgm_player.stream = load("res://audio/Main Menu Background Music.ogg")
+	bgm_player.volume_db = -10.0 # Standard volume for imported music
+	bgm_player.play()
+
+func play_game_bgm() -> void:
+	# Switch back to the procedural drone hum for the game
+	if bgm_player.stream is AudioStreamWAV:
+		return
+	bgm_player.stream = _generate_bgm()
+	bgm_player.volume_db = -30.0 # Lowered to reduce buzzing hum
+	bgm_player.play()
 
 func play_sfx(sound_name: String, pitch: float = 1.0, volume_db: float = 0.0) -> void:
 	if sound_name in sounds:

@@ -24,20 +24,16 @@ func _ready() -> void:
 		environment.tonemap_exposure = 1.0
 		environment.tonemap_white = 1.0
 		
-		# Screen Space Ambient Occlusion (adds beautiful deep shadows in corners)
-		environment.ssao_enabled = true
-		environment.ssao_radius = 1.0
-		environment.ssao_intensity = 2.0
+		# Add Ambient Light to fill in the harsh pitch-black shadows
+		# INCREASE THE ENERGY BELOW IF SHADOWS ARE STILL TOO DARK!
+		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		environment.ambient_light_color = Color(0.6, 0.65, 0.75) # Brighter bluish tint
+		environment.ambient_light_energy = 1.0 # Higher energy = lighter shadows
 		
 		# Bloom / Glow
 		environment.glow_enabled = true
 		environment.glow_bloom = 0.1
 		environment.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
-		
-		# Volumetric Fog Tweaks
-		environment.volumetric_fog_enabled = true
-		environment.volumetric_fog_length = 64.0 # Keep it relatively close for performance
-		environment.volumetric_fog_ambient_inject = 0.2
 
 	# Find DirectionalLight3D and force Shadows ON
 	if get_parent():
@@ -51,9 +47,8 @@ func _ready() -> void:
 				_dir_light.shadow_bias = 0.015
 				_dir_light.shadow_blur = 1.5
 				
-				# Enable soft PCF3D shadows if supported
-				_dir_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-				_dir_light.directional_shadow_blend_splits = true
+				_dir_light.shadow_bias = 0.015
+				_dir_light.shadow_blur = 1.5
 				break
 	
 	if get_tree().current_scene:
@@ -62,13 +57,49 @@ func _ready() -> void:
 	
 	PlayerData.genome_collected.connect(_on_genome_collected)
 	
+	if SettingsManager:
+		SettingsManager.settings_changed.connect(_apply_graphics_quality)
+		_apply_graphics_quality()
+	
 	# Set initial state (in case game loaded)
 	_update_environment(PlayerData.genome_fragments, true)
 
+func _apply_graphics_quality() -> void:
+	if not environment or not _dir_light:
+		return
+		
+	var q = SettingsManager.graphics_quality
+	
+	if q == 0: # Low
+		environment.ssao_enabled = false
+		environment.volumetric_fog_enabled = false
+		environment.fog_enabled = true
+		_dir_light.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+		_dir_light.directional_shadow_blend_splits = false
+	elif q == 1: # Medium
+		environment.ssao_enabled = false
+		environment.volumetric_fog_enabled = false
+		environment.fog_enabled = true
+		_dir_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		_dir_light.directional_shadow_blend_splits = false
+	elif q == 2: # High
+		environment.ssao_enabled = true
+		environment.ssao_radius = 1.0
+		environment.ssao_intensity = 2.0
+		environment.volumetric_fog_enabled = true
+		environment.volumetric_fog_length = 64.0
+		environment.volumetric_fog_ambient_inject = 0.2
+		environment.fog_enabled = false
+		_dir_light.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+		_dir_light.directional_shadow_blend_splits = true
+
 func _force_shadows(node: Node) -> void:
 	if node is MeshInstance3D:
-		# Ensure the mesh can cast and receive shadows
-		if node.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+		# Optimize performance by disabling shadow casting on grass and small details
+		var node_name_lower = node.name.to_lower()
+		if "grass" in node_name_lower or "weed" in node_name_lower or "flower" in node_name_lower:
+			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		elif node.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 			
 		var mat = node.material_override
@@ -125,11 +156,11 @@ func _update_environment(current: int, instant: bool) -> void:
 	var target_fog_density = lerpf(toxic_fog_density, clean_fog_density, progress)
 	var target_light_color = toxic_light_color.lerp(clean_light_color, progress)
 	
-	environment.volumetric_fog_enabled = true
-	
 	if instant:
 		environment.volumetric_fog_albedo = target_fog_color
 		environment.volumetric_fog_density = target_fog_density
+		environment.fog_light_color = target_fog_color
+		environment.fog_density = target_fog_density * 0.1 # Standard fog needs lower density values
 		if _dir_light:
 			_dir_light.light_color = target_light_color
 	else:
@@ -139,5 +170,7 @@ func _update_environment(current: int, instant: bool) -> void:
 		_env_tween.set_parallel(true)
 		_env_tween.tween_property(environment, "volumetric_fog_albedo", target_fog_color, 4.0).set_trans(Tween.TRANS_SINE)
 		_env_tween.tween_property(environment, "volumetric_fog_density", target_fog_density, 4.0).set_trans(Tween.TRANS_SINE)
+		_env_tween.tween_property(environment, "fog_light_color", target_fog_color, 4.0).set_trans(Tween.TRANS_SINE)
+		_env_tween.tween_property(environment, "fog_density", target_fog_density * 0.1, 4.0).set_trans(Tween.TRANS_SINE)
 		if _dir_light:
 			_env_tween.tween_property(_dir_light, "light_color", target_light_color, 4.0).set_trans(Tween.TRANS_SINE)

@@ -242,6 +242,7 @@ func _build_zone_status() -> void:
 	_zone_status_panel = PanelContainer.new()
 	_zone_status_panel.name = "ZoneStatusPanel"
 	_zone_status_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_zone_status_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_zone_status_panel.offset_top = 32
 	_zone_status_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	

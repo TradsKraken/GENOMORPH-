@@ -263,6 +263,8 @@ func _on_new_game_pressed() -> void:
 		PlayerData.reset_data(slot)
 		_anim_player.play("exit")
 		await _anim_player.animation_finished
+		if AudioManager and AudioManager.has_method("play_game_bgm"):
+			AudioManager.play_game_bgm()
 		get_tree().change_scene_to_file("res://levels/node_3d.scn")
 	)
 	play_menu.load_game.connect(func(slot: int):
@@ -270,6 +272,8 @@ func _on_new_game_pressed() -> void:
 			PlayerData.load_game(slot)
 			_anim_player.play("exit")
 			await _anim_player.animation_finished
+			if AudioManager and AudioManager.has_method("play_game_bgm"):
+				AudioManager.play_game_bgm()
 			get_tree().change_scene_to_file(PlayerData.current_scene_path)
 	)
 	add_child(play_menu)

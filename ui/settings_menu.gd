@@ -53,7 +53,7 @@ func _ready() -> void:
 	
 	# Settings options
 	_build_scale_option()
-	_build_msaa_option()
+	_build_quality_option()
 	_build_glow_toggle()
 	_build_draw_distance_option()
 	
@@ -101,28 +101,24 @@ func _build_scale_option() -> void:
 	hbox.add_child(opt)
 	_vbox.add_child(hbox)
 
-func _build_msaa_option() -> void:
+func _build_quality_option() -> void:
 	var hbox := HBoxContainer.new()
 	var lbl := Label.new()
-	lbl.text = "Anti-Aliasing (MSAA):"
+	lbl.text = "Graphics Quality:"
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	lbl.add_theme_font_size_override("font_size", 28)
 	hbox.add_child(lbl)
 	
 	var opt := OptionButton.new()
 	opt.add_theme_font_size_override("font_size", 24)
-	opt.add_item("Off", Viewport.MSAA_DISABLED)
-	opt.add_item("2x", Viewport.MSAA_2X)
-	opt.add_item("4x", Viewport.MSAA_4X)
+	opt.add_item("Low (Fastest)", 0)
+	opt.add_item("Medium (Balanced)", 1)
+	opt.add_item("High (Beautiful)", 2)
 	
-	var current = SettingsManager.msaa
-	for i in range(opt.item_count):
-		if opt.get_item_id(i) == current:
-			opt.selected = i
-			break
+	opt.selected = SettingsManager.graphics_quality
 			
 	opt.item_selected.connect(func(index: int):
-		SettingsManager.msaa = opt.get_item_id(index)
+		SettingsManager.graphics_quality = index
 		SettingsManager.apply_settings()
 	)
 	hbox.add_child(opt)
