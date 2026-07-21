@@ -85,6 +85,8 @@ var _fog_manager: Node
 
 signal subtitle_dismissed
 signal tutorial_dismissed
+signal tutorial_complete
+signal player_moved_in_tutorial
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
@@ -1124,7 +1126,461 @@ func _hide_tutorial() -> void:
 		_tutorial_panel.visible = false
 		get_tree().paused = false
 		tutorial_dismissed.emit()
+		tutorial_complete.emit()
 	)
+
+
+# \u2500\u2500 Interactive Spotlight Tutorial \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+
+var _tut_overlay: ColorRect = null
+var _tut_panel: PanelContainer = null
+var _tut_title_lbl: Label = null
+var _tut_desc_lbl: RichTextLabel = null
+var _tut_tap_hint: Label = null
+var _tut_tap_overlay: Button = null   # Invisible tap catcher placed over the target
+var _tut_active: bool = false
+
+func start_tutorial() -> void:
+	if PlayerData.has_seen_prologue:
+		return
+	_tut_active = true
+	get_tree().paused = false
+	
+	# \u2500\u2500 Build the dim overlay \u2500\u2500
+	_tut_overlay = ColorRect.new()
+	_tut_overlay.name = "TutOverlay"
+	_tut_overlay.color = Color(0, 0, 0, 0)
+	_tut_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_tut_overlay.z_index = 50
+	_tut_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_tut_overlay)
+
+	# \u2500\u2500 Build the floating tooltip \u2500\u2500
+	_tut_panel = PanelContainer.new()
+	_tut_panel.name = "TutTooltip"
+	_tut_panel.z_index = 80
+	_tut_panel.visible = false
+	_tut_panel.custom_minimum_size = Vector2(320, 0)
+	_tut_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tp_bg = StyleBoxFlat.new()
+	tp_bg.bg_color = Color(0.02, 0.05, 0.08, 0.96)
+	tp_bg.border_color = Color(0.1, 0.9, 0.7, 0.9)
+	tp_bg.set_border_width_all(2)
+	tp_bg.set_corner_radius_all(10)
+	tp_bg.shadow_color = Color(0, 0, 0, 0.5)
+	tp_bg.shadow_size = 12
+	tp_bg.content_margin_left = 20
+	tp_bg.content_margin_right = 20
+	tp_bg.content_margin_top = 16
+	tp_bg.content_margin_bottom = 16
+	_tut_panel.add_theme_stylebox_override("panel", tp_bg)
+	var tp_vbox = VBoxContainer.new()
+	tp_vbox.add_theme_constant_override("separation", 8)
+	tp_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tut_panel.add_child(tp_vbox)
+	_tut_title_lbl = Label.new()
+	_tut_title_lbl.add_theme_font_size_override("font_size", 20)
+	_tut_title_lbl.add_theme_color_override("font_color", Color(0.1, 0.9, 0.7))
+	_tut_title_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tp_vbox.add_child(_tut_title_lbl)
+	var sep = HSeparator.new()
+	var sep_s = StyleBoxLine.new()
+	sep_s.color = Color(0.1, 0.9, 0.7, 0.3)
+	sep.add_theme_stylebox_override("separator", sep_s)
+	tp_vbox.add_child(sep)
+	_tut_desc_lbl = RichTextLabel.new()
+	_tut_desc_lbl.bbcode_enabled = true
+	_tut_desc_lbl.fit_content = true
+	_tut_desc_lbl.scroll_active = false
+	_tut_desc_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_tut_desc_lbl.add_theme_font_size_override("normal_font_size", 16)
+	_tut_desc_lbl.custom_minimum_size = Vector2(280, 0)
+	tp_vbox.add_child(_tut_desc_lbl)
+	_tut_tap_hint = Label.new()
+	_tut_tap_hint.add_theme_font_size_override("font_size", 14)
+	_tut_tap_hint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+	_tut_tap_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tp_vbox.add_child(_tut_tap_hint)
+	_root.add_child(_tut_panel)
+
+	# Invisible tap catcher
+	_tut_tap_overlay = Button.new()
+	_tut_tap_overlay.name = "TutTapOverlay"
+	_tut_tap_overlay.z_index = 70
+	_tut_tap_overlay.visible = false
+	_tut_tap_overlay.flat = true
+	_tut_tap_overlay.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	_tut_tap_overlay.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
+	_tut_tap_overlay.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+	_root.add_child(_tut_tap_overlay)
+
+	# \u2500\u2500 Run all steps \u2500\u2500
+	await _tut_welcome()
+	var badge = _root.find_child("Badge", true, false)
+	await _tut_spotlight(badge,
+		"YOUR LEVEL BADGE",
+		"This badge shows your [color=#ffcc00]Level[/color].\n\nThe golden ring is your [color=#ffcc00]EXP progress[/color] to the next level.\n\n[b]Tap it[/b] to explore your character stats!",
+		"Tap the badge to continue")
+	# After badge is tapped \u2192 open character menu sub-tutorial
+	await _tut_character_menu()
+
+	await _tut_spotlight(_hp_bar,
+		"HEALTH BAR",
+		"The [color=#ff3b5c]red bar[/color] is your [b]Health[/b].\nIf it reaches zero, you go down.\n\nKeep it above zero at all times.",
+		"Tap the bar to continue")
+
+	await _tut_spotlight(_stam_bar,
+		"STAMINA BAR",
+		"The [color=#9400ff]purple bar[/color] is your [b]Stamina[/b].\n\nJump and Tongue Whip both consume it. It regenerates automatically when you stop using abilities.",
+		"Tap the bar to continue")
+
+	await _tut_spotlight(_quest_tracker_lbl,
+		"CURRENT OBJECTIVE",
+		"This shows your [b]current mission[/b].\n\nAlways check here if you're unsure of what to do next.",
+		"Tap the objective to continue")
+
+	await _tut_spotlight(_minimap_panel,
+		"MINIMAP",
+		"The [b]minimap[/b] shows a bird's-eye view.\n\n[b]Tap it[/b] to expand it to a full map.",
+		"Tap the minimap to continue")
+
+	var mm_event = InputEventMouseButton.new()
+	mm_event.button_index = MOUSE_BUTTON_LEFT
+	mm_event.pressed = true
+	_on_minimap_gui_input(mm_event)
+	mm_event.pressed = false
+	_on_minimap_gui_input(mm_event)
+	await get_tree().create_timer(0.4).timeout
+
+	await _tut_spotlight_in_canvas(_minimap_panel, self, "FULL MAP", "Drag to pan around.\n\n[color=#00ccff]Cyan[/color] dot = you. [color=#ff3333]Red triangles[/color] = enemies.\n\n[b]Tap the map again[/b] to close it.", "Tap the map to close")
+	
+	mm_event.pressed = true
+	_on_minimap_gui_input(mm_event)
+	mm_event.pressed = false
+	_on_minimap_gui_input(mm_event)
+	await get_tree().create_timer(0.4).timeout
+
+	await _tut_spotlight(_menu_btn,
+		"PAUSE MENU",
+		"Opens the system menu.\n\n[b]Tap it[/b] to view your options.",
+		"Tap the pause button to continue")
+		
+	_toggle_menu()
+	await get_tree().process_frame
+	
+	var resume_btn = _menu_panel.find_child("RESUME", true, false)
+	if resume_btn:
+		await _tut_spotlight_in_canvas(resume_btn, self, "SYSTEM OPTIONS", "\u2022 Adjust graphics quality\n\u2022 Save your progress\n\u2022 Return to Main Menu\n\n[b]Tap RESUME[/b] to close the menu.", "Tap RESUME to continue")
+	
+	if _menu_open:
+		_toggle_menu()
+	await get_tree().create_timer(0.2).timeout
+
+	await _tut_spotlight(_knowledge_btn,
+		"KNOWLEDGE LOG \ud83d\udcd6",
+		"Collecting Genome Fragments unlocks entries about the world.\n\n[b]Tap the book[/b] to open the Knowledge Log.",
+		"Tap the book to continue")
+		
+	_open_knowledge_menu()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	var k_menu = _root.get_children().filter(func(c): return c is KnowledgeMenu)
+	if not k_menu.is_empty():
+		var k_menu_node = k_menu[0]
+		var close_btn = k_menu_node.find_child("CLOSE", true, false)
+		if not close_btn:
+			for c in k_menu_node.get_children():
+				var b = c.find_child("CLOSE", true, false)
+				if b: close_btn = b; break
+		if close_btn:
+			await _tut_spotlight_in_canvas(close_btn, k_menu_node, "LORE & TRAITS", "Read about characters, locations, and enemy species here.\n\n[b]Tap CLOSE[/b] to return to the field.", "Tap CLOSE to continue")
+		if is_instance_valid(k_menu_node) and k_menu_node.has_method("_on_close"):
+			k_menu_node._on_close()
+	await get_tree().process_frame
+
+	await _tut_spotlight(_quest_btn,
+		"DIALOGUE LOG \ud83d\udcac",
+		"Review all past transmissions.\n\n[b]Tap the chat icon[/b] to open the log.",
+		"Tap the chat icon to continue")
+		
+	_open_quest_menu()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	
+	if is_instance_valid(_quest_panel):
+		var close_btn = _quest_panel.find_child("CLOSE", true, false)
+		if not close_btn:
+			for c in _quest_panel.get_children():
+				var b = c.find_child("CLOSE", true, false)
+				if b: close_btn = b; break
+		if close_btn:
+			await _tut_spotlight_in_canvas(close_btn, self, "TRANSMISSION HISTORY", "If you miss a message during gameplay, check here to catch up.\n\n[b]Tap CLOSE[/b] to return.", "Tap CLOSE to continue")
+		if is_instance_valid(_quest_panel):
+			_quest_panel.visible = false
+	await get_tree().process_frame
+
+	await _tut_spotlight(_jump_btn,
+		"SPLASHDOWN JUMP \ud83e\uddb8",
+		"[b]Tap[/b] for a quick hop.\n\n[b]Hold + drag[/b] to aim a directed jump, release to launch.\n\nDrag into the red [b]CANCEL ZONE[/b] that appears above to abort the jump safely.",
+		"Tap the jump button to continue")
+
+	await _tut_spotlight(_attack_btn,
+		"PRIMARY ATTACK \ud83e\uddb5",
+		"Performs a [b]Webbed Lunge[/b] \u2014 a powerful melee strike.\n\nDisrupts mosquito swarms and staggers ground enemies.\n\n[color=#00ff88]No stamina cost.[/color]",
+		"Tap the attack button to continue")
+
+	await _tut_spotlight(_skill1_btn,
+		"TONGUE WHIP \ud83d\udc45",
+		"A [b]ranged strike[/b] with longer reach than the lunge.\n\nConsumes [color=#9400ff]Stamina[/color]. The button dims when stamina is too low.\n\nWait for stamina to recover before using again.",
+		"Tap the tongue button to continue")
+
+	await _tut_spotlight(_skill3_btn,
+		"ULTIMATE \u2014 LOCKED \u2620\ufe0f",
+		"Your [b]Ultimate Ability[/b] is currently locked.\n\nCollect [color=#33ff88]Genome Fragments[/color] scattered through the environment to reconstruct your suit and unlock its full power.",
+		"Tap to acknowledge")
+
+	await _tut_finish()
+
+	# Clean up
+	if is_instance_valid(_tut_overlay): _tut_overlay.queue_free()
+	if is_instance_valid(_tut_panel): _tut_panel.queue_free()
+	if is_instance_valid(_tut_tap_overlay): _tut_tap_overlay.queue_free()
+	_tut_active = false
+	PlayerData.has_seen_prologue = true
+	PlayerData.save_game()
+	tutorial_complete.emit()
+
+
+func _tut_welcome() -> void:
+	# Dim gently then show a welcome tooltip at screen center
+	var tw = create_tween()
+	tw.tween_property(_tut_overlay, "color:a", 0.75, 0.4)
+	await tw.finished
+
+	_tut_title_lbl.text = "HUD SYSTEM INITIALIZED"
+	_tut_desc_lbl.text = "Your suit has booted. The heads-up display is now active.\n\n[b]Tap anywhere[/b] to begin the briefing."
+	_tut_tap_hint.text = ""
+	var vp = get_viewport().get_visible_rect().size
+	await get_tree().process_frame
+	_tut_panel.position = (vp - _tut_panel.size) / 2.0
+	_tut_panel.visible = true
+	_tut_panel.modulate.a = 0.0
+	var tw2 = create_tween()
+	tw2.tween_property(_tut_panel, "modulate:a", 1.0, 0.3)
+	await tw2.finished
+
+	# Full-screen tap catcher
+	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_tut_tap_overlay.visible = true
+	await _tut_tap_overlay.pressed
+
+	_tut_tap_overlay.visible = false
+	_tut_panel.visible = false
+
+
+func _tut_spotlight(target: Control, title: String, desc: String, hint: String) -> void:
+	if not is_instance_valid(target):
+		return
+
+	# Elevate target above dim overlay
+	var old_z = target.z_index
+	target.z_index = 65
+
+	# Dim overlay if not already visible
+	if _tut_overlay.color.a < 0.5:
+		var tw = create_tween()
+		tw.tween_property(_tut_overlay, "color:a", 0.75, 0.3)
+		await tw.finished
+
+	# Position tooltip: prefer below the target, but clamp to screen
+	await get_tree().process_frame
+	var vp = get_viewport().get_visible_rect().size
+	var tr = target.get_global_rect()
+	_tut_title_lbl.text = title
+	_tut_desc_lbl.text = desc
+	_tut_tap_hint.text = "\u25bc " + hint
+	_tut_panel.visible = true
+	_tut_panel.modulate.a = 0.0
+	await get_tree().process_frame  # let it size itself
+	var tp_size = _tut_panel.size
+	var pos = Vector2(tr.position.x, tr.position.y + tr.size.y + 12)
+	# Right-align if target is near right edge
+	if pos.x + tp_size.x > vp.x - 10:
+		pos.x = vp.x - tp_size.x - 10
+	# If tooltip goes off bottom, put it above the target
+	if pos.y + tp_size.y > vp.y - 10:
+		pos.y = tr.position.y - tp_size.y - 12
+	# Clamp
+	pos.x = clamp(pos.x, 8, vp.x - tp_size.x - 8)
+	pos.y = clamp(pos.y, 8, vp.y - tp_size.y - 8)
+	_tut_panel.position = pos
+	var tw2 = create_tween()
+	tw2.tween_property(_tut_panel, "modulate:a", 1.0, 0.25)
+	await tw2.finished
+
+	# Pulsing highlight on target
+	highlight_node(target)
+
+	# Place invisible tap catcher exactly over the target
+	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_tut_tap_overlay.position = tr.position
+	_tut_tap_overlay.size = tr.size
+	_tut_tap_overlay.visible = true
+	await _tut_tap_overlay.pressed
+
+	# Clean up this step
+	stop_highlight_node(target)
+	target.z_index = old_z
+	_tut_tap_overlay.visible = false
+	var tw3 = create_tween()
+	tw3.tween_property(_tut_panel, "modulate:a", 0.0, 0.2)
+	await tw3.finished
+	_tut_panel.visible = false
+
+
+func _tut_character_menu() -> void:
+	# Open the character menu
+	get_tree().paused = false
+	_open_character_menu()
+	# Wait one frame for the menu to be added to the tree
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var menu = _root.get_children().filter(func(c): return c is CharacterMenu)
+	if menu.is_empty():
+		return
+	var char_menu: CharacterMenu = menu[0]
+	var tab_container = char_menu.find_child("TabContainer", true, false) as TabContainer
+	if not tab_container:
+		return
+
+	# Sub-tutorial: highlight each tab
+	var tab_data = [
+		["STATS TAB", "This tab shows your [b]character statistics[/b]:\n\n[color=#ffcc00]Level[/color], [color=#ff3b5c]Health[/color], [color=#9400ff]Stamina[/color], [color=#ff8833]Attack Power[/color], [color=#33aaff]Defense[/color], [color=#44ff44]Speed[/color].\n\n[b]Tap the STATS tab[/b] to view it."],
+		["SKILLS TAB", "Here you can spend [color=#ffcc00]Skill Points[/color] earned from leveling up.\n\nUpgrade Vitality, Endurance, and Attack Power.\n\n[b]Tap the SKILLS tab[/b] to view it."],
+		["INVENTORY TAB", "This shows everything you are carrying.\n\n[color=#33ff88]Genome Fragments[/color] collected will appear here.\n\n[b]Tap the INVENTORY tab[/b] to view it."],
+	]
+	for i in range(tab_data.size()):
+		var tab_btn = _get_tab_button(tab_container, i)
+		if tab_btn:
+			await _tut_spotlight_in_canvas(tab_btn, char_menu, tab_data[i][0], tab_data[i][1], "Tap the tab to continue")
+			tab_container.current_tab = i
+
+	# Prompt to close
+	var close_btn = char_menu.find_child("CLOSE", true, false) as Button
+	if not close_btn:
+		# find by text
+		for c in char_menu.get_children():
+			var b = c.find_child("CLOSE", true, false)
+			if b: close_btn = b; break
+	if close_btn:
+		await _tut_spotlight_in_canvas(close_btn, char_menu, "CLOSE THE MENU", "Good! You now know how to read your character stats.\n\n[b]Tap CLOSE[/b] to return to the field.", "Tap CLOSE to continue")
+
+	# Ensure menu is closed
+	if is_instance_valid(char_menu):
+		char_menu._on_close()
+	await get_tree().process_frame
+
+
+func _tut_spotlight_in_canvas(target: Control, canvas: Node, title: String, desc: String, hint: String) -> void:
+	if not is_instance_valid(target): return
+
+	var need_reparent = (canvas != self and canvas != _root)
+	if need_reparent:
+		if _tut_overlay.get_parent(): _tut_overlay.get_parent().remove_child(_tut_overlay)
+		canvas.add_child(_tut_overlay)
+		if _tut_panel.get_parent(): _tut_panel.get_parent().remove_child(_tut_panel)
+		canvas.add_child(_tut_panel)
+		if _tut_tap_overlay.get_parent(): _tut_tap_overlay.get_parent().remove_child(_tut_tap_overlay)
+		canvas.add_child(_tut_tap_overlay)
+
+	var old_z = target.z_index
+	target.z_index = 65
+
+	if _tut_overlay.color.a < 0.5:
+		var tw = create_tween()
+		tw.tween_property(_tut_overlay, "color:a", 0.75, 0.3)
+		await tw.finished
+
+	await get_tree().process_frame
+	var vp = get_viewport().get_visible_rect().size
+	var tr = target.get_global_rect()
+	_tut_title_lbl.text = title
+	_tut_desc_lbl.text = desc
+	_tut_tap_hint.text = "\u25bc " + hint
+	_tut_panel.visible = true
+	_tut_panel.modulate.a = 0.0
+	await get_tree().process_frame
+	var tp_size = _tut_panel.size
+	var pos = Vector2(tr.position.x, tr.position.y + tr.size.y + 12)
+	if pos.x + tp_size.x > vp.x - 10: pos.x = vp.x - tp_size.x - 10
+	if pos.y + tp_size.y > vp.y - 10: pos.y = tr.position.y - tp_size.y - 12
+	pos.x = clamp(pos.x, 8, vp.x - tp_size.x - 8)
+	pos.y = clamp(pos.y, 8, vp.y - tp_size.y - 8)
+	_tut_panel.position = pos
+	var tw2 = create_tween()
+	tw2.tween_property(_tut_panel, "modulate:a", 1.0, 0.25)
+	await tw2.finished
+
+	highlight_node(target)
+
+	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	_tut_tap_overlay.position = tr.position
+	_tut_tap_overlay.size = tr.size
+	_tut_tap_overlay.visible = true
+	await _tut_tap_overlay.pressed
+
+	stop_highlight_node(target)
+	target.z_index = old_z
+	_tut_tap_overlay.visible = false
+	var tw3 = create_tween()
+	tw3.tween_property(_tut_panel, "modulate:a", 0.0, 0.2)
+	await tw3.finished
+	_tut_panel.visible = false
+
+	if need_reparent and is_instance_valid(_root):
+		if _tut_overlay.get_parent(): _tut_overlay.get_parent().remove_child(_tut_overlay)
+		_root.add_child(_tut_overlay)
+		if _tut_panel.get_parent(): _tut_panel.get_parent().remove_child(_tut_panel)
+		_root.add_child(_tut_panel)
+		if _tut_tap_overlay.get_parent(): _tut_tap_overlay.get_parent().remove_child(_tut_tap_overlay)
+		_root.add_child(_tut_tap_overlay)
+
+
+func _tut_finish() -> void:
+	_tut_title_lbl.text = "FIELD BRIEFING COMPLETE"
+	_tut_desc_lbl.text = "You are now fully operational, Volunteer.\n\nSterling is standing by on comms. The ecosystem is counting on you.\n\nFind the first [color=#33ff88]Genome Fragment[/color] and begin the reconstruction."
+	_tut_tap_hint.text = "\u25bc Tap anywhere to begin"
+	var vp = get_viewport().get_visible_rect().size
+	await get_tree().process_frame
+	_tut_panel.position = (vp - _tut_panel.size) / 2.0
+	_tut_panel.visible = true
+	_tut_panel.modulate.a = 0.0
+	var tw = create_tween()
+	tw.tween_property(_tut_panel, "modulate:a", 1.0, 0.3)
+	await tw.finished
+
+	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_tut_tap_overlay.visible = true
+	await _tut_tap_overlay.pressed
+	_tut_tap_overlay.visible = false
+
+	var tw2 = create_tween().set_parallel(true)
+	tw2.tween_property(_tut_panel, "modulate:a", 0.0, 0.4)
+	tw2.tween_property(_tut_overlay, "color:a", 0.0, 0.4)
+	await tw2.finished
+	_tut_panel.visible = false
+
+
+func _get_tab_button(tab_container: TabContainer, index: int) -> Control:
+	# TabContainer's tab bar is a child of type TabBar
+	for child in tab_container.get_children():
+		if child.get_class() == "TabBar":
+			# Each tab is accessible via the tab bar
+			return child
+	# Fallback: return the tab container itself if tab bar not found
+	return tab_container
 
 
 # ── Subtitle System ───────────────────────────────────────────────────────────

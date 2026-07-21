@@ -84,8 +84,8 @@ func _start_tutorial() -> void:
 	if player:
 		player.input_locked = false
 		
-	PlayerData.has_seen_prologue = true
-	PlayerData.save_game()
+	# DO NOT set has_seen_prologue = true here anymore.
+	# The new hud.start_tutorial() will set it after all 15 steps complete.
 		
 	# Animate camera back to normal
 	if camera:
@@ -95,25 +95,9 @@ func _start_tutorial() -> void:
 		tw.tween_property(camera, "distance_back", 0.0, 2.0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 		tw.tween_property(camera, "tilt_degrees", 35.0, 2.0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 		
+	# Kick off the full 15-step HUD tutorial
 	var huds = get_tree().get_nodes_in_group("hud")
-	if huds.size() > 0:
-		var steps = [
-			{
-				"title": "PLAYER STATUS",
-				"text": "This is your biological status.\nKeep an eye on your Health (Red), Stamina (Green), and Mutation Level (Yellow).",
-				"nodes": ["_status_group"]
-			},
-			{
-				"title": "KNOWLEDGE DATABASE",
-				"text": "This is the Knowledge Menu.\nTap here to review discovered biological traits and lore.",
-				"nodes": ["_knowledge_btn"]
-			},
-			{
-				"title": "OBJECTIVE: SEEK NUTRIENTS",
-				"text": "Use the Virtual Joystick to move.\nTap the JUMP button to Leap.\nTap the ATTACK button to Feed.",
-				"nodes": ["_jump_btn", "_attack_btn"]
-			}
-		]
-		huds[0].start_ui_walkthrough(steps)
+	if huds.size() > 0 and huds[0].has_method("start_tutorial"):
+		huds[0].start_tutorial()
 		
 	current_state = State.PLAYING
