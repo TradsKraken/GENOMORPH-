@@ -22,6 +22,7 @@ var _stam_bar:   ProgressBar
 var _stam_lbl:   Label
 var _exp_bar:    Control
 var _lvl_lbl:    Label
+var _level_badge: Label
 var _status_group: Control
 
 var _interact_btn: Button
@@ -194,6 +195,9 @@ func remove_minimap_marker(node: Node3D) -> void:
 		_minimap_markers.erase(node)
 
 func _process(delta: float) -> void:
+	if is_instance_valid(_level_badge):
+		_level_badge.visible = PlayerData.skill_points > 0
+		
 	if is_instance_valid(_minimap_camera):
 		var player = get_tree().get_first_node_in_group("player")
 		if is_instance_valid(player):
@@ -310,6 +314,27 @@ func _build_player_status() -> void:
 		_stam_bar = _root.find_child("StamBar", true, false)
 		_exp_bar = _root.find_child("ExpBar", true, false)
 		_lvl_lbl = _root.find_child("LvlLbl", true, false)
+		_level_badge = _root.find_child("LevelBadgeNotif", true, false)
+		if not is_instance_valid(_level_badge) and badge:
+			_level_badge = Label.new()
+			_level_badge.name = "LevelBadgeNotif"
+			_level_badge.add_theme_font_size_override("font_size", 14)
+			_level_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			_level_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			var notif_style := StyleBoxFlat.new()
+			notif_style.bg_color = Color(1.0, 0.2, 0.2, 1.0)
+			notif_style.set_corner_radius_all(12)
+			notif_style.content_margin_left = 6
+			notif_style.content_margin_right = 6
+			_level_badge.add_theme_stylebox_override("normal", notif_style)
+			_level_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+			_level_badge.offset_left = -20
+			_level_badge.offset_right = 4
+			_level_badge.offset_top = -4
+			_level_badge.offset_bottom = 20
+			_level_badge.text = "!"
+			_level_badge.visible = PlayerData.skill_points > 0
+			badge.add_child(_level_badge)
 		_quest_tracker_lbl = _root.find_child("QuestTrackerLbl", true, false)
 		if badge and not badge.gui_input.is_connected(_on_badge_gui_input):
 			badge.gui_input.connect(_on_badge_gui_input)
@@ -340,6 +365,27 @@ func _build_player_status() -> void:
 	badge.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	badge.gui_input.connect(_on_badge_gui_input)
 	_status_group.add_child(badge)
+	
+	_level_badge = Label.new()
+	_level_badge.name = "LevelBadgeNotif"
+	_level_badge.add_theme_font_size_override("font_size", 14)
+	_level_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_level_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	var notif_style := StyleBoxFlat.new()
+	notif_style.bg_color = Color(1.0, 0.2, 0.2, 1.0)
+	notif_style.set_corner_radius_all(12)
+	notif_style.content_margin_left = 6
+	notif_style.content_margin_right = 6
+	_level_badge.add_theme_stylebox_override("normal", notif_style)
+	_level_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_level_badge.offset_left = -20
+	_level_badge.offset_right = 4
+	_level_badge.offset_top = -4
+	_level_badge.offset_bottom = 20
+	_level_badge.text = "!"
+	_level_badge.visible = PlayerData.skill_points > 0
+	badge.add_child(_level_badge)
 
 	var lvl_vbox := VBoxContainer.new()
 	lvl_vbox.name = "LvlVBox"
@@ -2062,6 +2108,9 @@ func _on_level(new_level: int) -> void:
 	var tw := create_tween()
 	tw.tween_property(_lvl_lbl, "modulate", C_EXP, 0.1)
 	tw.tween_property(_lvl_lbl, "modulate", Color.WHITE, 0.5)
+	
+	var screen_pos = Vector2(get_viewport().size.x / 2.0, 200)
+	show_float_text("LEVEL UP! +1 Skill Point", screen_pos, Color(1.0, 0.8, 0.2))
 
 
 func _toggle_menu() -> void:
