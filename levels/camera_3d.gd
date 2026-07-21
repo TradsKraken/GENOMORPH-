@@ -188,8 +188,10 @@ func _handle_occlusion(delta: float) -> void:
 	
 	# 2. Cast rays to find all obstructing objects
 	for i in range(5): # Check up to 5 overlapping obstacles
-		var query = PhysicsRayQueryParameters3D.create(current_pos, target_pos)
+		# Raycast from PLAYER to CAMERA! This ensures it hits the outside of the tree canopy.
+		var query = PhysicsRayQueryParameters3D.create(target_pos, current_pos)
 		query.exclude = exclude
+		query.hit_from_inside = true
 		var result = space_state.intersect_ray(query)
 		
 		if result:
@@ -214,7 +216,7 @@ func _handle_occlusion(delta: float) -> void:
 		
 		for i in range(mesh.mesh.get_surface_count()):
 			var mat = mesh.get_surface_override_material(i)
-			if mat and mat is StandardMaterial3D:
+			if mat and mat is BaseMaterial3D:
 				mat.albedo_color.a = move_toward(mat.albedo_color.a, data.target_alpha, delta * 3.0) # Fade speed
 				if mat.albedo_color.a < 0.99:
 					all_restored = false
@@ -222,7 +224,7 @@ func _handle_occlusion(delta: float) -> void:
 		# If it's fully opaque again, remove the material overrides to restore performance
 		if data.target_alpha == 1.0 and all_restored:
 			for i in range(mesh.mesh.get_surface_count()):
-				mesh.set_surface_override_material(i, null)
+				mesh.set_surface_override_material(i, data.orig_overrides[i])
 			meshes_to_remove.append(mesh)
 			
 	# Clean up dictionary
@@ -233,14 +235,25 @@ func _mark_mesh_for_fade(mesh: MeshInstance3D) -> void:
 	if not _faded_objects.has(mesh):
 		if mesh.mesh == null: return
 		
+		var m_name = mesh.name.to_lower()
+		if "terrain" in m_name or "ground" in m_name or "plane" in m_name or "floor" in m_name:
+			return # Do not fade the actual ground/floor
+			
+		var orig_overrides = []
 		for i in range(mesh.mesh.get_surface_count()):
-			var orig_mat = mesh.mesh.surface_get_material(i)
-			if orig_mat is StandardMaterial3D:
+			# Save whatever override was there before (might be null)
+			orig_overrides.append(mesh.get_surface_override_material(i))
+			
+			var orig_mat = mesh.get_surface_override_material(i)
+			if orig_mat == null:
+				orig_mat = mesh.mesh.surface_get_material(i)
+				
+			if orig_mat is BaseMaterial3D:
 				# Duplicate the material so we only fade this specific tree, not all trees!
 				var new_mat = orig_mat.duplicate()
 				new_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 				mesh.set_surface_override_material(i, new_mat)
 				
-		_faded_objects[mesh] = { "target_alpha": 0.15 } # 15% opacity when fully faded
+		_faded_objects[mesh] = { "target_alpha": 0.15, "orig_overrides": orig_overrides } # 15% opacity when fully faded
 	else:
 		_faded_objects[mesh].target_alpha = 0.15
