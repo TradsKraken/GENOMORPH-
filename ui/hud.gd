@@ -197,6 +197,7 @@ func remove_minimap_marker(node: Node3D) -> void:
 func _process(delta: float) -> void:
 	if is_instance_valid(_level_badge):
 		_level_badge.visible = PlayerData.skill_points > 0
+		_level_badge.text = str(PlayerData.skill_points)
 		
 	if is_instance_valid(_minimap_camera):
 		var player = get_tree().get_first_node_in_group("player")
@@ -327,12 +328,13 @@ func _build_player_status() -> void:
 			notif_style.content_margin_left = 6
 			notif_style.content_margin_right = 6
 			_level_badge.add_theme_stylebox_override("normal", notif_style)
+			_level_badge.custom_minimum_size = Vector2(24, 24)
 			_level_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-			_level_badge.offset_left = -20
+			_level_badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+			_level_badge.grow_vertical = Control.GROW_DIRECTION_END
 			_level_badge.offset_right = 4
 			_level_badge.offset_top = -4
-			_level_badge.offset_bottom = 20
-			_level_badge.text = "!"
+			_level_badge.text = str(PlayerData.skill_points)
 			_level_badge.visible = PlayerData.skill_points > 0
 			badge.add_child(_level_badge)
 		_quest_tracker_lbl = _root.find_child("QuestTrackerLbl", true, false)
@@ -378,12 +380,13 @@ func _build_player_status() -> void:
 	notif_style.content_margin_left = 6
 	notif_style.content_margin_right = 6
 	_level_badge.add_theme_stylebox_override("normal", notif_style)
+	_level_badge.custom_minimum_size = Vector2(24, 24)
 	_level_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_level_badge.offset_left = -20
+	_level_badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_level_badge.grow_vertical = Control.GROW_DIRECTION_END
 	_level_badge.offset_right = 4
 	_level_badge.offset_top = -4
-	_level_badge.offset_bottom = 20
-	_level_badge.text = "!"
+	_level_badge.text = str(PlayerData.skill_points)
 	_level_badge.visible = PlayerData.skill_points > 0
 	badge.add_child(_level_badge)
 
@@ -843,12 +846,15 @@ func _build_action_buttons() -> void:
 		badge_style.corner_radius_top_right = 12
 		badge_style.corner_radius_bottom_left = 12
 		badge_style.corner_radius_bottom_right = 12
+		badge_style.content_margin_left = 6
+		badge_style.content_margin_right = 6
 		_knowledge_badge.add_theme_stylebox_override("normal", badge_style)
+		_knowledge_badge.custom_minimum_size = Vector2(24, 24)
 		_knowledge_badge.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-		_knowledge_badge.offset_left = -20
+		_knowledge_badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		_knowledge_badge.grow_vertical = Control.GROW_DIRECTION_END
 		_knowledge_badge.offset_right = 4
 		_knowledge_badge.offset_top = -4
-		_knowledge_badge.offset_bottom = 20
 		_knowledge_badge.visible = false
 		_knowledge_btn.add_child(_knowledge_badge)
 		
