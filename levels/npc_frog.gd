@@ -147,8 +147,17 @@ func _start_dialog() -> void:
 		
 	if not is_helped:
 		is_helped = true
-		PlayerData.frogs_helped += 1
-		if PlayerData.current_objective == self:
+		var frog_nodes = get_tree().get_nodes_in_group("npc_frog")
+		var helped_count = 0
+		for f in frog_nodes:
+			if "is_helped" in f and f.is_helped:
+				helped_count += 1
+				
+		PlayerData.frogs_helped = helped_count
+		if frog_nodes.size() > 0:
+			PlayerData.total_frogs = frog_nodes.size()
+			
+		if PlayerData.current_objective == self or PlayerData.current_objective == null:
 			PlayerData.set_objective(null, "Find the remaining frogs (" + str(PlayerData.frogs_helped) + "/" + str(PlayerData.total_frogs) + ")")
 		if hud.has_method("hide_zone_status"):
 			hud.hide_zone_status()
