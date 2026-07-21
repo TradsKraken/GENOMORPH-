@@ -29,6 +29,8 @@ func _ready() -> void:
 	for child in get_children():
 		if child is Area3D:
 			_territory_area = child
+			# Force the Area to detect ALL physics layers (enemies are often on Layer 2 or 3)
+			_territory_area.collision_mask = 4294967295 
 			_territory_area.body_entered.connect(_on_body_entered)
 			_territory_area.body_exited.connect(_on_body_exited)
 			break
