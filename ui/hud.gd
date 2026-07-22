@@ -336,7 +336,13 @@ func _build_player_status() -> void:
 			_level_badge.offset_top = -4
 			_level_badge.text = str(PlayerData.skill_points)
 			_level_badge.visible = PlayerData.skill_points > 0
-			badge.add_child(_level_badge)
+			var notif_wrapper = badge.get_node_or_null("LevelBadgeWrapper")
+			if not notif_wrapper:
+				notif_wrapper = Control.new()
+				notif_wrapper.name = "LevelBadgeWrapper"
+				notif_wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				badge.add_child(notif_wrapper)
+			notif_wrapper.add_child(_level_badge)
 		_quest_tracker_lbl = _root.find_child("QuestTrackerLbl", true, false)
 		if badge and not badge.gui_input.is_connected(_on_badge_gui_input):
 			badge.gui_input.connect(_on_badge_gui_input)
@@ -388,7 +394,12 @@ func _build_player_status() -> void:
 	_level_badge.offset_top = -4
 	_level_badge.text = str(PlayerData.skill_points)
 	_level_badge.visible = PlayerData.skill_points > 0
-	badge.add_child(_level_badge)
+	
+	var notif_wrapper = Control.new()
+	notif_wrapper.name = "LevelBadgeWrapper"
+	notif_wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	badge.add_child(notif_wrapper)
+	notif_wrapper.add_child(_level_badge)
 
 	var lvl_vbox := VBoxContainer.new()
 	lvl_vbox.name = "LvlVBox"
