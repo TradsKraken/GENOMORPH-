@@ -3,6 +3,7 @@ class_name TutorialTrigger
 
 @export_enum("Intro", "Nest1_Attack", "Nest2_Dodge", "Find_NPC", "Minigame_Arena") var trigger_type: int = 0
 @export var minigame_enemies: Array[NodePath]
+@export var requires_manual_trigger: bool = false
 
 var _triggered: bool = false
 var _active_enemies: Array[Node] = []
@@ -11,7 +12,7 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 func _on_body_entered(body: Node3D) -> void:
-	if _triggered or not body.is_in_group("player"):
+	if _triggered or requires_manual_trigger or not body.is_in_group("player"):
 		return
 		
 	_triggered = true
@@ -45,6 +46,20 @@ func _on_body_entered(body: Node3D) -> void:
 	_activate_children()
 	
 	if trigger_type == 4:
+		_start_minigame()
+
+func start_event_manually() -> void:
+	if _triggered: return
+	_triggered = true
+	var hud = get_tree().get_first_node_in_group("hud")
+	
+	if trigger_type == 4:
+		# Update objective and add minimap marker
+		PlayerData.set_objective(self, "Clear the Biological Control Arena")
+		if hud and hud.has_method("add_minimap_marker"):
+			hud.add_minimap_marker(self, Color(1.0, 0.2, 0.2)) # Red marker for combat
+		
+		_activate_children()
 		_start_minigame()
 
 func _activate_children() -> void:

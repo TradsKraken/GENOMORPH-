@@ -20,6 +20,8 @@ var _was_near: bool = false
 
 @export var territory_radius: float = 25.0
 var is_helped: bool = false
+var is_intro_done: bool = false
+var has_given_minigame: bool = false
 var _player_in_territory: bool = false
 var _territory_area: Area3D
 
@@ -158,49 +160,86 @@ func _start_dialog() -> void:
 			PlayerData.total_frogs = frog_nodes.size()
 			
 		if PlayerData.current_objective == self or PlayerData.current_objective == null:
-			PlayerData.set_objective(null, "Find the remaining frogs (" + str(PlayerData.frogs_helped) + "/" + str(PlayerData.total_frogs) + ")")
+			if PlayerData.frogs_helped >= PlayerData.total_frogs:
+				PlayerData.set_objective(null, "Return to Lolo Palaka")
+			else:
+				PlayerData.set_objective(null, "Find the remaining frogs (" + str(PlayerData.frogs_helped) + "/" + str(PlayerData.total_frogs) + ")")
+				
+		if PlayerData.frogs_helped >= PlayerData.total_frogs:
+			var frog_nodes_all = get_tree().get_nodes_in_group("npc_frog")
+			for f in frog_nodes_all:
+				if "is_main_quest" in f and f.is_main_quest:
+					if hud.has_method("add_minimap_marker"):
+						hud.add_minimap_marker(f, Color(1.0, 0.8, 0.2)) # Gold marker for return
+					PlayerData.set_objective(f, "Return to Lolo Palaka")
+					break
+
 		if hud.has_method("hide_zone_status"):
 			hud.hide_zone_status()
 		if hud.has_method("remove_minimap_marker"):
 			hud.remove_minimap_marker(self)
 
 	if is_main_quest:
-		hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
-		
-		hud.show_subtitle("Volunteer (Player)", '"I\'m trying to fix that. The pollution out there is bad, but those invasive swarms are making it impossible for anything to survive."')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
-		
-		hud.show_subtitle("Lolo Palaka", '"Ah, the biters. They are not the root of the sickness, but a symptom of the broken circle. When the toxic sludge poisoned the deep waters, the hunters died. Without us to keep them in check, the swarms multiply without end. They are a plague born from an empty throne."')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
-		
-		hud.show_subtitle("Volunteer (Player)", '"Population dynamics. Without natural predators, the invasive species consume all the resources. So, we need to restore the balance. How do we start?"')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
-		
-		hud.show_subtitle("Lolo Palaka", '"By remembering what we were made to do. A storm of them approaches our last clean pond. Words will not stop them, little frog. You must thin their numbers before they infect the water."')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
-		
-		hud.show_subtitle("Lolo Palaka", '"And it is not just me... there are others like us hiding out there in the marsh, terrified of these new predators. They need your help too."')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
-		
-		if _anim_player:
-			_anim_player.play("FrogArmature|Frog_Jump")
-		
-		hud.show_subtitle("Lolo Palaka", '"Please, find the others. Keep them safe until we can reclaim our home!"')
-		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
-		
-		# Trigger minimap markers for all other frogs
-		if hud.has_method("add_minimap_marker"):
-			var frogs = get_tree().get_nodes_in_group("npc_frog")
-			for f in frogs:
-				if "is_main_quest" in f and not f.is_main_quest:
-					hud.add_minimap_marker(f, Color(0.2, 1.0, 0.4))
-					
-		if not ("has_seen_minimap_tutorial" in PlayerData) or not PlayerData.has_seen_minimap_tutorial:
-			_wait_for_movement_and_show_tutorial(hud)
-		
-		if _anim_player:
-			_anim_player.play("FrogArmature|Frog_Idle")
+		if PlayerData.frogs_helped >= PlayerData.total_frogs:
+			if not has_given_minigame:
+				hud.show_subtitle("Lolo Palaka", '"You have saved our people. Now, show me what you can do. Clear the water!"')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				has_given_minigame = true
+				PlayerData.minigame_started = true
+				
+				# Trigger Minigame manually
+				if get_tree().current_scene:
+					var all_areas = get_tree().current_scene.find_children("*", "Area3D")
+					for area in all_areas:
+						if "trigger_type" in area and area.trigger_type == 4 and area.has_method("start_event_manually"):
+							area.start_event_manually()
+							break
+			else:
+				hud.show_subtitle("Lolo Palaka", '"Clear the water, Volunteer!"')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+		else:
+			if not is_intro_done:
+				is_intro_done = true
+				hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+				hud.show_subtitle("Volunteer (Player)", '"I\'m trying to fix that. The pollution out there is bad, but those invasive swarms are making it impossible for anything to survive."')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+				hud.show_subtitle("Lolo Palaka", '"Ah, the biters. They are not the root of the sickness, but a symptom of the broken circle. When the toxic sludge poisoned the deep waters, the hunters died. Without us to keep them in check, the swarms multiply without end. They are a plague born from an empty throne."')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+				hud.show_subtitle("Volunteer (Player)", '"Population dynamics. Without natural predators, the invasive species consume all the resources. So, we need to restore the balance. How do we start?"')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+				hud.show_subtitle("Lolo Palaka", '"By remembering what we were made to do. A storm of them approaches our last clean pond. Words will not stop them, little frog. You must thin their numbers before they infect the water."')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+				hud.show_subtitle("Lolo Palaka", '"And it is not just me... there are others like us hiding out there in the marsh, terrified of these new predators. They need your help too."')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+				if _anim_player:
+					_anim_player.play("FrogArmature|Frog_Jump")
+				
+				hud.show_subtitle("Lolo Palaka", '"Please, find the others. Keep them safe until we can reclaim our home!"')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+				
+				# Trigger minimap markers for all other frogs
+				if hud.has_method("add_minimap_marker"):
+					var frogs = get_tree().get_nodes_in_group("npc_frog")
+					for f in frogs:
+						if "is_main_quest" in f and not f.is_main_quest:
+							hud.add_minimap_marker(f, Color(0.2, 1.0, 0.4))
+							
+				if not ("has_seen_minimap_tutorial" in PlayerData) or not PlayerData.has_seen_minimap_tutorial:
+					_wait_for_movement_and_show_tutorial(hud)
+				
+				if _anim_player:
+					_anim_player.play("FrogArmature|Frog_Idle")
+			else:
+				hud.show_subtitle("Lolo Palaka", '"Please, find the others. Keep them safe until we can reclaim our home!"')
+				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 			
 	else:
 		# Generic Frog Dialogue
