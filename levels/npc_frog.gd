@@ -172,6 +172,8 @@ func _start_dialog() -> void:
 					if hud.has_method("add_minimap_marker"):
 						hud.add_minimap_marker(f, Color(1.0, 0.8, 0.2)) # Gold marker for return
 					PlayerData.set_objective(f, "Return to Lolo Palaka")
+					if hud.has_method("show_subtitle"):
+						hud.show_subtitle("OBJECTIVE COMPLETE", "All frogs rescued! Return to Lolo Palaka.", 5.0)
 					break
 
 		if hud.has_method("hide_zone_status"):

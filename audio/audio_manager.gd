@@ -56,11 +56,52 @@ func _ready() -> void:
 		sfx_players.append(p)
 
 func play_main_menu_bgm() -> void:
-	if bgm_player.stream != null and bgm_player.stream.resource_path == "res://audio/Main Menu Background Music.ogg" and bgm_player.playing:
+	if bgm_player.stream != null and bgm_player.stream.resource_path.contains("Main Menu") and bgm_player.playing:
 		return
 	bgm_player.stream = load("res://audio/Main Menu Background Music.ogg")
 	bgm_player.volume_db = -10.0 # Standard volume for imported music
 	bgm_player.play()
+
+func fade_to_main_menu_bgm(duration: float = 1.5) -> void:
+	if bgm_player.stream != null and bgm_player.stream.resource_path.contains("Main Menu") and bgm_player.playing:
+		var tw = create_tween()
+		tw.tween_property(bgm_player, "volume_db", -10.0, duration)
+		if ambiance_player.playing:
+			tw.parallel().tween_property(ambiance_player, "volume_db", -80.0, duration)
+			tw.tween_callback(func(): 
+				ambiance_player.stop()
+				ambiance_player.volume_db = 0.0
+			)
+		return
+
+	var tween = create_tween()
+	
+	if ambiance_player.playing:
+		tween.parallel().tween_property(ambiance_player, "volume_db", -80.0, duration)
+		
+	if bgm_player.playing:
+		tween.parallel().tween_property(bgm_player, "volume_db", -80.0, duration)
+		
+	for p in sfx_players:
+		if p.playing:
+			tween.parallel().tween_property(p, "volume_db", -80.0, duration)
+			
+	tween.tween_callback(func():
+		ambiance_player.stop()
+		ambiance_player.volume_db = 0.0
+		
+		for p in sfx_players:
+			if p.volume_db <= -79.0:
+				p.stop()
+				p.volume_db = 0.0
+		
+		bgm_player.stream = load("res://audio/Main Menu Background Music.ogg")
+		bgm_player.volume_db = -80.0
+		bgm_player.play()
+		
+		var fade_in_tw = create_tween()
+		fade_in_tw.tween_property(bgm_player, "volume_db", -10.0, duration)
+	)
 
 func play_game_bgm() -> void:
 	# Switch back to the procedural drone hum for the game
