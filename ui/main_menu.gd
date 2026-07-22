@@ -18,6 +18,9 @@ const PARTICLE_COUNT := 45
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	if AudioManager and AudioManager.has_method("fade_to_main_menu_bgm"):
+		AudioManager.fade_to_main_menu_bgm()
+
 	_title_label.add_theme_font_override("font", ThemeDB.fallback_font)
 	_tagline_label.add_theme_font_override("font", ThemeDB.fallback_font)
 	
