@@ -104,25 +104,35 @@ func _process(delta: float) -> void:
 		
 	# Check if all active enemies and spawners are dead/cleared
 	var all_dead = true
+	var first_alive = null
+	
 	for enemy_or_spawner in _active_enemies:
 		if is_instance_valid(enemy_or_spawner):
 			if enemy_or_spawner is EnemyBase and not enemy_or_spawner.is_dead:
 				all_dead = false
-				break
+				if not first_alive: first_alive = enemy_or_spawner
 			elif enemy_or_spawner is EnemySpawner:
 				# If the spawner is still valid (not queue_freed), it hasn't cleared all waves yet
 				all_dead = false
-				break
+				if not first_alive: first_alive = enemy_or_spawner
 			
 	var hud = get_tree().get_first_node_in_group("hud")
 	if not all_dead:
 		if hud and hud.has_method("show_zone_status"):
 			hud.show_zone_status("Eliminate them all!")
 			
+		if first_alive and PlayerData.current_objective != first_alive:
+			PlayerData.set_objective(first_alive, "Clear the Biological Control Arena")
+			
 	if all_dead and _active_enemies.size() > 0:
 		if hud and hud.has_method("hide_zone_status"):
 			hud.hide_zone_status()
 		set_process(false)
+		
+		# Minigame over, clear objective!
+		if hud and hud.has_method("remove_minimap_marker"):
+			hud.remove_minimap_marker(self)
+		PlayerData.set_objective(null, "Explore the wetlands")
 		_spawn_reward()
 
 func _spawn_reward() -> void:
