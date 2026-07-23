@@ -89,6 +89,7 @@ var _minimap_tween: Tween
 var _minimap_markers: Dictionary = {}
 var _player_icon_container: CenterContainer
 var _fog_manager: Node
+var _current_objective_target: Node3D = null
 
 signal subtitle_dismissed
 signal tutorial_dismissed
@@ -2287,6 +2288,22 @@ func _on_knowledge_unlocked(id: String) -> void:
 			_knowledge_badge.visible = true
 
 func _on_objective_changed(target: Node3D) -> void:
+	if is_instance_valid(_current_objective_target) and _current_objective_target != target:
+		remove_minimap_marker(_current_objective_target)
+		
+	_current_objective_target = target
+	
+	if is_instance_valid(target):
+		if not _minimap_markers.has(target):
+			add_minimap_marker(target, Color(1.0, 0.8, 0.2), true) # Gold objective marker
+		else:
+			# If it already has a marker, we can try to turn it gold
+			var icon_container = _minimap_markers[target]
+			if icon_container.get_child_count() > 0:
+				var icon = icon_container.get_child(0)
+				icon.set("color", Color(1.0, 0.8, 0.2))
+				if icon.has_method("queue_redraw"): icon.queue_redraw()
+
 	if _quest_tracker_lbl:
 		var txt = PlayerData.current_objective_text
 		if txt == "":
