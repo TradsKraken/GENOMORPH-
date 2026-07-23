@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://deya2xw3k4mo5"]
+
+[ext_resource type="Script" path="res://levels/young_mudfish.gd" id="1_mudfish_script"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.2
+height = 0.6
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
+radius = 0.2
+height = 0.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fish"]
+albedo_color = Color(0.1, 0.4, 0.8, 1)
+emission_enabled = true
+emission = Color(0.2, 0.6, 1, 1)
+emission_energy_multiplier = 1.5
+
+[node name="YoungMudfish" type="CharacterBody3D" groups=["mudfish"]]
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("1_mudfish_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.2, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.2, 0)
+mesh = SubResource("CapsuleMesh_1")
+surface_material_override/0 = SubResource("StandardMaterial3D_fish")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+light_color = Color(0.3, 0.7, 1, 1)
+light_energy = 2.0
+omni_range = 5.0

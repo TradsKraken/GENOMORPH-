@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b1vy2wih7s1y2"
-path="res://.godot/imported/Tilapia.glb-3aa61b39371dfbdfceee96d741785a7e.scn"
+uid="uid://c60qpn44kty84"
+path="res://.godot/imported/giant_african_snail.glb-46e86ee7f48aa8e69476798199f5250d.scn"
 
 [deps]
 
-source_file="res://Models/tilapia/Tilapia.glb"
-dest_files=["res://.godot/imported/Tilapia.glb-3aa61b39371dfbdfceee96d741785a7e.scn"]
+source_file="res://Models/Snail/giant_african_snail.glb"
+dest_files=["res://.godot/imported/giant_african_snail.glb-46e86ee7f48aa8e69476798199f5250d.scn"]
 
 [params]
 

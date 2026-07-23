@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c60qpn44kty84"
-path="res://.godot/imported/snail.glb-0ab90af66691a66958949a4dc820988b.scn"
+uid="uid://c0hy2p7uwkyfc"
+path="res://.godot/imported/npc_dalag.glb-cd37b6412a92e179fbb970aaff3d6ae7.scn"
 
 [deps]
 
-source_file="res://Models/Snail/snail.glb"
-dest_files=["res://.godot/imported/snail.glb-0ab90af66691a66958949a4dc820988b.scn"]
+source_file="res://Models/dalag/npc_dalag.glb"
+dest_files=["res://.godot/imported/npc_dalag.glb-cd37b6412a92e179fbb970aaff3d6ae7.scn"]
 
 [params]
 

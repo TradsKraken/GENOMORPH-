@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://v81trw6f3o6u"]
+
+[ext_resource type="Script" path="res://levels/oxygen_defense_minigame.gd" id="1_defense_script"]
+
+[node name="OxygenDefenseMinigame" type="Node3D" groups=["oxygen_defense"]]
+script = ExtResource("1_defense_script")

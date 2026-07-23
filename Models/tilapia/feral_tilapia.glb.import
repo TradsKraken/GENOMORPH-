@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://c0hy2p7uwkyfc"
-path="res://.godot/imported/Dalag.glb-36dde05c08e8756a9157ac8aa316acd4.scn"
+uid="uid://b1vy2wih7s1y2"
+path="res://.godot/imported/feral_tilapia.glb-73db8df3c14acd99d4e61b712e56ff19.scn"
 
 [deps]
 
-source_file="res://Models/dalag/Dalag.glb"
-dest_files=["res://.godot/imported/Dalag.glb-36dde05c08e8756a9157ac8aa316acd4.scn"]
+source_file="res://Models/tilapia/feral_tilapia.glb"
+dest_files=["res://.godot/imported/feral_tilapia.glb-73db8df3c14acd99d4e61b712e56ff19.scn"]
 
 [params]
 
