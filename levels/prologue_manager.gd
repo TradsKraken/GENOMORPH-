@@ -9,18 +9,7 @@ var camera: Camera3D = null
 var dialog_index = 0
 var dialog_sequence = [
 	{ "speaker": "SYSTEM", "text": "BIOMETRICS ONLINE...", "duration": 2.0 },
-	{ "speaker": "SYSTEM", "text": "WARNING: GENOME DATABASE CORRUPTED. RECONSTRUCTION REQUIRED.", "duration": 3.0 },
-	{ "speaker": "Dr. Sterling", "text": "Volunteer! Volunteer, do you copy? The biometric stream is haywire—please respond!", "duration": 4.0 },
-	{ "speaker": "Volunteer", "text": "I'm here. I'm... I'm down in the mud. Sterling, I'm a frog. I'm literally a frog.", "duration": 5.0 },
-	{ "speaker": "Dr. Sterling", "text": "I know. I'm sorry. Just — stay still. I'm trying to read what's left.", "duration": 4.0 },
-	{ "speaker": "Dr. Sterling", "text": "The DSEE discharged. All twelve genomes — gone from the suit. Released as raw biological energy.", "duration": 5.0 },
-	{ "speaker": "Dr. Sterling", "text": "Whatever is living in that wetland right now — I don't know what it is anymore.", "duration": 4.0 },
-	{ "speaker": "Volunteer", "text": "What do I do?", "duration": 3.0 },
-	{ "speaker": "Dr. Sterling", "text": "The data is still out there somewhere. Your suit's Purification Module is still active.", "duration": 5.0 },
-	{ "speaker": "Dr. Sterling", "text": "If you can find what absorbed those genomes and get close enough, the suit may be able to read and recover what's left.", "duration": 6.0 },
-	{ "speaker": "Volunteer", "text": "Starting from a frog.", "duration": 3.0 },
-	{ "speaker": "Dr. Sterling", "text": "...Starting from a frog. I'm sorry.", "duration": 3.0 },
-	{ "speaker": "Dr. Sterling", "text": "Your suit is locked to Frog form for now. Go carefully, Volunteer. Whatever is out there — it isn't ordinary anymore.", "duration": 6.0 }
+	{ "speaker": "SYSTEM", "text": "WARNING: GENOME DATABASE CORRUPTED. RECONSTRUCTION REQUIRED.", "duration": 3.0 }
 ]
 
 func _ready() -> void:
