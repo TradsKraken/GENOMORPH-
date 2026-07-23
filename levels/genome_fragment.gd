@@ -3,6 +3,13 @@ extends Area3D
 var _bob_time: float = 0.0
 
 func _ready() -> void:
+	if get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var node_path_str = str(get_tree().current_scene.get_path_to(self))
+		if PlayerData.is_object_destroyed(scene_path, node_path_str):
+			queue_free()
+			return
+
 	# Create a visual representation
 	var mesh = MeshInstance3D.new()
 	var box = BoxMesh.new()
@@ -35,4 +42,8 @@ func _process(delta: float) -> void:
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
 		PlayerData.add_genome_fragment()
+		if get_tree().current_scene:
+			var scene_path = get_tree().current_scene.scene_file_path
+			var node_path_str = str(get_tree().current_scene.get_path_to(self))
+			PlayerData.mark_object_destroyed(scene_path, node_path_str)
 		queue_free()

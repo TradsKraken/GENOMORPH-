@@ -74,6 +74,10 @@ var _respawn_point: Vector3 = Vector3.ZERO
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	if PlayerData.has_saved_position:
+		global_position = PlayerData.player_position
+		PlayerData.has_saved_position = false
+		
 	_respawn_point = global_position
 	rotation.y = PI
 	add_to_group("player")

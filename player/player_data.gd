@@ -35,6 +35,12 @@ func set_objective(target: Node3D, text: String = "") -> void:
 		
 	objective_changed.emit(target)
 
+func _restore_objective(path_str: String, text: String) -> void:
+	var target = null
+	if path_str != "" and get_tree().current_scene:
+		target = get_tree().current_scene.get_node_or_null(path_str)
+	set_objective(target, text)
+
 # ── Stats ─────────────────────────────────────────────────────────────────────
 var max_health: float  = 100.0
 var health: float      = 100.0
@@ -64,6 +70,31 @@ var lolo_palaka_intro_done: bool = false
 
 var current_scene_path: String = "res://levels/node_3d.scn"
 
+var player_position: Vector3 = Vector3.ZERO
+var has_saved_position: bool = false
+var world_state: Dictionary = {}
+
+func mark_object_destroyed(scene_path: String, node_path: String) -> void:
+	if not world_state.has(scene_path):
+		world_state[scene_path] = {}
+	if not world_state[scene_path].has(node_path):
+		world_state[scene_path][node_path] = {}
+	world_state[scene_path][node_path]["destroyed"] = true
+
+func is_object_destroyed(scene_path: String, node_path: String) -> bool:
+	if world_state.has(scene_path) and world_state[scene_path].has(node_path):
+		return world_state[scene_path][node_path].get("destroyed", false)
+	return false
+
+func get_object_state(scene_path: String, node_path: String) -> Dictionary:
+	if world_state.has(scene_path) and world_state[scene_path].has(node_path):
+		return world_state[scene_path][node_path]
+	return {}
+
+func set_object_state(scene_path: String, node_path: String, state: Dictionary) -> void:
+	if not world_state.has(scene_path):
+		world_state[scene_path] = {}
+	world_state[scene_path][node_path] = state
 func add_genome_fragment() -> void:
 	genome_fragments = mini(genome_fragments + 1, max_genome_fragments)
 	genome_collected.emit(genome_fragments, max_genome_fragments)
@@ -220,6 +251,40 @@ func save_game(slot: int = -1) -> void:
 		datetime.hour, datetime.minute
 	]
 
+	# Grab player position
+	var player = get_tree().get_first_node_in_group("player")
+	if player:
+		player_position = player.global_position
+		has_saved_position = true
+		
+	# Grab NPC states
+	if get_tree().current_scene:
+		for frog in get_tree().get_nodes_in_group("npc_frog"):
+			var path_str = str(get_tree().current_scene.get_path_to(frog))
+			var state = {
+				"is_helped": frog.is_helped,
+				"is_intro_done": frog.is_intro_done,
+				"has_given_minigame": frog.has_given_minigame
+			}
+			set_object_state(current_scene_path, path_str, state)
+			
+		for spawner in get_tree().get_nodes_in_group("enemy_spawner"):
+			var path_str = str(get_tree().current_scene.get_path_to(spawner))
+			var state = {
+				"is_cleared": spawner._is_nest_cleared,
+				"remaining_enemies": spawner._living_enemies.size()
+			}
+			set_object_state(current_scene_path, path_str, state)
+			
+	# Grab fog map
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("get_fog_data"):
+		var fog_data = hud.get_fog_data()
+		if fog_data != "":
+			if not world_state.has(current_scene_path):
+				world_state[current_scene_path] = {}
+			world_state[current_scene_path]["fog_map"] = fog_data
+
 	var data = {
 		"health": health,
 		"max_health": max_health,
@@ -244,8 +309,20 @@ func save_game(slot: int = -1) -> void:
 		"current_scene_path": current_scene_path,
 		"timestamp": timestamp,
 		"biome_name": biome_name,
-		"active_form": "Small Native Frog"
+		"active_form": "Small Native Frog",
+		"player_pos_x": player_position.x,
+		"player_pos_y": player_position.y,
+		"player_pos_z": player_position.z,
+		"has_saved_position": has_saved_position,
+		"world_state": world_state
 	}
+	
+	var obj_path_str = ""
+	if current_objective != null and is_instance_valid(current_objective) and current_objective.is_inside_tree() and get_tree().current_scene:
+		obj_path_str = str(get_tree().current_scene.get_path_to(current_objective))
+	data["current_objective_path"] = obj_path_str
+	data["current_objective_text"] = current_objective_text
+	
 	var file = FileAccess.open(get_save_path(slot), FileAccess.WRITE)
 	if file:
 		file.store_string(JSON.stringify(data))
@@ -293,10 +370,27 @@ func load_game(slot: int = -1) -> bool:
 				if current_scene_path == "res://levels/node_3d.tscn":
 					current_scene_path = "res://levels/node_3d.scn"
 				
+				has_saved_position = data.get("has_saved_position", false)
+				player_position = Vector3(
+					data.get("player_pos_x", 0.0),
+					data.get("player_pos_y", 0.0),
+					data.get("player_pos_z", 0.0)
+				)
+				var loaded_world_state = data.get("world_state", {})
+				world_state.clear()
+				for scene in loaded_world_state:
+					world_state[scene] = loaded_world_state[scene]
+				
 				health_changed.emit(health, max_health)
 				stamina_changed.emit(stamina, max_stamina)
 				level_changed.emit(level)
 				exp_changed.emit(experience, exp_to_next)
+				
+				var loaded_obj_path = data.get("current_objective_path", "")
+				var loaded_obj_text = data.get("current_objective_text", "")
+				if loaded_obj_text != "":
+					call_deferred("_restore_objective", loaded_obj_path, loaded_obj_text)
+					
 				return true
 	return false
 
@@ -324,6 +418,10 @@ func reset_data(slot: int = -1) -> void:
 	unlocked_knowledge.clear()
 	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])
 	current_scene_path = "res://levels/node_3d.scn"
+	
+	player_position = Vector3.ZERO
+	has_saved_position = false
+	world_state.clear()
 	
 	health_changed.emit(health, max_health)
 	stamina_changed.emit(stamina, max_stamina)

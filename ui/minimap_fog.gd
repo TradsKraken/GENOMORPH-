@@ -56,3 +56,17 @@ func update_fog(player_pos: Vector3) -> void:
 					_fog_image.set_pixel(x, y, Color(paint_val, paint_val, paint_val, 1.0))
 					
 	_fog_texture.update(_fog_image)
+
+func get_fog_data() -> String:
+	var png_buffer = _fog_image.save_png_to_buffer()
+	return Marshalls.raw_to_base64(png_buffer)
+
+func set_fog_data(base64_str: String) -> void:
+	var png_buffer = Marshalls.base64_to_raw(base64_str)
+	var img = Image.new()
+	var err = img.load_png_from_buffer(png_buffer)
+	if err == OK and img.get_size() == Vector2i(FOG_SIZE, FOG_SIZE):
+		if img.get_format() != Image.FORMAT_L8:
+			img.convert(Image.FORMAT_L8)
+		_fog_image.copy_from(img)
+		_fog_texture.update(_fog_image)

@@ -29,8 +29,20 @@ var _living_enemies: Array[Node3D] = []
 var _is_nest_cleared: bool = false
 
 func _ready() -> void:
+	add_to_group("enemy_spawner")
+	
 	if not is_inside_tree() or enemy_scene == null:
 		return
+		
+	if get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var node_path_str = str(get_tree().current_scene.get_path_to(self))
+		var saved_state = PlayerData.get_object_state(scene_path, node_path_str)
+		if saved_state.size() > 0:
+			if saved_state.get("is_cleared", false):
+				queue_free()
+				return
+			max_spawns = saved_state.get("remaining_enemies", max_spawns)
 		
 	if max_spawns <= 0:
 		max_spawns = 1

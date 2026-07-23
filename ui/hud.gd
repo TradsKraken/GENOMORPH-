@@ -671,6 +671,11 @@ func _build_minimap() -> void:
 	_fog_manager.name = "MinimapFog"
 	_root.add_child(_fog_manager)
 	
+	if PlayerData.world_state.has(PlayerData.current_scene_path):
+		var scene_state = PlayerData.world_state[PlayerData.current_scene_path]
+		if scene_state.has("fog_map"):
+			_fog_manager.set_fog_data(scene_state["fog_map"])
+	
 	var fog_plane = MeshInstance3D.new()
 	var plane_mesh = PlaneMesh.new()
 	plane_mesh.size = Vector2(500, 500)
@@ -2169,6 +2174,7 @@ func _connect_signals() -> void:
 	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
 	PlayerData.genome_collected.connect(show_genome_popup)
 	PlayerData.objective_changed.connect(_on_objective_changed)
+	_on_objective_changed(PlayerData.current_objective)
 	
 	# Initial states
 	_hp_bar.max_value   = pd.max_health
@@ -2470,3 +2476,8 @@ func play_boot_sequence() -> void:
 	).set_delay(2.0)
 	
 	tw.tween_callback(boot_overlay.queue_free).set_delay(1.0)
+
+func get_fog_data() -> String:
+	if _fog_manager and _fog_manager.has_method("get_fog_data"):
+		return _fog_manager.get_fog_data()
+	return ""

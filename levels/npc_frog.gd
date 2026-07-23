@@ -48,6 +48,35 @@ func _ready() -> void:
 			idle_anim.loop_mode = Animation.LOOP_LINEAR
 		_anim_player.play("FrogArmature|Frog_Idle")
 
+	# Restore saved state if available
+	if get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var node_path_str = str(get_tree().current_scene.get_path_to(self))
+		var saved_state = PlayerData.get_object_state(scene_path, node_path_str)
+		if saved_state.size() > 0:
+			is_helped = saved_state.get("is_helped", false)
+			is_intro_done = saved_state.get("is_intro_done", false)
+			has_given_minigame = saved_state.get("has_given_minigame", false)
+
+	if not is_main_quest and not is_helped and PlayerData.lolo_palaka_intro_done:
+		call_deferred("_add_self_to_minimap")
+	elif is_main_quest and PlayerData.frogs_helped >= PlayerData.total_frogs and not has_given_minigame:
+		call_deferred("_add_self_to_minimap_gold")
+
+func _add_self_to_minimap() -> void:
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("add_minimap_marker"):
+		hud.add_minimap_marker(self, Color(0.2, 1.0, 0.4))
+	elif not is_queued_for_deletion():
+		get_tree().create_timer(0.5).timeout.connect(_add_self_to_minimap)
+
+func _add_self_to_minimap_gold() -> void:
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("add_minimap_marker"):
+		hud.add_minimap_marker(self, Color(1.0, 0.8, 0.2))
+	elif not is_queued_for_deletion():
+		get_tree().create_timer(0.5).timeout.connect(_add_self_to_minimap_gold)
+
 func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
 		_player_in_territory = true

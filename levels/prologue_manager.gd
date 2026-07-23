@@ -13,15 +13,15 @@ var dialog_sequence = [
 ]
 
 func _ready() -> void:
-	var tut2 = get_node_or_null("../tut2/EnemySpawner")
-	if tut2:
-		PlayerData.call_deferred("set_objective", tut2)
-		
 	if PlayerData.has_seen_prologue:
 		if player:
 			player.input_locked = false
 		queue_free()
 		return
+		
+	var tut2 = get_node_or_null("../tut2/EnemySpawner")
+	if tut2:
+		PlayerData.call_deferred("set_objective", tut2)
 		
 	# Lock player
 	if player:
