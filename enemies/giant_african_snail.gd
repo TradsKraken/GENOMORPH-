@@ -2,8 +2,8 @@ class_name GiantAfricanSnail
 extends EnemyBase
 
 @export var damage_per_second: float = 0.0 # Uses spit instead
-@export var attack_range: float = 8.0 # Ranged attack
-@export var aggro_range: float = 12.0
+@export var attack_range: float = 15.0 # Ranged attack from further away
+@export var aggro_range: float = 20.0
 @export var territory_radius: float = 25.0
 @export var spit_cooldown: float = 3.0
 @export var spit_scene: PackedScene = preload("res://enemies/toxic_spit.tscn")
@@ -44,11 +44,19 @@ func _process_movement(delta: float) -> void:
 	if dist_to_target <= attack_range:
 		# In range to spit
 		velocity = Vector3.ZERO
-		_play_anim("attack")
 		_attack_timer += delta
+		
+		# Play attack animation slightly before spitting
+		if _attack_timer >= spit_cooldown - 0.5 and _attack_timer - delta < spit_cooldown - 0.5:
+			_play_anim("attack")
+			
 		if _attack_timer >= spit_cooldown:
 			_attack_timer = 0.0
 			_spit_at_target()
+			
+		# Play idle while waiting for cooldown
+		if _attack_timer < spit_cooldown - 0.5:
+			_play_anim("idle")
 	else:
 		# Move towards target
 		velocity = dir_to_target * speed

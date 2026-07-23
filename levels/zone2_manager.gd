@@ -46,8 +46,8 @@ func _process(delta: float) -> void:
 			var dist = player.global_position.distance_to(_nests[0].global_position)
 			if dist < 80.0: # Player is in Zone 2
 				_start_zone_2(hud)
-			elif PlayerData.frogs_helped >= PlayerData.total_frogs:
-				# Player has finished Zone 1 but isn't in Zone 2 yet. Point them to the swamp!
+			elif PlayerData.frogs_helped >= PlayerData.total_frogs and PlayerData.minigame_started:
+				# Player has finished Zone 1 (talked to Lolo Palaka) but isn't in Zone 2 yet. Point them to the swamp!
 				if PlayerData.current_objective != _nests[0]:
 					PlayerData.set_objective(_nests[0], "Head deeper into the swamp")
 				
@@ -74,7 +74,7 @@ func _start_zone_2(hud: Node) -> void:
 	_save_state()
 	
 	if hud.has_method("show_subtitle"):
-		hud.show_subtitle("System", "WARNING: HIGH CONCENTRATION OF INVASIVE NESTS DETECTED IN THE SWAMP.")
+		hud.show_subtitle("System", "WARNING: HIGH CONCENTRATION OF INVASIVE LIFEFORMS DETECTED IN THE SWAMP.")
 		
 	_check_nests() # Immediately set first nest objective
 
@@ -85,9 +85,9 @@ func _check_nests() -> void:
 	if _nests.size() > 0:
 		var next_nest = _nests[0]
 		if PlayerData.current_objective != next_nest:
-			PlayerData.set_objective(next_nest, "Clear the Invasive Nests (" + str(_nests.size()) + " remaining)")
+			PlayerData.set_objective(next_nest, "Clear the Invasive Threats (" + str(_nests.size()) + " remaining)")
 	else:
-		# All nests cleared!
+		# All threats cleared!
 		current_state = State.FIND_DALAG
 		_save_state()
 		
@@ -96,7 +96,7 @@ func _check_nests() -> void:
 			PlayerData.set_objective(dalag, "Find the Mudfish Elder")
 			var hud = get_tree().get_first_node_in_group("hud")
 			if hud and hud.has_method("show_subtitle"):
-				hud.show_subtitle("System", "NESTS CLEARED. NATIVE LIFEFORM DETECTED NEARBY.")
+				hud.show_subtitle("System", "THREATS CLEARED. NATIVE LIFEFORM DETECTED NEARBY.")
 
 func _transition_to_unlock(hud: Node) -> void:
 	current_state = State.UNLOCK_ZONE_3

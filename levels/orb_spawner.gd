@@ -6,7 +6,7 @@ extends Node3D
 # ── Exports ───────────────────────────────────────────────────────────────────
 @export var stamina_orb_count: int   = 25
 @export var exp_orb_count: int       = 20
-@export var spawn_radius: float      = 70.0
+@export var spawn_radius: float      = 150.0
 @export var clear_radius: float      = 6.0
 @export var orb_height: float        = 1.1
 @export var respawn_delay: float     = 10.0
