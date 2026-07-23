@@ -162,12 +162,13 @@ func _process(_delta: float) -> void:
 					hud.hide_interact(self)
 				_was_near = false
 		else:
-			if hud and hud.has_method("show_zone_status"):
-				hud.show_zone_status("Talk to " + npc_name)
-				
-			if PlayerData.current_objective != self:
-				PlayerData.set_objective(self, "Talk to " + npc_name)
-				
+			if not has_given_minigame:
+				if hud and hud.has_method("show_zone_status"):
+					hud.show_zone_status("Talk to " + npc_name)
+					
+				if PlayerData.current_objective != self:
+					PlayerData.set_objective(self, "Talk to " + npc_name)
+					
 			var _is_near = dist_to_player <= interact_distance
 			if _is_near and not _was_near:
 				if hud and hud.has_method("show_interact"):

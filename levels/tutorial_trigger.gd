@@ -10,12 +10,20 @@ var _active_enemies: Array[Node] = []
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+	
+	if get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var node_path_str = str(get_tree().current_scene.get_path_to(self))
+		var saved_state = PlayerData.get_object_state(scene_path, node_path_str)
+		if saved_state.size() > 0:
+			_triggered = saved_state.get("triggered", false)
 
 func _on_body_entered(body: Node3D) -> void:
 	if _triggered or requires_manual_trigger or not body.is_in_group("player"):
 		return
 		
 	_triggered = true
+	_save_state()
 	var hud = get_tree().get_first_node_in_group("hud")
 	
 	if not hud:
@@ -51,6 +59,7 @@ func _on_body_entered(body: Node3D) -> void:
 func start_event_manually() -> void:
 	if _triggered: return
 	_triggered = true
+	_save_state()
 	var hud = get_tree().get_first_node_in_group("hud")
 	
 	if trigger_type == 4:
@@ -130,3 +139,9 @@ func _spawn_reward() -> void:
 	# Automatically give the fragment instead of dropping it
 	AudioManager.play_sfx("level_up")
 	PlayerData.add_genome_fragment()
+
+func _save_state() -> void:
+	if get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var node_path_str = str(get_tree().current_scene.get_path_to(self))
+		PlayerData.set_object_state(scene_path, node_path_str, {"triggered": _triggered})

@@ -649,8 +649,13 @@ func _build_minimap() -> void:
 	_minimap_camera.near = 0.1
 	_minimap_camera.far = 400.0
 	_minimap_camera.rotation_degrees = Vector3(-90, 0, 0)
-	# Turn off environmental fog for a clear minimap view
-	_minimap_camera.environment = Environment.new()
+	# Turn off environmental fog for a clear minimap view, but provide ambient light to fix PBR shader glitches
+	var minimap_env = Environment.new()
+	minimap_env.background_mode = Environment.BG_COLOR
+	minimap_env.background_color = Color(0.1, 0.1, 0.1)
+	minimap_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	minimap_env.ambient_light_color = Color(1.0, 1.0, 1.0)
+	_minimap_camera.environment = minimap_env
 	_minimap_viewport.add_child(_minimap_camera)
 	
 	# Add a small player icon directly inside the minimap UI center
@@ -2174,7 +2179,10 @@ func _connect_signals() -> void:
 	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
 	PlayerData.genome_collected.connect(show_genome_popup)
 	PlayerData.objective_changed.connect(_on_objective_changed)
-	_on_objective_changed(PlayerData.current_objective)
+	if is_instance_valid(PlayerData.current_objective):
+		_on_objective_changed(PlayerData.current_objective)
+	else:
+		_on_objective_changed(null)
 	
 	# Initial states
 	_hp_bar.max_value   = pd.max_health

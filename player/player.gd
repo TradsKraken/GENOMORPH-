@@ -257,9 +257,20 @@ func take_damage(amount: float) -> void:
 			hud.show_float_text("-" + str(roundi(amount)), scr, Color.RED)
 	
 	if PlayerData.health <= 0:
-		# Player death logic: Reset health then reload scene
 		PlayerData.health = PlayerData.max_health
-		get_tree().reload_current_scene()
+		
+		var spawn_pos = _respawn_point
+		if PlayerData.has_saved_position:
+			spawn_pos = PlayerData.player_position
+			
+		global_position = spawn_pos
+		velocity = Vector3.ZERO
+		
+		if hud and hud.has_method("show_float_text"):
+			var cam := get_viewport().get_camera_3d()
+			if cam:
+				var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
+				hud.show_float_text("RESPAWNED", scr, Color.RED)
 
 func _process_auto_heal(delta: float) -> void:
 	_time_since_combat += delta
