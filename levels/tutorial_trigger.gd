@@ -105,18 +105,28 @@ func _process(delta: float) -> void:
 				all_dead = false
 				break
 			
+	var hud = get_tree().get_first_node_in_group("hud")
+	if not all_dead:
+		if hud and hud.has_method("show_zone_status"):
+			hud.show_zone_status("Eliminate them all!")
+			
 	if all_dead and _active_enemies.size() > 0:
+		if hud and hud.has_method("hide_zone_status"):
+			hud.hide_zone_status()
 		set_process(false)
 		_spawn_reward()
 
 func _spawn_reward() -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_subtitle"):
-		hud.show_subtitle("Sterling", "Threat eliminated. Reading a high concentration of useful genetic data... A Genome Fragment.", 5.0)
-		
-	var reward_script = load("res://levels/genome_fragment.gd")
-	if reward_script:
-		var reward = reward_script.new()
-		# Spawn in the center of the trigger zone
-		reward.global_position = global_position
-		get_tree().current_scene.call_deferred("add_child", reward)
+	if hud:
+		if hud.has_method("show_subtitle"):
+			hud.show_subtitle("Sterling", "Threat eliminated. Integrating recovered Genome Fragment into your suit.", 5.0)
+		if hud.has_method("show_zone_status"):
+			hud.show_zone_status("Quest Complete! Genome Fragment Recovered")
+			# Hide the zone status after 5 seconds
+			var timer = get_tree().create_timer(5.0)
+			timer.timeout.connect(func(): if hud.has_method("hide_zone_status"): hud.hide_zone_status())
+			
+	# Automatically give the fragment instead of dropping it
+	AudioManager.play_sfx("level_up")
+	PlayerData.add_genome_fragment()

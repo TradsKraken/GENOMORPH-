@@ -25,6 +25,9 @@ var has_given_minigame: bool = false
 var _player_in_territory: bool = false
 var _territory_area: Area3D
 
+var _local_enemies_hidden: bool = false
+var _hidden_enemies: Array[Node] = []
+
 func _ready() -> void:
 	add_to_group("npc_frog")
 	# Look for a visual Area3D child to use instead of the hardcoded radius
@@ -54,7 +57,33 @@ func _on_body_exited(body: Node3D) -> void:
 		_player_in_territory = false
 
 func _process(_delta: float) -> void:
+	if not is_main_quest:
+		if not PlayerData.lolo_palaka_intro_done and not _local_enemies_hidden:
+			_local_enemies_hidden = true
+			var all_enemies = get_tree().get_nodes_in_group("enemies")
+			for e in all_enemies:
+				if is_instance_valid(e) and e is Node3D and not _hidden_enemies.has(e):
+					if global_position.distance_to(e.global_position) <= territory_radius + 5.0:
+						e.visible = false
+						e.process_mode = Node.PROCESS_MODE_DISABLED
+						_hidden_enemies.append(e)
+		elif PlayerData.lolo_palaka_intro_done and _local_enemies_hidden:
+			_local_enemies_hidden = false
+			for e in _hidden_enemies:
+				if is_instance_valid(e):
+					e.visible = true
+					e.process_mode = Node.PROCESS_MODE_INHERIT
+			_hidden_enemies.clear()
+
 	if _is_talking:
+		if _was_near:
+			var hud := get_tree().get_first_node_in_group("hud")
+			if hud and hud.has_method("hide_interact"):
+				hud.hide_interact(self)
+			_was_near = false
+		return
+		
+	if not is_main_quest and not PlayerData.lolo_palaka_intro_done:
 		if _was_near:
 			var hud := get_tree().get_first_node_in_group("hud")
 			if hud and hud.has_method("hide_interact"):
@@ -79,7 +108,7 @@ func _process(_delta: float) -> void:
 		var alive_enemies = 0
 		var all_enemies = get_tree().get_nodes_in_group("enemies")
 		for e in all_enemies:
-			if not is_instance_valid(e) or e.get("is_dead"):
+			if not is_instance_valid(e) or e.get("is_dead") or not e.visible:
 				continue
 				
 			var enemy_in_zone = false
@@ -206,6 +235,7 @@ func _start_dialog() -> void:
 		else:
 			if not is_intro_done:
 				is_intro_done = true
+				PlayerData.lolo_palaka_intro_done = true
 				hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 				

@@ -123,7 +123,7 @@ func _create_health_bar() -> void:
 	_update_level_label_color()
 
 func take_damage(amount: float) -> void:
-	if is_dead:
+	if is_dead or not visible:
 		return
 	
 	health -= amount

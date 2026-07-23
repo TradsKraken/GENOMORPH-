@@ -60,6 +60,7 @@ var minigame_started: bool = false
 
 var frogs_helped: int = 0
 var total_frogs: int = 7
+var lolo_palaka_intro_done: bool = false
 
 var current_scene_path: String = "res://levels/node_3d.scn"
 
@@ -238,6 +239,7 @@ func save_game(slot: int = -1) -> void:
 		"total_frogs": total_frogs,
 		"minigame_started": minigame_started,
 		"has_seen_prologue": has_seen_prologue,
+		"lolo_palaka_intro_done": lolo_palaka_intro_done,
 		"unlocked_knowledge": unlocked_knowledge,
 		"current_scene_path": current_scene_path,
 		"timestamp": timestamp,
@@ -280,6 +282,7 @@ func load_game(slot: int = -1) -> bool:
 				total_frogs = data.get("total_frogs", 7)
 				minigame_started = data.get("minigame_started", false)
 				has_seen_prologue = data.get("has_seen_prologue", false)
+				lolo_palaka_intro_done = data.get("lolo_palaka_intro_done", false)
 				
 				var loaded_knowledge = data.get("unlocked_knowledge", [])
 				unlocked_knowledge.clear()
@@ -317,6 +320,7 @@ func reset_data(slot: int = -1) -> void:
 	total_frogs = 7
 	minigame_started = false
 	has_seen_prologue = false
+	lolo_palaka_intro_done = false
 	unlocked_knowledge.clear()
 	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])
 	current_scene_path = "res://levels/node_3d.scn"
