@@ -49,6 +49,7 @@ var _tutorial_desc:  Label
 var _subtitle_panel: PanelContainer
 var _subtitle_label: RichTextLabel
 var _subtitle_tween: Tween
+var _subtitle_time_shown: float = 0.0
 
 var _jump_highlight_tw: Tween
 var _attack_highlight_tw: Tween
@@ -138,7 +139,7 @@ func _input(event: InputEvent) -> void:
 				
 	if _subtitle_panel and _subtitle_panel.visible and _subtitle_panel.modulate.a > 0.5:
 		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
-			if event.is_pressed():
+			if event.is_pressed() and _subtitle_time_shown > 1.0:
 				hide_subtitle()
 
 func add_minimap_marker(node: Node3D, color: Color = Color(0.2, 1.0, 0.4), hover: bool = true) -> void:
@@ -201,6 +202,7 @@ func remove_minimap_marker(node: Node3D) -> void:
 		_minimap_markers.erase(node)
 
 func _process(delta: float) -> void:
+	_subtitle_time_shown += delta
 	if is_instance_valid(_level_badge):
 		_level_badge.visible = PlayerData.skill_points > 0
 		_level_badge.text = str(PlayerData.skill_points)
@@ -1920,6 +1922,7 @@ func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> voi
 	PlayerData.add_message(speaker, text, color_hex)
 		
 	_subtitle_label.text = "[center][b][color=#" + color_hex + "]" + speaker + ":[/color][/b] " + text + "\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
+	_subtitle_time_shown = 0.0
 	
 	if _subtitle_tween and _subtitle_tween.is_valid():
 		_subtitle_tween.kill()

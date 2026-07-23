@@ -8,6 +8,7 @@ var _is_running: bool = false
 var _current_wave: int = 0
 var _wave_timer: float = 0.0
 var _active_tilapias: Array[Node] = []
+var _initial_mudfish_count: int = 0
 
 func _ready() -> void:
 	add_to_group("oxygen_defense")
@@ -27,6 +28,8 @@ func start_minigame() -> void:
 	if _mudfish_nodes.size() == 0:
 		print("Error: No young mudfish found!")
 		return
+		
+	_initial_mudfish_count = _mudfish_nodes.size()
 		
 	_is_running = true
 	_current_wave = 1
@@ -118,8 +121,25 @@ func _fail_minigame() -> void:
 func _win_minigame() -> void:
 	_is_running = false
 	var hud = get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_subtitle"):
-		hud.show_subtitle("Dalag", '"You did it... The young ones are safe. Take this... it holds the secret to breathing in this muck."')
+	
+	var alive_count = 0
+	for m in _mudfish_nodes:
+		if is_instance_valid(m) and not m.is_queued_for_deletion():
+			alive_count += 1
+			
+	if alive_count == _initial_mudfish_count and _initial_mudfish_count > 0:
+		# Perfect Defense!
+		if hud and hud.has_method("show_subtitle"):
+			hud.show_subtitle("Dalag", '"Incredible! You saved every single one of them! You are a true guardian. Take this... it holds the secret to breathing in this muck."')
+		PlayerData.gain_exp(150) # Big bonus EXP
+		if hud and hud.has_method("show_notification"):
+			hud.show_notification("PERFECT DEFENSE!", "All Mudfish survived!\n+150 EXP Bonus", 5.0)
+	else:
+		# Partial Defense
+		if hud and hud.has_method("show_subtitle"):
+			hud.show_subtitle("Dalag", '"You did it... We lost some, but the school survives. Take this... it holds the secret to breathing in this muck."')
+		PlayerData.gain_exp(50)
+		
 	if hud and hud.has_method("hide_zone_status"):
 		hud.hide_zone_status()
 		
