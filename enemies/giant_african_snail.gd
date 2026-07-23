@@ -92,11 +92,15 @@ func _spit_at_target() -> void:
 	if not spit_scene or not is_instance_valid(target): return
 	
 	var spit = spit_scene.instantiate()
+	get_tree().current_scene.add_child(spit)
+	
 	spit.global_position = global_position + Vector3(0, 0.5, 0)
 	
 	# Calculate direction to target with a slight arc or just straight
-	var dir = (target.global_position + Vector3(0, 1.0, 0) - spit.global_position).normalized()
+	var target_pos = target.global_position + Vector3(0, 1.0, 0)
+	var dir = (target_pos - spit.global_position).normalized()
 	spit.direction = dir
 	
-	get_tree().current_scene.add_child(spit)
+	spit.look_at(target_pos, Vector3.UP)
+	
 	AudioManager.play_sfx("spit", randf_range(0.8, 1.2))

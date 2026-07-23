@@ -251,6 +251,8 @@ func _start_dialog() -> void:
 				has_given_minigame = true
 				PlayerData.minigame_started = true
 				
+				PlayerData.set_objective(null, "Explore the wetlands")
+				
 				# Trigger Minigame manually
 				if get_tree().current_scene:
 					var all_areas = get_tree().current_scene.find_children("*", "Area3D")
