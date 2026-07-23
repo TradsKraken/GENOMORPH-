@@ -651,3 +651,24 @@ func _update_animation(direction: Vector3) -> void:
 	else:
 		# Idle
 		animation_player.speed_scale = 1.0
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_Y:
+			var frogs = get_tree().get_nodes_in_group("npc_frog")
+			var generic_frogs = []
+			for f in frogs:
+				if "is_main_quest" in f and not f.is_main_quest:
+					generic_frogs.append(f)
+			
+			if generic_frogs.size() > 1:
+				for i in range(generic_frogs.size() - 1):
+					generic_frogs[i].is_helped = true
+					generic_frogs[i].visible = false
+				
+				PlayerData.total_frogs = frogs.size()
+				PlayerData.frogs_helped = PlayerData.total_frogs - 1
+				
+				var hud = get_tree().get_first_node_in_group("hud")
+				if hud and hud.has_method("show_subtitle"):
+					hud.show_subtitle("DEBUG CHEAT ACTIVATED", "All frogs except ONE have been instantly found! Go find the last one!", 4.0)

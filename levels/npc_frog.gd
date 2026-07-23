@@ -147,6 +147,8 @@ func _start_dialog() -> void:
 		_is_talking = false
 		return
 		
+	var just_completed = false
+	
 	if not is_helped:
 		is_helped = true
 		var frog_nodes = get_tree().get_nodes_in_group("npc_frog")
@@ -172,8 +174,7 @@ func _start_dialog() -> void:
 					if hud.has_method("add_minimap_marker"):
 						hud.add_minimap_marker(f, Color(1.0, 0.8, 0.2)) # Gold marker for return
 					PlayerData.set_objective(f, "Return to Lolo Palaka")
-					if hud.has_method("show_subtitle"):
-						hud.show_subtitle("OBJECTIVE COMPLETE", "All frogs rescued! Return to Lolo Palaka.", 5.0)
+					just_completed = true
 					break
 
 		if hud.has_method("hide_zone_status"):
@@ -184,6 +185,8 @@ func _start_dialog() -> void:
 	if is_main_quest:
 		if PlayerData.frogs_helped >= PlayerData.total_frogs:
 			if not has_given_minigame:
+				if hud.has_method("remove_minimap_marker"):
+					hud.remove_minimap_marker(self)
 				hud.show_subtitle("Lolo Palaka", '"You have saved our people. Now, show me what you can do. Clear the water!"')
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 				has_given_minigame = true
@@ -206,7 +209,7 @@ func _start_dialog() -> void:
 				hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 				
-				hud.show_subtitle("Volunteer (Player)", '"I\'m trying to fix that. The pollution out there is bad, but those invasive swarms are making it impossible for anything to survive."')
+				hud.show_subtitle("Volunteer (Player)", '"I am trying to fix that. The pollution out there is bad, but those invasive swarms are making it impossible for anything to survive."') 
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 				
 				hud.show_subtitle("Lolo Palaka", '"Ah, the biters. They are not the root of the sickness, but a symptom of the broken circle. When the toxic sludge poisoned the deep waters, the hunters died. Without us to keep them in check, the swarms multiply without end. They are a plague born from an empty throne."')
@@ -247,6 +250,11 @@ func _start_dialog() -> void:
 		# Generic Frog Dialogue
 		var random_line = custom_dialogues[randi() % custom_dialogues.size()]
 		hud.show_subtitle(npc_name, random_line)
+		if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
+
+	if just_completed:
+		if hud.has_method("show_notification"):
+			hud.show_notification("OBJECTIVE COMPLETE", "All frogs rescued! Return to Lolo Palaka.", 5.0)
 		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Jump")

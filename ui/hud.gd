@@ -64,6 +64,11 @@ var _zone_status_panel: PanelContainer
 var _zone_status_lbl: RichTextLabel
 var _zone_status_tween: Tween
 
+var _notification_panel: PanelContainer
+var _notification_title: Label
+var _notification_text: RichTextLabel
+var _notification_tween: Tween
+
 var _walkthrough_steps: Array = []
 var _current_step_index: int = 0
 var _active_highlight_nodes: Array = []
@@ -115,6 +120,7 @@ func _ready() -> void:
 	_build_genome_popup()
 	_build_minimap()
 	_build_zone_status()
+	_build_notification_panel()
 
 	_connect_signals()
 
@@ -303,6 +309,92 @@ func hide_zone_status() -> void:
 	_zone_status_tween = create_tween()
 	_zone_status_tween.tween_property(_zone_status_panel, "modulate:a", 0.0, 0.3)
 	_zone_status_tween.tween_callback(func(): _zone_status_panel.visible = false)
+
+# ── Cinematic Notification Banner ─────────────────────────────────────────────
+
+func _build_notification_panel() -> void:
+	if _root.has_node("NotificationPanel"):
+		_notification_panel = _root.find_child("NotificationPanel", true, false)
+		return
+		
+	_notification_panel = PanelContainer.new()
+	_notification_panel.name = "NotificationPanel"
+	_notification_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_notification_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_notification_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_notification_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_notification_panel.custom_minimum_size = Vector2(800, 150)
+	
+	var style = StyleBoxFlat.new()
+	# Translucent dark gradient style strip across the middle
+	style.bg_color = Color(0.0, 0.0, 0.0, 0.6)
+	style.set_border_width_all(0)
+	style.content_margin_top = 30
+	style.content_margin_bottom = 30
+	_notification_panel.add_theme_stylebox_override("panel", style)
+	
+	var vbox = VBoxContainer.new()
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	_notification_panel.add_child(vbox)
+	
+	_notification_title = Label.new()
+	_notification_title.name = "NotifTitle"
+	_notification_title.add_theme_font_size_override("font_size", 42)
+	_notification_title.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2)) # Gold
+	_notification_title.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+	_notification_title.add_theme_constant_override("shadow_offset_y", 2)
+	_notification_title.add_theme_constant_override("shadow_outline_size", 4)
+	_notification_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_notification_title.text = "OBJECTIVE COMPLETE"
+	vbox.add_child(_notification_title)
+	
+	_notification_text = RichTextLabel.new()
+	_notification_text.name = "NotifText"
+	_notification_text.bbcode_enabled = true
+	_notification_text.fit_content = true
+	_notification_text.scroll_active = false
+	_notification_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_notification_text.add_theme_font_size_override("normal_font_size", 20)
+	_notification_text.add_theme_color_override("default_color", Color(0.8, 0.8, 0.8))
+	_notification_text.custom_minimum_size = Vector2(600, 30)
+	vbox.add_child(_notification_text)
+	
+	_root.add_child(_notification_panel)
+	
+	_notification_panel.visible = false
+	_notification_panel.modulate.a = 0.0
+
+func show_notification(title: String, text: String, duration: float = 4.0) -> void:
+	if not is_instance_valid(_notification_panel): return
+	
+	_notification_title.text = title.to_upper()
+	_notification_text.text = "[center]" + text + "[/center]"
+	_notification_panel.visible = true
+	
+	if AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("palaka_convo") # Play a grander sound if available
+	
+	if _notification_tween and _notification_tween.is_valid():
+		_notification_tween.kill()
+		
+	# Cinematic scale and fade in
+	_notification_panel.scale = Vector2(1.2, 1.2)
+	_notification_panel.modulate.a = 0.0
+	_notification_panel.pivot_offset = _notification_panel.size / 2.0
+	
+	_notification_tween = create_tween()
+	_notification_tween.set_parallel(true)
+	
+	# Scale down slightly and fade in
+	_notification_tween.tween_property(_notification_panel, "scale", Vector2(1.0, 1.0), 0.8).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
+	_notification_tween.tween_property(_notification_panel, "modulate:a", 1.0, 0.8)
+	
+	_notification_tween.chain().tween_interval(duration)
+	
+	# Fade out smoothly
+	_notification_tween.chain().tween_property(_notification_panel, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_notification_tween.chain().tween_callback(func(): _notification_panel.visible = false)
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
 
@@ -1699,6 +1791,7 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.add_child(_subtitle_label)
 
 	_root.add_child(_subtitle_panel)
+
 
 func _build_objective_arrow() -> void:
 	if _root.has_node("ObjectiveArrow"):

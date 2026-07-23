@@ -203,7 +203,20 @@ func _build_player_status() -> void:
 	stam_box.add_child(_stam_bar)
 	bars_vbox.add_child(stam_box)
 
-	# Quest Tracker Label
+	# Quest Tracker Label inside BarsVBox for perfect layout
+	var quest_btn = Button.new()
+	quest_btn.name = "QuestTrackerBtn"
+	quest_btn.flat = true
+	var empty_style = StyleBoxEmpty.new()
+	quest_btn.add_theme_stylebox_override("normal", empty_style)
+	quest_btn.add_theme_stylebox_override("hover", empty_style)
+	quest_btn.add_theme_stylebox_override("pressed", empty_style)
+	quest_btn.add_theme_stylebox_override("focus", empty_style)
+	quest_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	quest_btn.custom_minimum_size = Vector2(300, 20)
+	quest_btn.pressed.connect(_open_quest_menu)
+	bars_vbox.add_child(quest_btn)
+
 	_quest_tracker_lbl = RichTextLabel.new()
 	_quest_tracker_lbl.name = "QuestTrackerLbl"
 	_quest_tracker_lbl.bbcode_enabled = true
@@ -211,9 +224,9 @@ func _build_player_status() -> void:
 	_quest_tracker_lbl.scroll_active = false
 	_quest_tracker_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_quest_tracker_lbl.add_theme_font_size_override("normal_font_size", 14)
-	_quest_tracker_lbl.custom_minimum_size = Vector2(300, 20)
+	_quest_tracker_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
-	bars_vbox.add_child(_quest_tracker_lbl)
+	quest_btn.add_child(_quest_tracker_lbl)
 
 	# EXP Bar (Radial around badge)
 	var exp_script = GDScript.new()
