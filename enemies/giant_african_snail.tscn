@@ -1,21 +1,21 @@
 [gd_scene format=3 uid="uid://snail5678"]
 
-[ext_resource type="Script" path="res://enemies/giant_african_snail.gd" id="1_snail_script"]
+[ext_resource type="Script" uid="uid://mo2fqfukkwy6" path="res://enemies/giant_african_snail.gd" id="1_snail_script"]
 [ext_resource type="PackedScene" uid="uid://c60qpn44kty84" path="res://Models/Snail/giant_african_snail.glb" id="2_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
-radius = 0.5
 height = 1.5
 
-[node name="GiantAfricanSnail" type="CharacterBody3D" groups=["enemies"]]
+[node name="GiantAfricanSnail" type="CharacterBody3D" unique_id=1841990344 groups=["enemies"]]
 script = ExtResource("1_snail_script")
 max_health = 120.0
 speed = 1.0
 exp_value = 25.0
 enemy_level = 3
+base_scale = 0.5
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1291242260]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.5, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="Model" parent="." instance=ExtResource("2_model")]
+[node name="Model" parent="." unique_id=1710861794 instance=ExtResource("2_model")]

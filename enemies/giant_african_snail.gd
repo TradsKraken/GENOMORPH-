@@ -12,6 +12,8 @@ var _attack_timer: float = 0.0
 var _anim_player: AnimationPlayer = null
 
 func _ready() -> void:
+	base_scale = 0.4 # Shrink the snail by default!
+	label_height_offset = 3.5 # The Snail is massive, raise the level text!
 	super._ready()
 	motion_mode = CharacterBody3D.MOTION_MODE_GROUNDED
 	

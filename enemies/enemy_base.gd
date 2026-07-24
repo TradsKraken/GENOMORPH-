@@ -5,6 +5,8 @@ extends CharacterBody3D
 @export var speed: float = 0.3
 @export var exp_value: float = 10.0
 @export var enemy_level: int = 1
+@export var label_height_offset: float = 1.8
+@export var base_scale: float = 1.0
 
 var health: float
 var is_dead: bool = false
@@ -45,9 +47,9 @@ func _apply_level_scaling() -> void:
 	# +20% EXP per level
 	exp_value += (exp_value * 0.20) * level_multiplier
 	
-	# +5% Size per level
+	# +5% Size per level, multiplied by their base scale
 	var size_boost = 1.0 + (0.05 * level_multiplier)
-	scale = Vector3(size_boost, size_boost, size_boost)
+	scale = Vector3(size_boost, size_boost, size_boost) * base_scale
 
 func _update_level_label_color() -> void:
 	if not _level_label:
@@ -121,7 +123,7 @@ func _create_health_bar() -> void:
 	_level_label.text = "Lv. %d" % enemy_level
 	_level_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_level_label.no_depth_test = true
-	_level_label.position = Vector3(0, 1.8, 0) # Moved slightly higher because it is bigger
+	_level_label.position = Vector3(0, label_height_offset, 0) # Moved slightly higher because it is bigger
 	_level_label.pixel_size = 0.002 # crisp resolution
 	_level_label.outline_render_priority = 0
 	_level_label.outline_size = 16
