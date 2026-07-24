@@ -767,6 +767,7 @@ func _build_tutorial_panel() -> void:
 	btn_got_it.add_theme_stylebox_override("pressed", sb_h)
 	
 	btn_got_it.pressed.connect(_hide_tutorial)
+	btn_got_it.pressed.connect(func(): AudioManager.play_sfx("ui_click"))
 	vbox.add_child(btn_got_it)
 
 	_root.add_child(_tutorial_panel)
@@ -1476,6 +1477,7 @@ func _panel_btn(text: String, col: Color = Color.WHITE) -> Button:
 	btn.add_theme_stylebox_override("pressed", hover)
 	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	btn.add_theme_color_override("font_color", col)
+	btn.pressed.connect(func(): AudioManager.play_sfx("ui_click"))
 	return btn
 
 # ── Prologue Sequence ─────────────────────────────────────────────────────────
