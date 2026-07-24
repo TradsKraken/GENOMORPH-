@@ -1107,7 +1107,6 @@ func _build_menu_panel() -> void:
 
 	var btn_quit := _panel_btn("Main Menu", Color(1.0, 0.2, 0.3))
 	btn_quit.pressed.connect(func():
-		PlayerData.save_game()
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://ui/main_menu.tscn")
 	)
@@ -1516,7 +1515,6 @@ func start_tutorial() -> void:
 	if is_instance_valid(_tut_tap_overlay): _tut_tap_overlay.queue_free()
 	_tut_active = false
 	PlayerData.has_seen_prologue = true
-	PlayerData.save_game()
 	tutorial_complete.emit()
 
 
