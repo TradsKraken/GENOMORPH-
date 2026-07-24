@@ -16,7 +16,7 @@ var _unlocked_keys: Array[String] = []
 var _tech_font: SystemFont
 
 # ── Threat Level Colors ────────────────────────────────────────────────────────
-const THREAT_COLORS := {
+const THREAT_COLORS: Dictionary = {
 	"CRITICAL": Color(1.0, 0.2, 0.2),
 	"HIGH":     Color(1.0, 0.55, 0.1),
 	"MODERATE": Color(1.0, 0.9, 0.2),
@@ -27,7 +27,7 @@ const THREAT_COLORS := {
 }
 
 # ── Category Colors ────────────────────────────────────────────────────────────
-const CATEGORY_COLORS := {
+const CATEGORY_COLORS: Dictionary = {
 	"All":         Color(0.1, 0.9, 0.7),
 	"Species":     Color(0.4, 1.0, 0.5),
 	"Environment": Color(0.9, 0.7, 0.2),
@@ -179,7 +179,7 @@ func _make_filter_button(cat: String) -> Button:
 	return btn
 
 func _style_filter_btn(btn: Button, cat: String, active: bool) -> void:
-	var col := CATEGORY_COLORS.get(cat, Color(0.1, 0.9, 0.7))
+	var col: Color = CATEGORY_COLORS.get(cat, Color(0.1, 0.9, 0.7))
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = Color(col.r, col.g, col.b, 0.12) if active else Color(0.05, 0.08, 0.10, 0.7)
 	normal.border_color = Color(col.r, col.g, col.b, 0.9) if active else Color(col.r, col.g, col.b, 0.35)
@@ -285,20 +285,20 @@ func _populate_list() -> void:
 
 	for key in PlayerData.unlocked_knowledge:
 		if key in PlayerData.KNOWLEDGE_DB:
-			var data = PlayerData.KNOWLEDGE_DB[key]
-			var cat = data.get("category", "")
+			var data: Dictionary = PlayerData.KNOWLEDGE_DB[key]
+			var cat: String = data.get("category", "")
 			if _current_filter != "All" and cat != _current_filter:
 				continue
-			var icon = data.get("icon", "")
-			var title = data.get("title", "Unknown")
-			var subcat = data.get("subcategory", cat)
+			var icon: String = data.get("icon", "")
+			var title: String = data.get("title", "Unknown")
+			var subcat: String = data.get("subcategory", cat)
 			_item_list.add_item(icon + "  " + title + "\n     [" + subcat + "]")
 			_unlocked_keys.append(key)
 
 	# Update count label
-	var count_lbl = _panel.find_child("CountLabel", true, false)
+	var count_lbl: Label = _panel.find_child("CountLabel", true, false) as Label
 	if count_lbl:
-		var total = PlayerData.unlocked_knowledge.size()
+		var total: int = PlayerData.unlocked_knowledge.size()
 		count_lbl.text = "%d / %d ENTRIES DISCOVERED" % [_unlocked_keys.size(), total]
 
 	if _item_list.item_count == 0:
@@ -310,8 +310,8 @@ func _populate_list() -> void:
 func _on_item_selected(index: int) -> void:
 	if index < 0 or index >= _unlocked_keys.size():
 		return
-	var key = _unlocked_keys[index]
-	var data = PlayerData.KNOWLEDGE_DB[key]
+	var key: String = _unlocked_keys[index]
+	var data: Dictionary = PlayerData.KNOWLEDGE_DB[key]
 	_show_detail(data)
 
 func _show_detail(data: Dictionary) -> void:
@@ -359,15 +359,17 @@ func _show_detail(data: Dictionary) -> void:
 	meta_hbox.add_theme_constant_override("separation", 10)
 	_detail_content.add_child(meta_hbox)
 
+	var cat_str: String = data.get("category", "") + "  ·  " + data.get("subcategory", "")
+	var cat_color: Color = CATEGORY_COLORS.get(data.get("category", ""), Color(0.1, 0.9, 0.7))
 	var cat_badge := _make_badge(
-		data.get("category", "") + "  ·  " + data.get("subcategory", ""),
-		CATEGORY_COLORS.get(data.get("category", ""), Color(0.1, 0.9, 0.7)),
+		cat_str,
+		cat_color,
 		14
 	)
 	meta_hbox.add_child(cat_badge)
 
-	var threat := data.get("threat_level", "UNKNOWN")
-	var threat_col := THREAT_COLORS.get(threat, Color(0.6, 0.6, 0.6))
+	var threat: String = data.get("threat_level", "UNKNOWN")
+	var threat_col: Color = THREAT_COLORS.get(threat, Color(0.6, 0.6, 0.6))
 	var threat_badge := _make_badge("⚠ THREAT: " + threat, threat_col, 14)
 	meta_hbox.add_child(threat_badge)
 
@@ -378,16 +380,17 @@ func _show_detail(data: Dictionary) -> void:
 	var summary_label := _make_section_header("OVERVIEW")
 	_detail_content.add_child(summary_label)
 
-	var summary_rtl := _make_rtl(data.get("summary", ""), 16)
+	var summary_text: String = data.get("summary", "")
+	var summary_rtl := _make_rtl(summary_text, 16)
 	_detail_content.add_child(summary_rtl)
 
 	# ── 5. Key Facts ──
-	var facts: Array = data.get("facts", [])
-	if facts.size() > 0:
+	var facts_raw: Array = data.get("facts", [])
+	if facts_raw.size() > 0:
 		_detail_content.add_child(_make_thin_sep())
 		_detail_content.add_child(_make_section_header("⬡ BIOLOGICAL FIELD NOTES"))
 
-		for fact in facts:
+		for fact_entry in facts_raw:
 			var fact_hbox := HBoxContainer.new()
 			fact_hbox.add_theme_constant_override("separation", 10)
 			_detail_content.add_child(fact_hbox)
@@ -401,7 +404,7 @@ func _show_detail(data: Dictionary) -> void:
 			fact_hbox.add_child(bullet)
 
 			var fact_lbl := Label.new()
-			fact_lbl.text = fact
+			fact_lbl.text = str(fact_entry)
 			fact_lbl.add_theme_font_override("font", _tech_font)
 			fact_lbl.add_theme_font_size_override("font_size", 15)
 			fact_lbl.add_theme_color_override("font_color", Color(0.78, 0.92, 0.86))
@@ -410,7 +413,7 @@ func _show_detail(data: Dictionary) -> void:
 			fact_hbox.add_child(fact_lbl)
 
 	# ── 6. Field Guide Tip ──
-	var tip = data.get("guide_tip", "")
+	var tip: String = data.get("guide_tip", "")
 	if tip != "":
 		_detail_content.add_child(_make_thin_sep())
 		var tip_container := PanelContainer.new()

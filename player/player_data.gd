@@ -17,7 +17,7 @@ var current_objective_text: String = ""
 var message_log: Array[String] = []
 
 func add_message(speaker: String, text: String, color: String = "ffffff") -> void:
-	var entry = "[b][color=#" + color + "]" + speaker + ":[/color][/b] " + text
+	var entry: String = "[b][color=#" + color + "]" + speaker + ":[/color][/b] " + text
 	if not message_log.has(entry):
 		message_log.append(entry)
 		if message_log.size() > 50:
@@ -36,7 +36,7 @@ func set_objective(target: Node3D, text: String = "") -> void:
 	objective_changed.emit(target)
 
 func _restore_objective(path_str: String, text: String) -> void:
-	var target = null
+	var target: Node3D = null
 	if path_str != "" and get_tree().current_scene:
 		target = get_tree().current_scene.get_node_or_null(path_str)
 	set_objective(target, text)
@@ -337,14 +337,14 @@ func has_save_file(slot: int = -1) -> bool:
 	return FileAccess.file_exists(get_save_path(slot))
 
 func get_save_preview(slot: int) -> Dictionary:
-	var path = get_save_path(slot)
+	var path: String = get_save_path(slot)
 	if not FileAccess.file_exists(path):
 		return {}
-	var file = FileAccess.open(path, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(path, FileAccess.READ)
 	if file:
-		var json = JSON.new()
+		var json: JSON = JSON.new()
 		if json.parse(file.get_as_text()) == OK:
-			var data = json.get_data()
+			var data: Variant = json.get_data()
 			if typeof(data) == TYPE_DICTIONARY:
 				return {
 					"level": data.get("level", 1),
@@ -358,37 +358,37 @@ func get_save_preview(slot: int) -> Dictionary:
 	return {}
 
 func save_game(slot: int = -1) -> void:
-	var current_level_path = get_tree().current_scene.scene_file_path if get_tree().current_scene else current_scene_path
+	var current_level_path: String = get_tree().current_scene.scene_file_path if get_tree().current_scene else current_scene_path
 	if current_level_path != "":
 		current_scene_path = current_level_path
 
-	var biome_name = "Level 1: The Polluted Wetlands"
+	var biome_name: String = "Level 1: The Polluted Wetlands"
 	if "mosquito_zone" in current_scene_path:
 		biome_name = "Level 1: Mosquito Swarm Zone"
 		
-	var datetime = Time.get_datetime_dict_from_system()
+	var datetime: Dictionary = Time.get_datetime_dict_from_system()
 	# Format: YYYY-MM-DD HH:MM
-	var timestamp = "%04d-%02d-%02d %02d:%02d" % [
+	var timestamp: String = "%04d-%02d-%02d %02d:%02d" % [
 		datetime.year, datetime.month, datetime.day,
 		datetime.hour, datetime.minute
 	]
 
 	# Grab player position
-	var player = get_tree().get_first_node_in_group("player")
+	var player: Node = get_tree().get_first_node_in_group("player")
 	if player:
 		player_position = player.global_position
 		has_saved_position = true
 		
 	# Grab fog map
-	var hud = get_tree().get_first_node_in_group("hud")
+	var hud: Node = get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("get_fog_data"):
-		var fog_data = hud.get_fog_data()
+		var fog_data: String = hud.get_fog_data()
 		if fog_data != "":
 			if not world_state.has(current_scene_path):
 				world_state[current_scene_path] = {}
 			world_state[current_scene_path]["fog_map"] = fog_data
 
-	var data = {
+	var data: Dictionary = {
 		"health": health,
 		"max_health": max_health,
 		"stamina": stamina,
@@ -420,7 +420,7 @@ func save_game(slot: int = -1) -> void:
 		"world_state": world_state
 	}
 	
-	var obj_path_str = ""
+	var obj_path_str: String = ""
 	if current_objective != null and is_instance_valid(current_objective) and current_objective.is_inside_tree() and get_tree().current_scene:
 		obj_path_str = str(get_tree().current_scene.get_path_to(current_objective))
 	data["current_objective_path"] = obj_path_str
@@ -437,13 +437,13 @@ func load_game(slot: int = -1) -> bool:
 	if slot != -1:
 		current_save_slot = slot
 		
-	var file = FileAccess.open(get_save_path(slot), FileAccess.READ)
+	var file: FileAccess = FileAccess.open(get_save_path(slot), FileAccess.READ)
 	if file:
-		var json_str = file.get_as_text()
-		var json = JSON.new()
-		var error = json.parse(json_str)
+		var json_str: String = file.get_as_text()
+		var json: JSON = JSON.new()
+		var error: int = json.parse(json_str)
 		if error == OK:
-			var data = json.get_data()
+			var data: Variant = json.get_data()
 			if typeof(data) == TYPE_DICTIONARY:
 				health = data.get("health", 100.0)
 				max_health = data.get("max_health", 100.0)
@@ -464,7 +464,7 @@ func load_game(slot: int = -1) -> bool:
 				has_seen_prologue = data.get("has_seen_prologue", false)
 				lolo_palaka_intro_done = data.get("lolo_palaka_intro_done", false)
 				
-				var loaded_knowledge = data.get("unlocked_knowledge", [])
+				var loaded_knowledge: Array = data.get("unlocked_knowledge", [])
 				unlocked_knowledge.clear()
 				for k in loaded_knowledge:
 					unlocked_knowledge.append(str(k))
@@ -479,7 +479,7 @@ func load_game(slot: int = -1) -> bool:
 					data.get("player_pos_y", 0.0),
 					data.get("player_pos_z", 0.0)
 				)
-				var loaded_world_state = data.get("world_state", {})
+				var loaded_world_state: Dictionary = data.get("world_state", {})
 				world_state.clear()
 				for scene in loaded_world_state:
 					world_state[scene] = loaded_world_state[scene]
@@ -489,8 +489,8 @@ func load_game(slot: int = -1) -> bool:
 				level_changed.emit(level)
 				exp_changed.emit(experience, exp_to_next)
 				
-				var loaded_obj_path = data.get("current_objective_path", "")
-				var loaded_obj_text = data.get("current_objective_text", "")
+				var loaded_obj_path: String = data.get("current_objective_path", "")
+				var loaded_obj_text: String = data.get("current_objective_text", "")
 				current_objective = null
 				current_objective_text = ""
 				objective_changed.emit()
