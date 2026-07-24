@@ -139,14 +139,15 @@ func _spawn_reward() -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud:
 		if hud.has_method("show_subtitle"):
-			hud.show_subtitle("Sterling", "Threat eliminated. Integrating recovered Genome Fragment into your suit.", 5.0)
+			hud.show_subtitle("Sterling", "Threat eliminated. Integrating recovered Genome Fragment into your suit.", 2.5)
 		if hud.has_method("show_zone_status"):
 			hud.show_zone_status("Quest Complete! Genome Fragment Recovered")
-			# Hide the zone status after 5 seconds
-			var timer = get_tree().create_timer(5.0)
-			timer.timeout.connect(func(): if hud.has_method("hide_zone_status"): hud.hide_zone_status())
 			
-	# Automatically give the fragment instead of dropping it
+	await get_tree().create_timer(2.5).timeout
+	
+	if hud and hud.has_method("hide_zone_status"):
+		hud.hide_zone_status()
+		
 	AudioManager.play_sfx("level_up")
 	PlayerData.add_genome_fragment()
 

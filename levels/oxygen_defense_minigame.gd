@@ -132,13 +132,20 @@ func _win_minigame() -> void:
 		if hud and hud.has_method("show_subtitle"):
 			hud.show_subtitle("Dalag", '"Incredible! You saved every single one of them! You are a true guardian. Take this... it holds the secret to breathing in this muck."')
 		PlayerData.gain_exp(150) # Big bonus EXP
+		
+		await get_tree().create_timer(2.5).timeout
+		
 		if hud and hud.has_method("show_notification"):
-			hud.show_notification("PERFECT DEFENSE!", "All Mudfish survived!\n+150 EXP Bonus", 5.0)
+			hud.show_notification("PERFECT DEFENSE!", "All Mudfish survived!\n+150 EXP Bonus", 2.5)
+			
+		await get_tree().create_timer(2.5).timeout
 	else:
 		# Partial Defense
 		if hud and hud.has_method("show_subtitle"):
 			hud.show_subtitle("Dalag", '"You did it... We lost some, but the school survives. Take this... it holds the secret to breathing in this muck."')
 		PlayerData.gain_exp(50)
+		
+		await get_tree().create_timer(2.5).timeout
 		
 	if hud and hud.has_method("hide_zone_status"):
 		hud.hide_zone_status()
