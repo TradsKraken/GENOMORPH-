@@ -21,9 +21,16 @@ func _ready() -> void:
 	if is_equal_approx(speed, 0.3):
 		speed = 1.0 # Snails are slow!
 	speed += randf_range(-0.2, 0.2) 
+	spit_cooldown += randf_range(-0.5, 0.5)
+	_attack_timer = randf_range(0.0, spit_cooldown * 0.8)
 
 	_anim_player = _find_animation_player(self)
 	_play_anim("idle")
+	
+	if is_instance_valid(_anim_player) and _anim_player.is_playing():
+		var anim_len = _anim_player.current_animation_length
+		if anim_len > 0:
+			_anim_player.seek(randf_range(0.0, anim_len), true)
 
 func _process_movement(delta: float) -> void:
 	if not is_instance_valid(target): return
