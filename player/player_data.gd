@@ -257,25 +257,6 @@ func save_game(slot: int = -1) -> void:
 		player_position = player.global_position
 		has_saved_position = true
 		
-	# Grab NPC states
-	if get_tree().current_scene:
-		for frog in get_tree().get_nodes_in_group("npc_frog"):
-			var path_str = str(get_tree().current_scene.get_path_to(frog))
-			var state = {
-				"is_helped": frog.is_helped,
-				"is_intro_done": frog.is_intro_done,
-				"has_given_minigame": frog.has_given_minigame
-			}
-			set_object_state(current_scene_path, path_str, state)
-			
-		for spawner in get_tree().get_nodes_in_group("enemy_spawner"):
-			var path_str = str(get_tree().current_scene.get_path_to(spawner))
-			var state = {
-				"is_cleared": spawner._is_nest_cleared,
-				"remaining_enemies": spawner._living_enemies.size()
-			}
-			set_object_state(current_scene_path, path_str, state)
-			
 	# Grab fog map
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("get_fog_data"):
@@ -388,6 +369,9 @@ func load_game(slot: int = -1) -> bool:
 				
 				var loaded_obj_path = data.get("current_objective_path", "")
 				var loaded_obj_text = data.get("current_objective_text", "")
+				current_objective = null
+				current_objective_text = ""
+				objective_changed.emit()
 				if loaded_obj_text != "":
 					call_deferred("_restore_objective", loaded_obj_path, loaded_obj_text)
 					
@@ -427,3 +411,7 @@ func reset_data(slot: int = -1) -> void:
 	stamina_changed.emit(stamina, max_stamina)
 	level_changed.emit(level)
 	exp_changed.emit(experience, exp_to_next)
+	
+	current_objective = null
+	current_objective_text = ""
+	objective_changed.emit()

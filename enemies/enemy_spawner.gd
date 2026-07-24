@@ -64,6 +64,8 @@ func _spawn_enemy(index: int) -> void:
 	
 	if "is_active" in enemy:
 		enemy.is_active = false # Always start asleep, activate sequentially
+	if "is_dynamic" in enemy:
+		enemy.is_dynamic = true
 	if "can_auto_wake" in enemy:
 		enemy.can_auto_wake = auto_wake
 		
@@ -94,8 +96,12 @@ func _on_enemy_died(enemy: Node3D) -> void:
 		return
 		
 	var tree = get_tree()
-	if tree == null:
-		return
+	if tree == null: return
+	
+	if tree and tree.current_scene:
+		var scene_path = tree.current_scene.scene_file_path
+		var node_path_str = str(tree.current_scene.get_path_to(self))
+		PlayerData.set_object_state(scene_path, node_path_str, {"remaining_enemies": _living_enemies.size()})
 		
 	if _living_enemies.size() > 0:
 		var timer = tree.create_timer(respawn_delay)
@@ -121,5 +127,10 @@ func _on_nest_cleared() -> void:
 			PlayerData.set_objective(next_obj)
 
 	
+	if get_tree() and get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var node_path_str = str(get_tree().current_scene.get_path_to(self))
+		PlayerData.set_object_state(scene_path, node_path_str, {"is_cleared": true, "remaining_enemies": 0})
+		
 	# The nest is dead, remove the spawner
 	queue_free()

@@ -210,6 +210,7 @@ func _start_dialog() -> void:
 	
 	if not is_helped:
 		is_helped = true
+		_save_state()
 		var frog_nodes = get_tree().get_nodes_in_group("npc_frog")
 		var helped_count = 0
 		for f in frog_nodes:
@@ -250,6 +251,7 @@ func _start_dialog() -> void:
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 				has_given_minigame = true
 				PlayerData.minigame_started = true
+				_save_state()
 				
 				PlayerData.set_objective(null, "Explore the wetlands")
 				
@@ -267,6 +269,7 @@ func _start_dialog() -> void:
 		else:
 			if not is_intro_done:
 				is_intro_done = true
+				_save_state()
 				PlayerData.lolo_palaka_intro_done = true
 				hud.show_subtitle("Lolo Palaka", '"A strange skin you wear, traveler... but you carry the heartbeat of the marsh. It has been many seasons since these waters were quiet enough to think."')
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
@@ -329,13 +332,22 @@ func _start_dialog() -> void:
 	_is_talking = false
 
 func _find_anim_player(node: Node) -> AnimationPlayer:
-	if node is AnimationPlayer:
-		return node
+	if node is AnimationPlayer: return node
 	for child in node.get_children():
-		var result = _find_anim_player(child)
-		if result:
-			return result
+		var ap = _find_anim_player(child)
+		if ap: return ap
 	return null
+
+func _save_state() -> void:
+	if get_tree() and get_tree().current_scene:
+		var scene_path = get_tree().current_scene.scene_file_path
+		var node_path_str = str(get_tree().current_scene.get_path_to(self))
+		var state = {
+			"is_helped": is_helped,
+			"is_intro_done": is_intro_done,
+			"has_given_minigame": has_given_minigame
+		}
+		PlayerData.set_object_state(scene_path, node_path_str, state)
 
 func _wait_for_movement_and_show_tutorial(hud: Node) -> void:
 	if not hud.has_method("show_tutorial"): return

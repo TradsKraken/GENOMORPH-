@@ -8,6 +8,7 @@ extends CharacterBody3D
 
 var health: float
 var is_dead: bool = false
+var is_dynamic: bool = false
 var target: Node3D = null
 
 var _hp_bg: Sprite3D
@@ -20,7 +21,7 @@ func _ready() -> void:
 	health = max_health
 	add_to_group("enemies")
 	
-	if get_tree().current_scene:
+	if not is_dynamic and get_tree().current_scene:
 		var scene_path = get_tree().current_scene.scene_file_path
 		var node_path_str = str(get_tree().current_scene.get_path_to(self))
 		if PlayerData.is_object_destroyed(scene_path, node_path_str):
@@ -154,7 +155,7 @@ func die() -> void:
 	if is_dead: return
 	is_dead = true
 	
-	if get_tree().current_scene:
+	if not is_dynamic and get_tree().current_scene:
 		var scene_path = get_tree().current_scene.scene_file_path
 		var node_path_str = str(get_tree().current_scene.get_path_to(self))
 		PlayerData.mark_object_destroyed(scene_path, node_path_str)

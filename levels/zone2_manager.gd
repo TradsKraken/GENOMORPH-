@@ -46,8 +46,8 @@ func _process(delta: float) -> void:
 			var dist = player.global_position.distance_to(_nests[0].global_position)
 			if dist < 80.0 and PlayerData.genome_fragments >= 1: # Player is in Zone 2 AND finished Zone 1
 				_start_zone_2(hud)
-			elif PlayerData.frogs_helped >= PlayerData.total_frogs and PlayerData.minigame_started:
-				# Player has finished Zone 1 (talked to Lolo Palaka) but isn't in Zone 2 yet. Point them to the swamp!
+			elif PlayerData.genome_fragments >= 1:
+				# Player has finished Zone 1 (cleared final swarm) but isn't in Zone 2 yet. Point them to the swamp!
 				if PlayerData.current_objective != _nests[0]:
 					PlayerData.set_objective(_nests[0], "Head deeper into the swamp")
 				
