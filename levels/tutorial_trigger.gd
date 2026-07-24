@@ -6,6 +6,7 @@ class_name TutorialTrigger
 @export var requires_manual_trigger: bool = false
 
 var _triggered: bool = false
+var _is_cleared: bool = false
 var _active_enemies: Array[Node] = []
 
 func _ready() -> void:
@@ -17,6 +18,23 @@ func _ready() -> void:
 		var saved_state = PlayerData.get_object_state(scene_path, node_path_str)
 		if saved_state.size() > 0:
 			_triggered = saved_state.get("triggered", false)
+			_is_cleared = saved_state.get("is_cleared", false)
+			
+			if _triggered and trigger_type == 4 and not _is_cleared:
+				# It was triggered but the minigame hasn't finished yet!
+				# We must re-populate the active enemies list from the saved scene state
+				for path in minigame_enemies:
+					var node = get_node_or_null(path)
+					if node and is_instance_valid(node):
+						if node is EnemySpawner and not node._is_nest_cleared:
+							_active_enemies.append(node)
+						elif node is EnemyBase and not node.is_dead:
+							_active_enemies.append(node)
+				
+				if _active_enemies.size() > 0:
+					set_process(true)
+			elif _is_cleared:
+				set_process(false)
 
 func _on_body_entered(body: Node3D) -> void:
 	if _triggered or requires_manual_trigger or not body.is_in_group("player"):
@@ -130,6 +148,8 @@ func _process(delta: float) -> void:
 		set_process(false)
 		
 		# Minigame over, clear objective!
+		_is_cleared = true
+		_save_state()
 		if hud and hud.has_method("remove_minimap_marker"):
 			hud.remove_minimap_marker(self)
 		PlayerData.set_objective(null, "Explore the wetlands")
@@ -155,4 +175,4 @@ func _save_state() -> void:
 	if get_tree().current_scene:
 		var scene_path = get_tree().current_scene.scene_file_path
 		var node_path_str = str(get_tree().current_scene.get_path_to(self))
-		PlayerData.set_object_state(scene_path, node_path_str, {"triggered": _triggered})
+		PlayerData.set_object_state(scene_path, node_path_str, {"triggered": _triggered, "is_cleared": _is_cleared})
