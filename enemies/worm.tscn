@@ -1,7 +1,6 @@
-[gd_scene format=3 uid="uid://do4j1k1p2q3r"]
+[gd_scene load_steps=3 format=3 uid="uid://do4j1k1p2q3r"]
 
 [ext_resource type="Script" path="res://enemies/worm.gd" id="1_worm"]
-[ext_resource type="PackedScene" path="res://Models/Worm/Worm.glb" id="2_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_worm"]
 radius = 0.2
@@ -14,4 +13,4 @@ script = ExtResource("1_worm")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.2, 0)
 shape = SubResource("CapsuleShape3D_worm")
 
-[node name="WormModel" parent="." instance=ExtResource("2_model")]
+[node name="Visuals" type="Node3D" parent="."]
