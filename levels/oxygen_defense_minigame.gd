@@ -152,6 +152,7 @@ func _win_minigame() -> void:
 		
 	AudioManager.play_sfx("level_up")
 	PlayerData.add_genome_fragment()
+	PlayerData.unlock_knowledge("mudfish")
 	PlayerData.set_objective(null, "Explore the wetlands")
 	
 	# Save state

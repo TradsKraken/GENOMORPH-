@@ -156,40 +156,162 @@ func _do_level_up() -> void:
 
 const KNOWLEDGE_DB: Dictionary = {
 	"mosquito": {
-		"title": "Mosquito",
+		"title": "Mosquito Swarm",
 		"category": "Species",
+		"subcategory": "Invasive Insect",
 		"icon": "⬡",
-		"desc": "Mosquitoes can become highly invasive when introduced to non-native environments. They aggressively outcompete native species for breeding sites in stagnant water and disrupt local food webs. Furthermore, they act as prolific vectors for diseases, which can decimate local wildlife populations that lack natural immunity."
+		"classification": "Culex sp. / Aedes sp.",
+		"threat_level": "HIGH",
+		"summary": "Mosquito swarms are among the most ecologically damaging invasive insects in enclosed wetland biomes. Their ability to breed rapidly in stagnant water makes eradication difficult without disrupting native ecosystems.",
+		"facts": [
+			"A single female mosquito can lay up to 300 eggs in a single batch.",
+			"They carry and transmit pathogens like malaria, dengue, and West Nile virus.",
+			"Swarms compete with native dragonfly larvae and small fish for breeding sites.",
+			"Their population can double every 48 hours in a warm, stagnant environment.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Strike the swarm's center of mass. Disrupting the core will scatter the entire colony."
 	},
 	"swamp": {
-		"title": "Toxic Swamp",
+		"title": "Toxic Swamp Biome",
 		"category": "Environment",
+		"subcategory": "Contaminated Wetland",
 		"icon": "⌬",
-		"desc": "A hazardous wetland teeming with aggressive flora and fauna. The water itself is highly acidic, slowly eating away at any organic matter submerged in it."
+		"classification": "Biome Class IV — Hazardous",
+		"threat_level": "MODERATE",
+		"summary": "A severely degraded wetland ecosystem, now characterized by hypoxic water, acidic soil, and a collapse of native biodiversity. Once a thriving freshwater habitat, it now acts as an incubator for invasive and mutated species.",
+		"facts": [
+			"Wetlands naturally filter up to 90% of pollutants before water reaches rivers.",
+			"Hypoxic (oxygen-poor) water kills most native fish within hours of exposure.",
+			"Acidic swamp water (pH < 5) corrodes organic matter and dissolves minerals from the soil.",
+			"Despite toxicity, some species have evolved resistance, becoming apex predators in this disrupted niche.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Avoid prolonged submersion in swamp water. Your suit's biological filters have a finite capacity."
 	},
 	"lolo_palaka": {
 		"title": "Lolo Palaka",
 		"category": "Characters",
+		"subcategory": "Elder / Guide",
 		"icon": "◈",
-		"desc": "A wise old amphibian who guides young tadpoles through the dangerous environment. Often speaks in riddles."
+		"classification": "Amphibian — Native",
+		"threat_level": "ALLY",
+		"summary": "An elder frog of remarkable longevity who has survived the ecosystem's collapse through wisdom and adaptation. He is the last keeper of pre-Collapse environmental knowledge in the wetland.",
+		"facts": [
+			"He has memorized the original migration routes of all native species before The Collapse.",
+			"His croaking contains encoded biological data interpretable by the GenoMorph suit.",
+			"He leads a small community of surviving native species in the deeper, less-polluted zones.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Speak with Lolo Palaka to receive biological wisdom and unlock new objectives."
 	},
 	"genomorph_suit": {
 		"title": "GenoMorph Prototype",
 		"category": "Technology",
+		"subcategory": "Biotech — Adaptive Suit",
 		"icon": "⌬",
-		"desc": "A cutting-edge biological shape-shifting suit designed to adapt to extreme environments by assimilating local genome fragments."
+		"classification": "Classified — Project GENESIS",
+		"threat_level": "ASSET",
+		"summary": "A cutting-edge experimental suit that assimilates local genome data to unlock biological adaptations. The suit's core function is to integrate fragments of local DNA, adapting the wearer's physiology to survive in extreme environments.",
+		"facts": [
+			"The suit uses lateral gene transfer (LGT) principles found in bacteria and archaea.",
+			"Each Genome Fragment contains compressed DNA data from a native or invasive species.",
+			"The suit's AI cross-references absorbed genomes to synthesize viable hybrid adaptations.",
+			"Overloading the suit with incompatible genomes can trigger an unstable mutation cascade.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Collect all 12 Genome Fragments to unlock the suit's full potential."
 	},
 	"dr_sterling": {
 		"title": "Dr. Alistair Sterling",
 		"category": "Characters",
+		"subcategory": "Researcher / Handler",
 		"icon": "◈",
-		"desc": "The lead researcher and creator of the GenoMorph project. He monitors the suit's telemetry from a secure clinical laboratory."
+		"classification": "Project GENESIS — Lead Scientist",
+		"threat_level": "UNKNOWN",
+		"summary": "The architect of the GenoMorph project and the primary handler communicating via the suit's comm-link. His motivations appear scientific, though certain logged transmissions suggest a hidden agenda behind the fieldwork.",
+		"facts": [
+			"His published research covers lateral gene transfer and cross-species genome integration.",
+			"He monitors the suit's vitals and genome absorption rate in real-time from a remote lab.",
+			"Suit logs indicate he has run four previous field trials, all resulting in data loss.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Trust Sterling's tactical guidance, but question his strategic motivations."
 	},
 	"the_collapse": {
 		"title": "The Collapse",
 		"category": "History",
+		"subcategory": "Ecological Event",
 		"icon": "⬡",
-		"desc": "The ecological catastrophe that decimated the region's diverse ecosystems, leaving behind highly toxic and mutated zones."
+		"classification": "Event — Year 0 of Current Timeline",
+		"threat_level": "CRITICAL",
+		"summary": "A cascading ecological catastrophe triggered by a combination of industrial pollution and the mass introduction of invasive species. Within a decade, over 70% of native species in the region were classified as locally extinct.",
+		"facts": [
+			"The event began with uncontrolled industrial runoff contaminating the primary water table.",
+			"Invasive species, introduced via the supply chain, exploited the weakened ecosystem.",
+			"Native apex predators collapsed first, removing population controls on smaller species.",
+			"The contamination is now self-sustaining due to the sediment layer of industrial byproducts.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Understanding The Collapse is key to understanding the behavior of every species you encounter."
+	},
+	"giant_african_snail": {
+		"title": "Giant African Snail",
+		"category": "Species",
+		"subcategory": "Invasive Gastropod",
+		"icon": "⬡",
+		"classification": "Lissachatina fulica",
+		"threat_level": "HIGH",
+		"summary": "One of the most destructive invasive land mollusks on Earth. Introduced via the supply chain during pre-Collapse industrialization, it has since bred unchecked and outcompeted all native snail species.",
+		"facts": [
+			"It can consume over 500 plant species, making it a devastating agricultural and ecological threat.",
+			"A single snail is hermaphroditic and can produce up to 1,200 eggs per year.",
+			"Its mucus trail contains irritant compounds that are toxic to small amphibians on direct contact.",
+			"It carries the rat lungworm parasite (Angiostrongylus cantonensis), harmful to mammals.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Keep distance from its spit arc. Its toxin corrodes your suit's biological membrane."
+	},
+	"healing_worm": {
+		"title": "Regenerative Earthworm",
+		"category": "Species",
+		"subcategory": "Mutated Annelid",
+		"icon": "⬡",
+		"classification": "Oligochaeta sp. (Mutated)",
+		"threat_level": "LOW",
+		"summary": "A mutated descendant of native earthworms that absorbed trace genomic data from the contamination event. It has developed accelerated cellular regeneration as a survival mechanism, making it a valuable biological resource.",
+		"facts": [
+			"Standard earthworms aerate up to 2 tonnes of soil per hectare annually, critical to soil health.",
+			"This variant's cells divide 40x faster than its non-mutated counterparts.",
+			"When consumed by amphibians, its regenerative enzymes temporarily boost the consumer's own healing.",
+			"Its presence in soil indicates a patch of partially recovering, less-toxic ground.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Collect worms as they flee. Their regenerative properties restore your biological integrity."
+	},
+	"toxic_sludge": {
+		"title": "Toxic Sludge",
+		"category": "Environment",
+		"subcategory": "Chemical Hazard",
+		"icon": "⌬",
+		"classification": "Hazard Class V — Corrosive",
+		"threat_level": "CRITICAL",
+		"summary": "A viscous industrial byproduct that has permanently saturated sections of the wetland. It is a complex mixture of heavy metals, acidic compounds, and mutated biological runoff that actively dissolves organic tissue.",
+		"facts": [
+			"Heavy metals like lead and mercury bioaccumulate up the food chain, causing cascading toxicity.",
+			"The sludge's pH can drop as low as 2.5, similar to gastric acid.",
+			"It permanently renders soil infertile by binding to and neutralizing essential minerals.",
+			"Some extremophile bacteria thrive in it, accelerating the breakdown of surrounding organic matter.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Exit immediately on contact. Prolonged exposure bypasses suit insulation layers."
+	},
+	"mudfish": {
+		"title": "Native Mudfish (Dalag)",
+		"category": "Species",
+		"subcategory": "Keystone Predator",
+		"icon": "◈",
+		"classification": "Channa striata",
+		"threat_level": "ALLY",
+		"summary": "A highly resilient native freshwater predator and ecological keystone species. The Dalag is critical to maintaining wetland biodiversity by controlling invasive fish populations. Its near-extinction is a key indicator of the ecosystem's overall collapse.",
+		"facts": [
+			"It breathes atmospheric air using a labyrinth organ, surviving in oxygen-depleted water.",
+			"Can survive buried in mud for months during dry seasons using estivation.",
+			"As an apex predator, its presence naturally suppresses invasive tilapia and carp populations.",
+			"Young mudfish (fry) are communally protected by both parents, a rare behavior among fish.",
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] The Dalag is a restoration indicator. Protect its young to restore a balanced ecosystem."
 	}
 }
 

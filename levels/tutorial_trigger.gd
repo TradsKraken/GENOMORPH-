@@ -63,6 +63,7 @@ func _on_body_entered(body: Node3D) -> void:
 			if hud.has_method("show_subtitle"): hud.show_subtitle("Sterling", "Careful! This cluster is aggressive. Use your form's natural agility to evade before you strike.")
 		3: # Find_NPC
 			if hud.has_method("show_subtitle"): hud.show_subtitle("Sterling", "Wait. There's a life signature nearby. It's clean... native. Approach carefully and see what the suit's translation matrix can pick up.")
+			PlayerData.unlock_knowledge("lolo_palaka")
 		4: # Minigame_Arena
 			if hud.has_method("show_subtitle"): hud.show_subtitle("Lolo Palaka", "Show me what you can do. Clear the water!")
 

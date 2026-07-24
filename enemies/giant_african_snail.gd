@@ -37,6 +37,9 @@ func _process_movement(delta: float) -> void:
 	
 	var dist_to_target = global_position.distance_to(target.global_position)
 	
+	if dist_to_target <= aggro_range:
+		PlayerData.unlock_knowledge("giant_african_snail")
+	
 	# Lose aggro if too far
 	if dist_to_target > territory_radius:
 		# Return to spawn or just wander

@@ -88,6 +88,9 @@ func _process_movement(delta: float) -> void:
 	var dist_to_player = global_position.distance_to(target.global_position)
 	var dist_player_to_start = target.global_position.distance_to(_start_position)
 	
+	if dist_to_player <= aggro_range:
+		PlayerData.unlock_knowledge("mosquito")
+	
 	match _current_state:
 		State.IDLE:
 			# Wake up if the player is within the territory and within aggro range

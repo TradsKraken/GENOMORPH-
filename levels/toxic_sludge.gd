@@ -19,6 +19,7 @@ func _on_body_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
 		if not _players_inside.has(body):
 			_players_inside.append(body)
+			PlayerData.unlock_knowledge("toxic_sludge")
 
 func _on_body_exited(body: Node3D) -> void:
 	if _players_inside.has(body):

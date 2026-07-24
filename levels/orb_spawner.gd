@@ -6,7 +6,6 @@ extends Node3D
 # ── Exports ───────────────────────────────────────────────────────────────────
 @export var stamina_orb_count: int   = 25
 @export var exp_orb_count: int       = 20
-@export var worm_count: int          = 100
 @export var spawn_radius: float      = 150.0
 @export var clear_radius: float      = 6.0
 @export var orb_height: float        = 1.1
@@ -15,12 +14,10 @@ extends Node3D
 # ── Private ───────────────────────────────────────────────────────────────────
 const _STAMINA_PATH := "res://levels/stamina_orb.gd"
 const _EXP_PATH     := "res://levels/exp_orb.gd"
-const _WORM_PATH    := "res://enemies/worm.tscn"
 
 var _rng:            RandomNumberGenerator = RandomNumberGenerator.new()
 var _stamina_script: GDScript
 var _exp_script:     GDScript
-var _worm_scene:     PackedScene
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
@@ -28,7 +25,6 @@ func _ready() -> void:
 	_rng.randomize()
 	_stamina_script = load(_STAMINA_PATH)
 	_exp_script     = load(_EXP_PATH)
-	_worm_scene     = load(_WORM_PATH)
 	
 	# Wait for physics to sync so raycasts work
 	await get_tree().physics_frame
@@ -37,8 +33,6 @@ func _ready() -> void:
 		_spawn_orb(false)
 	for _i in exp_orb_count:
 		_spawn_orb(true)
-	for _i in worm_count:
-		_spawn_worm()
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -60,25 +54,6 @@ func _spawn_orb(is_exp: bool) -> void:
 	add_child(orb)
 	orb.tree_exited.connect(_on_orb_collected.bind(is_exp))
 
-func _spawn_worm() -> void:
-	if not _worm_scene: return
-	var pos := _random_position()
-	var worm = _worm_scene.instantiate()
-	
-	var final_y = 1.0 
-	var space_state = get_world_3d().direct_space_state
-	if space_state:
-		var origin = Vector3(pos.x, 200.0, pos.y)
-		var target = Vector3(pos.x, -100.0, pos.y)
-		var params = PhysicsRayQueryParameters3D.create(origin, target)
-		var result = space_state.intersect_ray(params)
-		if result.has("position"):
-			final_y = result.position.y + 0.5 
-			
-	worm.position = Vector3(pos.x, final_y, pos.y)
-	add_child(worm)
-	worm.tree_exited.connect(_on_worm_killed)
-
 
 func _on_orb_collected(is_exp: bool) -> void:
 	if not is_inside_tree():
@@ -90,14 +65,6 @@ func _on_orb_collected(is_exp: bool) -> void:
 	await tree.create_timer(respawn_delay).timeout
 	if is_inside_tree():
 		_spawn_orb(is_exp)
-
-func _on_worm_killed() -> void:
-	if not is_inside_tree(): return
-	var tree := get_tree()
-	if tree == null: return
-	await tree.create_timer(respawn_delay * 2.0).timeout
-	if is_inside_tree():
-		_spawn_worm()
 
 
 func _random_position() -> Vector2:
