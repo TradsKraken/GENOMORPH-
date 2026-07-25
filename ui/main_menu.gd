@@ -1,6 +1,6 @@
 ﻿extends Control
 
-# â”€â”€ Node refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Node refs ────────────────────────────────────────────────────────────────
 @onready var _title_label: Label       = $Background/ContentAnchor/ContentBox/TitleLabel
 @onready var _tagline_label: Label     = $Background/ContentAnchor/ContentBox/TaglineLabel
 @onready var _start_btn: Button        = $Background/ContentAnchor/ContentBox/ButtonContainer/NewGameButton
@@ -10,12 +10,12 @@
 @onready var _background_root: Control = $Background
 @onready var _version_label: Label     = $Background/VersionLabel
 
-# â”€â”€ Particle state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Particle state ────────────────────────────────────────────────────────────
 var _particles: Array[Dictionary] = []
 var _time: float = 0.0
 const PARTICLE_COUNT := 45
 
-# â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
 	if AudioManager and AudioManager.has_method("fade_to_main_menu_bgm"):
@@ -70,7 +70,7 @@ func _ready() -> void:
 	
 	# Dynamically show the version number from project settings
 	var app_version = ProjectSettings.get_setting("application/config/version", "0.1.0")
-	_version_label.text = "v" + str(app_version) + " â€” GENOMORPH"
+	_version_label.text = "v" + str(app_version) + " — GENOMORPH"
 	
 	_spawn_background_world()
 	
@@ -159,7 +159,7 @@ func _process(delta: float) -> void:
 	_particle_layer.queue_redraw()
 
 
-# â”€â”€ Background World Instantiation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Background World Instantiation ───────────────────────────────────────────
 
 func _spawn_background_world() -> void:
 	# Create a SubViewportContainer and SubViewport to render the 3D scene
@@ -219,7 +219,7 @@ void fragment() {
 	_background_root.move_child(blur_overlay, 1)
 
 
-# â”€â”€ Particles â€” warm firefly / spore effect â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Particles — warm firefly / spore effect ───────────────────────────────────
 
 func _spawn_particles() -> void:
 	var vp := get_viewport_rect().size
@@ -258,7 +258,7 @@ func _on_particle_layer_draw() -> void:
 			_particle_layer.draw_circle(pos, s * 1.1, Color(col.r, col.g, col.b, col.a * 0.18))
 
 
-# â”€â”€ Button callbacks â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Button callbacks ──────────────────────────────────────────────────────────
 
 func _on_new_game_pressed() -> void:
 	var play_menu = preload("res://ui/play_menu.gd").new()

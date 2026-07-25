@@ -136,6 +136,9 @@ func _ready() -> void:
 	_update_skills_tab_title(PlayerData.skill_points)
 	if PlayerData.has_signal("skill_points_changed"):
 		PlayerData.skill_points_changed.connect(_update_skills_tab_title)
+		
+	if PlayerData.skill_points > 0:
+		_tab_container.current_tab = 1
 	
 	add_child(_panel)
 

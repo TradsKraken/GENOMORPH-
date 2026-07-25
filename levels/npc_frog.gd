@@ -280,7 +280,7 @@ func _start_dialog() -> void:
 				hud.show_subtitle("Lolo Palaka", '"Ah, the biters. They are not the root of the sickness, but a symptom of the broken circle. When the toxic sludge poisoned the deep waters, the hunters died. Without us to keep them in check, the swarms multiply without end. They are a plague born from an empty throne."')
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 				
-				hud.show_subtitle("Volunteer (Player)", '"Population dynamics. Without natural predators, the invasive species consume all the resources. So, we need to restore the balance. How do we start?"')
+				hud.show_subtitle("Volunteer (Player)", '"Population dynamics. Without natural predators, the invasive species consume all the resources. So, we need to restore the balance. How do we start—')
 				if hud.has_signal("subtitle_dismissed"): await hud.subtitle_dismissed
 				
 				hud.show_subtitle("Lolo Palaka", '"By remembering what we were made to do. A storm of them approaches our last clean pond. Words will not stop them, little frog. You must thin their numbers before they infect the water."')

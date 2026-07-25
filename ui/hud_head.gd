@@ -3,7 +3,7 @@ extends CanvasLayer
 ## Clean, modern game HUD.
 ## Sleek bars, circular badges, translucent backgrounds.
 
-# â”€â”€ Colors & Styling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Colors & Styling ──────────────────────────────────────────────────────────
 
 const C_HP       := Color("#ff3b5c")
 const C_STAM     := Color("#9400ff")
@@ -12,7 +12,7 @@ const C_BG_DARK  := Color(0.04, 0.04, 0.06, 0.65)
 const C_BTN_NORM := Color(0.12, 0.13, 0.18, 0.75)
 const C_BTN_PRSS := Color(0.85, 0.88, 0.95, 0.90)
 
-# â”€â”€ Node refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Node refs ─────────────────────────────────────────────────────────────────
 
 var _root:       Control
 var _hp_bar:     ProgressBar
@@ -63,7 +63,7 @@ var _active_highlight_tweens: Dictionary = {}
 
 signal subtitle_dismissed
 
-# â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
 	layer = 10
@@ -110,7 +110,7 @@ func _input(event: InputEvent) -> void:
 				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
 
 
-# â”€â”€ Player Status (Top Left) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Player Status (Top Left) ──────────────────────────────────────────────────
 
 func _build_player_status() -> void:
 	if _root.has_node("StatusGroup"):
@@ -338,7 +338,7 @@ func _hide_genome_popup() -> void:
 	_genome_popup_tween.tween_property(_genome_popup_panel, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE)
 	_genome_popup_tween.tween_callback(func(): _genome_popup_panel.visible = false)
 
-# â”€â”€ Action Buttons (Right / Bottom Right) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Action Buttons (Right / Bottom Right) ────────────────────────────────────────────────────────────
 
 func _build_action_buttons() -> void:
 	# 1. Primary Attack Button (Webbed Lunge)
@@ -522,7 +522,7 @@ func _build_action_buttons() -> void:
 	_quest_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	_quest_btn.pressed.connect(_open_quest_menu)
 
-# â”€â”€ Menu Panel (Centered) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Menu Panel (Centered) ─────────────────────────────────────────────────────
 
 func _build_menu_panel() -> void:
 	if _root.has_node("MenuPanel"):
@@ -718,7 +718,7 @@ func _open_quest_menu() -> void:
 		
 	_quest_panel.visible = true
 
-# â”€â”€ Tutorial / Subtitle Panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Tutorial / Subtitle Panels ────────────────────────────────────────────────────────────
 
 func _build_tutorial_panel() -> void:
 	if _root.has_node("TutorialPanel"):
@@ -821,7 +821,7 @@ func _hide_tutorial() -> void:
 	)
 
 
-# â”€â”€ Subtitle System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Subtitle System ───────────────────────────────────────────────────────────
 
 func _build_subtitle_panel() -> void:
 	if _root.has_node("SubtitlePanel"):
@@ -1008,7 +1008,7 @@ func hide_subtitle() -> void:
 		subtitle_dismissed.emit()
 	)
 
-# â”€â”€ Tutorial UI Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Tutorial UI Controls ──────────────────────────────────────────────────────
 
 func hide_action_buttons() -> void:
 	if _attack_btn: _attack_btn.modulate.a = 0.0
@@ -1108,7 +1108,7 @@ func flash_dodge() -> void:
 			tw.tween_property(_jump_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.15)
 
 
-# â”€â”€ Cancel Zone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Cancel Zone ───────────────────────────────────────────────────────────────
 
 func _build_cancel_zone() -> void:
 	if _root.has_node("CancelZone"):
@@ -1145,7 +1145,7 @@ func _build_cancel_zone() -> void:
 	_cancel_zone.visible = false
 	_root.add_child(_cancel_zone)
 
-# â”€â”€ Interact API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Interact API ──────────────────────────────────────────────────────────────
 
 func show_interact(text: String, callback: Callable, source: Node) -> void:
 	_current_interact_source = source
@@ -1165,7 +1165,7 @@ func _on_interact_pressed() -> void:
 
 
 
-# â”€â”€ Action Button Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Action Button Logic ───────────────────────────────────────────────────────
 
 var _is_aiming_jump: bool = false
 var _jump_start_pos: Vector2
@@ -1228,7 +1228,7 @@ func _on_jump_btn_input(event: InputEvent) -> void:
 			if player.has_method("update_aim_jump"):
 				player.update_aim_jump(mapped_vec, is_cancelled)
 
-# â”€â”€ Signals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Signals ───────────────────────────────────────────────────────────────────
 
 func _connect_signals() -> void:
 	var pd = PlayerData
@@ -1360,7 +1360,7 @@ func _on_objective_changed(target: Node3D) -> void:
 		else:
 			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]" + txt + "[/color]"
 
-# â”€â”€ Notifications / Menus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Notifications / Menus ──────────────────────────────────────────────────────────
 
 func show_float_text(text: String, screen_pos: Vector2, color: Color = Color.WHITE) -> void:
 	var lbl := Label.new()
@@ -1379,7 +1379,7 @@ func show_float_text(text: String, screen_pos: Vector2, color: Color = Color.WHI
 	tw.finished.connect(lbl.queue_free)
 
 
-# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 func _make_label(text: String, size: int, color: Color) -> Label:
 	var lbl := Label.new()
@@ -1522,7 +1522,7 @@ func _panel_btn(text: String, col: Color = Color.WHITE) -> Button:
 	btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	return btn
 
-# â”€â”€ Prologue Sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ── Prologue Sequence ─────────────────────────────────────────────────────────
 
 func play_boot_sequence() -> void:
 	var boot_overlay = ColorRect.new()
