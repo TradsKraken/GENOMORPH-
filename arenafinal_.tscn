@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://bk2odb7mmjch4"]
+
+[ext_resource type="PackedScene" uid="uid://dtan3yma1ufcj" path="res://Models/ARENA/ARENAFINAL .glb" id="1_5qq16"]
+
+[node name="ARENAFINAL " unique_id=32135949 instance=ExtResource("1_5qq16")]
