@@ -7,7 +7,7 @@ extends Node3D
 var boss_instance: Node3D
 
 func _ready() -> void:
-	_ensure_player_and_hud()
+	call_deferred("_ensure_player_and_hud")
 	_generate_arena()
 	call_deferred("_spawn_boss")
 	
@@ -51,18 +51,56 @@ func _ensure_player_and_hud() -> void:
 		if hud_scene:
 			var hud = hud_scene.instantiate()
 			add_child(hud)
+			
+	# Add lighting if missing
+	var has_light = false
+	for child in get_children():
+		if child is DirectionalLight3D:
+			has_light = true
+			break
+	if not has_light:
+		var light = DirectionalLight3D.new()
+		light.rotation_degrees = Vector3(-45, 45, 0)
+		light.light_color = Color(0.9, 0.85, 0.65)
+		light.light_energy = 0.85
+		light.shadow_enabled = true
+		add_child(light)
+		
+	# Add WorldEnvironment if missing
+	var has_env = false
+	for child in get_children():
+		if child is WorldEnvironment:
+			has_env = true
+			break
+	if not has_env:
+		var env = Environment.new()
+		env.background_mode = Environment.BG_COLOR
+		env.background_color = Color(0.3, 0.45, 0.35)
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.ambient_light_color = Color(0.65, 0.7, 0.8)
+		env.ambient_light_energy = 0.8
+		env.tonemap_mode = Environment.TONE_MAPPER_ACES
+		env.glow_enabled = true
+		env.glow_bloom = 0.1
+		var world_env = WorldEnvironment.new()
+		world_env.environment = env
+		add_child(world_env)
 
 	
 func _generate_arena() -> void:
-	# Create a massive invisible floor so the player doesn't fall through the model
+	# Generate precise trimesh collision for the arena floor (plane_002)
+	var arena_model = get_node_or_null("ArenaModel")
+	if arena_model:
+		_generate_mesh_collision(arena_model)
+		
+	# Fallback flat floor just in case the mesh isn't found
 	var floor_body = StaticBody3D.new()
 	var floor_col = CollisionShape3D.new()
 	var box = BoxShape3D.new()
 	box.size = Vector3(200, 2, 200)
 	floor_col.shape = box
 	floor_body.add_child(floor_col)
-	# Set just below the visual surface (Y=0) so the top of the box is at Y=0
-	floor_body.global_position = Vector3(0, -1, 0)
+	floor_body.global_position = Vector3(0, -2, 0) # Moved down to -2 so it doesn't clip with the real mesh floor
 	add_child(floor_body)
 
 	# Spawn water pools (healing zones)
@@ -132,6 +170,13 @@ func _spawn_log(pos: Vector3) -> void:
 	log_body.rotation.y = randf() * PI
 
 func _spawn_boss() -> void:
+	# Check if the user manually placed the boss in the editor
+	var existing_enemies = get_tree().get_nodes_in_group("enemies")
+	for enemy in existing_enemies:
+		if "boss" in enemy.name.to_lower() or "chimera" in enemy.name.to_lower():
+			boss_instance = enemy
+			return
+
 	if boss_scene:
 		boss_instance = boss_scene.instantiate()
 		add_child(boss_instance)
@@ -158,3 +203,10 @@ func on_boss_defeated() -> void:
 		
 	# The DNA fragment is dropped by the boss script. When the player picks it up, 
 	# it will trigger PlayerData.unlock_genome("avian_form")
+
+func _generate_mesh_collision(node: Node) -> void:
+	if node is MeshInstance3D and "plane_002" in node.name.to_lower():
+		node.create_trimesh_collision()
+		
+	for child in node.get_children():
+		_generate_mesh_collision(child)

@@ -25,8 +25,28 @@ var _spin_active: bool = false
 
 var shell_mesh: Node3D
 var core_mesh: Node3D
+var anim_player: AnimationPlayer
+
+func _find_anim(node: Node) -> AnimationPlayer:
+	if node is AnimationPlayer: return node
+	for c in node.get_children():
+		var a = _find_anim(c)
+		if a: return a
+	return null
+
+func _play_anim(anim_name: String, override: bool = false) -> void:
+	if not anim_player: return
+	if anim_player.current_animation == anim_name and not override: return
+	
+	if not override:
+		var current = anim_player.current_animation
+		if current in ["Attack", "Jump", "spit"] and anim_player.is_playing():
+			return
+			
+	anim_player.play(anim_name)
 
 func _ready() -> void:
+	anim_player = _find_anim(self)
 	max_health = 500.0 # Boss health
 	speed = 2.0
 	exp_value = 200.0
@@ -90,9 +110,12 @@ func _process_movement(delta: float) -> void:
 		_stun_timer -= delta
 		if _stun_timer <= 0:
 			_is_stunned = false
+		_play_anim("Idle")
 		return
 		
-	if not is_instance_valid(target): return
+	if not is_instance_valid(target):
+		_play_anim("Idle")
+		return
 	
 	if _is_charging:
 		_process_charge(delta)
@@ -137,6 +160,11 @@ func _process_movement(delta: float) -> void:
 		if not is_on_floor():
 			velocity.y -= 20.0 * delta
 		move_and_slide()
+		
+		if velocity.length() > 0.1:
+			_play_anim("rUN")
+		else:
+			_play_anim("Idle")
 
 func _choose_attack() -> void:
 	velocity = Vector3.ZERO
@@ -166,6 +194,7 @@ func _choose_attack() -> void:
 func _start_spit_volley() -> void:
 	_current_attack = "spit_volley"
 	_attack_timer = 2.0
+	_play_anim("spit", true)
 	_fire_spit_spread(3, 30.0)
 
 func _fire_spit_spread(count: int, spread_deg: float) -> void:
@@ -189,6 +218,7 @@ func _start_shell_slam() -> void:
 	_current_attack = "shell_slam"
 	_attack_timer = 2.5
 	_slam_timer = 1.0 # 1 sec windup
+	_play_anim("Jump", true)
 
 func _execute_slam() -> void:
 	# AoE Damage logic
@@ -210,6 +240,7 @@ func _spawn_sludge(pos: Vector3) -> void:
 func _start_toxic_nova() -> void:
 	_current_attack = "toxic_nova"
 	_attack_timer = 3.0
+	_play_anim("Attack", true)
 	_fire_spit_spread(12, 360.0)
 
 func _start_rapid_barrage() -> void:
@@ -217,6 +248,7 @@ func _start_rapid_barrage() -> void:
 	_attack_timer = 3.0
 	_slam_sequence_step = 6
 	_slam_timer = 0.2 # fire every 0.2s
+	_play_anim("spit", true)
 
 func _start_charge() -> void:
 	_current_attack = "charge"
@@ -224,6 +256,7 @@ func _start_charge() -> void:
 	_charge_timer = 2.0
 	_charge_dir = (target.global_position - global_position).normalized()
 	_charge_dir.y = 0
+	_play_anim("rUN", true)
 	AudioManager.play_sfx("roar", 1.0)
 
 func _process_charge(delta: float) -> void:
@@ -253,6 +286,7 @@ func _start_spinning() -> void:
 	_current_attack = "spinning"
 	_spin_active = true
 	_attack_timer = 4.0
+	_play_anim("Attack", true)
 
 func _check_spin_collision() -> void:
 	if not is_instance_valid(target): return
@@ -263,6 +297,7 @@ func _check_spin_collision() -> void:
 func _start_puddle_summon() -> void:
 	_current_attack = "puddle_summon"
 	_attack_timer = 2.0
+	_play_anim("Attack", true)
 	if is_instance_valid(target):
 		_spawn_sludge(target.global_position)
 		_spawn_sludge(target.global_position + Vector3(3, 0, 0))
@@ -273,6 +308,7 @@ func _start_final_slam() -> void:
 	_attack_timer = 4.0
 	_slam_sequence_step = 3
 	_slam_timer = 0.8
+	_play_anim("Jump", true)
 
 func _process_attack_sequence(delta: float) -> void:
 	if _current_attack == "shell_slam":
