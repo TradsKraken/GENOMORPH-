@@ -1,6 +1,9 @@
-[gd_scene format=3 uid="uid://dwlyw7rgffsde"]
+[gd_scene load_steps=3 format=3 uid="uid://bossarenachimera123"]
 
 [ext_resource type="Script" uid="uid://zone4managerid" path="res://levels/zone4_manager.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://Models/ARENA/ARENAFINAL .glb" id="2_model"]
 
 [node name="Zone4_BossArena" type="Node3D" groups=["zone4_manager"]]
 script = ExtResource("1_script")
+
+[node name="ArenaModel" parent="." instance=ExtResource("2_model")]

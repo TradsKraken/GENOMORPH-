@@ -1,6 +1,27 @@
-﻿[gd_scene load_steps=2 format=3 uid="uid://boss_portal123"]
+[gd_scene load_steps=5 format=3 uid="uid://boss_portal123"]
 
 [ext_resource type="Script" path="res://levels/boss_portal.gd" id="1_script"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_portal"]
+radius = 3.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_portal"]
+albedo_color = Color(0.2, 0.8, 1, 0.8)
+emission_enabled = true
+emission = Color(0.1, 0.6, 1, 1)
+emission_energy_multiplier = 2.0
+transparency = 1
+
+[sub_resource type="SphereMesh" id="SphereMesh_portal"]
+material = SubResource("StandardMaterial3D_portal")
+radius = 3.0
+height = 6.0
+
 [node name="BossPortal" type="Area3D"]
 script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_portal")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_portal")

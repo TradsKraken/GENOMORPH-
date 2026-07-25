@@ -60,7 +60,7 @@ func _spawn_enemy(index: int) -> void:
 	# Position in a circle around the spawner
 	var angle = (float(index) / max_spawns) * TAU
 	var offset = Vector3(cos(angle), 0, sin(angle)) * spawn_radius
-	enemy.global_position = global_position + offset
+	enemy.position = global_position + offset
 	
 	if "is_active" in enemy:
 		enemy.is_active = false # Always start asleep, activate sequentially

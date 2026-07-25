@@ -7,55 +7,63 @@ extends Node3D
 var boss_instance: Node3D
 
 func _ready() -> void:
+	_ensure_player_and_hud()
 	_generate_arena()
 	call_deferred("_spawn_boss")
 	
-func _generate_arena() -> void:
-	# Semi-circular arena bounded by trees/reeds
-	var center = Vector3(0, 0, 0)
-	var radius = 25.0
+func _ensure_player_and_hud() -> void:
+	# Add player if missing
+	if not get_tree().get_nodes_in_group("player"):
+		var player_scene = load("res://player/player.tscn")
+		if player_scene:
+			var player = player_scene.instantiate()
+			player.name = "Player"
+			player.global_position = Vector3(0, 2, 8)
+			add_child(player)
+			
+	# Add camera if missing
+	var has_cam = false
+	for cam in get_tree().get_nodes_in_group("camera"):
+		has_cam = true
+		break
 	
-	if tree_scene:
-		# Draw a semi-circle of trees
-		for i in range(30):
-			var angle = PI + (PI * i / 29.0) # PI to 2PI (bottom half)
-			var pos = center + Vector3(cos(angle)*radius, 0, sin(angle)*radius)
-			var tree = tree_scene.instantiate()
-			add_child(tree)
-			tree.global_position = pos
-			tree.rotation.y = randf() * TAU
-			tree.scale = Vector3.ONE * randf_range(1.5, 2.5)
-	else:
-		# Procedural primitive trees
-		for i in range(30):
-			var angle = PI + (PI * i / 29.0)
-			var pos = center + Vector3(cos(angle)*radius, 0, sin(angle)*radius)
-			_spawn_primitive_tree(pos)
+	if not has_cam:
+		var cam_scene = load("res://player/camera_3d.tscn")
+		if not cam_scene:
+			# Fallback if no dedicated camera scene
+			var cam = Camera3D.new()
+			var script = load("res://levels/camera_3d.gd")
+			if script:
+				cam.set_script(script)
+			cam.global_position = Vector3(0, 15, 10)
+			cam.rotation_degrees = Vector3(-45, 0, 0)
+			cam.add_to_group("camera")
+			add_child(cam)
+		else:
+			var cam = cam_scene.instantiate()
+			add_child(cam)
+			
+	# Add HUD if missing
+	if not get_tree().get_nodes_in_group("hud"):
+		var hud_scene = load("res://ui/hud_head.tscn")
+		if not hud_scene:
+			hud_scene = load("res://ui/hud.tscn")
+		if hud_scene:
+			var hud = hud_scene.instantiate()
+			add_child(hud)
 
-func _spawn_primitive_tree(pos: Vector3) -> void:
-	var tree_body = StaticBody3D.new()
-	var col = CollisionShape3D.new()
-	var shape = CylinderShape3D.new()
-	shape.radius = 1.0
-	shape.height = 10.0
-	col.shape = shape
-	col.position.y = 5.0
-	tree_body.add_child(col)
 	
-	var mesh = MeshInstance3D.new()
-	var cyl = CylinderMesh.new()
-	cyl.top_radius = 1.0
-	cyl.bottom_radius = 1.0
-	cyl.height = 10.0
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(0.2, 0.15, 0.05)
-	cyl.material = mat
-	mesh.mesh = cyl
-	mesh.position.y = 5.0
-	tree_body.add_child(mesh)
-	
-	add_child(tree_body)
-	tree_body.global_position = pos
+func _generate_arena() -> void:
+	# Create a massive invisible floor so the player doesn't fall through the model
+	var floor_body = StaticBody3D.new()
+	var floor_col = CollisionShape3D.new()
+	var box = BoxShape3D.new()
+	box.size = Vector3(200, 2, 200)
+	floor_col.shape = box
+	floor_body.add_child(floor_col)
+	# Set just below the visual surface (Y=0) so the top of the box is at Y=0
+	floor_body.global_position = Vector3(0, -1, 0)
+	add_child(floor_body)
 
 	# Spawn water pools (healing zones)
 	_spawn_water_pool(Vector3(-10, 0.1, -5))
@@ -87,6 +95,7 @@ func _spawn_water_pool(pos: Vector3) -> void:
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	cyl.material = mat
 	mesh.mesh = cyl
+	mesh.visible = false # Hide visual mesh, rely on the GLB arena model
 	pool.add_child(mesh)
 	
 	add_child(pool)
@@ -115,6 +124,7 @@ func _spawn_log(pos: Vector3) -> void:
 	cyl.material = mat
 	mesh.mesh = cyl
 	mesh.rotation.z = PI / 2.0
+	mesh.visible = false # Hide visual mesh, rely on the GLB arena model
 	log_body.add_child(mesh)
 	
 	add_child(log_body)

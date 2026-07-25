@@ -1,4 +1,4 @@
-﻿extends Control
+extends Control
 
 # ── Node refs ────────────────────────────────────────────────────────────────
 @onready var _title_label: Label       = $Background/ContentAnchor/ContentBox/TitleLabel
@@ -269,13 +269,21 @@ func _on_new_game_pressed() -> void:
 		get_node("/root/SceneLoader").load_scene("res://ui/prologue.tscn")
 	)
 	play_menu.load_game.connect(func(slot: int):
+		print("DEBUG: load_game signal received for slot: ", slot)
 		if PlayerData.has_save_file(slot):
-			PlayerData.load_game(slot)
+			print("DEBUG: has_save_file is true")
+			var ok = PlayerData.load_game(slot)
+			print("DEBUG: PlayerData.load_game returned ", ok)
+			print("DEBUG: current_scene_path is ", PlayerData.current_scene_path)
 			_anim_player.play("exit")
 			await _anim_player.animation_finished
+			print("DEBUG: animation_finished")
 			if AudioManager and AudioManager.has_method("play_game_bgm"):
 				AudioManager.play_game_bgm()
+			print("DEBUG: Calling SceneLoader...")
 			get_node("/root/SceneLoader").load_scene(PlayerData.current_scene_path)
+		else:
+			print("DEBUG: has_save_file is false")
 	)
 	add_child(play_menu)
 

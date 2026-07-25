@@ -492,11 +492,19 @@ func load_game(slot: int = -1) -> bool:
 					current_scene_path = "res://levels/node_3d.scn"
 				
 				has_saved_position = data.get("has_saved_position", false)
-				player_position = Vector3(
-					data.get("player_pos_x", 0.0),
-					data.get("player_pos_y", 0.0),
-					data.get("player_pos_z", 0.0)
-				)
+				var p_pos = data.get("player_position", {})
+				if typeof(p_pos) == TYPE_DICTIONARY and p_pos.has("x"):
+					player_position = Vector3(
+						p_pos.get("x", 0.0),
+						p_pos.get("y", 0.0),
+						p_pos.get("z", 0.0)
+					)
+				else:
+					player_position = Vector3(
+						data.get("player_pos_x", 0.0),
+						data.get("player_pos_y", 0.0),
+						data.get("player_pos_z", 0.0)
+					)
 				var loaded_world_state: Dictionary = data.get("world_state", {})
 				world_state.clear()
 				for scene in loaded_world_state:
