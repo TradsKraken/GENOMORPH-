@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cfvvetldyujyw"]
+
+[ext_resource type="Script" uid="uid://bosschimerascript" path="res://enemies/boss_chimera.gd" id="1_script"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_chimera"]
+radius = 2.0
+height = 6.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shell"]
+albedo_color = Color(0.3, 0.4, 0.2, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_core"]
+albedo_color = Color(0.9, 0.2, 0.8, 1)
+emission_enabled = true
+emission = Color(0.9, 0.2, 0.8, 1)
+
+[node name="BossChimera" type="CharacterBody3D" groups=["enemies"]]
+script = ExtResource("1_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 2, 0)
+shape = SubResource("CapsuleShape3D_chimera")
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Shell" type="CSGSphere3D" parent="Visuals"]
+transform = Transform3D(1.5, 0, 0, 0, 1.2, 0, 0, 0, 2.0, 0, 2.5, -0.5)
+radius = 2.0
+material = SubResource("StandardMaterial3D_shell")
+
+[node name="Core" type="CSGSphere3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 1.5)
+radius = 1.2
+material = SubResource("StandardMaterial3D_core")

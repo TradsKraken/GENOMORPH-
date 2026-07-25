@@ -406,6 +406,13 @@ func _trigger_splashdown_aoe() -> void:
 		var cam = get_viewport().get_camera_3d()
 		if cam and cam.has_method("add_trauma"):
 			cam.add_trauma(0.6)
+			
+	# Cleanse Toxic Sludge
+	for sludge in get_tree().get_nodes_in_group("toxic_sludge"):
+		if sludge.has_method("cleanse"):
+			var dist = global_position.distance_to(sludge.global_position)
+			if dist <= splash_radius + 2.0: # slightly larger cleanse radius
+				sludge.cleanse()
 
 func _attack() -> void:
 	_time_since_combat = 0.0

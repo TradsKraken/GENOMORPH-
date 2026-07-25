@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dwlyw7rgffsde"]
+
+[ext_resource type="Script" uid="uid://zone4managerid" path="res://levels/zone4_manager.gd" id="1_script"]
+
+[node name="Zone4_BossArena" type="Node3D" groups=["zone4_manager"]]
+script = ExtResource("1_script")

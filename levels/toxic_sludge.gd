@@ -6,8 +6,13 @@ class_name ToxicSludge
 var _players_inside: Array[Node3D] = []
 
 func _ready() -> void:
+	add_to_group("toxic_sludge")
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	
+func cleanse() -> void:
+	AudioManager.play_sfx("splash")
+	queue_free()
 
 func _process(delta: float) -> void:
 	if _players_inside.size() > 0:
