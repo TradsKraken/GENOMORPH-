@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 
 const FOG_SIZE = 512
 const WORLD_SIZE = 500.0 # 500 meters across

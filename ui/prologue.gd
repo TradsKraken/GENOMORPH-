@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 
 var scenes: Array[Dictionary] = [
 	{
@@ -11,92 +11,92 @@ var scenes: Array[Dictionary] = [
 	},
 	{
 		"mood": "degraded", 
-		"label": "ARCHIVAL FOOTAGE — CONT.", 
+		"label": "ARCHIVAL FOOTAGE â€” CONT.", 
 		"speaker": "DR. STERLING (V.O.)",
-		"text": '"This region lost most of its keystones. Not at once. Quietly, over decades — the way a wall loses its mortar."',
+		"text": '"This region lost most of its keystones. Not at once. Quietly, over decades â€” the way a wall loses its mortar."',
 		"dir": 'Same places, degraded. Brown water. Dead trees. Concrete through forest. Bleached reef.',
 		"rec": true
 	},
 	{
 		"mood": "lab", 
-		"label": "INTERIOR — LAB — NIGHT", 
+		"label": "INTERIOR â€” LAB â€” NIGHT", 
 		"speaker": "DR. STERLING",
 		"text": '"My name is Dr. Alistair Sterling. I am a geneticist and biomedical engineer. I\'ve spent eleven years building something I have to believe can help."',
 		"dir": 'Sterling at a workbench, monitors and biological equipment around him. He looks tired.'
 	},
 	{
 		"mood": "lab", 
-		"label": "INTERIOR — LAB — NIGHT", 
+		"label": "INTERIOR â€” LAB â€” NIGHT", 
 		"speaker": "DR. STERLING",
 		"text": '"The ecosystem already knows how to fix itself. I just need to give it a way back in."',
 		"dir": 'He holds up a panel of the adaptive armor layer.'
 	},
 	{
 		"mood": "lab", 
-		"label": "MONTAGE — SUIT ASSEMBLY", 
+		"label": "MONTAGE â€” SUIT ASSEMBLY", 
 		"speaker": "",
 		"text": 'Time-lapse: the GenoMorph suit built, tested, refined. A suited figure flickers between human silhouette and frog outline.',
 		"dir": 'Sterling watches data streams, writes notes, discards designs, starts over.'
 	},
 	{
 		"mood": "degraded", 
-		"label": "EXTERIOR — WETLANDS BORDER — DAY", 
+		"label": "EXTERIOR â€” WETLANDS BORDER â€” DAY", 
 		"speaker": "",
 		"text": 'The Volunteer stands at a wire fence, overlooking the ruined, brown wetlands. Quiet grief hardens into resolve.',
 		"dir": 'Seen from behind. They fold Sterling\'s recruitment listing and turn from the dead water.'
 	},
 	{
 		"mood": "lab", 
-		"label": "EXTERIOR — LAB ENTRANCE — DAY", 
+		"label": "EXTERIOR â€” LAB ENTRANCE â€” DAY", 
 		"speaker": "DR. STERLING (V.O.)",
 		"text": '"I found the right person. Someone who knew this land. Someone who wanted it back."',
 		"dir": 'The Volunteer arrives. A brief, firm handshake with Sterling at the door.'
 	},
 	{
 		"mood": "lab", 
-		"label": "INTERIOR — LAB — LATER", 
+		"label": "INTERIOR â€” LAB â€” LATER", 
 		"speaker": "DR. STERLING",
 		"text": '"There is something else I need to tell you. About why it\'s you specifically."',
-		"dir": 'The suit hangs in its storage frame. Sterling pulls up a genomic display — two DNA profiles side by side.'
+		"dir": 'The suit hangs in its storage frame. Sterling pulls up a genomic display â€” two DNA profiles side by side.'
 	},
 	{
 		"mood": "lab", 
-		"label": "INTERIOR — LAB — LATER", 
+		"label": "INTERIOR â€” LAB â€” LATER", 
 		"speaker": "DR. STERLING",
 		"text": '"I tested myself first, years ago. My genome doesn\'t carry it. The suit would tear my mind apart speaking a language it has forgotten how to hear."',
 		"dir": 'Close on the second profile, labeled simply: AS.'
 	},
 	{
 		"mood": "lab", 
-		"label": "INTERIOR — LAB — LATER", 
+		"label": "INTERIOR â€” LAB â€” LATER", 
 		"speaker": "DR. STERLING",
 		"text": '"You were the only applicant who matched. The suit was always going to need you. I just needed to find you."',
 		"dir": 'The Volunteer looks at the suit for a long moment, then back at Sterling.'
 	},
 	{
 		"mood": "lab", 
-		"label": "INTERIOR — LAB — LATER", 
+		"label": "INTERIOR â€” LAB â€” LATER", 
 		"speaker": "VOLUNTEER",
 		"text": '"When do we start?"', 
 		"dir": 'A beat of quiet resolve.'
 	},
 	{
 		"mood": "dawn", 
-		"label": "EXTERIOR — WETLAND EDGE — DAWN", 
+		"label": "EXTERIOR â€” WETLAND EDGE â€” DAWN", 
 		"speaker": "DR. STERLING",
 		"text": '"Tomorrow morning. Test run only. Sixty seconds in Frog form, then we debrief."',
 		"dir": 'The Volunteer, now suited, stands at the wetland\'s edge. Dark panels glow faintly green.'
 	},
 	{
 		"mood": "dawn", 
-		"label": "EXTERIOR — WETLAND EDGE — DAWN", 
+		"label": "EXTERIOR â€” WETLAND EDGE â€” DAWN", 
 		"speaker": "DR. STERLING (RADIO)",
-		"text": '"BioScan readings coming in. Contamination higher than expected — but within tolerance. Initiating Frog transformation on your mark."',
+		"text": '"BioScan readings coming in. Contamination higher than expected â€” but within tolerance. Initiating Frog transformation on your mark."',
 		"dir": 'Radio crackle over the earpiece.'
 	},
 	{
 		"mood": "dawn", 
-		"label": "EXTERIOR — WETLAND EDGE — DAWN", 
+		"label": "EXTERIOR â€” WETLAND EDGE â€” DAWN", 
 		"speaker": "VOLUNTEER",
 		"text": '"Mark."', 
 		"dir": 'The suit shimmers. Silhouette shifts smoothly into the shape of a native frog.'
@@ -105,28 +105,28 @@ var scenes: Array[Dictionary] = [
 		"mood": "surge", 
 		"label": "THE SURGE", 
 		"speaker": "",
-		"text": 'A blinding burst of white light. A violent electrical crackle. Twelve pulses of golden light erupt outward — the DNA database, scattering. Gone.',
+		"text": 'A blinding burst of white light. A violent electrical crackle. Twelve pulses of golden light erupt outward â€” the DNA database, scattering. Gone.',
 		"dir": 'SLOW MOTION. A warning klaxon sounds briefly, then dies.'
 	},
 	{
 		"mood": "swamp", 
 		"label": "FROG-EYE VIEW", 
 		"speaker": "",
-		"text": 'The world drops to frog-height. Reeds tower like redwoods. Sludge drops the size of boulders. Breath comes shallow — the breathing of a small, panicked animal.',
-		"dir": 'Webbed hands press into the mud. Center of gravity too low — a wobble, a tumble onto their side.'
+		"text": 'The world drops to frog-height. Reeds tower like redwoods. Sludge drops the size of boulders. Breath comes shallow â€” the breathing of a small, panicked animal.',
+		"dir": 'Webbed hands press into the mud. Center of gravity too low â€” a wobble, a tumble onto their side.'
 	},
 	{
 		"mood": "swamp", 
 		"label": "THE DEEP MARSH", 
 		"speaker": "",
-		"text": 'Silence, save for a wet throat pulsing. Then — a distant, water-muffled roar. Something massive, waking. The sound vibrates through the mud.',
+		"text": 'Silence, save for a wet throat pulsing. Then â€” a distant, water-muffled roar. Something massive, waking. The sound vibrates through the mud.',
 		"dir": 'Nothing visible yet. Only sound.'
 	},
 	{
 		"mood": "radio", 
-		"label": "RADIO — HAYWIRE", 
+		"label": "RADIO â€” HAYWIRE", 
 		"speaker": "DR. STERLING (RADIO)",
-		"text": '"Volunteer! Volunteer, do you copy? The biometric stream is haywire — please respond!"',
+		"text": '"Volunteer! Volunteer, do you copy? The biometric stream is haywire â€” please respond!"',
 		"dir": 'Heavy static. Genuine panic in his voice.'
 	},
 	{
@@ -140,14 +140,14 @@ var scenes: Array[Dictionary] = [
 		"mood": "radio", 
 		"label": "RADIO", 
 		"speaker": "DR. STERLING (RADIO)",
-		"text": '"The DSEE discharged. All twelve genomes — gone from the suit. Released as raw biological energy. Whatever is living in that wetland right now — I don\'t know what it is anymore."',
+		"text": '"The DSEE discharged. All twelve genomes â€” gone from the suit. Released as raw biological energy. Whatever is living in that wetland right now â€” I don\'t know what it is anymore."',
 		"dir": 'Frantic keystrokes through the static.'
 	},
 	{
 		"mood": "radio", 
 		"label": "RADIO", 
 		"speaker": "VOLUNTEER / DR. STERLING",
-		"text": '"What do I do?" — "...The data is still out there. Your suit\'s Purification Module is still active. Go carefully, Volunteer. Whatever is out there — it isn\'t ordinary anymore."',
+		"text": '"What do I do?" â€” "...The data is still out there. Your suit\'s Purification Module is still active. Go carefully, Volunteer. Whatever is out there â€” it isn\'t ordinary anymore."',
 		"dir": 'A long pause before Sterling answers, quieter than before.'
 	},
 	{
@@ -161,14 +161,14 @@ var scenes: Array[Dictionary] = [
 		"mood": "swamp", 
 		"label": "GAMEPLAY BEGINS", 
 		"speaker": "DR. STERLING (RADIO)",
-		"text": '"Okay... suit telemetry is stable. Your basic systems are functioning. You need to get moving, Volunteer — something big is heading toward your signature."',
+		"text": '"Okay... suit telemetry is stable. Your basic systems are functioning. You need to get moving, Volunteer â€” something big is heading toward your signature."',
 		"dir": 'A chemical-laced droplet falls from a giant reed.'
 	},
 	{
 		"mood": "swamp", 
 		"label": "PLAYER GAINS CONTROL", 
 		"speaker": "",
-		"text": 'The player leaps just in time. An invasive mosquito flies close — a tongue snaps out, catching it, healing minor armor damage.',
+		"text": 'The player leaps just in time. An invasive mosquito flies close â€” a tongue snaps out, catching it, healing minor armor damage.',
 		"dir": 'Control passes to the player.'
 	}
 ]
@@ -341,7 +341,7 @@ func _load_scene(i: int) -> void:
 	var tw = create_tween()
 	tw.tween_property(_bg, "color", bg_col, 0.5)
 	
-	_scene_label.text = ("● REC  " if (s.has("rec") and s["rec"]) else "") + str(s.get("label", ""))
+	_scene_label.text = ("â— REC  " if (s.has("rec") and s["rec"]) else "") + str(s.get("label", ""))
 	_dir_label.text = s.get("dir", "")
 	_speaker_label.text = s.get("speaker", "")
 	

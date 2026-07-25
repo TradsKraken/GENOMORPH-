@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 
 func _ready() -> void:
 	# This node just instantly kicks off the SceneLoader to load the Main Menu.

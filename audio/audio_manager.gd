@@ -49,6 +49,17 @@ func _ready() -> void:
 	sounds["error"] = _generate_sfx("error")
 	sounds["ui_click"] = _generate_sfx("ui_click")
 	
+	# New UI Sounds
+	sounds["pause_button"] = preload("res://audio/Pause button.ogg")
+	sounds["resume_button"] = preload("res://audio/Resume Game.ogg")
+	sounds["dialogue_button"] = preload("res://audio/dialogue button.ogg")
+	sounds["knowledge_button"] = preload("res://audio/knowledge button.ogg")
+	sounds["tap_button"] = [
+		preload("res://audio/tap button.ogg"),
+		preload("res://audio/tap button 2.ogg"),
+		preload("res://audio/tap button 3.ogg")
+	]
+	
 	for i in range(8):
 		var p = AudioStreamPlayer.new()
 		p.bus = "Master"

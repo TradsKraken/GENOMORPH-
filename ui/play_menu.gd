@@ -1,4 +1,4 @@
-extends CanvasLayer
+﻿extends CanvasLayer
 
 signal new_game(slot: int)
 signal load_game(slot: int)
@@ -77,6 +77,7 @@ func _show_main_actions() -> void:
 	new_game_btn.add_theme_font_size_override("font_size", 36)
 	new_game_btn.custom_minimum_size = Vector2(0, 80)
 	new_game_btn.mouse_filter = Control.MOUSE_FILTER_PASS
+	new_game_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	new_game_btn.pressed.connect(func():
 		_show_slot_selection(false)
 	)
@@ -98,6 +99,7 @@ func _show_main_actions() -> void:
 	if not any_save:
 		load_game_btn.disabled = true
 		load_game_btn.text = "Load Game (No saves found)"
+	load_game_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	load_game_btn.pressed.connect(func():
 		_show_slot_selection(true)
 	)
@@ -112,6 +114,7 @@ func _show_main_actions() -> void:
 	close_btn.add_theme_font_size_override("font_size", 36)
 	close_btn.custom_minimum_size = Vector2(0, 80)
 	close_btn.mouse_filter = Control.MOUSE_FILTER_PASS
+	close_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	close_btn.pressed.connect(func():
 		closed.emit()
 		queue_free()
@@ -149,6 +152,7 @@ func _show_slot_selection(is_loading: bool) -> void:
 	back_btn.add_theme_font_size_override("font_size", 36)
 	back_btn.custom_minimum_size = Vector2(0, 80)
 	back_btn.mouse_filter = Control.MOUSE_FILTER_PASS
+	back_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	back_btn.pressed.connect(_show_main_actions)
 	_vbox.add_child(back_btn)
 
@@ -255,6 +259,7 @@ func _create_save_slot_card(slot_idx: int, preview: Dictionary, is_loading: bool
 			
 	vbox.add_child(action_btn)
 	
+	action_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	action_btn.pressed.connect(func():
 		if is_loading:
 			load_game.emit(slot_idx)

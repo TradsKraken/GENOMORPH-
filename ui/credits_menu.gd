@@ -1,4 +1,4 @@
-extends CanvasLayer
+﻿extends CanvasLayer
 
 var _scroll_container: Control
 var _rtl: RichTextLabel
@@ -29,7 +29,7 @@ func _ready() -> void:
 
 [font_size=52][color=#b3d9ff][b]GENOMORPH[/b][/color][/font_size]
 
-[font_size=20][color=#aaaaaa]A Game by[/color] [color=#ffffff]PhsynTaK’s[/color][/font_size]
+[font_size=20][color=#aaaaaa]A Game by[/color] [color=#ffffff]PhsynTaKâ€™s[/color][/font_size]
 
 
 [font_size=24][color=#80bfff]- THE CORE TEAM -[/color][/font_size]
@@ -38,7 +38,7 @@ func _ready() -> void:
 [font_size=22][color=#ffffff]Kent Dave R. Pilar[/color][/font_size]
 
 [font_size=16][color=#888888]NARRATIVE & GAMEPLAY DESIGNER[/color][/font_size]
-[font_size=22][color=#ffffff]Pshych Earl B. Caleñada[/color][/font_size]
+[font_size=22][color=#ffffff]Pshych Earl B. CaleÃ±ada[/color][/font_size]
 
 [font_size=16][color=#888888]RESEARCH, CONCEPT & DOCUMENTATION LEAD[/color][/font_size]
 [font_size=22][color=#ffffff]Thomas Kyle L. Galo[/color][/font_size]
@@ -62,7 +62,7 @@ func _ready() -> void:
 [font_size=20][color=#ffffff]Valencia National Highschool[/color][/font_size]
 
 [font_size=16][color=#888888]PROJECT ADVISOR[/color][/font_size]
-[font_size=20][color=#ffffff]Ace B. Cardeño[/color][/font_size]
+[font_size=20][color=#ffffff]Ace B. CardeÃ±o[/color][/font_size]
 
 [font_size=16][color=#888888]PLAYTESTERS[/color][/font_size]
 [font_size=20][color=#ffffff]Our Amazing Friends & Classmates[/color][/font_size]
@@ -74,7 +74,7 @@ func _ready() -> void:
 
 
 
-[font_size=14][color=#666666]© 2026 PhsynTaK’s. All rights reserved.[/color][/font_size]
+[font_size=14][color=#666666]Â© 2026 PhsynTaKâ€™s. All rights reserved.[/color][/font_size]
 
 [/center]"""
 	

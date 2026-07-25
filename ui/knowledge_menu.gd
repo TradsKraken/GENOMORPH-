@@ -1,10 +1,10 @@
-extends CanvasLayer
+﻿extends CanvasLayer
 
 class_name KnowledgeMenu
 
 signal closed
 
-# ── Node refs ─────────────────────────────────────────────────────────────────
+# â”€â”€ Node refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 var _panel: Control
 var _item_list: ItemList
 var _detail_panel: ScrollContainer
@@ -15,7 +15,7 @@ var _current_filter: String = "All"
 var _unlocked_keys: Array[String] = []
 var _tech_font: SystemFont
 
-# ── Threat Level Colors ────────────────────────────────────────────────────────
+# â”€â”€ Threat Level Colors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const THREAT_COLORS: Dictionary = {
 	"CRITICAL": Color(1.0, 0.2, 0.2),
 	"HIGH":     Color(1.0, 0.55, 0.1),
@@ -26,7 +26,7 @@ const THREAT_COLORS: Dictionary = {
 	"UNKNOWN":  Color(0.6, 0.6, 0.6),
 }
 
-# ── Category Colors ────────────────────────────────────────────────────────────
+# â”€â”€ Category Colors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CATEGORY_COLORS: Dictionary = {
 	"All":         Color(0.1, 0.9, 0.7),
 	"Species":     Color(0.4, 1.0, 0.5),
@@ -36,7 +36,7 @@ const CATEGORY_COLORS: Dictionary = {
 	"History":     Color(1.0, 0.5, 0.3),
 }
 
-# ── Lifecycle ─────────────────────────────────────────────────────────────────
+# â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _ready() -> void:
 	layer = 100
@@ -54,7 +54,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_on_close()
 
-# ── Build UI ──────────────────────────────────────────────────────────────────
+# â”€â”€ Build UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _build_background() -> void:
 	var bg_rect := ColorRect.new()
@@ -67,7 +67,7 @@ func _build_background() -> void:
 	add_child(bg_rect)
 
 func _build_panel() -> void:
-	# ── Outer panel (wider for more content) ──
+	# â”€â”€ Outer panel (wider for more content) â”€â”€
 	_panel = Control.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_panel.custom_minimum_size = Vector2(960, 620)
@@ -131,7 +131,7 @@ func _build_header(parent: VBoxContainer) -> void:
 	hbox.add_child(title_vbox)
 
 	var title_lbl := Label.new()
-	title_lbl.text = "◈ GENOME DATABASE"
+	title_lbl.text = "â—ˆ GENOME DATABASE"
 	title_lbl.add_theme_font_override("font", _tech_font)
 	title_lbl.add_theme_font_size_override("font_size", 30)
 	title_lbl.add_theme_color_override("font_color", Color(0.8, 1.0, 0.92))
@@ -144,7 +144,7 @@ func _build_header(parent: VBoxContainer) -> void:
 	subtitle_lbl.add_theme_color_override("font_color", Color(0.1, 0.9, 0.7, 0.6))
 	title_vbox.add_child(subtitle_lbl)
 
-	var close_btn := _make_button("✕  CLOSE", _on_close)
+	var close_btn := _make_button("âœ•  CLOSE", _on_close)
 	close_btn.custom_minimum_size = Vector2(110, 44)
 	hbox.add_child(close_btn)
 
@@ -175,6 +175,7 @@ func _make_filter_button(cat: String) -> Button:
 	btn.custom_minimum_size = Vector2(0, 30)
 	btn.toggle_mode = false
 	_style_filter_btn(btn, cat, false)
+	btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	btn.pressed.connect(func(): _on_filter_pressed(cat))
 	return btn
 
@@ -202,7 +203,7 @@ func _build_split_layout(parent: VBoxContainer) -> void:
 	hbox.add_theme_constant_override("separation", 20)
 	parent.add_child(hbox)
 
-	# ── LEFT: entry list ──
+	# â”€â”€ LEFT: entry list â”€â”€
 	var list_vbox := VBoxContainer.new()
 	list_vbox.custom_minimum_size = Vector2(240, 0)
 	list_vbox.add_theme_constant_override("separation", 6)
@@ -239,7 +240,7 @@ func _build_split_layout(parent: VBoxContainer) -> void:
 	_item_list.item_selected.connect(_on_item_selected)
 	list_vbox.add_child(_item_list)
 
-	# ── VSEP ──
+	# â”€â”€ VSEP â”€â”€
 	var vsep := VSeparator.new()
 	var vsep_style := StyleBoxLine.new()
 	vsep_style.color = Color(0.1, 0.9, 0.7, 0.2)
@@ -248,7 +249,7 @@ func _build_split_layout(parent: VBoxContainer) -> void:
 	vsep.add_theme_stylebox_override("separator", vsep_style)
 	hbox.add_child(vsep)
 
-	# ── RIGHT: detail scroll ──
+	# â”€â”€ RIGHT: detail scroll â”€â”€
 	_detail_panel = ScrollContainer.new()
 	_detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_detail_panel.size_flags_vertical   = Control.SIZE_EXPAND_FILL
@@ -261,7 +262,7 @@ func _build_split_layout(parent: VBoxContainer) -> void:
 
 	# Empty state prompt
 	_empty_label = Label.new()
-	_empty_label.text = "— Select an entry to view its biological telemetry —"
+	_empty_label.text = "â€” Select an entry to view its biological telemetry â€”"
 	_empty_label.add_theme_font_override("font", _tech_font)
 	_empty_label.add_theme_font_size_override("font_size", 16)
 	_empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -277,7 +278,7 @@ func _build_separator(parent: VBoxContainer) -> void:
 	sep.add_theme_stylebox_override("separator", sep_style)
 	parent.add_child(sep)
 
-# ── List Population ───────────────────────────────────────────────────────────
+# â”€â”€ List Population â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _populate_list() -> void:
 	_item_list.clear()
@@ -302,10 +303,10 @@ func _populate_list() -> void:
 		count_lbl.text = "%d / %d ENTRIES DISCOVERED" % [_unlocked_keys.size(), total]
 
 	if _item_list.item_count == 0:
-		_item_list.add_item("  — NO ENTRIES —")
+		_item_list.add_item("  â€” NO ENTRIES â€”")
 		_item_list.set_item_disabled(0, true)
 
-# ── Detail View ───────────────────────────────────────────────────────────────
+# â”€â”€ Detail View â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _on_item_selected(index: int) -> void:
 	if index < 0 or index >= _unlocked_keys.size():
@@ -322,13 +323,13 @@ func _show_detail(data: Dictionary) -> void:
 	_empty_label.visible = false
 	await get_tree().process_frame
 
-	# ── 1. Title row ──
+	# â”€â”€ 1. Title row â”€â”€
 	var title_hbox := HBoxContainer.new()
 	title_hbox.add_theme_constant_override("separation", 12)
 	_detail_content.add_child(title_hbox)
 
 	var icon_lbl := Label.new()
-	icon_lbl.text = data.get("icon", "◈")
+	icon_lbl.text = data.get("icon", "â—ˆ")
 	icon_lbl.add_theme_font_override("font", _tech_font)
 	icon_lbl.add_theme_font_size_override("font_size", 44)
 	icon_lbl.add_theme_color_override("font_color", Color(0.1, 0.9, 0.7))
@@ -354,12 +355,12 @@ func _show_detail(data: Dictionary) -> void:
 	sci_name.add_theme_color_override("font_color", Color(0.1, 0.9, 0.7, 0.7))
 	title_block.add_child(sci_name)
 
-	# ── 2. Category + Threat row ──
+	# â”€â”€ 2. Category + Threat row â”€â”€
 	var meta_hbox := HBoxContainer.new()
 	meta_hbox.add_theme_constant_override("separation", 10)
 	_detail_content.add_child(meta_hbox)
 
-	var cat_str: String = data.get("category", "") + "  ·  " + data.get("subcategory", "")
+	var cat_str: String = data.get("category", "") + "  Â·  " + data.get("subcategory", "")
 	var cat_color: Color = CATEGORY_COLORS.get(data.get("category", ""), Color(0.1, 0.9, 0.7))
 	var cat_badge := _make_badge(
 		cat_str,
@@ -370,13 +371,13 @@ func _show_detail(data: Dictionary) -> void:
 
 	var threat: String = data.get("threat_level", "UNKNOWN")
 	var threat_col: Color = THREAT_COLORS.get(threat, Color(0.6, 0.6, 0.6))
-	var threat_badge := _make_badge("⚠ THREAT: " + threat, threat_col, 14)
+	var threat_badge := _make_badge("âš  THREAT: " + threat, threat_col, 14)
 	meta_hbox.add_child(threat_badge)
 
-	# ── 3. Separator ──
+	# â”€â”€ 3. Separator â”€â”€
 	_detail_content.add_child(_make_thin_sep())
 
-	# ── 4. Summary ──
+	# â”€â”€ 4. Summary â”€â”€
 	var summary_label := _make_section_header("OVERVIEW")
 	_detail_content.add_child(summary_label)
 
@@ -384,11 +385,11 @@ func _show_detail(data: Dictionary) -> void:
 	var summary_rtl := _make_rtl(summary_text, 16)
 	_detail_content.add_child(summary_rtl)
 
-	# ── 5. Key Facts ──
+	# â”€â”€ 5. Key Facts â”€â”€
 	var facts_raw: Array = data.get("facts", [])
 	if facts_raw.size() > 0:
 		_detail_content.add_child(_make_thin_sep())
-		_detail_content.add_child(_make_section_header("⬡ BIOLOGICAL FIELD NOTES"))
+		_detail_content.add_child(_make_section_header("â¬¡ BIOLOGICAL FIELD NOTES"))
 
 		for fact_entry in facts_raw:
 			var fact_hbox := HBoxContainer.new()
@@ -396,7 +397,7 @@ func _show_detail(data: Dictionary) -> void:
 			_detail_content.add_child(fact_hbox)
 
 			var bullet := Label.new()
-			bullet.text = "▸"
+			bullet.text = "â–¸"
 			bullet.add_theme_font_override("font", _tech_font)
 			bullet.add_theme_font_size_override("font_size", 14)
 			bullet.add_theme_color_override("font_color", Color(0.1, 0.9, 0.7, 0.8))
@@ -412,7 +413,7 @@ func _show_detail(data: Dictionary) -> void:
 			fact_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			fact_hbox.add_child(fact_lbl)
 
-	# ── 6. Field Guide Tip ──
+	# â”€â”€ 6. Field Guide Tip â”€â”€
 	var tip: String = data.get("guide_tip", "")
 	if tip != "":
 		_detail_content.add_child(_make_thin_sep())
@@ -433,7 +434,7 @@ func _show_detail(data: Dictionary) -> void:
 		var tip_rtl := _make_rtl(tip, 15)
 		tip_container.add_child(tip_rtl)
 
-# ── Filter Logic ──────────────────────────────────────────────────────────────
+# â”€â”€ Filter Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _on_filter_pressed(cat: String) -> void:
 	_current_filter = cat
@@ -449,7 +450,7 @@ func _set_filter_active(active_cat: String) -> void:
 	for cat in _filter_btns:
 		_style_filter_btn(_filter_btns[cat], cat, cat == active_cat)
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _make_section_header(txt: String) -> Label:
 	var lbl := Label.new()
@@ -522,10 +523,11 @@ func _make_button(txt: String, callback: Callable) -> Button:
 	btn.add_theme_stylebox_override("hover", hover)
 	btn.add_theme_color_override("font_hover_color", Color(0.1, 1.0, 0.75))
 
+	btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	btn.pressed.connect(callback)
 	return btn
 
-# ── Close ─────────────────────────────────────────────────────────────────────
+# â”€â”€ Close â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _on_close() -> void:
 	get_tree().paused = false

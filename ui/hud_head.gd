@@ -1,9 +1,9 @@
-extends CanvasLayer
+﻿extends CanvasLayer
 
 ## Clean, modern game HUD.
 ## Sleek bars, circular badges, translucent backgrounds.
 
-# ── Colors & Styling ──────────────────────────────────────────────────────────
+# â”€â”€ Colors & Styling â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const C_HP       := Color("#ff3b5c")
 const C_STAM     := Color("#9400ff")
@@ -12,7 +12,7 @@ const C_BG_DARK  := Color(0.04, 0.04, 0.06, 0.65)
 const C_BTN_NORM := Color(0.12, 0.13, 0.18, 0.75)
 const C_BTN_PRSS := Color(0.85, 0.88, 0.95, 0.90)
 
-# ── Node refs ─────────────────────────────────────────────────────────────────
+# â”€â”€ Node refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 var _root:       Control
 var _hp_bar:     ProgressBar
@@ -64,7 +64,7 @@ var _active_highlight_tweens: Dictionary = {}
 
 signal subtitle_dismissed
 
-# ── Lifecycle ─────────────────────────────────────────────────────────────────
+# â”€â”€ Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _ready() -> void:
 	layer = 10
@@ -111,7 +111,7 @@ func _input(event: InputEvent) -> void:
 				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
 
 
-# ── Player Status (Top Left) ──────────────────────────────────────────────────
+# â”€â”€ Player Status (Top Left) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _build_player_status() -> void:
 	if _root.has_node("StatusGroup"):
@@ -214,6 +214,7 @@ func _build_player_status() -> void:
 	quest_btn.add_theme_stylebox_override("focus", empty_style)
 	quest_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	quest_btn.custom_minimum_size = Vector2(300, 20)
+	quest_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	quest_btn.pressed.connect(_open_quest_menu)
 	bars_vbox.add_child(quest_btn)
 
@@ -338,13 +339,13 @@ func _hide_genome_popup() -> void:
 	_genome_popup_tween.tween_property(_genome_popup_panel, "modulate:a", 0.0, 0.3).set_trans(Tween.TRANS_SINE)
 	_genome_popup_tween.tween_callback(func(): _genome_popup_panel.visible = false)
 
-# ── Action Buttons (Right / Bottom Right) ────────────────────────────────────────────────────────────
+# â”€â”€ Action Buttons (Right / Bottom Right) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _build_action_buttons() -> void:
 	# 1. Primary Attack Button (Webbed Lunge)
 	# Largest button, outermost bottom-right
 	var attack_is_new = not _root.has_node("AttackBtn")
-	_attack_btn = _make_circle_btn("AttackBtn", "🦵", 120, C_BTN_NORM)
+	_attack_btn = _make_circle_btn("AttackBtn", "ðŸ¦µ", 120, C_BTN_NORM)
 	_attack_btn.add_theme_font_size_override("font_size", 64)
 	if attack_is_new:
 		_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -364,7 +365,7 @@ func _build_action_buttons() -> void:
 	# 2. Skill 1 Button (Sticky Tongue Whip)
 	# Medium, directly to the left of Primary Attack
 	var skill1_is_new = not _root.has_node("Skill1Btn")
-	_skill1_btn = _make_circle_btn("Skill1Btn", "👅", 80, C_BTN_NORM)
+	_skill1_btn = _make_circle_btn("Skill1Btn", "ðŸ‘…", 80, C_BTN_NORM)
 	_skill1_btn.add_theme_font_size_override("font_size", 48)
 	if skill1_is_new:
 		_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -381,7 +382,7 @@ func _build_action_buttons() -> void:
 	# 3. Skill 2 Button (Splashdown Jump)
 	# Medium, directly above Skill 1, forming the center of the UI arc
 	var jump_is_new = not _root.has_node("JumpBtn")
-	_jump_btn = _make_circle_btn("JumpBtn", "🦘", 80, C_BTN_NORM)
+	_jump_btn = _make_circle_btn("JumpBtn", "ðŸ¦˜", 80, C_BTN_NORM)
 	_jump_btn.add_theme_font_size_override("font_size", 48)
 	if jump_is_new:
 		_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -397,7 +398,7 @@ func _build_action_buttons() -> void:
 	# 4. Skill 3 Button (Cutaneous Respiration - Ultimate)
 	# Medium, top of the curved arc (directly above Primary Attack)
 	var skill3_is_new = not _root.has_node("Skill3Btn")
-	_skill3_btn = _make_circle_btn("Skill3Btn", "☣️", 80, C_BTN_NORM)
+	_skill3_btn = _make_circle_btn("Skill3Btn", "â˜£ï¸", 80, C_BTN_NORM)
 	_skill3_btn.add_theme_font_size_override("font_size", 48)
 	if skill3_is_new:
 		_skill3_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -413,7 +414,7 @@ func _build_action_buttons() -> void:
 
 	# 5. Interact Button
 	var interact_is_new = not _root.has_node("InteractBtn")
-	_interact_btn = _make_circle_btn("InteractBtn", "🖐️", 70, C_BTN_NORM)
+	_interact_btn = _make_circle_btn("InteractBtn", "ðŸ–ï¸", 70, C_BTN_NORM)
 	_interact_btn.add_theme_font_size_override("font_size", 32)
 	if interact_is_new:
 		_interact_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -425,7 +426,7 @@ func _build_action_buttons() -> void:
 		_interact_btn.offset_left   = -110
 		_interact_btn.offset_top    = -370
 	_interact_btn.visible = false
-	_interact_btn.pressed.connect(_on_interact_pressed)
+	_interact_btn.pressed.connect(func(): AudioManager.play_sfx("dialogue_button")); _interact_btn.pressed.connect(_on_interact_pressed)
 
 
 
@@ -441,12 +442,12 @@ func _build_action_buttons() -> void:
 		_menu_btn.offset_top    = 24
 		_menu_btn.offset_left   = -24 - 56
 		_menu_btn.offset_bottom = 24 + 56
-	_menu_btn.pressed.connect(_toggle_menu)
+	_menu_btn.pressed.connect(func(): AudioManager.play_sfx("pause_button")); _menu_btn.pressed.connect(_toggle_menu)
 	_menu_btn.draw.connect(_draw_pause_icon)
 
 	# Knowledge Button (Top Right, left of Menu Button)
 	var knowledge_is_new = not _root.has_node("KnowledgeBtn")
-	_knowledge_btn = _make_circle_btn("KnowledgeBtn", "📖", 56, C_BTN_NORM)
+	_knowledge_btn = _make_circle_btn("KnowledgeBtn", "ðŸ“–", 56, C_BTN_NORM)
 	_knowledge_btn.add_theme_font_size_override("font_size", 28)
 	if knowledge_is_new:
 		_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -483,7 +484,7 @@ func _build_action_buttons() -> void:
 		_knowledge_badge.visible = false
 		_knowledge_btn.add_child(_knowledge_badge)
 		
-	_knowledge_btn.pressed.connect(_open_knowledge_menu)
+	_knowledge_btn.pressed.connect(func(): AudioManager.play_sfx("knowledge_button")); _knowledge_btn.pressed.connect(_open_knowledge_menu)
 
 	# Quest Button (Top Right, left of Knowledge Button)
 	var quest_is_new = not _root.has_node("QuestBtn")
@@ -499,9 +500,10 @@ func _build_action_buttons() -> void:
 		_quest_btn.offset_top    = 24
 		_quest_btn.offset_left   = -24 - 56 - 16 - 56 - 16 - 56
 		_quest_btn.offset_bottom = 24 + 56
+	_quest_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	_quest_btn.pressed.connect(_open_quest_menu)
 
-# ── Menu Panel (Centered) ─────────────────────────────────────────────────────
+# â”€â”€ Menu Panel (Centered) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _build_menu_panel() -> void:
 	if _root.has_node("MenuPanel"):
@@ -591,11 +593,12 @@ func _build_menu_panel() -> void:
 
 	var btn_resume := _panel_btn("Resume Game")
 	btn_resume.name = "BtnResume"
-	btn_resume.pressed.connect(_toggle_menu)
+	btn_resume.pressed.connect(func(): AudioManager.play_sfx("resume_button")); btn_resume.pressed.connect(_toggle_menu)
 	style_btn.call(btn_resume, Color(0.1, 0.9, 0.7))
 	vbox.add_child(btn_resume)
 
 	var btn_settings := _panel_btn("Settings")
+	btn_settings.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	btn_settings.pressed.connect(func():
 		var settings = preload("res://ui/settings_menu.gd").new()
 		_root.add_child(settings)
@@ -604,6 +607,7 @@ func _build_menu_panel() -> void:
 	vbox.add_child(btn_settings)
 
 	var btn_save := _panel_btn("Save Game")
+	btn_save.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	btn_save.pressed.connect(func():
 		PlayerData.save_game()
 		btn_save.text = "Saved!"
@@ -616,6 +620,7 @@ func _build_menu_panel() -> void:
 	vbox.add_child(btn_save)
 
 	var btn_quit := _panel_btn("Main Menu", Color(1.0, 0.2, 0.3))
+	btn_quit.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	btn_quit.pressed.connect(func():
 		get_tree().paused = false
 		get_tree().change_scene_to_file("res://ui/main_menu.tscn")
@@ -676,6 +681,7 @@ func _build_quest_panel() -> void:
 	var close_btn := Button.new()
 	close_btn.text = "CLOSE"
 	close_btn.custom_minimum_size = Vector2(0, 40)
+	close_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	close_btn.pressed.connect(func(): _quest_panel.visible = false)
 	vbox.add_child(close_btn)
 	
@@ -693,7 +699,7 @@ func _open_quest_menu() -> void:
 		
 	_quest_panel.visible = true
 
-# ── Tutorial / Subtitle Panels ────────────────────────────────────────────────────────────
+# â”€â”€ Tutorial / Subtitle Panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _build_tutorial_panel() -> void:
 	if _root.has_node("TutorialPanel"):
@@ -702,6 +708,7 @@ func _build_tutorial_panel() -> void:
 		_tutorial_desc = _root.find_child("TutorialDesc", true, false)
 		var btn = _root.find_child("BtnGotIt", true, false)
 		if btn and not btn.pressed.is_connected(_hide_tutorial):
+			btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 			btn.pressed.connect(_hide_tutorial)
 		return
 
@@ -766,8 +773,9 @@ func _build_tutorial_panel() -> void:
 	btn_got_it.add_theme_stylebox_override("hover", sb_h)
 	btn_got_it.add_theme_stylebox_override("pressed", sb_h)
 	
+	btn_got_it.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	btn_got_it.pressed.connect(_hide_tutorial)
-	btn_got_it.pressed.connect(func(): AudioManager.play_sfx("ui_click"))
+	btn_got_it.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	vbox.add_child(btn_got_it)
 
 	_root.add_child(_tutorial_panel)
@@ -794,7 +802,7 @@ func _hide_tutorial() -> void:
 	)
 
 
-# ── Subtitle System ───────────────────────────────────────────────────────────
+# â”€â”€ Subtitle System â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _build_subtitle_panel() -> void:
 	if _root.has_node("SubtitlePanel"):
@@ -981,7 +989,7 @@ func hide_subtitle() -> void:
 		subtitle_dismissed.emit()
 	)
 
-# ── Tutorial UI Controls ──────────────────────────────────────────────────────
+# â”€â”€ Tutorial UI Controls â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func hide_action_buttons() -> void:
 	if _attack_btn: _attack_btn.modulate.a = 0.0
@@ -1081,7 +1089,7 @@ func flash_dodge() -> void:
 			tw.tween_property(_jump_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.15)
 
 
-# ── Cancel Zone ───────────────────────────────────────────────────────────────
+# â”€â”€ Cancel Zone â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _build_cancel_zone() -> void:
 	if _root.has_node("CancelZone"):
@@ -1118,7 +1126,7 @@ func _build_cancel_zone() -> void:
 	_cancel_zone.visible = false
 	_root.add_child(_cancel_zone)
 
-# ── Interact API ──────────────────────────────────────────────────────────────
+# â”€â”€ Interact API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func show_interact(text: String, callback: Callable, source: Node) -> void:
 	_current_interact_source = source
@@ -1138,7 +1146,7 @@ func _on_interact_pressed() -> void:
 
 
 
-# ── Action Button Logic ───────────────────────────────────────────────────────
+# â”€â”€ Action Button Logic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 var _is_aiming_jump: bool = false
 var _jump_start_pos: Vector2
@@ -1201,7 +1209,7 @@ func _on_jump_btn_input(event: InputEvent) -> void:
 			if player.has_method("update_aim_jump"):
 				player.update_aim_jump(mapped_vec, is_cancelled)
 
-# ── Signals ───────────────────────────────────────────────────────────────────
+# â”€â”€ Signals â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _connect_signals() -> void:
 	var pd = PlayerData
@@ -1317,7 +1325,7 @@ func _on_objective_changed(target: Node3D) -> void:
 		else:
 			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]" + txt + "[/color]"
 
-# ── Notifications / Menus ──────────────────────────────────────────────────────────
+# â”€â”€ Notifications / Menus â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func show_float_text(text: String, screen_pos: Vector2, color: Color = Color.WHITE) -> void:
 	var lbl := Label.new()
@@ -1336,7 +1344,7 @@ func show_float_text(text: String, screen_pos: Vector2, color: Color = Color.WHI
 	tw.finished.connect(lbl.queue_free)
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func _make_label(text: String, size: int, color: Color) -> Label:
 	var lbl := Label.new()
@@ -1477,10 +1485,10 @@ func _panel_btn(text: String, col: Color = Color.WHITE) -> Button:
 	btn.add_theme_stylebox_override("pressed", hover)
 	btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	btn.add_theme_color_override("font_color", col)
-	btn.pressed.connect(func(): AudioManager.play_sfx("ui_click"))
+	btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	return btn
 
-# ── Prologue Sequence ─────────────────────────────────────────────────────────
+# â”€â”€ Prologue Sequence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 func play_boot_sequence() -> void:
 	var boot_overlay = ColorRect.new()

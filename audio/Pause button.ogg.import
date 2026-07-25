@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c5adfqxw1yeoi"
+path="res://.godot/imported/Pause button.ogg-8d3a8f7f06546453088f144e53a4fa3c.oggvorbisstr"
+
+[deps]
+
+source_file="res://audio/Pause button.ogg"
+dest_files=["res://.godot/imported/Pause button.ogg-8d3a8f7f06546453088f144e53a4fa3c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

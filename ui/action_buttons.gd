@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 
 @onready var primary_btn: Button = $PrimaryAttack
 @onready var skill1_btn: Button = $Skill1
@@ -7,7 +7,7 @@ extends Control
 
 func _ready() -> void:
 	# Skill 3 (Cutaneous Respiration - Ultimate)
-	# Zones 1–3 (Locked State): visually greyed out, transparent, completely unclickable.
+	# Zones 1â€“3 (Locked State): visually greyed out, transparent, completely unclickable.
 	skill3_btn.disabled = true
 	skill3_btn.modulate = Color(0.5, 0.5, 0.5, 0.5)
 

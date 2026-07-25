@@ -1,4 +1,4 @@
-extends CanvasLayer
+﻿extends CanvasLayer
 
 class_name CharacterMenu
 
@@ -102,6 +102,7 @@ func _ready() -> void:
 	btn_hover.border_color = Color(0.9, 0.8, 0.1, 1.0)
 	close_btn.add_theme_stylebox_override("hover", btn_hover)
 	
+	close_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	close_btn.pressed.connect(_on_close)
 	header_hbox.add_child(close_btn)
 	
@@ -237,6 +238,7 @@ func _build_skills_tab() -> void:
 			btn.disabled = true
 			btn.modulate = Color(0.5, 0.5, 0.5, 0.5)
 			
+		btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 		btn.pressed.connect(func():
 			if PlayerData.skill_points > 0:
 				PlayerData.skill_points -= 1

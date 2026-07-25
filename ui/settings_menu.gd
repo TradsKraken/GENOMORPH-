@@ -1,4 +1,4 @@
-extends CanvasLayer
+﻿extends CanvasLayer
 
 class_name SettingsMenu
 
@@ -67,6 +67,7 @@ func _ready() -> void:
 	close_btn.text = "Close"
 	close_btn.add_theme_font_size_override("font_size", 36)
 	close_btn.custom_minimum_size = Vector2(0, 80)
+	close_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	close_btn.pressed.connect(_on_close)
 	_vbox.add_child(close_btn)
 	
