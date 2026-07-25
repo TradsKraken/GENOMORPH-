@@ -1,0 +1,6 @@
+﻿[gd_scene load_steps=2 format=3 uid="uid://boss_portal123"]
+
+[ext_resource type="Script" path="res://levels/boss_portal.gd" id="1_script"]
+
+[node name="BossPortal" type="Area3D"]
+script = ExtResource("1_script")

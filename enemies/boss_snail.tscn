@@ -1,0 +1,7 @@
+﻿[gd_scene load_steps=3 format=3 uid="uid://boss_snail1234"]
+
+[ext_resource type="PackedScene" uid="uid://snail5678" path="res://enemies/giant_african_snail.tscn" id="1_scene"]
+[ext_resource type="Script" path="res://enemies/boss_snail.gd" id="2_script"]
+
+[node name="BossSnail" instance=ExtResource("1_scene")]
+script = ExtResource("2_script")

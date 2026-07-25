@@ -1,4 +1,4 @@
-﻿extends CanvasLayer
+extends CanvasLayer
 
 class_name CharacterMenu
 
@@ -133,7 +133,18 @@ func _ready() -> void:
 	_build_skills_tab()
 	_build_inventory_tab()
 	
+	_update_skills_tab_title(PlayerData.skill_points)
+	if PlayerData.has_signal("skill_points_changed"):
+		PlayerData.skill_points_changed.connect(_update_skills_tab_title)
+	
 	add_child(_panel)
+
+func _update_skills_tab_title(points: int) -> void:
+	if is_instance_valid(_tab_container) and _tab_container.get_tab_count() > 1:
+		if points > 0:
+			_tab_container.set_tab_title(1, "SKILLS (!)")
+		else:
+			_tab_container.set_tab_title(1, "SKILLS")
 
 
 func _build_stats_tab() -> void:

@@ -1,4 +1,4 @@
-﻿extends CanvasLayer
+extends CanvasLayer
 
 ## Clean, modern game HUD.
 ## Sleek bars, circular badges, translucent backgrounds.
@@ -37,7 +37,6 @@ var _menu_panel: Control
 var _menu_open:  bool = false
 var _knowledge_btn: Button
 var _knowledge_badge: Label
-var _unread_knowledge_count: int = 0
 
 var _tutorial_panel: PanelContainer
 var _tutorial_title: Label
@@ -345,8 +344,13 @@ func _build_action_buttons() -> void:
 	# 1. Primary Attack Button (Webbed Lunge)
 	# Largest button, outermost bottom-right
 	var attack_is_new = not _root.has_node("AttackBtn")
-	_attack_btn = _make_circle_btn("AttackBtn", "ðŸ¦µ", 120, C_BTN_NORM)
-	_attack_btn.add_theme_font_size_override("font_size", 64)
+	_attack_btn = _make_circle_btn("AttackBtn", "", 120, C_BTN_NORM)
+	_attack_btn.icon = preload("res://assets/BASIC ATTACK.svg")
+	_attack_btn.expand_icon = true
+	_attack_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_attack_btn.add_theme_color_override("icon_normal_color", Color(1, 1, 1, 0.6))
+	_attack_btn.add_theme_color_override("icon_hover_color", Color(1, 1, 1, 0.8))
+	_attack_btn.add_theme_color_override("icon_pressed_color", Color(1, 1, 1, 0.9))
 	if attack_is_new:
 		_attack_btn.set_anchor(SIDE_RIGHT, 1.0)
 		_attack_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -365,8 +369,13 @@ func _build_action_buttons() -> void:
 	# 2. Skill 1 Button (Sticky Tongue Whip)
 	# Medium, directly to the left of Primary Attack
 	var skill1_is_new = not _root.has_node("Skill1Btn")
-	_skill1_btn = _make_circle_btn("Skill1Btn", "ðŸ‘…", 80, C_BTN_NORM)
-	_skill1_btn.add_theme_font_size_override("font_size", 48)
+	_skill1_btn = _make_circle_btn("Skill1Btn", "", 80, C_BTN_NORM)
+	_skill1_btn.icon = preload("res://assets/TONGUE ATTACK.svg")
+	_skill1_btn.expand_icon = true
+	_skill1_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_skill1_btn.add_theme_color_override("icon_normal_color", Color(1, 1, 1, 0.6))
+	_skill1_btn.add_theme_color_override("icon_hover_color", Color(1, 1, 1, 0.8))
+	_skill1_btn.add_theme_color_override("icon_pressed_color", Color(1, 1, 1, 0.9))
 	if skill1_is_new:
 		_skill1_btn.set_anchor(SIDE_RIGHT, 1.0)
 		_skill1_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -382,8 +391,13 @@ func _build_action_buttons() -> void:
 	# 3. Skill 2 Button (Splashdown Jump)
 	# Medium, directly above Skill 1, forming the center of the UI arc
 	var jump_is_new = not _root.has_node("JumpBtn")
-	_jump_btn = _make_circle_btn("JumpBtn", "ðŸ¦˜", 80, C_BTN_NORM)
-	_jump_btn.add_theme_font_size_override("font_size", 48)
+	_jump_btn = _make_circle_btn("JumpBtn", "", 80, C_BTN_NORM)
+	_jump_btn.icon = preload("res://assets/SPLASH BUTTON.svg")
+	_jump_btn.expand_icon = true
+	_jump_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_jump_btn.add_theme_color_override("icon_normal_color", Color(1, 1, 1, 0.6))
+	_jump_btn.add_theme_color_override("icon_hover_color", Color(1, 1, 1, 0.8))
+	_jump_btn.add_theme_color_override("icon_pressed_color", Color(1, 1, 1, 0.9))
 	if jump_is_new:
 		_jump_btn.set_anchor(SIDE_RIGHT, 1.0)
 		_jump_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -398,8 +412,13 @@ func _build_action_buttons() -> void:
 	# 4. Skill 3 Button (Cutaneous Respiration - Ultimate)
 	# Medium, top of the curved arc (directly above Primary Attack)
 	var skill3_is_new = not _root.has_node("Skill3Btn")
-	_skill3_btn = _make_circle_btn("Skill3Btn", "â˜£ï¸", 80, C_BTN_NORM)
-	_skill3_btn.add_theme_font_size_override("font_size", 48)
+	_skill3_btn = _make_circle_btn("Skill3Btn", "", 80, C_BTN_NORM)
+	_skill3_btn.icon = preload("res://assets/cutaneous respiration.svg")
+	_skill3_btn.expand_icon = true
+	_skill3_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_skill3_btn.add_theme_color_override("icon_normal_color", Color(1, 1, 1, 0.6))
+	_skill3_btn.add_theme_color_override("icon_hover_color", Color(1, 1, 1, 0.8))
+	_skill3_btn.add_theme_color_override("icon_pressed_color", Color(1, 1, 1, 0.9))
 	if skill3_is_new:
 		_skill3_btn.set_anchor(SIDE_RIGHT, 1.0)
 		_skill3_btn.set_anchor(SIDE_BOTTOM, 1.0)
@@ -414,7 +433,7 @@ func _build_action_buttons() -> void:
 
 	# 5. Interact Button
 	var interact_is_new = not _root.has_node("InteractBtn")
-	_interact_btn = _make_circle_btn("InteractBtn", "ðŸ–ï¸", 70, C_BTN_NORM)
+	_interact_btn = _make_circle_btn("InteractBtn", "🖐️", 70, C_BTN_NORM)
 	_interact_btn.add_theme_font_size_override("font_size", 32)
 	if interact_is_new:
 		_interact_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -447,7 +466,7 @@ func _build_action_buttons() -> void:
 
 	# Knowledge Button (Top Right, left of Menu Button)
 	var knowledge_is_new = not _root.has_node("KnowledgeBtn")
-	_knowledge_btn = _make_circle_btn("KnowledgeBtn", "ðŸ“–", 56, C_BTN_NORM)
+	_knowledge_btn = _make_circle_btn("KnowledgeBtn", "📖", 56, C_BTN_NORM)
 	_knowledge_btn.add_theme_font_size_override("font_size", 28)
 	if knowledge_is_new:
 		_knowledge_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -488,7 +507,7 @@ func _build_action_buttons() -> void:
 
 	# Quest Button (Top Right, left of Knowledge Button)
 	var quest_is_new = not _root.has_node("QuestBtn")
-	_quest_btn = _make_circle_btn("QuestBtn", "!", 56, C_BTN_NORM)
+	_quest_btn = _make_circle_btn("QuestBtn", "💬", 56, C_BTN_NORM)
 	_quest_btn.add_theme_font_size_override("font_size", 28)
 	if quest_is_new:
 		_quest_btn.set_anchor(SIDE_RIGHT, 1.0)
@@ -1217,7 +1236,11 @@ func _connect_signals() -> void:
 	pd.stamina_changed.connect(_on_stamina)
 	pd.exp_changed.connect(_on_exp)
 	pd.level_changed.connect(_on_level)
+	if pd.has_signal("skill_points_changed"):
+		pd.skill_points_changed.connect(_on_skill_points_changed)
 	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
+	if PlayerData.has_signal("knowledge_read"):
+		PlayerData.knowledge_read.connect(_on_knowledge_read)
 	PlayerData.genome_collected.connect(show_genome_popup)
 	PlayerData.objective_changed.connect(_on_objective_changed)
 	
@@ -1269,7 +1292,13 @@ func _on_level(new_level: int) -> void:
 	var tw := create_tween()
 	tw.tween_property(_lvl_lbl, "modulate", C_EXP, 0.1)
 	tw.tween_property(_lvl_lbl, "modulate", Color.WHITE, 0.5)
+	var screen_pos = Vector2(get_viewport().size.x / 2.0, 150)
+	show_float_text("LEVEL UP! +1 Skill Point", screen_pos, Color(1.0, 0.8, 0.2))
 
+func _on_skill_points_changed(points: int) -> void:
+	if is_instance_valid(_level_badge):
+		_level_badge.text = str(points)
+		_level_badge.visible = points > 0
 
 func _toggle_menu() -> void:
 	_menu_open = !_menu_open
@@ -1288,9 +1317,6 @@ func _toggle_menu() -> void:
 		)
 
 func _open_knowledge_menu() -> void:
-	_unread_knowledge_count = 0
-	if is_instance_valid(_knowledge_badge):
-		_knowledge_badge.visible = false
 	get_tree().paused = true
 	var menu = load("res://ui/knowledge_menu.gd").new()
 	_root.add_child(menu)
@@ -1312,10 +1338,19 @@ func _on_knowledge_unlocked(id: String) -> void:
 		var screen_pos = Vector2(get_viewport().size.x / 2.0, 150) # top center
 		show_float_text("NEW KNOWLEDGE: " + icon + " " + title, screen_pos, Color(0.9, 0.8, 0.4))
 		
-		_unread_knowledge_count += 1
-		if is_instance_valid(_knowledge_badge):
-			_knowledge_badge.text = str(_unread_knowledge_count)
+		_update_knowledge_badge()
+
+func _on_knowledge_read(_id: String) -> void:
+	_update_knowledge_badge()
+
+func _update_knowledge_badge() -> void:
+	if is_instance_valid(_knowledge_badge):
+		var count = PlayerData.unread_knowledge.size()
+		if count > 0:
+			_knowledge_badge.text = str(count)
 			_knowledge_badge.visible = true
+		else:
+			_knowledge_badge.visible = false
 
 func _on_objective_changed(target: Node3D) -> void:
 	if _quest_tracker_lbl:
@@ -1385,8 +1420,7 @@ func _make_circle_btn(name: String, text: String, size: float, bg_col: Color) ->
 		btn.name = name
 		is_new = true
 		
-	if text != "":
-		btn.text = text
+	btn.text = text
 		
 	btn.custom_minimum_size = Vector2(size, size)
 	

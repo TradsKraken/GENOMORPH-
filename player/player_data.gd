@@ -8,6 +8,7 @@ signal health_changed(value: float, maximum: float)
 signal stamina_changed(value: float, maximum: float)
 signal exp_changed(value: float, needed: float)
 signal level_changed(new_level: int)
+signal skill_points_changed(points: int)
 signal objective_changed(target_node: Node3D)
 signal genome_collected(current: int, total: int)
 
@@ -51,7 +52,10 @@ var stamina: float     = 100.0
 var level: int         = 1
 var experience: float  = 0.0
 var exp_to_next: float = 100.0
-var skill_points: int  = 0
+var skill_points: int = 0:
+	set(val):
+		skill_points = val
+		skill_points_changed.emit(val)
 
 var attack_power: float = 10.0
 var defense: float = 5.0
@@ -316,13 +320,21 @@ const KNOWLEDGE_DB: Dictionary = {
 }
 
 var unlocked_knowledge: Array[String] = ["genomorph_suit", "dr_sterling", "the_collapse"]
+var unread_knowledge: Array[String] = []
 
 signal knowledge_unlocked(id: String)
+signal knowledge_read(id: String)
 
 func unlock_knowledge(id: String) -> void:
 	if id in KNOWLEDGE_DB and not id in unlocked_knowledge:
 		unlocked_knowledge.append(id)
+		unread_knowledge.append(id)
 		knowledge_unlocked.emit(id)
+
+func mark_knowledge_read(id: String) -> void:
+	if id in unread_knowledge:
+		unread_knowledge.erase(id)
+		knowledge_read.emit(id)
 
 # ── Save & Load ───────────────────────────────────────────────────────────────
 
@@ -409,6 +421,7 @@ func save_game(slot: int = -1) -> void:
 		"has_seen_prologue": has_seen_prologue,
 		"lolo_palaka_intro_done": lolo_palaka_intro_done,
 		"unlocked_knowledge": unlocked_knowledge,
+		"unread_knowledge": unread_knowledge,
 		"current_scene_path": current_scene_path,
 		"timestamp": timestamp,
 		"biome_name": biome_name,
@@ -469,6 +482,11 @@ func load_game(slot: int = -1) -> bool:
 				for k in loaded_knowledge:
 					unlocked_knowledge.append(str(k))
 					
+				var loaded_unread: Array = data.get("unread_knowledge", [])
+				unread_knowledge.clear()
+				for k in loaded_unread:
+					unread_knowledge.append(str(k))
+					
 				current_scene_path = data.get("current_scene_path", "res://levels/node_3d.scn")
 				if current_scene_path == "res://levels/node_3d.tscn":
 					current_scene_path = "res://levels/node_3d.scn"
@@ -523,6 +541,7 @@ func reset_data(slot: int = -1) -> void:
 	lolo_palaka_intro_done = false
 	unlocked_knowledge.clear()
 	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])
+	unread_knowledge.clear()
 	current_scene_path = "res://levels/node_3d.scn"
 	
 	player_position = Vector3.ZERO

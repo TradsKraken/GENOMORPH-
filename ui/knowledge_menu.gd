@@ -1,4 +1,4 @@
-﻿extends CanvasLayer
+extends CanvasLayer
 
 class_name KnowledgeMenu
 
@@ -48,7 +48,22 @@ func _ready() -> void:
 	_build_background()
 	_build_panel()
 	add_child(_panel)
+	
+	if PlayerData.has_signal("knowledge_read"):
+		PlayerData.knowledge_read.connect(func(_id):
+			var selected_indices = _item_list.get_selected_items()
+			var selected_key = _unlocked_keys[selected_indices[0]] if selected_indices.size() > 0 else ""
+			_populate_list()
+			_refresh_filter_tabs()
+			# Re-select the item after repopulating so we don't lose selection highlighting
+			if selected_key != "":
+				var idx = _unlocked_keys.find(selected_key)
+				if idx != -1:
+					_item_list.select(idx)
+		)
+		
 	_populate_list()
+	_refresh_filter_tabs()
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -166,6 +181,25 @@ func _build_category_filters(parent: VBoxContainer) -> void:
 		_filter_btns[cat] = btn
 
 	_set_filter_active("All")
+	
+func _has_unread(cat: String) -> bool:
+	if cat == "All": return PlayerData.unread_knowledge.size() > 0
+	for key in PlayerData.unread_knowledge:
+		if key in PlayerData.KNOWLEDGE_DB:
+			if PlayerData.KNOWLEDGE_DB[key].get("category", "") == cat:
+				return true
+	return false
+
+func _refresh_filter_tabs() -> void:
+	for cat in _filter_btns:
+		var btn: Button = _filter_btns[cat]
+		if _has_unread(cat):
+			btn.text = cat.to_upper() + " (!)"
+			btn.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2)) # Yellow hint
+		else:
+			btn.text = cat.to_upper()
+			# The style method will reset its color properly
+			_style_filter_btn(btn, cat, _current_filter == cat)
 
 func _make_filter_button(cat: String) -> Button:
 	var btn := Button.new()
@@ -293,7 +327,11 @@ func _populate_list() -> void:
 			var icon: String = data.get("icon", "")
 			var title: String = data.get("title", "Unknown")
 			var subcat: String = data.get("subcategory", cat)
+			if key in PlayerData.unread_knowledge:
+				title += "  (NEW)"
 			_item_list.add_item(icon + "  " + title + "\n     [" + subcat + "]")
+			if key in PlayerData.unread_knowledge:
+				_item_list.set_item_custom_fg_color(_item_list.item_count - 1, Color(1.0, 0.9, 0.3))
 			_unlocked_keys.append(key)
 
 	# Update count label
@@ -313,6 +351,10 @@ func _on_item_selected(index: int) -> void:
 		return
 	var key: String = _unlocked_keys[index]
 	var data: Dictionary = PlayerData.KNOWLEDGE_DB[key]
+	
+	if PlayerData.has_method("mark_knowledge_read"):
+		PlayerData.mark_knowledge_read(key)
+		
 	_show_detail(data)
 
 func _show_detail(data: Dictionary) -> void:
