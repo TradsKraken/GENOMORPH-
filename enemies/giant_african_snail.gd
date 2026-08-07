@@ -10,7 +10,8 @@ extends EnemyBase
 
 var _attack_timer: float = 0.0
 var _anim_player: AnimationPlayer = null
-
+var _anim_cache: Dictionary = {}
+var _cached_anim_keys: Array = []
 func _ready() -> void:
 	base_scale = 0.4 # Shrink the snail by default!
 	label_height_offset = 3.5 # The Snail is massive, raise the level text!
@@ -25,6 +26,11 @@ func _ready() -> void:
 	_attack_timer = randf_range(0.0, spit_cooldown * 0.8)
 
 	_anim_player = _find_animation_player(self)
+	if is_instance_valid(_anim_player):
+		var anims = _anim_player.get_animation_list()
+		for a in anims:
+			_anim_cache[a.to_lower()] = a
+		_cached_anim_keys = _anim_cache.keys()
 	_play_anim("idle")
 	
 	if is_instance_valid(_anim_player) and _anim_player.is_playing():
@@ -91,22 +97,24 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 func _play_anim(keyword: String) -> void:
 	if not is_instance_valid(_anim_player): return
 	
-	var current = _anim_player.current_animation
-	if current != "" and keyword.to_lower() in current.to_lower() and _anim_player.is_playing():
+	var keyword_lower = keyword.to_lower()
+	var current_lower = _anim_player.current_animation.to_lower()
+	
+	if current_lower != "" and keyword_lower in current_lower and _anim_player.is_playing():
 		return # Already playing a matching animation
 		
 	if _anim_player.has_animation(keyword):
 		_anim_player.play(keyword)
 		return
 		
-	for a in _anim_player.get_animation_list():
-		if keyword.to_lower() in a.to_lower():
-			_anim_player.play(a)
+	for key in _cached_anim_keys:
+		if keyword_lower in key:
+			_anim_player.play(_anim_cache[key])
 			return
 			
 	# Fallback to playing the first animation if idle is requested but not found
-	if keyword == "idle" and _anim_player.get_animation_list().size() > 0:
-		_anim_player.play(_anim_player.get_animation_list()[0])
+	if keyword_lower == "idle" and _cached_anim_keys.size() > 0:
+		_anim_player.play(_anim_cache[_cached_anim_keys[0]])
 
 func _spit_at_target() -> void:
 	if not spit_scene or not is_instance_valid(target): return

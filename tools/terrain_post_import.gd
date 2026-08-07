@@ -42,7 +42,8 @@ func _process_nodes(node: Node, root: Node):
 		# 3. Fix transparency and shadows
 		node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if "grass" in n or "leaf" in n or "flower" in n:
-			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_DOUBLE_SIDED
+			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			node.add_to_group("foliage_detail", true)
 			
 		# 2. Fix camera occlusion by enabling Distance Dither Fade
 		if node.mesh != null:
@@ -60,10 +61,7 @@ func _process_nodes(node: Node, root: Node):
 					mat.emission_enabled = false 
 					
 					if not ("plane" in n or "terrain" in n or "ground" in n):
-						# This makes objects dissolve into dots when the camera gets too close!
-						mat.distance_fade_mode = BaseMaterial3D.DISTANCE_FADE_PIXEL_DITHER
-						mat.distance_fade_max_distance = 11.0 # Starts fading here
-						mat.distance_fade_min_distance = 7.0  # Fully invisible here
+						pass # We use script-based camera fading now, pixel dither is too slow
 						
 	# 4. Remove any lights accidentally exported from Blender! They wash out our custom game lighting and shadows!
 	if node is Light3D:

@@ -1,4 +1,4 @@
-﻿extends CanvasLayer
+extends CanvasLayer
 
 class_name SettingsMenu
 
@@ -55,6 +55,8 @@ func _ready() -> void:
 	_build_scale_option()
 	_build_quality_option()
 	_build_glow_toggle()
+	_build_shadows_toggle()
+	_build_foliage_toggle()
 	_build_draw_distance_option()
 	
 	# Spacer
@@ -171,6 +173,40 @@ func _build_draw_distance_option() -> void:
 		SettingsManager.apply_settings()
 	)
 	hbox.add_child(opt)
+	_vbox.add_child(hbox)
+
+func _build_shadows_toggle() -> void:
+	var hbox := HBoxContainer.new()
+	var lbl := Label.new()
+	lbl.text = "Shadows:"
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(lbl)
+	
+	var check := CheckButton.new()
+	check.button_pressed = SettingsManager.shadows_enabled
+	check.toggled.connect(func(toggled_on: bool):
+		SettingsManager.shadows_enabled = toggled_on
+		SettingsManager.apply_settings()
+	)
+	hbox.add_child(check)
+	_vbox.add_child(hbox)
+
+func _build_foliage_toggle() -> void:
+	var hbox := HBoxContainer.new()
+	var lbl := Label.new()
+	lbl.text = "Foliage Details:"
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(lbl)
+	
+	var check := CheckButton.new()
+	check.button_pressed = SettingsManager.foliage_enabled
+	check.toggled.connect(func(toggled_on: bool):
+		SettingsManager.foliage_enabled = toggled_on
+		SettingsManager.apply_settings()
+	)
+	hbox.add_child(check)
 	_vbox.add_child(hbox)
 
 func _on_close() -> void:

@@ -9,6 +9,8 @@ extends EnemyBase
 
 var _attack_timer: float = 0.0
 var _wake_delay: float = 0.0
+var _raycast_timer: float = 0.0
+var _last_move_dir: Vector3 = Vector3.ZERO
 
 enum State { IDLE, ATTACK, RETURN }
 var _current_state: State = State.IDLE
@@ -115,7 +117,7 @@ func _process_movement(delta: float) -> void:
 				look_at(global_position + face_dir, Vector3.UP)
 			
 			if not is_passive and dist_to_player > attack_range * 0.9:
-				_fly_towards(face_dir, target.global_position.y + 1.0)
+				_fly_towards(face_dir, target.global_position.y + 1.0, delta)
 			else:
 				velocity = Vector3.ZERO
 				
@@ -143,14 +145,15 @@ func _process_movement(delta: float) -> void:
 					move_dir = move_dir.normalized()
 					look_at(global_position + move_dir, Vector3.UP)
 				
-				_fly_towards(move_dir, _start_position.y)
+				_fly_towards(move_dir, _start_position.y, delta)
 				
 				# Re-aggro if player enters territory and range again
 				if can_auto_wake and dist_player_to_start <= territory_radius and dist_to_player <= aggro_range:
 					is_active = true
 					_current_state = State.ATTACK
 
-func _fly_towards(intended_dir: Vector3, target_y: float) -> void:
+func _fly_towards(intended_dir: Vector3, target_y: float, delta: float) -> void:
+	_raycast_timer -= delta
 	var move_dir = intended_dir
 	var space_state = get_world_3d().direct_space_state
 	var ray_length = 3.0
@@ -164,28 +167,34 @@ func _fly_towards(intended_dir: Vector3, target_y: float) -> void:
 	
 	var is_blocked = space_state.intersect_ray(forward_query)
 	if is_blocked:
-		var best_dir = intended_dir
-		var best_score = -999.0
-		
-		for i in range(12):
-			var angle = i * (TAU / 12.0)
-			var dir = Vector3(cos(angle), 0, sin(angle))
-			var score = dir.dot(intended_dir)
+		if _raycast_timer > 0.0:
+			move_dir = _last_move_dir
+			target_y += 2.5
+		else:
+			_raycast_timer = 0.25
+			var best_dir = intended_dir
+			var best_score = -999.0
 			
-			var query = PhysicsRayQueryParameters3D.create(global_position, global_position + dir * ray_length)
-			query.exclude = exclude_rids
-			var result = space_state.intersect_ray(query)
-			
-			if result:
-				var dist_to_hit = global_position.distance_to(result.position)
-				score -= (ray_length - dist_to_hit) * 5.0
+			for i in range(12):
+				var angle = i * (TAU / 12.0)
+				var dir = Vector3(cos(angle), 0, sin(angle))
+				var score = dir.dot(intended_dir)
 				
-			if score > best_score:
-				best_score = score
-				best_dir = dir
+				var query = PhysicsRayQueryParameters3D.create(global_position, global_position + dir * ray_length)
+				query.exclude = exclude_rids
+				var result = space_state.intersect_ray(query)
 				
-		move_dir = best_dir.normalized()
-		target_y += 2.5 # Fly up to get over the obstacle
+				if result:
+					var dist_to_hit = global_position.distance_to(result.position)
+					score -= (ray_length - dist_to_hit) * 5.0
+					
+				if score > best_score:
+					best_score = score
+					best_dir = dir
+					
+			move_dir = best_dir.normalized()
+			_last_move_dir = move_dir
+			target_y += 2.5 # Fly up to get over the obstacle
 		
 	var y_diff = target_y - global_position.y
 	velocity = Vector3(move_dir.x * speed, y_diff * 2.0, move_dir.z * speed)
