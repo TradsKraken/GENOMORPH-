@@ -36,7 +36,7 @@ extends CharacterBody3D
 @export var jump_stamina_cost: float = 30.0
 
 ## How much stamina is recovered per second.
-@export var stamina_recovery_rate: float = 5.0
+@export var stamina_recovery_rate: float = 10.0
 
 # ── Private ──────────────────────────────────────────────────────────────────
 
@@ -425,7 +425,7 @@ func _attack() -> void:
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
 	if animation_player:
-		animation_player.play("FrogArmature|Frog_Attack", 0.1)
+		animation_player.play("FrogArmature|Frog_Attack", 0.1, 2.0)
 		
 	AudioManager.play_sfx("lunge", randf_range(0.9, 1.1))
 		

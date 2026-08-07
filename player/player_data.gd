@@ -57,7 +57,7 @@ var skill_points: int = 0:
 		skill_points = val
 		skill_points_changed.emit(val)
 
-var attack_power: float = 10.0
+var attack_power: float = 20.0
 var defense: float = 5.0
 var speed: float = 4.0
 
