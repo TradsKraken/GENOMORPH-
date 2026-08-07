@@ -78,23 +78,29 @@ func _ready() -> void:
 		if AudioManager and AudioManager.has_method("play_ambiance"):
 			AudioManager.play_ambiance()
 			
-		var hud_scene := load("res://ui/hud.tscn") as PackedScene
-		if hud_scene:
-			var hud = hud_scene.instantiate()
-			hud.name = "GameHUD"
-			get_parent().call_deferred("add_child", hud)
-		else:
-			var hud_script := load("res://ui/hud.gd") as GDScript
-			if hud_script:
-				var hud: CanvasLayer = hud_script.new()
-				hud.name = "GameHUD"
-				get_parent().call_deferred("add_child", hud)
+		call_deferred("_spawn_hud_if_missing")
 
 		var spawner_script := load("res://levels/orb_spawner.gd") as GDScript
 		if spawner_script:
 			var spawner: Node3D = spawner_script.new()
 			spawner.name = "OrbSpawner"
 			get_parent().call_deferred("add_child", spawner)
+
+func _spawn_hud_if_missing() -> void:
+	if get_tree().get_nodes_in_group("hud").size() > 0:
+		return
+		
+	var hud_scene := load("res://ui/hud.tscn") as PackedScene
+	if hud_scene:
+		var hud = hud_scene.instantiate()
+		hud.name = "GameHUD"
+		get_parent().add_child(hud)
+	else:
+		var hud_script := load("res://ui/hud.gd") as GDScript
+		if hud_script:
+			var hud: CanvasLayer = hud_script.new()
+			hud.name = "GameHUD"
+			get_parent().add_child(hud)
 
 
 func _process(delta: float) -> void:

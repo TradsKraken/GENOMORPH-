@@ -31,7 +31,7 @@ func _ready() -> void:
 	_video_player = VideoStreamPlayer.new()
 	_video_player.set_anchors_preset(PRESET_FULL_RECT)
 	_video_player.expand = true
-	_video_player.stream = load("res://assets/Prologue1.ogv")
+	_video_player.stream = load("res://assets/Prologue.ogv")
 	add_child(_video_player)
 	
 	var top_bar = ColorRect.new()
