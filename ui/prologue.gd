@@ -18,6 +18,7 @@ var _video_player: VideoStreamPlayer
 var _speaker_label: Label
 var _text_label: RichTextLabel
 var _current_sub_idx: int = -1
+var _is_fading_out: bool = false
 
 func _ready() -> void:
 	set_anchors_preset(PRESET_FULL_RECT)
@@ -101,6 +102,10 @@ func _process(_delta: float) -> void:
 		
 	var t = _video_player.stream_position
 	
+	if t >= 85.0 and not _is_fading_out:
+		_is_fading_out = true
+		_start_fade_out()
+	
 	var target_sub = -1
 	for i in range(subtitles.size()):
 		if t >= subtitles[i].time:
@@ -131,12 +136,27 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _finish_prologue() -> void:
+	if _is_fading_out: return
+	_is_fading_out = true
 	set_process_input(false)
 	_video_player.stop()
 	
 	var tw = create_tween()
 	tw.tween_property(self, "modulate:a", 0.0, 0.5)
 	tw.tween_callback(func():
+		if AudioManager and AudioManager.has_method("play_game_bgm"):
+			AudioManager.play_game_bgm()
+		get_node("/root/SceneLoader").load_scene("res://levels/node_3d.scn")
+	)
+
+func _start_fade_out() -> void:
+	set_process_input(false)
+	var tw = create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(_video_player, "volume_db", -40.0, 2.0)
+	tw.tween_property(self, "modulate:a", 0.0, 2.0)
+	tw.chain().tween_callback(func():
+		_video_player.stop()
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
 		get_node("/root/SceneLoader").load_scene("res://levels/node_3d.scn")

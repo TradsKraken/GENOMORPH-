@@ -34,6 +34,11 @@ func _ensure_player_and_hud() -> void:
 			var script = load("res://levels/camera_3d.gd")
 			if script:
 				cam.set_script(script)
+				cam.set("height", 13.0)
+				cam.set("tilt_degrees", 35.0)
+				cam.set("distance_back", 0.0)
+				cam.set("horizontal_offset", 0.0)
+				cam.set("follow_speed", 8.0)
 			cam.global_position = Vector3(0, 15, 10)
 			cam.rotation_degrees = Vector3(-45, 0, 0)
 			cam.add_to_group("camera")
@@ -47,16 +52,38 @@ func _ensure_player_and_hud() -> void:
 			
 	# Deduplicate and Add HUD if missing
 	var huds = get_tree().get_nodes_in_group("hud")
+	var the_hud = null
 	if huds.size() == 0:
 		var hud_scene = load("res://ui/hud_head.tscn")
 		if not hud_scene:
 			hud_scene = load("res://ui/hud.tscn")
 		if hud_scene:
-			var hud = hud_scene.instantiate()
-			add_child(hud)
-	elif huds.size() > 1:
-		for i in range(1, huds.size()):
-			huds[i].queue_free()
+			the_hud = hud_scene.instantiate()
+			add_child(the_hud)
+	else:
+		the_hud = huds[0]
+		if huds.size() > 1:
+			for i in range(1, huds.size()):
+				huds[i].queue_free()
+				
+	# Deduplicate and Add Joystick if missing
+	var joys = get_tree().get_nodes_in_group("joystick")
+	if joys.size() == 0 and the_hud != null:
+		var joy = Control.new()
+		var script = load("res://ui/virtual_joystick.gd")
+		if script:
+			joy.set_script(script)
+		joy.name = "VirtualJoystick"
+		joy.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+		joy.offset_left = 60
+		joy.offset_top = -320
+		joy.offset_right = 320
+		joy.offset_bottom = -60
+		the_hud.add_child(joy)
+		
+		var active_players = get_tree().get_nodes_in_group("player")
+		if active_players.size() > 0 and active_players[0].has_method("_find_joystick"):
+			active_players[0]._find_joystick()
 			
 	# Add lighting if missing
 	var has_light = false

@@ -862,7 +862,6 @@ func _build_action_buttons() -> void:
 	# Medium, directly to the left of Primary Attack
 	var skill1_is_new = not _root.has_node("Skill1Btn")
 	_skill1_btn = _make_circle_btn("Skill1Btn", "", 80, C_BTN_NORM)
-	_skill1_btn.clip_contents = true
 	_skill1_btn.icon = preload("res://assets/TONGUE ATTACK.svg")
 	_skill1_btn.expand_icon = true
 	_skill1_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2242,17 +2241,24 @@ func _on_skill1_cooldown(duration: float) -> void:
 		overlay = TextureProgressBar.new()
 		overlay.name = "CooldownOverlay"
 		overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+		overlay.offset_left = 3
+		overlay.offset_top = 3
+		overlay.offset_right = -3
+		overlay.offset_bottom = -3
 		overlay.fill_mode = TextureProgressBar.FILL_CLOCKWISE
-		overlay.nine_patch_stretch = true
+		overlay.step = 0.01
 		
-		# Radial sweep requires a texture
+		# Radial sweep requires a perfectly circular texture
 		var grad = Gradient.new()
-		grad.offsets = PackedFloat32Array([0.0, 1.0])
-		grad.colors = PackedColorArray([Color(0,0,0, 0.7), Color(0,0,0, 0.7)])
+		grad.offsets = PackedFloat32Array([0.0, 0.99, 1.0])
+		grad.colors = PackedColorArray([Color(0,0,0, 0.7), Color(0,0,0, 0.7), Color(0,0,0, 0.0)])
 		var tex = GradientTexture2D.new()
 		tex.gradient = grad
-		tex.width = 80
-		tex.height = 80
+		tex.fill = GradientTexture2D.FILL_RADIAL
+		tex.fill_from = Vector2(0.5, 0.5)
+		tex.fill_to = Vector2(1.0, 0.5)
+		tex.width = 74
+		tex.height = 74
 		
 		overlay.texture_progress = tex
 		overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
