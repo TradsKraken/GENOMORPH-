@@ -70,6 +70,8 @@ var input_locked: bool = false
 var _time_since_combat: float = 5.0
 var _heal_timer: float = 0.0
 var _respawn_point: Vector3 = Vector3.ZERO
+var _is_using_skill: bool = false
+var _skill1_cooldown_timer: float = 0.0
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -158,6 +160,8 @@ func _physics_process(delta: float) -> void:
 	# ── Stamina recovery ─────────────────────────────────────────────────────
 	PlayerData.recover_stamina(delta, stamina_recovery_rate)
 	_process_auto_heal(delta)
+	if _skill1_cooldown_timer > 0.0:
+		_skill1_cooldown_timer -= delta
 
 	# ── Gravity ──────────────────────────────────────────────────────────────
 	if not is_on_floor():
@@ -415,6 +419,9 @@ func _trigger_splashdown_aoe() -> void:
 				sludge.cleanse()
 
 func _attack() -> void:
+	if animation_player and animation_player.current_animation == "FrogArmature|Frog_Attack" and animation_player.is_playing():
+		return
+		
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
 	if animation_player:
@@ -462,10 +469,17 @@ func _attack() -> void:
 	pass
 
 func _skill1() -> void:
+	if _is_using_skill or _skill1_cooldown_timer > 0.0:
+		return
+		
 	if not PlayerData.use_stamina(25.0):
 		AudioManager.play_sfx("error", 1.0, 5.0)
 		return
 		
+	_is_using_skill = true
+	_skill1_cooldown_timer = 3.0
+	PlayerData.skill1_cooldown_started.emit(3.0)
+	
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
 	AudioManager.play_sfx("whip", randf_range(0.9, 1.1))
@@ -544,6 +558,7 @@ func _animate_tongue(target_pos: Vector3) -> void:
 	tween.tween_property(tongue_pivot, "scale:z", 0.01, 0.1).set_delay(0.05)
 	tween.finished.connect(func():
 		tongue_pivot.queue_free()
+		_is_using_skill = false
 	)
 
 func _show_attack_range(radius: float, color: Color) -> void:

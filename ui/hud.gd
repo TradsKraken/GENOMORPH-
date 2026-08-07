@@ -862,6 +862,7 @@ func _build_action_buttons() -> void:
 	# Medium, directly to the left of Primary Attack
 	var skill1_is_new = not _root.has_node("Skill1Btn")
 	_skill1_btn = _make_circle_btn("Skill1Btn", "", 80, C_BTN_NORM)
+	_skill1_btn.clip_contents = true
 	_skill1_btn.icon = preload("res://assets/TONGUE ATTACK.svg")
 	_skill1_btn.expand_icon = true
 	_skill1_btn.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -2217,6 +2218,9 @@ func _connect_signals() -> void:
 		_on_objective_changed(PlayerData.current_objective)
 	else:
 		_on_objective_changed(null)
+		
+	if pd.has_signal("skill1_cooldown_started"):
+		pd.skill1_cooldown_started.connect(_on_skill1_cooldown)
 	
 	# Initial states
 	_hp_bar.max_value   = pd.max_health
@@ -2229,6 +2233,38 @@ func _connect_signals() -> void:
 	_exp_bar.max_value  = pd.exp_to_next
 	_exp_bar.value      = pd.experience
 	_lvl_lbl.text       = str(pd.level)
+
+func _on_skill1_cooldown(duration: float) -> void:
+	if not is_instance_valid(_skill1_btn): return
+	
+	var overlay = _skill1_btn.get_node_or_null("CooldownOverlay")
+	if not overlay:
+		overlay = TextureProgressBar.new()
+		overlay.name = "CooldownOverlay"
+		overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+		overlay.fill_mode = TextureProgressBar.FILL_CLOCKWISE
+		overlay.nine_patch_stretch = true
+		
+		# Radial sweep requires a texture
+		var grad = Gradient.new()
+		grad.offsets = PackedFloat32Array([0.0, 1.0])
+		grad.colors = PackedColorArray([Color(0,0,0, 0.7), Color(0,0,0, 0.7)])
+		var tex = GradientTexture2D.new()
+		tex.gradient = grad
+		tex.width = 80
+		tex.height = 80
+		
+		overlay.texture_progress = tex
+		overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_skill1_btn.add_child(overlay)
+		
+	overlay.max_value = duration
+	overlay.value = duration
+	overlay.visible = true
+	
+	var tw = create_tween()
+	tw.tween_property(overlay, "value", 0.0, duration)
+	tw.finished.connect(func(): overlay.visible = false)
 
 
 func _on_health(value: float, maximum: float) -> void:

@@ -11,7 +11,7 @@ signal level_changed(new_level: int)
 signal skill_points_changed(points: int)
 signal objective_changed(target_node: Node3D)
 signal genome_collected(current: int, total: int)
-
+signal skill1_cooldown_started(duration: float)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
 
