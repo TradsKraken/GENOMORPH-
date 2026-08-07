@@ -10,27 +10,26 @@ func _ready() -> void:
 	call_deferred("_ensure_player_and_hud")
 	_generate_arena()
 	call_deferred("_spawn_boss")
+	call_deferred("_setup_boss_objective")
 	
 func _ensure_player_and_hud() -> void:
-	# Add player if missing
-	if not get_tree().get_nodes_in_group("player"):
+	# Deduplicate and Add player if missing
+	var players = get_tree().get_nodes_in_group("player")
+	if players.size() == 0:
 		var player_scene = load("res://player/player.tscn")
 		if player_scene:
 			var player = player_scene.instantiate()
-			player.name = "Player"
-			player.global_position = Vector3(0, 2, 8)
 			add_child(player)
+			player.global_position = Vector3(0, 2, 8) # Fallback spawn
+	elif players.size() > 1:
+		for i in range(1, players.size()):
+			players[i].queue_free()
 			
-	# Add camera if missing
-	var has_cam = false
-	for cam in get_tree().get_nodes_in_group("camera"):
-		has_cam = true
-		break
-	
-	if not has_cam:
+	# Deduplicate and Add camera if missing
+	var cameras = get_tree().get_nodes_in_group("camera")
+	if cameras.size() == 0:
 		var cam_scene = load("res://player/camera_3d.tscn")
 		if not cam_scene:
-			# Fallback if no dedicated camera scene
 			var cam = Camera3D.new()
 			var script = load("res://levels/camera_3d.gd")
 			if script:
@@ -42,15 +41,22 @@ func _ensure_player_and_hud() -> void:
 		else:
 			var cam = cam_scene.instantiate()
 			add_child(cam)
+	elif cameras.size() > 1:
+		for i in range(1, cameras.size()):
+			cameras[i].queue_free()
 			
-	# Add HUD if missing
-	if not get_tree().get_nodes_in_group("hud"):
+	# Deduplicate and Add HUD if missing
+	var huds = get_tree().get_nodes_in_group("hud")
+	if huds.size() == 0:
 		var hud_scene = load("res://ui/hud_head.tscn")
 		if not hud_scene:
 			hud_scene = load("res://ui/hud.tscn")
 		if hud_scene:
 			var hud = hud_scene.instantiate()
 			add_child(hud)
+	elif huds.size() > 1:
+		for i in range(1, huds.size()):
+			huds[i].queue_free()
 			
 	# Add lighting if missing
 	var has_light = false
@@ -177,10 +183,16 @@ func _spawn_boss() -> void:
 			boss_instance = enemy
 			return
 
-	if boss_scene:
+	if boss_scene and not boss_instance:
 		boss_instance = boss_scene.instantiate()
 		add_child(boss_instance)
 		boss_instance.global_position = Vector3(0, 1.0, -15)
+
+func _setup_boss_objective() -> void:
+	if is_instance_valid(boss_instance) and PlayerData.has_method("set_objective"):
+		# Give a slight delay to ensure HUD is fully initialized
+		await get_tree().create_timer(0.5).timeout
+		PlayerData.set_objective(boss_instance, "Defeat the Snail-Toad Chimera")
 
 func _on_water_entered(body: Node3D) -> void:
 	if body.is_in_group("player"):
