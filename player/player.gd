@@ -261,7 +261,7 @@ func take_damage(amount: float) -> void:
 			hud.show_float_text("-" + str(roundi(amount)), scr, Color.RED)
 	
 	if PlayerData.health <= 0:
-		PlayerData.health = PlayerData.max_health
+		PlayerData.heal(PlayerData.max_health)
 		
 		var spawn_pos = _respawn_point
 		if PlayerData.has_saved_position:
@@ -683,8 +683,8 @@ func _update_animation(direction: Vector3) -> void:
 				if air_time > 0.0:
 					animation_player.speed_scale = anim.length / air_time
 	elif target_anim == anim_walk:
-		# Scale walking hop to movement speed
-		animation_player.speed_scale = clamp(speed / 2.5, 0.5, 2.0)
+		# Scale walking hop to movement speed, doubled for faster animation
+		animation_player.speed_scale = clamp((speed / 2.5) * 1.2, 0.5, 4.0)
 	else:
 		# Idle
 		animation_player.speed_scale = 1.0
