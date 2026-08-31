@@ -11,6 +11,9 @@ var draw_distance: float = 60.0
 var shadows_enabled: bool = true
 var foliage_enabled: bool = true
 
+var camera_fov: float = 75.0
+var camera_zoom: float = 3.5
+
 func _ready() -> void:
 	load_settings()
 	# Apply once at startup
@@ -24,6 +27,8 @@ func save_settings() -> void:
 	config.set_value("graphics", "draw_distance", draw_distance)
 	config.set_value("graphics", "shadows", shadows_enabled)
 	config.set_value("graphics", "foliage", foliage_enabled)
+	config.set_value("perspective", "camera_fov", camera_fov)
+	config.set_value("perspective", "camera_zoom", camera_zoom)
 	config.save(SAVE_PATH)
 
 func load_settings() -> void:
@@ -35,6 +40,8 @@ func load_settings() -> void:
 		draw_distance = config.get_value("graphics", "draw_distance", 60.0)
 		shadows_enabled = config.get_value("graphics", "shadows", true)
 		foliage_enabled = config.get_value("graphics", "foliage", true)
+		camera_fov = config.get_value("perspective", "camera_fov", 75.0)
+		camera_zoom = config.get_value("perspective", "camera_zoom", 3.5)
 
 func apply_settings() -> void:
 	var vp := get_viewport()
@@ -57,6 +64,13 @@ func apply_settings() -> void:
 	for f in foliage:
 		if f is Node3D:
 			f.visible = foliage_enabled
+			
+	# Update camera settings if we have a current camera
+	var cam = get_viewport().get_camera_3d()
+	if cam:
+		cam.fov = camera_fov
+		if "tp_distance_back" in cam:
+			cam.tp_distance_back = camera_zoom
 			
 	settings_changed.emit()
 

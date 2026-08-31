@@ -26,6 +26,16 @@ extends Camera3D
 ## Smooth-follow speed. Lower = lazier follow, higher = snappier.
 @export var follow_speed: float = 8.0
 
+enum ViewMode { TOP_DOWN, THIRD_PERSON }
+@export var view_mode: ViewMode = ViewMode.TOP_DOWN
+
+@export_group("Third Person Settings")
+@export var tp_height: float = 1.5
+@export var tp_distance_back: float = 3.5
+@export var tp_horizontal_offset: float = 0.5
+@export var tp_mouse_sensitivity: float = 0.003
+
+
 ## Set to true if this scene is being loaded as the main menu background.
 @export var is_main_menu: bool = false
 
@@ -34,6 +44,10 @@ extends Camera3D
 var _player: Node3D = null
 var _last_ground_y: float = 0.0
 var _target_ground_y: float = 0.0
+
+var _cam_yaw: float = 0.0
+var _cam_pitch: float = -0.2
+
 
 var _shake_trauma: float = 0.0
 
@@ -85,6 +99,37 @@ func _ready() -> void:
 			var spawner: Node3D = spawner_script.new()
 			spawner.name = "OrbSpawner"
 			get_parent().call_deferred("add_child", spawner)
+			
+	if not InputMap.has_action("toggle_camera"):
+		InputMap.add_action("toggle_camera")
+		var event = InputEventKey.new()
+		event.keycode = KEY_V
+		InputMap.action_add_event("toggle_camera", event)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_camera"):
+		if view_mode == ViewMode.TOP_DOWN:
+			view_mode = ViewMode.THIRD_PERSON
+			if _player:
+				# Face the direction the player is facing (player's Z is backward, so +PI)
+				_cam_yaw = _player.rotation.y + PI
+			if OS.get_name() not in ["Android", "iOS"]:
+				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		else:
+			view_mode = ViewMode.TOP_DOWN
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+	if view_mode == ViewMode.THIRD_PERSON:
+		if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			_cam_yaw -= event.relative.x * tp_mouse_sensitivity
+			_cam_pitch = clamp(_cam_pitch - event.relative.y * tp_mouse_sensitivity, -PI/2.5, PI/4.0)
+		elif event is InputEventScreenDrag:
+			var vp_size = get_viewport().get_visible_rect().size
+			if event.position.x > vp_size.x * 0.4: # Right 60% of the screen
+				_cam_yaw -= event.relative.x * tp_mouse_sensitivity
+				_cam_pitch = clamp(_cam_pitch - event.relative.y * tp_mouse_sensitivity, -PI/2.5, PI/4.0)
+
+
 
 func _spawn_hud_if_missing() -> void:
 	if get_tree().get_nodes_in_group("hud").size() > 0:
@@ -136,21 +181,29 @@ func _process(delta: float) -> void:
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 func _apply_position(weight: float) -> void:
-	# With a tilted camera the player ends up below screen-center unless we
-	# compensate. By positioning the camera directly above + behind and then
-	# calling look_at() on the player, the player is always exactly centered.
-	var tilt_rad := deg_to_rad(tilt_degrees)
-	var z_offset := height * tan(tilt_rad) + distance_back
-
 	var ground_pos := _player.global_position
 	ground_pos.y = _last_ground_y
-
-	var offset := Vector3(
-		horizontal_offset,
-		height,
-		z_offset
-	)
-	var target_pos := ground_pos + offset
+	
+	var target_pos: Vector3
+	var look_target: Vector3
+	var current_offset: Vector3
+	
+	if view_mode == ViewMode.TOP_DOWN:
+		var tilt_rad := deg_to_rad(tilt_degrees)
+		var z_offset := height * tan(tilt_rad) + distance_back
+		current_offset = Vector3(horizontal_offset, height, z_offset)
+		target_pos = ground_pos + current_offset
+		look_target = target_pos - current_offset
+	else:
+		# THIRD_PERSON
+		var yaw_basis = Basis(Vector3.UP, _cam_yaw)
+		var pitch_basis = Basis(Vector3.RIGHT, _cam_pitch)
+		var cam_dir = (yaw_basis * pitch_basis) * Vector3(0, 0, 1)
+		
+		# Offset from player
+		current_offset = (yaw_basis * Vector3(tp_horizontal_offset, tp_height, 0)) + (cam_dir * tp_distance_back)
+		target_pos = ground_pos + Vector3(0, tp_height * 0.5, 0) + current_offset
+		look_target = ground_pos + Vector3(0, tp_height * 0.8, 0)
 
 	var unshifted_pos = global_position.lerp(target_pos, clampf(weight, 0.0, 1.0))
 
@@ -166,10 +219,14 @@ func _apply_position(weight: float) -> void:
 		
 	global_position = unshifted_pos + shake_offset
 
-	# To prevent the camera from swiveling/tilting when the player moves,
-	# we look at a point relative to the camera's CURRENT position (excluding shake).
-	# This keeps the camera angle completely rigid while it slides into place.
-	look_at(unshifted_pos - offset, Vector3.UP)
+	if view_mode == ViewMode.TOP_DOWN:
+		look_at(unshifted_pos - current_offset, Vector3.UP)
+	else:
+		# Look at the player
+		var look_pos = look_target
+		if global_position.distance_to(look_pos) > 0.1:
+			look_at(look_pos, Vector3.UP)
+
 
 	_handle_occlusion(get_process_delta_time())
 

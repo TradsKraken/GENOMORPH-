@@ -36,9 +36,9 @@ func _ready() -> void:
 	sb.content_margin_bottom = 40
 	_panel.add_theme_stylebox_override("panel", sb)
 	
-	_vbox = VBoxContainer.new()
-	_vbox.add_theme_constant_override("separation", 32)
-	_panel.add_child(_vbox)
+	var main_vbox = VBoxContainer.new()
+	main_vbox.add_theme_constant_override("separation", 24)
+	_panel.add_child(main_vbox)
 	
 	# Title
 	var title := Label.new()
@@ -46,10 +46,20 @@ func _ready() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 48)
 	title.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
-	_vbox.add_child(title)
+	main_vbox.add_child(title)
 	
 	var sep := HSeparator.new()
-	_vbox.add_child(sep)
+	main_vbox.add_child(sep)
+	
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	main_vbox.add_child(scroll)
+	
+	_vbox = VBoxContainer.new()
+	_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_vbox.add_theme_constant_override("separation", 24)
+	scroll.add_child(_vbox)
 	
 	# Settings options
 	_build_scale_option()
@@ -59,10 +69,18 @@ func _ready() -> void:
 	_build_foliage_toggle()
 	_build_draw_distance_option()
 	
-	# Spacer
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_vbox.add_child(spacer)
+	var sep2 := HSeparator.new()
+	_vbox.add_child(sep2)
+	
+	var p_title := Label.new()
+	p_title.text = "PERSPECTIVE SETTINGS"
+	p_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	p_title.add_theme_font_size_override("font_size", 32)
+	p_title.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+	_vbox.add_child(p_title)
+	
+	_build_fov_slider()
+	_build_zoom_slider()
 	
 	# Close button
 	var close_btn := Button.new()
@@ -71,7 +89,7 @@ func _ready() -> void:
 	close_btn.custom_minimum_size = Vector2(0, 80)
 	close_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	close_btn.pressed.connect(_on_close)
-	_vbox.add_child(close_btn)
+	main_vbox.add_child(close_btn)
 	
 	add_child(_panel)
 
@@ -208,6 +226,64 @@ func _build_foliage_toggle() -> void:
 	)
 	hbox.add_child(check)
 	_vbox.add_child(hbox)
+
+func _build_fov_slider() -> void:
+	var vbox := VBoxContainer.new()
+	var hbox := HBoxContainer.new()
+	var lbl := Label.new()
+	lbl.text = "Camera FOV:"
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(lbl)
+	
+	var val_lbl := Label.new()
+	val_lbl.text = str(int(SettingsManager.camera_fov))
+	val_lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(val_lbl)
+	vbox.add_child(hbox)
+	
+	var slider := HSlider.new()
+	slider.min_value = 50.0
+	slider.max_value = 110.0
+	slider.step = 1.0
+	slider.value = SettingsManager.camera_fov
+	slider.custom_minimum_size = Vector2(0, 40)
+	slider.value_changed.connect(func(val: float):
+		SettingsManager.camera_fov = val
+		val_lbl.text = str(int(val))
+		SettingsManager.apply_settings()
+	)
+	vbox.add_child(slider)
+	_vbox.add_child(vbox)
+
+func _build_zoom_slider() -> void:
+	var vbox := VBoxContainer.new()
+	var hbox := HBoxContainer.new()
+	var lbl := Label.new()
+	lbl.text = "3rd Person Zoom Distance:"
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(lbl)
+	
+	var val_lbl := Label.new()
+	val_lbl.text = "%.1f" % SettingsManager.camera_zoom
+	val_lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(val_lbl)
+	vbox.add_child(hbox)
+	
+	var slider := HSlider.new()
+	slider.min_value = 1.5
+	slider.max_value = 10.0
+	slider.step = 0.1
+	slider.value = SettingsManager.camera_zoom
+	slider.custom_minimum_size = Vector2(0, 40)
+	slider.value_changed.connect(func(val: float):
+		SettingsManager.camera_zoom = val
+		val_lbl.text = "%.1f" % val
+		SettingsManager.apply_settings()
+	)
+	vbox.add_child(slider)
+	_vbox.add_child(vbox)
 
 func _on_close() -> void:
 	SettingsManager.save_settings()

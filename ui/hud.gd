@@ -1011,6 +1011,28 @@ func _build_action_buttons() -> void:
 	_quest_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	_quest_btn.pressed.connect(_open_quest_menu)
 
+	# Camera Toggle Button (Top Right, below Quest Button)
+	var cam_btn_is_new = not _root.has_node("CamToggleBtn")
+	var _cam_toggle_btn = _make_circle_btn("CamToggleBtn", "🎥", 56, C_BTN_NORM)
+	_cam_toggle_btn.add_theme_font_size_override("font_size", 28)
+	_cam_toggle_btn.set_anchor(SIDE_RIGHT, 1.0)
+	_cam_toggle_btn.set_anchor(SIDE_TOP, 0.0)
+	_cam_toggle_btn.set_anchor(SIDE_LEFT, 1.0)
+	_cam_toggle_btn.set_anchor(SIDE_BOTTOM, 0.0)
+	_cam_toggle_btn.offset_right  = -220
+	_cam_toggle_btn.offset_top    = 240
+	_cam_toggle_btn.offset_left   = -276
+	_cam_toggle_btn.offset_bottom = 296
+	_cam_toggle_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
+	_cam_toggle_btn.pressed.connect(func():
+		var event = InputEventAction.new()
+		event.action = "toggle_camera"
+		event.pressed = true
+		Input.parse_input_event(event)
+	)
+
+
+
 # ── Menu Panel (Centered) ─────────────────────────────────────────────────────
 
 func _build_menu_panel() -> void:

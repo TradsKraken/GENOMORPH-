@@ -187,6 +187,11 @@ func _physics_process(delta: float) -> void:
 			)
 	# Map 2-D input → 3-D world XZ direction.
 	var direction := Vector3(raw_input.x, 0.0, raw_input.y).normalized()
+	
+	var cam = get_viewport().get_camera_3d()
+	if cam and "view_mode" in cam and cam.view_mode == 1: # THIRD_PERSON
+		direction = direction.rotated(Vector3.UP, cam.global_rotation.y)
+
 
 	# Keep reticle attached to player as they walk
 	if is_aiming_jump:
@@ -311,7 +316,13 @@ func start_aiming_jump() -> void:
 func update_aim_jump(drag_vec: Vector2, is_cancelled: bool = false) -> void:
 	if not is_aiming_jump: return
 	var aim_range = 8.0
-	_aim_offset = Vector3(drag_vec.x, 0, drag_vec.y) * aim_range
+	var offset_dir := Vector3(drag_vec.x, 0, drag_vec.y)
+	
+	var cam = get_viewport().get_camera_3d()
+	if cam and "view_mode" in cam and cam.view_mode == 1: # THIRD_PERSON
+		offset_dir = offset_dir.rotated(Vector3.UP, cam.global_rotation.y)
+		
+	_aim_offset = offset_dir * aim_range
 	jump_target_pos = global_position + _aim_offset
 	jump_target_pos.y = global_position.y
 	_reticle.global_position = jump_target_pos
