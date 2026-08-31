@@ -34,25 +34,7 @@ func _ready() -> void:
 		environment.glow_bloom = 0.1
 		environment.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
 
-	# Find DirectionalLight3D and force Shadows ON
-	if get_parent():
-		for child in get_parent().get_children():
-			if child is DirectionalLight3D:
-				_dir_light = child
-				
-				# ── FORCE SHADOWS ON ──
-				_dir_light.shadow_enabled = true
-				_dir_light.light_energy = 0.85 # Soften the harsh direct sunlight
-				_dir_light.shadow_bias = 0.015
-				_dir_light.shadow_blur = 1.5
-				
-				_dir_light.shadow_bias = 0.015
-				_dir_light.shadow_blur = 1.5
-				break
-	
-	if get_tree().current_scene:
-		_force_shadows(get_tree().current_scene)
-		_force_collisions(get_tree().current_scene)
+	call_deferred("_setup_scene")
 	
 	PlayerData.genome_collected.connect(_on_genome_collected)
 	
@@ -62,6 +44,32 @@ func _ready() -> void:
 	
 	# Set initial state (in case game loaded)
 	_update_environment(PlayerData.genome_fragments, true)
+
+func _setup_scene() -> void:
+	var scene = get_tree().current_scene
+	if not scene:
+		return
+		
+	_dir_light = _find_directional_light(scene)
+	if _dir_light:
+		_dir_light.shadow_enabled = true
+		_dir_light.light_energy = 0.85 # Soften the harsh direct sunlight
+		_dir_light.shadow_bias = 0.015
+		_dir_light.shadow_blur = 1.5
+		
+	_force_shadows(scene)
+	_force_collisions(scene)
+	_apply_graphics_quality()
+	_update_environment(PlayerData.genome_fragments, true)
+
+func _find_directional_light(node: Node) -> DirectionalLight3D:
+	if node is DirectionalLight3D:
+		return node
+	for child in node.get_children():
+		var result = _find_directional_light(child)
+		if result:
+			return result
+	return null
 
 func _apply_graphics_quality() -> void:
 	if not environment or not _dir_light:

@@ -16,4 +16,8 @@ transform = Transform3D(-0.9795673, 0, 0.20111679, 0, 1, 0, -0.20111679, 0, -0.9
 [node name="BossChimera" parent="." unique_id=2045379451 instance=ExtResource("4_r5bd1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 98.49458, 6.327285, -149.57198)
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707106, 0, -0.707106, -0.5, 0.707106, -0.5, 0.5, 0.707106, 0.5, 0, 10, 0)
+shadow_enabled = true
+
 [editable path="ArenaModel"]
