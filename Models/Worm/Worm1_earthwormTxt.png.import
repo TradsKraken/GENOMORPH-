@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmrrfy2wjw55y"
-path.s3tc="res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.s3tc.ctex"
-path.etc2="res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.etc2.ctex"
+uid="uid://cvn0nkcd8pmng"
+path.s3tc="res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.s3tc.ctex"
+path.etc2="res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "e090597bf3cd02f242916715ae54e598"
+"md5": "f7b26fc4c627803813f836f857e071d9"
 }
 
 [deps]
 
-source_file="res://Models/Snake/Snake_cobraTxt.png"
-dest_files=["res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.s3tc.ctex", "res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.etc2.ctex"]
+source_file="res://Models/Worm/Worm1_earthwormTxt.png"
+dest_files=["res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.s3tc.ctex", "res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.etc2.ctex"]
 
 [params]
 
