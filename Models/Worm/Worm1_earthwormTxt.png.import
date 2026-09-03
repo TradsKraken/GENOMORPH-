@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdq54ae1pc80y"
-path.s3tc="res://.godot/imported/Worm_earthwormTxt.png-6093474116b1965fbd8cae83511ca3fd.s3tc.ctex"
-path.etc2="res://.godot/imported/Worm_earthwormTxt.png-6093474116b1965fbd8cae83511ca3fd.etc2.ctex"
+uid="uid://cvn0nkcd8pmng"
+path.s3tc="res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.s3tc.ctex"
+path.etc2="res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -15,8 +15,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Models/Worm/Worm_earthwormTxt.png"
-dest_files=["res://.godot/imported/Worm_earthwormTxt.png-6093474116b1965fbd8cae83511ca3fd.s3tc.ctex", "res://.godot/imported/Worm_earthwormTxt.png-6093474116b1965fbd8cae83511ca3fd.etc2.ctex"]
+source_file="res://Models/Worm/Worm1_earthwormTxt.png"
+dest_files=["res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.s3tc.ctex", "res://.godot/imported/Worm1_earthwormTxt.png-6bfae27a5ba80faaf60f3059c43940e1.etc2.ctex"]
 
 [params]
 

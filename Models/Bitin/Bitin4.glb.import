@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://b13aajxqkapi1"
-path="res://.godot/imported/Snake.glb-c6dcf4144956d183960c102633e4bca2.scn"
+uid="uid://dkj6me0d5g3s2"
+path="res://.godot/imported/Bitin4.glb-c8d387e25234ff2148813cbab187e4db.scn"
 
 [deps]
 
-source_file="res://Models/Snake/Snake.glb"
-dest_files=["res://.godot/imported/Snake.glb-c6dcf4144956d183960c102633e4bca2.scn"]
+source_file="res://Models/Bitin/Bitin4.glb"
+dest_files=["res://.godot/imported/Bitin4.glb-c8d387e25234ff2148813cbab187e4db.scn"]
 
 [params]
 

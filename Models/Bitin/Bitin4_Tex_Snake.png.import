@@ -2,21 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bmrrfy2wjw55y"
-path.s3tc="res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.s3tc.ctex"
-path.etc2="res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.etc2.ctex"
+uid="uid://b2sqpt7nbol2w"
+path.s3tc="res://.godot/imported/Bitin4_Tex_Snake.png-0365ff51f67d283378bf6e105de37c0e.s3tc.ctex"
+path.etc2="res://.godot/imported/Bitin4_Tex_Snake.png-0365ff51f67d283378bf6e105de37c0e.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "e090597bf3cd02f242916715ae54e598"
+"md5": "010c608f3eeef806c74df16e20a37b10"
 }
 
 [deps]
 
-source_file="res://Models/Snake/Snake_cobraTxt.png"
-dest_files=["res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.s3tc.ctex", "res://.godot/imported/Snake_cobraTxt.png-23a373e33f758d82cd807cbf4862bde0.etc2.ctex"]
+source_file="res://Models/Bitin/Bitin4_Tex_Snake.png"
+dest_files=["res://.godot/imported/Bitin4_Tex_Snake.png-0365ff51f67d283378bf6e105de37c0e.s3tc.ctex", "res://.godot/imported/Bitin4_Tex_Snake.png-0365ff51f67d283378bf6e105de37c0e.etc2.ctex"]
 
 [params]
 
