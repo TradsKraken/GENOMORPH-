@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dv5ei0ljf0883"]
 
 [ext_resource type="Script" uid="uid://bxao35ll3iys4" path="res://levels/toxic_sludge.gd" id="1_sludge_script"]
+[ext_resource type="PackedScene" uid="uid://d3yq8jknowledge" path="res://levels/knowledge_object.tscn" id="2_knowledge"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_sludge"]
 height = 0.5
@@ -30,3 +31,9 @@ shape = SubResource("CylinderShape3D_sludge")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 mesh = SubResource("CylinderMesh_sludge")
 surface_material_override/0 = SubResource("StandardMaterial3D_sludge")
+
+[node name="KnowledgeObject" parent="." instance=ExtResource("2_knowledge")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+knowledge_id = "toxic_sludge"
+interact_text = "Scan Sludge"
+interact_distance = 5.0

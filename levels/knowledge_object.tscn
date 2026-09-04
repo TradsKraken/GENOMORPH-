@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://d3yq8jknowledge"]
+
+[ext_resource type="Script" path="res://levels/knowledge_object.gd" id="1_kobjg"]
+
+[node name="KnowledgeObject" type="Node3D"]
+script = ExtResource("1_kobjg")

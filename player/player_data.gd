@@ -316,6 +316,21 @@ const KNOWLEDGE_DB: Dictionary = {
 			"Young mudfish (fry) are communally protected by both parents, a rare behavior among fish.",
 		],
 		"guide_tip": "[color=#1affa0]Field Guide:[/color] The Dalag is a restoration indicator. Protect its young to restore a balanced ecosystem."
+	},
+	"water_bottle": {
+		"title": "Discarded Water Bottle",
+		"category": "Environment",
+		"subcategory": "Plastic Pollution",
+		"icon": "⌬",
+		"classification": "Non-Biodegradable Waste",
+		"threat_level": "LOW",
+		"summary": "A typical single-use plastic water bottle. While small, accumulations of microplastics from these bottles severely disrupt the hormonal balance of native wetland amphibians.",
+		"facts": [
+			"A plastic bottle can take up to 450 years to completely decompose in a wetland environment.",
+			"As it breaks down, it releases microplastics that are ingested by fish and amphibians.",
+			"Chemicals leaching from the plastic (like BPA) mimic estrogen, disrupting frog reproduction rates."
+		],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Even simple plastic waste contributes to the collapse. Every piece removed helps the ecosystem recover."
 	}
 }
 
