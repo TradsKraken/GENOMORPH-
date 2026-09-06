@@ -1,9 +1,10 @@
 class_name MosquitoSwarm
 extends EnemyBase
 
-@export var attack_damage: float = 15.0
+@export var attack_damage: float = 10.0
 
 func _ready() -> void:
+	max_health = 100.0
 	super._ready()
 	
 	# Flying enemies need Floating mode so they don't get stuck on terrain!
@@ -12,7 +13,7 @@ func _ready() -> void:
 	# Base class AI configuration
 	uses_gravity = false
 	speed = randf_range(3.0, 5.0)
-	attack_range = 2.0
+	attack_range = 1.0
 	detection_radius = 15.0
 	recovery_time = 1.5
 	patrol_radius = 10.0
@@ -54,17 +55,40 @@ func _perform_attack() -> void:
 		var dir = (target.global_position - global_position).normalized()
 		_face_direction(dir, 1.0) # Snap to face target
 	
-	# Calculate damage
-	var final_damage = attack_damage
-	if target and target.is_in_group("player") and enemy_level > PlayerData.level:
-		final_damage *= 1.5
+	# Visual Lunge: Move the mesh exactly to the player's position
+	var visual = get_node_or_null("mosquito1")
+	if visual and target and is_instance_valid(target):
+		var orig_pos = visual.position
+		
+		# Find the exact local position of the player relative to the mosquito
+		var global_target = target.global_position
+		global_target.y += 0.3 # slightly above feet
+		var local_target = to_local(global_target)
+		
+		var tween = create_tween()
+		tween.tween_property(visual, "position", local_target, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.tween_property(visual, "position", orig_pos, 0.25).set_delay(0.2)
 	
-	# Damage the target
-	if target and target.has_method("take_damage"):
-		target.take_damage(final_damage)
+	# Wind-up simulation (bite frame)
+	await get_tree().create_timer(0.2).timeout
 	
-	# Play attack/bite sound if available
-	AudioManager.play_sfx("hit", randf_range(1.2, 1.5)) # Fast, pitched up hit sound for mosquito bite
+	if is_dead:
+		return
+		
+	# Check if target is still valid and in range (small tolerance)
+	if target and is_instance_valid(target):
+		var dist_2d = Vector2(global_position.x, global_position.z).distance_to(Vector2(target.global_position.x, target.global_position.z))
+		if dist_2d <= attack_range + 0.8:
+			# Calculate damage via DamageCalculator
+			var final_damage = DamageCalculator.calculate_enemy_damage(attack_damage)
+			
+			if target.has_method("take_damage"):
+				target.take_damage(final_damage)
+				
+			# Play attack/bite sound
+			AudioManager.play_sfx("hit", randf_range(1.2, 1.5))
+	
+	await get_tree().create_timer(0.2).timeout
 	
 	# Finish the attack to return to the RECOVER state
 	_finish_attack()

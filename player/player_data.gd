@@ -42,22 +42,83 @@ func _restore_objective(path_str: String, text: String) -> void:
 		target = get_tree().current_scene.get_node_or_null(path_str)
 	set_objective(target, text)
 
-# ── Stats ─────────────────────────────────────────────────────────────────────
-var max_health: float  = 100.0
+# ── Species Progression ───────────────────────────────────────────────────────
+var active_species: String = "frog"
+var species_progression: Dictionary = {
+	"frog": {
+		"is_unlocked": true,
+		"current_xp": 0.0,
+		"current_level": 1,
+		"unspent_ap": 0,
+		"health_upgrades": 0,
+		"attack_power_upgrades": 0,
+		"stamina_upgrades": 0,
+		"stamina_recovery_upgrades": 0,
+		"cooldown_reduction_upgrades": 0,
+		"health_recovery_upgrades": 0,
+		"genomes_earned": 0,
+		"genomes_spent": 0,
+		"genomes_available": 0,
+		"attack_ultimate_level": 0,
+		"defense_ultimate_level": 0,
+		"agility_ultimate_level": 0,
+		"equipped_ultimate_category": ""
+	}
+}
+
+func get_current_species_data() -> Dictionary:
+	if not species_progression.has(active_species):
+		return {}
+	return species_progression[active_species]
+
+# ── Base Shared Stats (Tuning) ────────────────────────────────────────────────
+var base_shared_health: float = 100.0
+var base_species_stamina: float = 100.0
+var base_attack_power: float = 20.0
+
+# ── Volunteer Shared Resources ────────────────────────────────────────────────
+var max_health: float:
+	get:
+		var sp_data = get_current_species_data()
+		var upgrades = sp_data.get("health_upgrades", 0) if sp_data else 0
+		return base_shared_health * (1.0 + 0.05 * upgrades)
 var health: float      = 100.0
 
-var max_stamina: float = 100.0
+var max_stamina: float:
+	get:
+		var sp_data = get_current_species_data()
+		var upgrades = sp_data.get("stamina_upgrades", 0) if sp_data else 0
+		return base_species_stamina * (1.0 + 0.05 * upgrades)
 var stamina: float     = 100.0
 
-var level: int         = 1
-var experience: float  = 0.0
-var exp_to_next: float = 100.0
-var skill_points: int = 0:
+var level: int:
+	get: return get_current_species_data().get("current_level", 1)
+	set(val): get_current_species_data()["current_level"] = val
+
+var experience: float:
+	get: return get_current_species_data().get("current_xp", 0.0)
+	set(val): get_current_species_data()["current_xp"] = val
+
+var exp_to_next: float:
+	get:
+		var max_level = XP_THRESHOLDS.size()
+		if level < max_level:
+			return XP_THRESHOLDS[level]
+		else:
+			return XP_THRESHOLDS[max_level - 1]
+
+var skill_points: int:
+	get: return get_current_species_data().get("unspent_ap", 0)
 	set(val):
-		skill_points = val
+		get_current_species_data()["unspent_ap"] = val
 		skill_points_changed.emit(val)
 
-var attack_power: float = 20.0
+var attack_power: float:
+	get:
+		var sp_data = get_current_species_data()
+		var upgrades = sp_data.get("attack_power_upgrades", 0) if sp_data else 0
+		return base_attack_power * (1.0 + 0.05 * upgrades)
+
 var defense: float = 5.0
 var speed: float = 4.0
 
@@ -139,19 +200,23 @@ func heal(amount: float) -> void:
 
 
 # ── EXP / Level API ───────────────────────────────────────────────────────────
+const XP_THRESHOLDS: Array[float] = [
+	0.0, 100.0, 250.0, 450.0, 700.0, 1000.0, 1350.0, 1750.0, 2200.0, 2700.0, 3250.0, 3850.0, 4500.0, 5200.0, 6000.0
+]
 
 func gain_exp(amount: float) -> void:
 	experience += amount
-	while experience >= exp_to_next:
+	
+	var max_level = XP_THRESHOLDS.size()
+	while level < max_level and experience >= XP_THRESHOLDS[level]:
 		_do_level_up()
-	exp_changed.emit(experience, exp_to_next)
-
+		
+	var next_req = XP_THRESHOLDS[level] if level < max_level else XP_THRESHOLDS[max_level - 1]
+	exp_changed.emit(experience, next_req)
 
 func _do_level_up() -> void:
-	experience -= exp_to_next
 	level += 1
-	skill_points += 1
-	exp_to_next = 100.0 * pow(1.4, level - 1)
+	skill_points += 2
 	AudioManager.play_sfx("level_up")
 	level_changed.emit(level)
 
@@ -479,7 +544,6 @@ func load_game(slot: int = -1) -> bool:
 				max_stamina = data.get("max_stamina", 100.0)
 				level = data.get("level", 1)
 				experience = data.get("experience", 0.0)
-				exp_to_next = data.get("exp_to_next", 100.0)
 				skill_points = data.get("skill_points", 0)
 				attack_power = data.get("attack_power", 10.0)
 				defense = data.get("defense", 5.0)
@@ -550,7 +614,6 @@ func reset_data(slot: int = -1) -> void:
 	stamina = 100.0
 	level = 1
 	experience = 0.0
-	exp_to_next = 100.0
 	skill_points = 0
 	attack_power = 10.0
 	defense = 5.0

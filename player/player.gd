@@ -72,6 +72,8 @@ var _heal_timer: float = 0.0
 var _respawn_point: Vector3 = Vector3.ZERO
 var _is_using_skill: bool = false
 var _skill1_cooldown_timer: float = 0.0
+var damage_cooldown_timer: float = 0.0
+@export var damage_cooldown_duration: float = 1.0
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -162,6 +164,8 @@ func _physics_process(delta: float) -> void:
 	_process_auto_heal(delta)
 	if _skill1_cooldown_timer > 0.0:
 		_skill1_cooldown_timer -= delta
+	if damage_cooldown_timer > 0.0:
+		damage_cooldown_timer -= delta
 
 	# ── Gravity ──────────────────────────────────────────────────────────────
 	if not is_on_floor():
@@ -254,9 +258,23 @@ func _physics_process(delta: float) -> void:
 # ── Combat ───────────────────────────────────────────────────────────────────
 
 func take_damage(amount: float) -> void:
+	if damage_cooldown_timer > 0.0:
+		return
+		
+	damage_cooldown_timer = damage_cooldown_duration
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
 	PlayerData.take_damage(amount)
+	
+	# Apply brief flinch (red flash) without blocking movement
+	var mesh = _find_mesh(self)
+	if mesh:
+		var tween = create_tween()
+		tween.tween_property(mesh, "instance_shader_parameter/hit_flash", 1.0, 0.05)
+		tween.tween_property(mesh, "instance_shader_parameter/hit_flash", 0.0, 0.2)
+	
+	_apply_hit_stop(0.05, 0.2)
+	
 	# Give some visual feedback when hit
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("show_float_text"):
@@ -296,6 +314,15 @@ func _process_auto_heal(delta: float) -> void:
 					if cam:
 						var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
 						hud.show_float_text("+5", scr, Color.GREEN)
+
+func _find_mesh(node: Node) -> MeshInstance3D:
+	for child in node.get_children():
+		if child is MeshInstance3D:
+			return child
+		var result = _find_mesh(child)
+		if result != null:
+			return result
+	return null
 
 # ── Splashdown Jump Mechanics ────────────────────────────────────────────────
 
@@ -445,7 +472,7 @@ func _attack() -> void:
 	_show_attack_range(attack_range, Color(1.0, 0.2, 0.2))
 	
 	# MVP Attack Logic: Damage closest enemy in front
-	var damage = PlayerData.attack_power # Use the new stat
+	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power, 1.0)
 	var closest_enemy = null
 	var closest_dist = attack_range
 	
@@ -499,7 +526,7 @@ func _skill1() -> void:
 	_show_attack_range(attack_range, Color(0.2, 0.6, 1.0))
 	
 	# Sticky Tongue Whip: Damage closest enemy at short range
-	var damage = PlayerData.attack_power * 2.0
+	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power, 1.5)
 	var closest_enemy = null
 	var closest_dist = attack_range
 	

@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dpxlu8oobmyh8" path="res://enemies/Mosqito.tscn" id="2_mosq_model"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_mosq"]
-radius = 0.8
+radius = 0.3
 
 [node name="MosquitoSwarm" type="CharacterBody3D" unique_id=2068107157]
 collision_layer = 4

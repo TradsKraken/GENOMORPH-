@@ -157,6 +157,7 @@ func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
 		return
 	
 	health -= amount
+	_show_damage_text(amount)
 	knockback_velocity = knockback
 	AudioManager.play_sfx("hit", randf_range(0.8, 1.2))
 	
@@ -261,7 +262,7 @@ func _process_ai_state_machine(delta: float) -> void:
 						dir.y = 0
 					else:
 						# Flying enemies aim slightly above the player's center
-						dir.y += 1.0 
+						dir.y += 0.3 
 						
 					dir = dir.normalized()
 					velocity.x = dir.x * speed
