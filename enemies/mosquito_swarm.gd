@@ -55,19 +55,28 @@ func _perform_attack() -> void:
 		var dir = (target.global_position - global_position).normalized()
 		_face_direction(dir, 1.0) # Snap to face target
 	
-	# Visual Lunge: Move the mesh exactly to the player's position
-	var visual = get_node_or_null("mosquito1")
-	if visual and target and is_instance_valid(target):
-		var orig_pos = visual.position
+	# Visual Lunge: Move the ENTIRE mosquito character to the player's position
+	if target and is_instance_valid(target):
+		var orig_pos = self.global_position
 		
-		# Find the exact local position of the player relative to the mosquito
+		# Find the exact global position of the player's center
 		var global_target = target.global_position
-		global_target.y += 0.3 # slightly above feet
-		var local_target = to_local(global_target)
+		global_target.y += 0.5 # frog center height
+		
+		# Temporarily disable collision so physics doesn't push us away from the frog
+		var col = get_node_or_null("CollisionShape3D")
+		if col:
+			col.disabled = true
 		
 		var tween = create_tween()
-		tween.tween_property(visual, "position", local_target, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.tween_property(visual, "position", orig_pos, 0.25).set_delay(0.2)
+		tween.tween_property(self, "global_position", global_target, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.tween_property(self, "global_position", orig_pos, 0.25).set_delay(0.2)
+		
+		# Re-enable collision after dash
+		tween.finished.connect(func():
+			if col and is_instance_valid(col):
+				col.disabled = false
+		)
 	
 	# Wind-up simulation (bite frame)
 	await get_tree().create_timer(0.2).timeout
