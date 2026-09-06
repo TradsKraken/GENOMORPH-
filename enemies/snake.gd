@@ -2,10 +2,10 @@ class_name Snake
 extends EnemyBase
 
 @export var damage_per_second: float = 3.0
-@export var attack_range: float = 1.5
+
 @export var aggro_range: float = 12.0
 @export var territory_radius: float = 20.0
-@export var gravity: float = 20.0
+
 
 var _attack_timer: float = 0.0
 var _wake_delay: float = 0.0

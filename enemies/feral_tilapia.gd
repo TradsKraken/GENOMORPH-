@@ -2,7 +2,7 @@ class_name FeralTilapia
 extends EnemyBase
 
 @export var damage_per_second: float = 8.0
-@export var attack_range: float = 1.5
+
 @export var aggro_range: float = 20.0
 @export var territory_radius: float = 40.0
 
