@@ -6,19 +6,19 @@ extends EnemyBase
 func _ready() -> void:
 	max_health = 100.0
 	super._ready()
-	
-	# Flying enemies need Floating mode so they don't get stuck on terrain!
+
+	# ── Flying mode ─────────────────────────────────────────────────────────
 	motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
-	
-	# Base class AI configuration
 	uses_gravity = false
-	speed = randf_range(3.0, 5.0)
-	attack_range = 1.0
+
+	# ── AI tuning ────────────────────────────────────────────────────────────
+	speed            = 4.0
+	attack_range     = 1.2   # must be within 1.2 m to bite
 	detection_radius = 15.0
-	recovery_time = 1.5
-	patrol_radius = 10.0
-	
-	# Find and play the mosquito idle/fly animation
+	recovery_time    = 1.2
+	patrol_radius    = 8.0
+
+	# ── Play looping animation ───────────────────────────────────────────────
 	var anim_player = _find_animation_player(self)
 	if anim_player:
 		var anims = anim_player.get_animation_list()
@@ -40,6 +40,8 @@ func _ready() -> void:
 		add_child(fly_sfx)
 		fly_sfx.play()
 
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
 		return node
@@ -49,55 +51,47 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 			return ap
 	return null
 
+# ── Attack ───────────────────────────────────────────────────────────────────
+
 func _perform_attack() -> void:
-	# Face the player during the attack
-	if target and is_instance_valid(target):
-		var dir = (target.global_position - global_position).normalized()
-		_face_direction(dir, 1.0) # Snap to face target
+	if not target or not is_instance_valid(target):
+		_finish_attack()
+		return
+
+	# Direction from mosquito to frog (full 3D direction so it dives)
+	var lunge_target = target.global_position
+	lunge_target.y += 0.4  # aim at frog body center
 	
-	# Visual Lunge: Move the ENTIRE mosquito character to the player's position
-	if target and is_instance_valid(target):
-		var orig_pos = self.global_position
-		
-		# Find the exact global position of the player's center
-		var global_target = target.global_position
-		global_target.y += 0.5 # frog center height
-		
-		# Temporarily disable collision so physics doesn't push us away from the frog
-		var col = get_node_or_null("CollisionShape3D")
-		if col:
-			col.disabled = true
-		
-		var tween = create_tween()
-		tween.tween_property(self, "global_position", global_target, 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.tween_property(self, "global_position", orig_pos, 0.25).set_delay(0.2)
-		
-		# Re-enable collision after dash
-		tween.finished.connect(func():
-			if col and is_instance_valid(col):
-				col.disabled = false
-		)
-	
-	# Wind-up simulation (bite frame)
-	await get_tree().create_timer(0.2).timeout
-	
+	var to_frog = lunge_target - global_position
+	var lunge_dir = to_frog.normalized()
+
+	# ── Lunge IN: fast 3D burst toward the frog ─────────────────────────────
+	velocity = lunge_dir * 18.0
+
+	await get_tree().create_timer(0.12).timeout
+
 	if is_dead:
 		return
-		
-	# Check if target is still valid and in range (small tolerance)
-	if target and is_instance_valid(target):
-		var dist_2d = Vector2(global_position.x, global_position.z).distance_to(Vector2(target.global_position.x, target.global_position.z))
-		if dist_2d <= attack_range + 0.8:
-			# Calculate damage via DamageCalculator
-			var final_damage = DamageCalculator.calculate_enemy_damage(attack_damage)
-			
-			if target.has_method("take_damage"):
-				target.take_damage(final_damage)
-				
-			# Play attack/bite sound
-			AudioManager.play_sfx("hit", randf_range(1.2, 1.5))
-	
+
+	# ── Bite: stop and deal damage ───────────────────────────────────────────
+	velocity = Vector3.ZERO
+
+	var final_damage = DamageCalculator.calculate_enemy_damage(attack_damage)
+	if target and is_instance_valid(target) and target.has_method("take_damage"):
+		target.take_damage(final_damage)
+	AudioManager.play_sfx("hit", randf_range(1.2, 1.5))
+
+	# Brief pause so the hit registers visually
+	await get_tree().create_timer(0.1).timeout
+
+	if is_dead:
+		return
+
+	# ── Retreat: short hop backwards ─────────────────────────────────────────
+	velocity = -lunge_dir * 8.0
+
 	await get_tree().create_timer(0.2).timeout
-	
-	# Finish the attack to return to the RECOVER state
+
+	velocity = Vector3.ZERO
+
 	_finish_attack()
