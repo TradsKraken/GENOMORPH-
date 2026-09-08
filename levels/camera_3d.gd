@@ -120,14 +120,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 	if view_mode == ViewMode.THIRD_PERSON:
+		var sens = SettingsManager.camera_sensitivity if SettingsManager else tp_mouse_sensitivity
 		if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			_cam_yaw -= event.relative.x * tp_mouse_sensitivity
-			_cam_pitch = clamp(_cam_pitch - event.relative.y * tp_mouse_sensitivity, -PI/2.5, PI/4.0)
+			_cam_yaw -= event.relative.x * sens
+			_cam_pitch = clamp(_cam_pitch - event.relative.y * sens, -PI/2.5, PI/4.0)
 		elif event is InputEventScreenDrag:
 			var vp_size = get_viewport().get_visible_rect().size
 			if event.position.x > vp_size.x * 0.4: # Right 60% of the screen
-				_cam_yaw -= event.relative.x * tp_mouse_sensitivity
-				_cam_pitch = clamp(_cam_pitch - event.relative.y * tp_mouse_sensitivity, -PI/2.5, PI/4.0)
+				_cam_yaw -= event.relative.x * sens
+				_cam_pitch = clamp(_cam_pitch - event.relative.y * sens, -PI/2.5, PI/4.0)
 
 
 
@@ -165,15 +166,19 @@ func _process(delta: float) -> void:
 	if _player == null:
 		return
 
-	if _player is CharacterBody3D:
-		if _player.is_on_floor():
-			_target_ground_y = _player.global_position.y
-		elif _player.global_position.y < _target_ground_y:
-			_target_ground_y = _player.global_position.y
+	var space_state = _player.get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(_player.global_position + Vector3(0, 1.0, 0), _player.global_position + Vector3(0, -100.0, 0))
+	query.collision_mask = 1 # Environment mask
+	if _player is PhysicsBody3D:
+		query.exclude = [_player.get_rid()]
+	
+	var result = space_state.intersect_ray(query)
+	if result:
+		_target_ground_y = result.position.y
 	else:
 		_target_ground_y = _player.global_position.y
 
-	_last_ground_y = lerp(_last_ground_y, _target_ground_y, 10.0 * delta)
+	_last_ground_y = lerp(_last_ground_y, _target_ground_y, 8.0 * delta)
 
 	_apply_position(follow_speed * delta)
 
@@ -188,12 +193,15 @@ func _apply_position(weight: float) -> void:
 	var look_target: Vector3
 	var current_offset: Vector3
 	
+	var unshifted_pos: Vector3
+	
 	if view_mode == ViewMode.TOP_DOWN:
 		var tilt_rad := deg_to_rad(tilt_degrees)
 		var z_offset := height * tan(tilt_rad) + distance_back
 		current_offset = Vector3(horizontal_offset, height, z_offset)
 		target_pos = ground_pos + current_offset
 		look_target = target_pos - current_offset
+		unshifted_pos = global_position.lerp(target_pos, clampf(weight, 0.0, 1.0))
 	else:
 		# THIRD_PERSON
 		var yaw_basis = Basis(Vector3.UP, _cam_yaw)
@@ -201,11 +209,14 @@ func _apply_position(weight: float) -> void:
 		var cam_dir = (yaw_basis * pitch_basis) * Vector3(0, 0, 1)
 		
 		# Offset from player
-		current_offset = (yaw_basis * Vector3(tp_horizontal_offset, tp_height, 0)) + (cam_dir * tp_distance_back)
+		var tp_zoom = SettingsManager.camera_zoom if SettingsManager else tp_distance_back
+		current_offset = (yaw_basis * Vector3(tp_horizontal_offset, tp_height, 0)) + (cam_dir * tp_zoom)
 		target_pos = ground_pos + Vector3(0, tp_height * 0.5, 0) + current_offset
 		look_target = ground_pos + Vector3(0, tp_height * 0.8, 0)
-
-	var unshifted_pos = global_position.lerp(target_pos, clampf(weight, 0.0, 1.0))
+		
+		# Faster XZ follow for 3rd person to prevent floatiness
+		var tp_weight = clampf(25.0 * get_process_delta_time(), 0.0, 1.0)
+		unshifted_pos = global_position.lerp(target_pos, tp_weight)
 
 	var shake_offset := Vector3.ZERO
 	if _shake_trauma > 0:

@@ -172,7 +172,7 @@ func _spawn_background_world() -> void:
 	sub_viewport_container.add_child(sub_viewport)
 	
 	# Optionally pre-load the world scene in the background
-	var world_scene = load("res://levels/node_3d.scn")
+	var world_scene = load("res://levels/main terrain.scn")
 	var world = world_scene.instantiate()
 	
 	# Find the camera and set it to main menu mode

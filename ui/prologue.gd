@@ -146,7 +146,7 @@ func _finish_prologue() -> void:
 	tw.tween_callback(func():
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
-		get_node("/root/SceneLoader").load_scene("res://levels/node_3d.scn")
+		get_node("/root/SceneLoader").load_scene("res://levels/main terrain.scn")
 	)
 
 func _start_fade_out() -> void:
@@ -159,5 +159,5 @@ func _start_fade_out() -> void:
 		_video_player.stop()
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
-		get_node("/root/SceneLoader").load_scene("res://levels/node_3d.scn")
+		get_node("/root/SceneLoader").load_scene("res://levels/main terrain.scn")
 	)

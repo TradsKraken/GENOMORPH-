@@ -37,6 +37,7 @@ var _menu_panel: Control
 var _menu_open:  bool = false
 var _knowledge_btn: Button
 var _knowledge_badge: Label
+var _level_badge: Label
 
 var _tutorial_panel: PanelContainer
 var _tutorial_title: Label

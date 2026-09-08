@@ -81,6 +81,7 @@ func _ready() -> void:
 	
 	_build_fov_slider()
 	_build_zoom_slider()
+	_build_sensitivity_slider()
 	
 	# Close button
 	var close_btn := Button.new()
@@ -280,6 +281,35 @@ func _build_zoom_slider() -> void:
 	slider.value_changed.connect(func(val: float):
 		SettingsManager.camera_zoom = val
 		val_lbl.text = "%.1f" % val
+		SettingsManager.apply_settings()
+	)
+	vbox.add_child(slider)
+	_vbox.add_child(vbox)
+
+func _build_sensitivity_slider() -> void:
+	var vbox := VBoxContainer.new()
+	var hbox := HBoxContainer.new()
+	var lbl := Label.new()
+	lbl.text = "Camera Sensitivity:"
+	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(lbl)
+	
+	var val_lbl := Label.new()
+	val_lbl.text = "%.2f" % (SettingsManager.camera_sensitivity * 100.0)
+	val_lbl.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(val_lbl)
+	vbox.add_child(hbox)
+	
+	var slider := HSlider.new()
+	slider.min_value = 0.001
+	slider.max_value = 0.015
+	slider.step = 0.001
+	slider.value = SettingsManager.camera_sensitivity
+	slider.custom_minimum_size = Vector2(0, 40)
+	slider.value_changed.connect(func(val: float):
+		SettingsManager.camera_sensitivity = val
+		val_lbl.text = "%.2f" % (val * 100.0)
 		SettingsManager.apply_settings()
 	)
 	vbox.add_child(slider)

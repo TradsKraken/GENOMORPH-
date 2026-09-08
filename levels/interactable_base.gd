@@ -2,6 +2,7 @@ extends Area3D
 class_name InteractableBase
 
 signal interacted
+signal interaction_finished
 
 @export var interact_prompt: String = "Interact"
 @export var is_active: bool = true
@@ -11,7 +12,7 @@ var _is_player_near: bool = false
 
 func _ready() -> void:
 	collision_layer = 0
-	collision_mask = 2 # Player layer (2)
+	collision_mask = 3 # Player layer (1 or 2)
 	
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
@@ -41,7 +42,8 @@ func _on_interact_pressed() -> void:
 		_hud.hide_interact(self)
 		
 	interacted.emit()
-	_perform_interaction()
+	await _perform_interaction()
+	interaction_finished.emit()
 
 func set_active(active: bool) -> void:
 	is_active = active

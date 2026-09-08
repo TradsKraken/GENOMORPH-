@@ -133,7 +133,7 @@ var frogs_helped: int = 0
 var total_frogs: int = 7
 var lolo_palaka_intro_done: bool = false
 
-var current_scene_path: String = "res://levels/node_3d.scn"
+var current_scene_path: String = "res://levels/main terrain.scn"
 
 var player_position: Vector3 = Vector3.ZERO
 var has_saved_position: bool = false
@@ -224,6 +224,27 @@ func _do_level_up() -> void:
 # ── Knowledge Base ────────────────────────────────────────────────────────────
 
 const KNOWLEDGE_DB: Dictionary = {
+	"q01_water": {
+		"title": "Contaminated Water",
+		"category": "Environment",
+		"subcategory": "Chemical Runoff",
+		"icon": "",
+		"summary": "A chemical sheen coats the surface. Dead fish drift near the edge. Whatever caused this happened more than once."
+	},
+	"q01_plants": {
+		"title": "Damaged Vegetation",
+		"category": "Environment",
+		"subcategory": "Ecosystem Collapse",
+		"icon": "",
+		"summary": "Blackened, wilted reeds. The roots are rotting. Small prey animals have lost both food and shelter here."
+	},
+	"q01_debris": {
+		"title": "Human Debris",
+		"category": "Environment",
+		"subcategory": "Industrial Waste",
+		"icon": "",
+		"summary": "A rusted pipe fragment and degraded plastic. This wasn't a natural die-off; humans left this behind."
+	},
 	"mosquito": {
 		"title": "Mosquito Swarm",
 		"category": "Species",
@@ -566,9 +587,9 @@ func load_game(slot: int = -1) -> bool:
 				for k in loaded_unread:
 					unread_knowledge.append(str(k))
 					
-				current_scene_path = data.get("current_scene_path", "res://levels/node_3d.scn")
-				if current_scene_path == "res://levels/node_3d.tscn":
-					current_scene_path = "res://levels/node_3d.scn"
+				current_scene_path = data.get("current_scene_path", "res://levels/main terrain.scn")
+				if current_scene_path == "res://levels/main terrain.scn":
+					current_scene_path = "res://levels/main terrain.scn"
 				
 				has_saved_position = data.get("has_saved_position", false)
 				var p_pos = data.get("player_position", {})
@@ -628,7 +649,7 @@ func reset_data(slot: int = -1) -> void:
 	unlocked_knowledge.clear()
 	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])
 	unread_knowledge.clear()
-	current_scene_path = "res://levels/node_3d.scn"
+	current_scene_path = "res://levels/main terrain.scn"
 	
 	player_position = Vector3.ZERO
 	has_saved_position = false

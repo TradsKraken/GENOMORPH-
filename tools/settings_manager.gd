@@ -13,6 +13,7 @@ var foliage_enabled: bool = true
 
 var camera_fov: float = 75.0
 var camera_zoom: float = 3.5
+var camera_sensitivity: float = 0.003
 
 func _ready() -> void:
 	load_settings()
@@ -29,6 +30,7 @@ func save_settings() -> void:
 	config.set_value("graphics", "foliage", foliage_enabled)
 	config.set_value("perspective", "camera_fov", camera_fov)
 	config.set_value("perspective", "camera_zoom", camera_zoom)
+	config.set_value("perspective", "camera_sensitivity", camera_sensitivity)
 	config.save(SAVE_PATH)
 
 func load_settings() -> void:
@@ -42,6 +44,7 @@ func load_settings() -> void:
 		foliage_enabled = config.get_value("graphics", "foliage", true)
 		camera_fov = config.get_value("perspective", "camera_fov", 75.0)
 		camera_zoom = config.get_value("perspective", "camera_zoom", 3.5)
+		camera_sensitivity = config.get_value("perspective", "camera_sensitivity", 0.003)
 
 func apply_settings() -> void:
 	var vp := get_viewport()

@@ -48,6 +48,9 @@ var _tutorial_desc:  Label
 var _subtitle_panel: PanelContainer
 var _subtitle_label: RichTextLabel
 var _subtitle_tween: Tween
+
+var _objective_panel: PanelContainer
+var _objective_lbl: Label
 var _subtitle_time_shown: float = 0.0
 
 var _jump_highlight_tw: Tween
@@ -117,7 +120,14 @@ func _ready() -> void:
 	_build_menu_panel()
 	_build_tutorial_panel()
 	_build_subtitle_panel()
+	_build_objective_panel()
 	_build_objective_arrow()
+
+	# Listen to QuestManager if it exists
+	if get_tree().root.has_node("QuestManager"):
+		var qm = get_tree().root.get_node("QuestManager")
+		qm.objective_updated.connect(_on_objective_updated)
+		_on_objective_updated(qm.current_objective)
 	_build_genome_popup()
 	_build_minimap()
 	_build_zone_status()
@@ -1822,6 +1832,49 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.offset_right = 400
 	_subtitle_panel.offset_bottom = -40
 	_subtitle_panel.offset_top = -40
+	
+func _build_objective_panel() -> void:
+	if _root.has_node("ObjectivePanel"):
+		_objective_panel = _root.find_child("ObjectivePanel", true, false)
+		_objective_lbl = _root.find_child("ObjectiveLabel", true, false)
+		return
+		
+	_objective_panel = PanelContainer.new()
+	_objective_panel.name = "ObjectivePanel"
+	_objective_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	var style = StyleBoxFlat.new()
+	style.bg_color = Color(0.08, 0.08, 0.1, 0.7)
+	style.corner_radius_bottom_right = 20
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color(1.0, 0.8, 0.2, 0.8)
+	style.content_margin_left = 20
+	style.content_margin_top = 10
+	style.content_margin_right = 30
+	style.content_margin_bottom = 10
+	_objective_panel.add_theme_stylebox_override("panel", style)
+	
+	_objective_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_objective_panel.position = Vector2(0, 160) # Below status/badges
+	
+	_objective_lbl = Label.new()
+	_objective_lbl.name = "ObjectiveLabel"
+	_objective_lbl.text = ""
+	_objective_lbl.add_theme_font_size_override("font_size", 24)
+	_objective_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.6))
+	_objective_panel.add_child(_objective_lbl)
+	
+	_objective_panel.hide()
+	_root.add_child(_objective_panel)
+
+func _on_objective_updated(text: String) -> void:
+	if not is_instance_valid(_objective_lbl): return
+	if text.is_empty():
+		_objective_panel.hide()
+	else:
+		_objective_lbl.text = "Objective: " + text
+		_objective_panel.show()
 	_subtitle_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	
 	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE

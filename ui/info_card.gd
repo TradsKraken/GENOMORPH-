@@ -17,7 +17,7 @@ signal closed
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
-	get_tree().paused = true
+	# No longer pausing the game to keep world live
 	
 	if learn_more_btn:
 		learn_more_btn.pressed.connect(_on_learn_more)
@@ -25,6 +25,32 @@ func _ready() -> void:
 		close_btn.pressed.connect(_on_close)
 		
 	if panel:
+		panel.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+		
+		var style = StyleBoxFlat.new()
+		style.bg_color = Color("#12201C")
+		style.border_width_left = 2
+		style.border_width_top = 2
+		style.border_width_right = 2
+		style.border_width_bottom = 2
+		style.border_color = Color("#8FD9B8")
+		style.border_blend = true
+		style.corner_radius_top_left = 8
+		style.corner_radius_top_right = 8
+		style.corner_radius_bottom_right = 8
+		style.corner_radius_bottom_left = 8
+		style.content_margin_left = 20
+		style.content_margin_top = 20
+		style.content_margin_right = 20
+		style.content_margin_bottom = 20
+		panel.add_theme_stylebox_override("panel", style)
+		
+		if icon_label: icon_label.add_theme_color_override("font_color", Color("#8FD9B8"))
+		if title_label: title_label.add_theme_color_override("font_color", Color("#8FD9B8"))
+		if summary_label: summary_label.add_theme_color_override("default_color", Color("#8FD9B8"))
+		if category_label: category_label.add_theme_color_override("font_color", Color("#8FD9B8"))
+		if facts_label: facts_label.add_theme_color_override("default_color", Color("#8FD9B8"))
+		
 		panel.scale = Vector2(0.8, 0.8)
 		panel.modulate.a = 0.0
 		var tw = create_tween()
@@ -37,7 +63,8 @@ func set_info(knowledge_id: String, db_entry: Dictionary) -> void:
 		await ready
 		
 	icon_label.text = db_entry.get("icon", "🔹")
-	title_label.text = db_entry.get("title", "UNKNOWN DISCOVERY").to_upper()
+	# Title in sentence case, not all-caps
+	title_label.text = db_entry.get("title", "Unknown Discovery")
 	summary_label.text = db_entry.get("summary", "")
 	
 	var cat = db_entry.get("category", "")
@@ -80,6 +107,5 @@ func _on_close() -> void:
 		tw.tween_property(panel, "modulate:a", 0.0, 0.15)
 		await tw.finished
 		
-	get_tree().paused = false
 	closed.emit()
 	queue_free()

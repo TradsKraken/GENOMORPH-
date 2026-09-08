@@ -64,13 +64,13 @@ func _ready() -> void:
 	if core_mesh:
 		core_mesh.visible = false # Hidden until phase 3
 
-func take_damage(amount: float) -> void:
+func take_damage(amount: float, hit_position: Vector3 = Vector3.ZERO) -> void:
 	if current_phase == Phase.PHASE_3 and not _is_core_exposed():
 		# Shell deflects damage in phase 3
 		AudioManager.play_sfx("deflect", 1.0)
 		return
 		
-	super.take_damage(amount)
+	super.take_damage(amount, hit_position)
 	_check_phase_transition()
 
 func _is_core_exposed() -> bool:
