@@ -1,6 +1,8 @@
 extends Node
 class_name Q01Director
 
+signal completed
+
 const MosquitoScene = preload("res://enemies/mosquito_swarm.tscn")
 
 var _hud: Node = null
@@ -16,9 +18,11 @@ enum SequenceState {
 var _state: SequenceState = SequenceState.INIT
 
 func _ready() -> void:
+	add_to_group("q01_director")
+
 	# Add a slight delay to let the scene fully load and HUD initialize
 	await get_tree().create_timer(1.5).timeout
-	
+
 	_hud = get_tree().get_first_node_in_group("hud")
 	if get_tree().root.has_node("QuestManager"):
 		_quest_manager = get_tree().root.get_node("QuestManager")
@@ -33,11 +37,9 @@ func _ready() -> void:
 	_start_sequence()
 
 func _start_sequence() -> void:
-	if _hud and _hud.has_method("show_notification"):
-		_hud.show_notification("STERLING (RADIO)", "Your suit is locked to Frog form for now. Go carefully, Volunteer. Whatever is out there — it isn't ordinary anymore.", 8.0)
-	
-	await get_tree().create_timer(6.0).timeout
-	
+	# Sterling already says this over the radio subtitle during the wake-up
+	# sequence (see prologue_manager.gd) — showing it again here as a popup
+	# was a redundant repeat of the same line.
 	if _quest_manager:
 		# First quest logic
 		_quest_manager.set_objective("Investigate your surroundings", "Something is wrong with this wetland. Look around and find out what happened.")
@@ -87,3 +89,5 @@ func _on_mosquito_defeated() -> void:
 		
 	if _quest_manager:
 		_quest_manager.set_objective("Explore deeper into the wetlands")
+
+	completed.emit()

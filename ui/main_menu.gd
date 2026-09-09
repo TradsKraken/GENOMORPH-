@@ -191,7 +191,16 @@ func _spawn_background_world() -> void:
 	for child in world.get_children():
 		if child is CanvasLayer:
 			child.visible = false
-		
+
+	# This is decorative wallpaper only — freeze every script/AI/physics tick in this
+	# copy of the world (rendering doesn't need them) and halve the internal render
+	# resolution, since the heavy blur overlay already destroys fine detail. Previously
+	# this ran the *entire* live wetlands simulation (enemy AI, environment tweens,
+	# terrain physics) continuously just to sit behind the main menu.
+	world.process_mode = Node.PROCESS_MODE_DISABLED
+	_disable_shadows_recursive(world)
+	sub_viewport.scaling_3d_scale = 0.5
+
 	sub_viewport.add_child(world)
 	
 	# Create a blur shader overlay
@@ -217,6 +226,13 @@ void fragment() {
 	# Add the blur overlay directly on top of the viewport
 	_background_root.add_child(blur_overlay)
 	_background_root.move_child(blur_overlay, 1)
+
+
+func _disable_shadows_recursive(node: Node) -> void:
+	if node is Light3D:
+		node.shadow_enabled = false
+	for child in node.get_children():
+		_disable_shadows_recursive(child)
 
 
 # ── Particles — warm firefly / spore effect ───────────────────────────────────
