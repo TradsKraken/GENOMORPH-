@@ -34,8 +34,7 @@ func _ready() -> void:
 	_start_sequence()
 
 func _start_sequence() -> void:
-	if _hud and _hud.has_method("show_notification"):
-		_hud.show_notification("STERLING (RADIO)", "Your suit is locked to Frog form for now. Go carefully, Volunteer. Whatever is out there — it isn't ordinary anymore.", 8.0)
+
 
 	await get_tree().create_timer(6.0).timeout
 
