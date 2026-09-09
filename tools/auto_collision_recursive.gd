@@ -19,16 +19,7 @@ func _generate_collisions(node: Node) -> void:
 		else:
 			# Terrain optimizations: cast shadows, build collision
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
-			var has_collision := false
-			for child in node.get_children():
-				if child is CollisionObject3D:
-					has_collision = true
-					break
-			# Import already bakes collision (see terrain_post_import.gd). Regenerating
-			# it here on every scene load is a slow trimesh rebake per mesh and leaves
-			# duplicate overlapping colliders behind — only fill in what's missing.
-			if not has_collision:
-				node.create_trimesh_collision()
+			node.create_trimesh_collision()
 			
 		if node.mesh:
 			for i in range(node.mesh.get_surface_count()):

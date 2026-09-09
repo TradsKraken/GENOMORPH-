@@ -17,6 +17,11 @@ extends CharacterBody3D
 @export var gravity: float = 20.0
 @export var uses_gravity: bool = true # Flying enemies can set this to false
 
+# TEMPORARY — remove once the "enemy won't chase" bug is confirmed fixed.
+@export var debug_ai: bool = false
+var _debug_timer: float = 0.0
+var _debug_label: Label3D = null
+
 enum AIState { IDLE, PATROL, CHASE, ATTACK, RECOVER }
 var current_state: AIState = AIState.IDLE
 var state_timer: float = 0.0
@@ -211,6 +216,42 @@ func _physics_process(delta: float) -> void:
 	
 	_process_ai_state_machine(delta)
 	move_and_slide()
+
+	if debug_ai:
+		if not is_instance_valid(_debug_label):
+			_debug_label = Label3D.new()
+			_debug_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			_debug_label.no_depth_test = true
+			_debug_label.position = Vector3(0, 2.3, 0)
+			_debug_label.pixel_size = 0.006
+			_debug_label.outline_size = 14
+			_debug_label.font_size = 32
+			_debug_label.modulate = Color.YELLOW
+			add_child(_debug_label)
+
+		_debug_timer += delta
+		if _debug_timer >= 0.3:
+			_debug_timer = 0.0
+			var dist_str = "no target"
+			if target and is_instance_valid(target):
+				dist_str = "%.1fm" % global_position.distance_to(target.global_position)
+			_debug_label.text = "[%s]\nvel=%.1f\ndist=%s\nphys=%s" % [
+				AIState.keys()[current_state],
+				velocity.length(),
+				dist_str,
+				str(is_physics_processing())
+			]
+
+			var player_count = get_tree().get_nodes_in_group("player").size()
+			var target_name = "none"
+			var target_pos = "n/a"
+			if target and is_instance_valid(target):
+				target_name = str(target.get_path())
+				target_pos = str(target.global_position)
+			print("[AI DEBUG] ", name, " state=", AIState.keys()[current_state],
+				" self_pos=", global_position, " vel=", velocity,
+				" target=", target_name, " target_pos=", target_pos,
+				" player_nodes_in_group=", player_count)
 
 # ── AI State Machine ──────────────────────────────────────────────────────────
 

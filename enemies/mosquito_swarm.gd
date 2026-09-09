@@ -5,6 +5,7 @@ extends EnemyBase
 
 func _ready() -> void:
 	max_health = 100.0
+	debug_ai = true # TEMPORARY — remove once the "won't chase" bug is confirmed fixed.
 	super._ready()
 
 	# ── Flying mode ─────────────────────────────────────────────────────────
@@ -65,8 +66,10 @@ func _perform_attack() -> void:
 	var to_frog = lunge_target - global_position
 	var lunge_dir = to_frog.normalized()
 
-	# ── Lunge IN: fast 3D burst toward the frog ─────────────────────────────
-	velocity = lunge_dir * 18.0
+	# ── Lunge IN: quick burst toward the frog ───────────────────────────────
+	# (Kept small on purpose: attack_range is 1.2m, so anything much faster than
+	# this overshoots straight through the player before the 0.12s timer ends.)
+	velocity = lunge_dir * 5.0
 
 	await get_tree().create_timer(0.12).timeout
 
@@ -88,7 +91,7 @@ func _perform_attack() -> void:
 		return
 
 	# ── Retreat: short hop backwards ─────────────────────────────────────────
-	velocity = -lunge_dir * 8.0
+	velocity = -lunge_dir * 3.0
 
 	await get_tree().create_timer(0.2).timeout
 

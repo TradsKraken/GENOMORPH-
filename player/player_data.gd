@@ -249,28 +249,6 @@ const KNOWLEDGE_DB: Dictionary = {
 		"icon": "",
 		"summary": "A rusted pipe fragment and degraded plastic. This wasn't a natural die-off; humans left this behind."
 	},
-	"q02_burrows": {
-		"title": "Invasive Burrows",
-		"category": "Environment",
-		"subcategory": "Invasive Species",
-		"icon": "",
-		"summary": "Freshly dug tunnels, gnaw marks, and scattered tracks. Something is nesting here — and it isn't native to this wetland."
-	},
-	"rat": {
-		"title": "Invasive Rat",
-		"category": "Species",
-		"subcategory": "Invasive Mammal",
-		"icon": "⬡",
-		"classification": "Rattus sp.",
-		"threat_level": "MODERATE",
-		"summary": "Invasive rats outcompete native wetland species for food and shelter, and their burrowing accelerates bank erosion. Alone they're minor pests; in numbers, they gut a habitat.",
-		"facts": [
-			"A single breeding pair can produce hundreds of descendants in a year.",
-			"They raid the nests and burrows of native amphibians and small mammals.",
-			"Their tunneling destabilizes riverbanks and wetland embankments.",
-		],
-		"guide_tip": "[color=#1affa0]Field Guide:[/color] They come in packs. Don't get surrounded — clear them one at a time."
-	},
 	"mosquito": {
 		"title": "Mosquito Swarm",
 		"category": "Species",

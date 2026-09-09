@@ -104,18 +104,11 @@ func _force_shadows(node: Node) -> void:
 	if node is MeshInstance3D:
 		# Optimize performance by disabling shadow casting on grass and small details
 		var node_name_lower = node.name.to_lower()
-		var is_small_detail = "grass" in node_name_lower or "weed" in node_name_lower or "flower" in node_name_lower
-		if not is_small_detail and node.mesh:
-			# Catch small clutter that isn't named for it too (rocks, twigs, debris) —
-			# each one is a full extra shadow-map draw call across a scattered terrain.
-			if node.mesh.get_aabb().size.length() < 1.5:
-				is_small_detail = true
-		if is_small_detail:
+		if "grass" in node_name_lower or "weed" in node_name_lower or "flower" in node_name_lower:
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		# Note: we don't force shadows back ON for anything else here — meshes with
-		# shadows already off (from import) were left that way on purpose, and
-		# re-enabling hundreds of them on every scene load was undoing that for free.
-
+		elif node.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_OFF:
+			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+			
 		var mat = node.material_override
 		if mat == null and node.mesh:
 			for i in range(node.mesh.get_surface_count()):

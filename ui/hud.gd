@@ -218,20 +218,12 @@ func remove_minimap_marker(node: Node3D) -> void:
 			icon_container.queue_free()
 		_minimap_markers.erase(node)
 
-var _minimap_update_accum: float = 0.0
-const MINIMAP_UPDATE_INTERVAL: float = 1.0 / 15.0 # minimap doesn't need full framerate
-
 func _process(delta: float) -> void:
 	_subtitle_time_shown += delta
 	if is_instance_valid(_level_badge):
 		_level_badge.visible = PlayerData.skill_points > 0
 		_level_badge.text = str(PlayerData.skill_points)
-
-	_minimap_update_accum += delta
-	if _minimap_update_accum < MINIMAP_UPDATE_INTERVAL:
-		return
-	_minimap_update_accum = 0.0
-
+		
 	if is_instance_valid(_minimap_camera):
 		var player = get_tree().get_first_node_in_group("player")
 		if is_instance_valid(player):
