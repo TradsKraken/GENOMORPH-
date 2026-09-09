@@ -16,7 +16,8 @@ func _generate_collisions(node: Node) -> void:
 			pass
 		else:
 			# Create a static collision mesh for ground, trees, rocks, etc.
-			node.create_trimesh_collision()
+			if node.mesh != null and node.mesh.get_surface_count() > 0:
+				node.create_trimesh_collision()
 			
 	# Recursively check all children
 	for child in node.get_children():

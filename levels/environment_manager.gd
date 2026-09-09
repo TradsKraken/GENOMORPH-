@@ -27,7 +27,7 @@ func _ready() -> void:
 		# Add Ambient Light to fill in the harsh pitch-black shadows
 		environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 		environment.ambient_light_color = Color(0.65, 0.7, 0.8) # Muted sky blue
-		environment.ambient_light_energy = 0.8 # Lowered to prevent harsh, washed-out look
+		environment.ambient_light_energy = 1.6 # Increased to prevent dark spots from new terrain geometry
 		
 		# Bloom / Glow
 		environment.glow_enabled = true
@@ -53,7 +53,7 @@ func _setup_scene() -> void:
 	_dir_light = _find_directional_light(scene)
 	if _dir_light:
 		_dir_light.shadow_enabled = true
-		_dir_light.light_energy = 0.85 # Soften the harsh direct sunlight
+		_dir_light.light_energy = 0.7 # Soften the harsh direct sunlight to balance increased ambient light
 		_dir_light.shadow_bias = 0.015
 		_dir_light.shadow_blur = 1.5
 		
