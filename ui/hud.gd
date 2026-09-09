@@ -1866,10 +1866,17 @@ func _build_objective_panel() -> void:
 	_objective_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_objective_panel.gui_input.connect(_on_objective_gui_input)
 	_objective_panel.add_theme_constant_override("separation", 8)
-	
+
+	# Same technical sans-serif family as the Investigation Card / Quest Log —
+	# this only sets the default font (HBoxContainer has no "panel" stylebox
+	# slot), so it can't accidentally add a background to the resting banner.
+	var panel_suit_theme = load("res://ui/suit_theme.gd")
+	if panel_suit_theme:
+		_objective_panel.theme = panel_suit_theme.get_theme()
+
 	_objective_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_objective_panel.position = Vector2(16, 160) # Below status/badges, slight indent
-	
+
 	_quest_accent_rect = ColorRect.new()
 	_quest_accent_rect.custom_minimum_size = Vector2(3, 0)
 	_quest_accent_rect.size_flags_vertical = Control.SIZE_FILL
@@ -1967,7 +1974,12 @@ func _on_objective_updated(text: String) -> void:
 	_subtitle_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 func _on_objective_gui_input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+	# Only InputEventScreenTouch is handled here — project.godot has
+	# pointing/emulate_touch_from_mouse=true, so every mouse click ALSO
+	# generates a synthetic touch event. Handling both meant a single tap
+	# fired this twice in the same frame (state 0→1, then immediately 1→0
+	# plus opening the Quest Log), skipping the in-place expand entirely.
+	if event is InputEventScreenTouch:
 		if event.is_pressed() and PlayerData.current_objective_text != "":
 			AudioManager.play_sfx("tap_button")
 			if _quest_hud_state == 0:
@@ -1987,7 +1999,9 @@ func _set_quest_hud_state(state: int) -> void:
 		_quest_desc_panel.show()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+	# Same reasoning as _on_objective_gui_input — only handle the touch event,
+	# since mouse clicks are also synthesized into touch events project-wide.
+	if event is InputEventScreenTouch:
 		if event.is_pressed() and _quest_hud_state == 1:
 			var rect = _objective_panel.get_global_rect()
 			if not rect.has_point(event.position):
@@ -2760,8 +2774,13 @@ func _build_quest_log_panel() -> void:
 	if suit_theme:
 		_quest_log_panel.theme = suit_theme.get_theme()
 		
-	# Make it full screen or center it
+	# Center it. PRESET_CENTER alone only anchors the panel's top-left corner to
+	# screen-center (offsets default to 0) — without also setting both grow
+	# directions, the panel expands toward the bottom-right instead of being
+	# centered around that point.
 	_quest_log_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_quest_log_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_quest_log_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_quest_log_panel.custom_minimum_size = Vector2(800, 450)
 	
 	var margin = MarginContainer.new()
