@@ -10,7 +10,6 @@ const RatScene = preload("res://enemies/rat.tscn")
 @export var rat_pack_size: int = 3
 
 var _hud: Node = null
-var _quest_manager: Node = null
 
 enum SequenceState {
 	INIT,
@@ -24,8 +23,6 @@ var _living_rats: Array[Node] = []
 
 func _ready() -> void:
 	_hud = get_tree().get_first_node_in_group("hud")
-	if get_tree().root.has_node("QuestManager"):
-		_quest_manager = get_tree().root.get_node("QuestManager")
 
 	for node in get_tree().get_nodes_in_group("knowledge_object"):
 		var kid = node.get("knowledge_id")
@@ -46,8 +43,7 @@ func _ready() -> void:
 		_begin()
 
 func _begin() -> void:
-	if _quest_manager:
-		_quest_manager.set_objective("Investigate the disturbance", "Something else is out here. Find the source.")
+	PlayerData.set_objective(null, "Investigate the disturbance", "Something else is out here. Find the source.")
 
 	_state = SequenceState.WAITING_FOR_SCAN
 
@@ -73,8 +69,7 @@ func _on_burrows_scanned(clue_node: Node) -> void:
 		rat.tree_exited.connect(_on_rat_died)
 		_living_rats.append(rat)
 
-	if _quest_manager:
-		_quest_manager.set_objective("Clear the invasive rats", "%d remaining" % _living_rats.size())
+	PlayerData.set_objective(null, "Clear the invasive rats", "%d remaining" % _living_rats.size())
 
 func _on_rat_died() -> void:
 	_living_rats = _living_rats.filter(func(r): return is_instance_valid(r) and not r.is_queued_for_deletion())
@@ -83,13 +78,11 @@ func _on_rat_died() -> void:
 		return
 
 	if _living_rats.size() > 0:
-		if _quest_manager:
-			_quest_manager.set_objective("Clear the invasive rats", "%d remaining" % _living_rats.size())
+		PlayerData.set_objective(null, "Clear the invasive rats", "%d remaining" % _living_rats.size())
 		return
 
 	_state = SequenceState.DONE
 	if _hud and _hud.has_method("show_notification"):
 		_hud.show_notification("STERLING (RADIO)", "That's the last of them for now. But this disturbance goes deeper — keep moving.", 5.0)
 
-	if _quest_manager:
-		_quest_manager.set_objective("Explore deeper into the wetlands")
+	PlayerData.set_objective(null, "Explore deeper into the wetlands")

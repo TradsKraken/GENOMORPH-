@@ -274,11 +274,15 @@ func _process_ai_state_machine(delta: float) -> void:
 				current_state = AIState.IDLE
 				
 		AIState.ATTACK:
-			# Base class does nothing but wait. 
-			# Subclasses should override _perform_attack() and call _finish_attack() when done.
-			velocity.x = 0
-			velocity.z = 0
-			
+			# Base class does nothing but wait — velocity is left alone here on purpose.
+			# Subclasses that override _perform_attack() (e.g. a lunge/dash) manage their
+			# own velocity across the attack's frames; re-zeroing it every tick here would
+			# stomp that movement one frame after it's set, which is exactly what was
+			# happening (e.g. MosquitoSwarm's lunge got cancelled immediately, leaving
+			# only its untouched Y-component to drift). The one-time zero at the
+			# CHASE→ATTACK transition already covers subclasses that don't move at all.
+			pass
+
 		AIState.RECOVER:
 			velocity.x = 0
 			velocity.z = 0
