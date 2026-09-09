@@ -50,7 +50,6 @@ var _subtitle_tween: Tween
 var _jump_highlight_tw: Tween
 var _attack_highlight_tw: Tween
 
-var _quest_tracker_lbl: RichTextLabel
 var _quest_btn: Button
 var _quest_panel: PanelContainer
 var _genome_popup_panel: PanelContainer
@@ -106,9 +105,6 @@ func _input(event: InputEvent) -> void:
 		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 			if event.is_pressed():
 				hide_subtitle()
-				# Accept the event so it doesn't trigger jumping or attacking if they tap the subtitle area
-				# Alternatively, let them attack/jump while dismissing. 
-				# It's better to just dismiss and not block input if it's full screen, but let's leave it as non-blocking.
 
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
@@ -122,7 +118,6 @@ func _build_player_status() -> void:
 		_stam_bar = _root.find_child("StamBar", true, false)
 		_exp_bar = _root.find_child("ExpBar", true, false)
 		_lvl_lbl = _root.find_child("LvlLbl", true, false)
-		_quest_tracker_lbl = _root.find_child("QuestTrackerLbl", true, false)
 		if badge and not badge.gui_input.is_connected(_on_badge_gui_input):
 			badge.gui_input.connect(_on_badge_gui_input)
 		return
@@ -202,32 +197,6 @@ func _build_player_status() -> void:
 	_stam_bar.name = "StamBar"
 	stam_box.add_child(_stam_bar)
 	bars_vbox.add_child(stam_box)
-
-	# Quest Tracker Label inside BarsVBox for perfect layout
-	var quest_btn = Button.new()
-	quest_btn.name = "QuestTrackerBtn"
-	quest_btn.flat = true
-	var empty_style = StyleBoxEmpty.new()
-	quest_btn.add_theme_stylebox_override("normal", empty_style)
-	quest_btn.add_theme_stylebox_override("hover", empty_style)
-	quest_btn.add_theme_stylebox_override("pressed", empty_style)
-	quest_btn.add_theme_stylebox_override("focus", empty_style)
-	quest_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	quest_btn.custom_minimum_size = Vector2(300, 20)
-	quest_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
-	quest_btn.pressed.connect(_open_quest_menu)
-	bars_vbox.add_child(quest_btn)
-
-	_quest_tracker_lbl = RichTextLabel.new()
-	_quest_tracker_lbl.name = "QuestTrackerLbl"
-	_quest_tracker_lbl.bbcode_enabled = true
-	_quest_tracker_lbl.fit_content = true
-	_quest_tracker_lbl.scroll_active = false
-	_quest_tracker_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_quest_tracker_lbl.add_theme_font_size_override("normal_font_size", 14)
-	_quest_tracker_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
-	quest_btn.add_child(_quest_tracker_lbl)
 
 	# EXP Bar (Radial around badge)
 	var exp_script = GDScript.new()
@@ -1354,12 +1323,7 @@ func _update_knowledge_badge() -> void:
 			_knowledge_badge.visible = false
 
 func _on_objective_changed(target: Node3D) -> void:
-	if _quest_tracker_lbl:
-		var txt = PlayerData.current_objective_text
-		if txt == "":
-			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]None[/color]"
-		else:
-			_quest_tracker_lbl.text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff]" + txt + "[/color]"
+	pass
 
 # ── Notifications / Menus ──────────────────────────────────────────────────────────
 

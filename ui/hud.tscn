@@ -1338,19 +1338,7 @@ text = "100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="QuestTrackerLbl" type="RichTextLabel" parent="Root/StatusGroup/BarsVBox/HpBox" unique_id=1423858309]
-custom_minimum_size = Vector2(300, 20)
-layout_mode = 0
-offset_left = -53.0
-offset_top = 117.0
-offset_right = 247.0
-offset_bottom = 137.0
-mouse_filter = 2
-theme_override_font_sizes/normal_font_size = 14
-bbcode_enabled = true
-text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
-fit_content = true
-scroll_active = false
+
 
 [node name="StamBox" type="Control" parent="Root/StatusGroup/BarsVBox" unique_id=2129543531]
 custom_minimum_size = Vector2(220, 16)

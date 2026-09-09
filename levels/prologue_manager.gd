@@ -8,9 +8,16 @@ var camera: Camera3D = null
 
 var dialog_index = 0
 var dialog_sequence = [
-	{ "speaker": "STERLING", "text": "Volunteer, do you read me?", "duration": 4.0 },
-	{ "speaker": "STERLING", "text": "The suit was damaged in the blast. The DSEE is unstable.", "duration": 5.0 },
-	{ "speaker": "STERLING", "text": "You are currently locked into your base genetic form. Do not panic. I am trying to re-establish a link.", "duration": 6.0 }
+	{ "speaker": "STERLING", "text": "Volunteer! Volunteer, do you copy? The biometric stream is haywire—please respond!", "duration": 4.0 },
+	{ "speaker": "VOLUNTEER", "text": "I'm here. I'm... I'm down in the mud. Sterling, I'm a frog. I'm literally a frog.", "duration": 4.0 },
+	{ "speaker": "STERLING", "text": "I know. I'm sorry. Just — stay still. I'm trying to read what's left.", "duration": 4.0 },
+	{ "speaker": "STERLING", "text": "The DSEE discharged. All twelve genomes — gone from the suit. Released as raw biological energy. I don't know where they landed.", "duration": 6.0 },
+	{ "speaker": "STERLING", "text": "The water, the soil... anything that was close enough could have absorbed fragments. Whatever is living in that wetland right now — I don't know what it is anymore.", "duration": 7.0 },
+	{ "speaker": "VOLUNTEER", "text": "What do I do?", "duration": 2.0 },
+	{ "speaker": "STERLING", "text": "The data is still out there somewhere. It has to be. Your suit's Purification Module is still active — if you can find what absorbed those genomes and get close enough, the suit may be able to read and recover what's left.", "duration": 8.0 },
+	{ "speaker": "VOLUNTEER", "text": "Starting from a frog.", "duration": 3.0 },
+	{ "speaker": "STERLING", "text": "...Starting from a frog. I'm sorry.", "duration": 3.0 },
+	{ "speaker": "STERLING", "text": "Your suit is locked to Frog form for now. Go carefully, Volunteer. Whatever is out there — it isn't ordinary anymore.", "duration": 6.0 }
 ]
 
 func _ready() -> void:
@@ -19,10 +26,6 @@ func _ready() -> void:
 			player.input_locked = false
 		queue_free()
 		return
-		
-	var tut2 = get_node_or_null("../tut2/EnemySpawner")
-	if tut2:
-		PlayerData.call_deferred("set_objective", tut2)
 		
 	# Lock player during fade in
 	if player:

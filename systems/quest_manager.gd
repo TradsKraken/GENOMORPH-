@@ -1,14 +1,17 @@
 extends Node
 
-signal objective_updated(new_objective: String)
+signal objective_updated(new_objective: String, new_desc: String)
 signal quest_completed(quest_id: String)
 
 var current_objective: String = ""
+var current_description: String = ""
 
-func set_objective(text: String) -> void:
+func set_objective(text: String, desc: String = "") -> void:
 	current_objective = text
-	objective_updated.emit(text)
+	current_description = desc
+	objective_updated.emit(text, desc)
 
 func clear_objective() -> void:
 	current_objective = ""
-	objective_updated.emit("")
+	current_description = ""
+	objective_updated.emit("", "")

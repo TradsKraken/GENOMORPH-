@@ -1,4 +1,4 @@
-﻿[gd_scene format=4 uid="uid://cx4vj1g5x4vj"]
+[gd_scene format=4 uid="uid://cx4vj1g5x4vj"]
 
 [ext_resource type="Script" uid="uid://d3eh7xrsdcw3o" path="res://ui/hud.gd" id="1_hud"]
 [ext_resource type="Shader" uid="uid://1v1r7fud6vev" path="res://ui/scanlines.gdshader" id="2_276te"]
@@ -995,19 +995,7 @@ text = "100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="QuestTrackerLbl" type="RichTextLabel" parent="Root/StatusGroup/BarsVBox/HpBox" unique_id=1045932415]
-custom_minimum_size = Vector2(300, 20)
-layout_mode = 0
-offset_left = -46.0
-offset_top = 113.0
-offset_right = 254.0
-offset_bottom = 133.0
-mouse_filter = 2
-theme_override_font_sizes/normal_font_size = 14
-bbcode_enabled = true
-text = "[color=#aaaaaa]Current Quest:[/color] [color=#ffffff][/color]"
-fit_content = true
-scroll_active = false
+
 
 [node name="StamBox" type="Control" parent="Root/StatusGroup/BarsVBox" unique_id=988202092]
 custom_minimum_size = Vector2(220, 16)

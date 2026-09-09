@@ -14,6 +14,7 @@ signal genome_collected(current: int, total: int)
 signal skill1_cooldown_started(duration: float)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
+var current_objective_desc: String = ""
 
 var message_log: Array[String] = []
 
@@ -24,23 +25,26 @@ func add_message(speaker: String, text: String, color: String = "ffffff") -> voi
 		if message_log.size() > 50:
 			message_log.pop_front()
 
-func set_objective(target: Node3D, text: String = "") -> void:
+func set_objective(target: Node3D, text: String = "", desc: String = "") -> void:
 	current_objective = target
 	
 	if text != "":
 		current_objective_text = text
+		current_objective_desc = desc
 	elif target and "objective_text" in target:
 		current_objective_text = target.objective_text
+		current_objective_desc = target.get("objective_desc") if "objective_desc" in target else ""
 	else:
 		current_objective_text = ""
+		current_objective_desc = ""
 		
 	objective_changed.emit(target)
 
-func _restore_objective(path_str: String, text: String) -> void:
+func _restore_objective(path_str: String, text: String, desc: String = "") -> void:
 	var target: Node3D = null
 	if path_str != "" and get_tree().current_scene:
 		target = get_tree().current_scene.get_node_or_null(path_str)
-	set_objective(target, text)
+	set_objective(target, text, desc)
 
 # ── Species Progression ───────────────────────────────────────────────────────
 var active_species: String = "frog"

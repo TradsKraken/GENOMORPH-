@@ -39,7 +39,8 @@ func _start_sequence() -> void:
 	await get_tree().create_timer(6.0).timeout
 	
 	if _quest_manager:
-		_quest_manager.set_objective("Investigate your surroundings")
+		# First quest logic
+		_quest_manager.set_objective("Investigate your surroundings", "Something is wrong with this wetland. Look around and find out what happened.")
 		
 	_state = SequenceState.WAITING_FOR_SCAN
 

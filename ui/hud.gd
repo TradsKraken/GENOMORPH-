@@ -49,15 +49,21 @@ var _subtitle_panel: PanelContainer
 var _subtitle_label: RichTextLabel
 var _subtitle_tween: Tween
 
-var _objective_panel: PanelContainer
+var _objective_panel: HBoxContainer
 var _objective_lbl: Label
 var _subtitle_time_shown: float = 0.0
 
 var _jump_highlight_tw: Tween
 var _attack_highlight_tw: Tween
 
-var _quest_tracker_lbl: RichTextLabel
+var _quest_header_lbl: Label
+var _quest_accent_rect: ColorRect
 var _quest_btn: Button
+var _quest_hud_state: int = 0
+var _quest_desc_panel: PanelContainer
+var _quest_desc_lbl: Label
+var _quest_hint_lbl: Label
+var _quest_log_panel: PanelContainer
 var _quest_panel: PanelContainer
 var _genome_popup_panel: PanelContainer
 var _genome_popup_label: RichTextLabel
@@ -122,6 +128,7 @@ func _ready() -> void:
 	_build_subtitle_panel()
 	_build_objective_panel()
 	_build_objective_arrow()
+	_build_quest_log_panel()
 
 	# Listen to QuestManager if it exists
 	if get_tree().root.has_node("QuestManager"):
@@ -447,7 +454,6 @@ func _build_player_status() -> void:
 				notif_wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
 				badge.add_child(notif_wrapper)
 			notif_wrapper.add_child(_level_badge)
-		_quest_tracker_lbl = _root.find_child("QuestTrackerLbl", true, false)
 		if badge and not badge.gui_input.is_connected(_on_badge_gui_input):
 			badge.gui_input.connect(_on_badge_gui_input)
 		return
@@ -554,19 +560,6 @@ func _build_player_status() -> void:
 	_stam_bar.name = "StamBar"
 	stam_box.add_child(_stam_bar)
 	bars_vbox.add_child(stam_box)
-
-	# Quest Tracker Label
-	_quest_tracker_lbl = RichTextLabel.new()
-	_quest_tracker_lbl.name = "QuestTrackerLbl"
-	_quest_tracker_lbl.bbcode_enabled = true
-	_quest_tracker_lbl.fit_content = true
-	_quest_tracker_lbl.scroll_active = false
-	_quest_tracker_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_quest_tracker_lbl.add_theme_font_size_override("normal_font_size", 20)
-	_quest_tracker_lbl.add_theme_font_size_override("bold_font_size", 20)
-	_quest_tracker_lbl.custom_minimum_size = Vector2(400, 30)
-	_quest_tracker_lbl.text = "[color=#ffcc00][b]Current Quest:[/b][/color] [color=#ffffff][/color]"
-	bars_vbox.add_child(_quest_tracker_lbl)
 
 	# EXP Bar (Radial around badge)
 	var exp_script = GDScript.new()
@@ -1461,7 +1454,7 @@ func start_tutorial() -> void:
 		"The [color=#9400ff]purple bar[/color] is your [b]Stamina[/b].\n\nJump and Tongue Whip both consume it. It regenerates automatically when you stop using abilities.",
 		"Tap the bar to continue")
 
-	await _tut_spotlight(_quest_tracker_lbl,
+	await _tut_spotlight(_objective_panel,
 		"CURRENT OBJECTIVE",
 		"This shows your [b]current mission[/b].\n\nAlways check here if you're unsure of what to do next.",
 		"Tap the objective to continue")
@@ -1833,50 +1826,6 @@ func _build_subtitle_panel() -> void:
 	_subtitle_panel.offset_bottom = -40
 	_subtitle_panel.offset_top = -40
 	
-func _build_objective_panel() -> void:
-	if _root.has_node("ObjectivePanel"):
-		_objective_panel = _root.find_child("ObjectivePanel", true, false)
-		_objective_lbl = _root.find_child("ObjectiveLabel", true, false)
-		return
-		
-	_objective_panel = PanelContainer.new()
-	_objective_panel.name = "ObjectivePanel"
-	_objective_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	
-	var style = StyleBoxFlat.new()
-	style.bg_color = Color(0.08, 0.08, 0.1, 0.7)
-	style.corner_radius_bottom_right = 20
-	style.border_width_right = 2
-	style.border_width_bottom = 2
-	style.border_color = Color(1.0, 0.8, 0.2, 0.8)
-	style.content_margin_left = 20
-	style.content_margin_top = 10
-	style.content_margin_right = 30
-	style.content_margin_bottom = 10
-	_objective_panel.add_theme_stylebox_override("panel", style)
-	
-	_objective_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-	_objective_panel.position = Vector2(0, 160) # Below status/badges
-	
-	_objective_lbl = Label.new()
-	_objective_lbl.name = "ObjectiveLabel"
-	_objective_lbl.text = ""
-	_objective_lbl.add_theme_font_size_override("font_size", 24)
-	_objective_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.6))
-	_objective_panel.add_child(_objective_lbl)
-	
-	_objective_panel.hide()
-	_root.add_child(_objective_panel)
-
-func _on_objective_updated(text: String) -> void:
-	if not is_instance_valid(_objective_lbl): return
-	if text.is_empty():
-		_objective_panel.hide()
-	else:
-		_objective_lbl.text = "Objective: " + text
-		_objective_panel.show()
-	_subtitle_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	
 	_subtitle_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	var bg := StyleBoxFlat.new()
@@ -1905,8 +1854,145 @@ func _on_objective_updated(text: String) -> void:
 	_subtitle_panel.add_child(_subtitle_label)
 
 	_root.add_child(_subtitle_panel)
+	
+func _build_objective_panel() -> void:
+	if _root.has_node("ObjectivePanel"):
+		_objective_panel = _root.find_child("ObjectivePanel", true, false)
+		_objective_lbl = _root.find_child("ObjectiveLabel", true, false)
+		return
+		
+	_objective_panel = HBoxContainer.new()
+	_objective_panel.name = "ObjectivePanel"
+	_objective_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_objective_panel.gui_input.connect(_on_objective_gui_input)
+	_objective_panel.add_theme_constant_override("separation", 8)
+	
+	_objective_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_objective_panel.position = Vector2(16, 160) # Below status/badges, slight indent
+	
+	_quest_accent_rect = ColorRect.new()
+	_quest_accent_rect.custom_minimum_size = Vector2(3, 0)
+	_quest_accent_rect.size_flags_vertical = Control.SIZE_FILL
+	_objective_panel.add_child(_quest_accent_rect)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", -2)
+	_objective_panel.add_child(vbox)
+	
+	var suit_theme = load("res://ui/suit_theme.gd")
+	
+	_quest_header_lbl = Label.new()
+	_quest_header_lbl.text = "Quests"
+	_quest_header_lbl.add_theme_font_size_override("font_size", 14)
+	_quest_header_lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	_quest_header_lbl.add_theme_constant_override("shadow_offset_x", 0)
+	_quest_header_lbl.add_theme_constant_override("shadow_offset_y", 2)
+	_quest_header_lbl.add_theme_constant_override("shadow_outline_size", 6)
+	if suit_theme:
+		_quest_header_lbl.add_theme_color_override("font_color", suit_theme.COLOR_TEXT_INACTIVE)
+		_quest_accent_rect.color = suit_theme.COLOR_TEXT_INACTIVE
+	vbox.add_child(_quest_header_lbl)
+	
+	_objective_lbl = Label.new()
+	_objective_lbl.name = "ObjectiveLabel"
+	_objective_lbl.text = ""
+	_objective_lbl.add_theme_font_size_override("font_size", 20)
+	_objective_lbl.add_theme_color_override("font_color", Color(0.95, 0.98, 0.95))
+	_objective_lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	_objective_lbl.add_theme_constant_override("shadow_offset_x", 0)
+	_objective_lbl.add_theme_constant_override("shadow_offset_y", 2)
+	_objective_lbl.add_theme_constant_override("shadow_outline_size", 6)
+	vbox.add_child(_objective_lbl)
+	
+	_quest_desc_panel = PanelContainer.new()
+	_quest_desc_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var desc_style = StyleBoxFlat.new()
+	desc_style.bg_color = Color(18/255.0, 32/255.0, 28/255.0, 0.75)
+	desc_style.set_corner_radius_all(0)
+	desc_style.corner_radius_top_right = 8
+	desc_style.corner_radius_bottom_right = 8
+	desc_style.content_margin_left = 12
+	desc_style.content_margin_right = 12
+	desc_style.content_margin_top = 8
+	desc_style.content_margin_bottom = 8
+	_quest_desc_panel.add_theme_stylebox_override("panel", desc_style)
+	_quest_desc_panel.hide()
+	
+	var desc_vbox = VBoxContainer.new()
+	_quest_desc_panel.add_child(desc_vbox)
+	
+	_quest_desc_lbl = Label.new()
+	_quest_desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_quest_desc_lbl.custom_minimum_size = Vector2(250, 0)
+	_quest_desc_lbl.add_theme_font_size_override("font_size", 14)
+	desc_vbox.add_child(_quest_desc_lbl)
+	
+	_quest_hint_lbl = Label.new()
+	_quest_hint_lbl.text = "Tap again for quest log →"
+	_quest_hint_lbl.add_theme_font_size_override("font_size", 12)
+	if suit_theme:
+		_quest_hint_lbl.add_theme_color_override("font_color", suit_theme.COLOR_ACCENT_YELLOW)
+	desc_vbox.add_child(_quest_hint_lbl)
+	
+	vbox.add_child(_quest_desc_panel)
+	
+	_root.add_child(_objective_panel)
 
+func _on_objective_updated(text: String) -> void:
+	if not is_instance_valid(_objective_lbl) or not is_instance_valid(_quest_header_lbl) or not is_instance_valid(_quest_accent_rect): return
+	
+	var suit_theme = load("res://ui/suit_theme.gd")
+	var color_active = suit_theme.COLOR_ACCENT_YELLOW if suit_theme else Color("#f2c94c")
+	var color_inactive = suit_theme.COLOR_TEXT_INACTIVE if suit_theme else Color("#777777")
+	
+	if text.is_empty():
+		_quest_header_lbl.text = "Quests"
+		_quest_header_lbl.add_theme_color_override("font_color", color_inactive)
+		_quest_accent_rect.color = color_inactive
+		_objective_lbl.text = ""
+		_objective_lbl.hide()
+		if _quest_hud_state != 0: _set_quest_hud_state(0)
+	else:
+		_quest_header_lbl.text = "Quests ▾" if _quest_hud_state == 0 else "Quests ▴"
+		_quest_header_lbl.add_theme_color_override("font_color", color_active)
+		_quest_accent_rect.color = color_active
+		_objective_lbl.text = text
+		_objective_lbl.show()
+		
+	if PlayerData.current_objective_desc != "":
+		_quest_desc_lbl.text = PlayerData.current_objective_desc
+	else:
+		_quest_desc_lbl.text = "No additional details."
+	
+	_subtitle_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 
+func _on_objective_gui_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+		if event.is_pressed() and PlayerData.current_objective_text != "":
+			AudioManager.play_sfx("tap_button")
+			if _quest_hud_state == 0:
+				_set_quest_hud_state(1)
+			else:
+				_set_quest_hud_state(0)
+				_open_quest_log()
+
+func _set_quest_hud_state(state: int) -> void:
+	_quest_hud_state = state
+	if state == 0:
+		if PlayerData.current_objective_text != "":
+			_quest_header_lbl.text = "Quests ▾"
+		_quest_desc_panel.hide()
+	else:
+		_quest_header_lbl.text = "Quests ▴"
+		_quest_desc_panel.show()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
+		if event.is_pressed() and _quest_hud_state == 1:
+			var rect = _objective_panel.get_global_rect()
+			if not rect.has_point(event.position):
+				_set_quest_hud_state(0)
+	
 func _build_objective_arrow() -> void:
 	if _root.has_node("ObjectiveArrow"):
 		var arrow = _root.find_child("ObjectiveArrow", true, false)
@@ -2461,12 +2547,8 @@ func _on_objective_changed(target: Node3D) -> void:
 				icon.set("color", Color(1.0, 0.8, 0.2))
 				if icon.has_method("queue_redraw"): icon.queue_redraw()
 
-	if _quest_tracker_lbl:
-		var txt = PlayerData.current_objective_text
-		if txt == "":
-			_quest_tracker_lbl.text = "[color=#ffcc00][b]Current Quest:[/b][/color] [color=#ffffff]None[/color]"
-		else:
-			_quest_tracker_lbl.text = "[color=#ffcc00][b]Current Quest:[/b][/color] [color=#ffffff]" + txt + "[/color]"
+	var txt = PlayerData.current_objective_text
+	_on_objective_updated(txt)
 
 # ── Notifications / Menus ──────────────────────────────────────────────────────────
 
@@ -2666,3 +2748,94 @@ func get_fog_data() -> String:
 	if _fog_manager and _fog_manager.has_method("get_fog_data"):
 		return _fog_manager.get_fog_data()
 	return ""
+
+func _build_quest_log_panel() -> void:
+	if _root.has_node("QuestLogPanel"):
+		_quest_log_panel = _root.get_node("QuestLogPanel")
+		return
+		
+	_quest_log_panel = PanelContainer.new()
+	_quest_log_panel.name = "QuestLogPanel"
+	var suit_theme = load("res://ui/suit_theme.gd")
+	if suit_theme:
+		_quest_log_panel.theme = suit_theme.get_theme()
+		
+	# Make it full screen or center it
+	_quest_log_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_quest_log_panel.custom_minimum_size = Vector2(800, 450)
+	
+	var margin = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 32)
+	margin.add_theme_constant_override("margin_right", 32)
+	margin.add_theme_constant_override("margin_top", 32)
+	margin.add_theme_constant_override("margin_bottom", 32)
+	_quest_log_panel.add_child(margin)
+	
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 24)
+	margin.add_child(vbox)
+	
+	var header = Label.new()
+	header.text = "ACTIVE"
+	header.add_theme_font_size_override("font_size", 28)
+	if suit_theme:
+		header.add_theme_color_override("font_color", suit_theme.COLOR_ACCENT_YELLOW)
+	vbox.add_child(header)
+	
+	var active_quest_lbl = Label.new()
+	active_quest_lbl.name = "ActiveQuestLbl"
+	active_quest_lbl.add_theme_font_size_override("font_size", 24)
+	vbox.add_child(active_quest_lbl)
+	
+	var active_desc_lbl = Label.new()
+	active_desc_lbl.name = "ActiveDescLbl"
+	active_desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	active_desc_lbl.add_theme_font_size_override("font_size", 18)
+	if suit_theme:
+		active_desc_lbl.add_theme_color_override("font_color", suit_theme.COLOR_TEXT_INACTIVE)
+	vbox.add_child(active_desc_lbl)
+	
+	var divider = ColorRect.new()
+	divider.custom_minimum_size = Vector2(0, 2)
+	if suit_theme:
+		divider.color = suit_theme.COLOR_TEXT_INACTIVE
+	divider.color.a = 0.3
+	vbox.add_child(divider)
+	
+	var completed_lbl = Label.new()
+	completed_lbl.text = "No completed quests yet."
+	completed_lbl.add_theme_font_size_override("font_size", 18)
+	if suit_theme:
+		completed_lbl.add_theme_color_override("font_color", suit_theme.COLOR_TEXT_INACTIVE)
+	vbox.add_child(completed_lbl)
+	
+	# Close button
+	var close_btn = Button.new()
+	close_btn.text = "Close"
+	close_btn.add_theme_font_size_override("font_size", 20)
+	close_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	close_btn.pressed.connect(func():
+		AudioManager.play_sfx("tap_button")
+		_quest_log_panel.hide()
+		get_tree().paused = false
+	)
+	vbox.add_child(close_btn)
+	
+	_quest_log_panel.hide()
+	_root.add_child(_quest_log_panel)
+
+func _open_quest_log() -> void:
+	if not is_instance_valid(_quest_log_panel): return
+	
+	var active_quest_lbl = _quest_log_panel.find_child("ActiveQuestLbl", true, false)
+	var active_desc_lbl = _quest_log_panel.find_child("ActiveDescLbl", true, false)
+	
+	if PlayerData.current_objective_text != "":
+		active_quest_lbl.text = PlayerData.current_objective_text
+		active_desc_lbl.text = PlayerData.current_objective_desc if PlayerData.current_objective_desc != "" else "No additional details available."
+	else:
+		active_quest_lbl.text = "No active quests."
+		active_desc_lbl.text = ""
+		
+	_quest_log_panel.show()
+	get_tree().paused = true
