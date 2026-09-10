@@ -6,7 +6,7 @@ signal completed
 const MosquitoScene = preload("res://enemies/mosquito_swarm.tscn")
 
 @export var swarm_size: int = 3
-@export var spawn_distance: float = 6.0
+@export var spawn_distance: float = 12.0 # Increased from 6.0 so they don't spawn right on top of the player
 
 var _hud: Node = null
 
@@ -195,3 +195,6 @@ func _wait_for_dialogue() -> void:
 		await _hud.subtitle_dismissed
 	else:
 		await get_tree().create_timer(2.0).timeout
+		
+	# Add a small pacing delay so enemies don't spawn the exact instant the dialogue closes
+	await get_tree().create_timer(1.0).timeout

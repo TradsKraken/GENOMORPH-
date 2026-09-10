@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://d4habitatrestore1"]
+
+[ext_resource type="PackedScene" path="res://levels/interactable_base.tscn" id="1_base"]
+[ext_resource type="Script" path="res://levels/habitat_restore_point.gd" id="2_script"]
+
+[node name="HabitatRestorePoint" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+interact_prompt = "Restore"
