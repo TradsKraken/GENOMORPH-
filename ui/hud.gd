@@ -78,6 +78,11 @@ var _notification_title: Label
 var _notification_text: RichTextLabel
 var _notification_tween: Tween
 
+var _knowledge_toast_panel: PanelContainer
+var _knowledge_toast_title: Label
+var _knowledge_toast_label: Label
+var _knowledge_toast_tween: Tween
+
 var _walkthrough_steps: Array = []
 var _current_step_index: int = 0
 var _active_highlight_nodes: Array = []
@@ -139,6 +144,7 @@ func _ready() -> void:
 	_build_minimap()
 	_build_zone_status()
 	_build_notification_panel()
+	_build_knowledge_toast()
 
 	_connect_signals()
 
@@ -414,6 +420,135 @@ func show_notification(title: String, text: String, duration: float = 4.0) -> vo
 	# Fade out smoothly
 	_notification_tween.chain().tween_property(_notification_panel, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	_notification_tween.chain().tween_callback(func(): _notification_panel.visible = false)
+
+# ── Knowledge Unlocked Toast (flies into the Knowledge book button) ───────────
+
+func _build_knowledge_toast() -> void:
+	if _root.has_node("KnowledgeToast"):
+		_knowledge_toast_panel = _root.find_child("KnowledgeToast", true, false)
+		return
+
+	_knowledge_toast_panel = PanelContainer.new()
+	_knowledge_toast_panel.name = "KnowledgeToast"
+	_knowledge_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var suit_theme = load("res://ui/suit_theme.gd")
+	if suit_theme:
+		_knowledge_toast_panel.theme = suit_theme.get_theme()
+
+	# Same small dark backing as the quest expand panel — this is a brief,
+	# self-contained pop-up moment (like the Investigation Card), not part of
+	# the always-on resting HUD, so a light panel background is appropriate.
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(18 / 255.0, 32 / 255.0, 28 / 255.0, 0.9)
+	style.set_corner_radius_all(8)
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 12
+	style.content_margin_bottom = 12
+	_knowledge_toast_panel.add_theme_stylebox_override("panel", style)
+
+	_knowledge_toast_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_knowledge_toast_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_knowledge_toast_panel.grow_vertical = Control.GROW_DIRECTION_END
+	_knowledge_toast_panel.position.y = 190
+
+	var vbox = VBoxContainer.new()
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 2)
+	_knowledge_toast_panel.add_child(vbox)
+
+	_knowledge_toast_title = Label.new()
+	_knowledge_toast_title.text = "NEW KNOWLEDGE"
+	_knowledge_toast_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_knowledge_toast_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_knowledge_toast_title.add_theme_font_size_override("font_size", 14)
+	if suit_theme:
+		_knowledge_toast_title.add_theme_color_override("font_color", suit_theme.COLOR_ACCENT_YELLOW)
+	vbox.add_child(_knowledge_toast_title)
+
+	_knowledge_toast_label = Label.new()
+	_knowledge_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_knowledge_toast_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_knowledge_toast_label.add_theme_font_size_override("font_size", 20)
+	_knowledge_toast_label.add_theme_color_override("font_color", Color(0.95, 0.98, 0.95))
+	vbox.add_child(_knowledge_toast_label)
+
+	_root.add_child(_knowledge_toast_panel)
+	_knowledge_toast_panel.visible = false
+	_knowledge_toast_panel.modulate.a = 0.0
+
+## Quiet pop-up for scanning a knowledge object — appears, holds briefly so the
+## player can read it, then shrinks and flies into the Knowledge (book) button
+## as if the entry is being physically filed away, instead of just fading out
+## in place. This is deliberately smaller/quieter than show_notification()'s
+## cinematic banner, which is reserved for bigger story/system beats.
+func show_knowledge_unlocked(title: String) -> void:
+	if not is_instance_valid(_knowledge_toast_panel) or not is_instance_valid(_knowledge_btn):
+		return
+
+	_knowledge_toast_label.text = title
+
+	if _knowledge_toast_tween and _knowledge_toast_tween.is_valid():
+		_knowledge_toast_tween.kill()
+
+	# Reset to resting state at its anchored position before each run.
+	_knowledge_toast_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_knowledge_toast_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_knowledge_toast_panel.grow_vertical = Control.GROW_DIRECTION_END
+	_knowledge_toast_panel.position.y = 190
+	_knowledge_toast_panel.scale = Vector2(0.85, 0.85)
+	_knowledge_toast_panel.modulate.a = 0.0
+	_knowledge_toast_panel.visible = true
+	await get_tree().process_frame # let the container settle so size/pivot are correct
+	_knowledge_toast_panel.pivot_offset = _knowledge_toast_panel.size / 2.0
+
+	if AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("message")
+
+	_knowledge_toast_tween = create_tween()
+
+	# Pop in.
+	_knowledge_toast_tween.set_parallel(true)
+	_knowledge_toast_tween.tween_property(_knowledge_toast_panel, "scale", Vector2(1.0, 1.0), 0.35).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	_knowledge_toast_tween.tween_property(_knowledge_toast_panel, "modulate:a", 1.0, 0.25)
+	_knowledge_toast_tween.set_parallel(false)
+
+	# Hold so the player can actually read it.
+	_knowledge_toast_tween.tween_interval(1.4)
+
+	# Fly and shrink into the Knowledge book button, like the entry is being
+	# filed away. Switching to a fixed top-left anchor (no grow) lets us
+	# animate global_position directly without the anchor system fighting it.
+	_knowledge_toast_tween.tween_callback(func():
+		var start_pos = _knowledge_toast_panel.global_position
+		_knowledge_toast_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		_knowledge_toast_panel.grow_horizontal = Control.GROW_DIRECTION_END
+		_knowledge_toast_panel.grow_vertical = Control.GROW_DIRECTION_END
+		_knowledge_toast_panel.global_position = start_pos
+	)
+
+	var target_pos: Vector2 = _knowledge_btn.get_global_rect().get_center()
+	_knowledge_toast_tween.set_parallel(true)
+	_knowledge_toast_tween.tween_property(_knowledge_toast_panel, "global_position", target_pos, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
+	_knowledge_toast_tween.tween_property(_knowledge_toast_panel, "scale", Vector2(0.05, 0.05), 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
+	_knowledge_toast_tween.tween_property(_knowledge_toast_panel, "modulate:a", 0.0, 0.25).set_delay(0.25)
+	_knowledge_toast_tween.set_parallel(false)
+
+	_knowledge_toast_tween.tween_callback(func():
+		_knowledge_toast_panel.visible = false
+		_bounce_knowledge_button()
+		if AudioManager.has_method("play_sfx"):
+			AudioManager.play_sfx("exp_collect")
+	)
+
+func _bounce_knowledge_button() -> void:
+	if not is_instance_valid(_knowledge_btn): return
+	_knowledge_btn.pivot_offset = _knowledge_btn.size / 2.0
+	var tw = create_tween()
+	tw.tween_property(_knowledge_btn, "scale", Vector2(1.25, 1.25), 0.12).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_knowledge_btn, "scale", Vector2(1.0, 1.0), 0.18).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
 

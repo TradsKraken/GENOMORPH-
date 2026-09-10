@@ -8,15 +8,15 @@ extends EditorScript
 #    active scene tab.
 # 2. Open this file in the Script workspace.
 # 3. File > Run (or Ctrl+Shift+X).
-# 4. In the Scene dock you'll now see three new nodes under the scene root:
-#      - DisturbanceMarker — reposition this to roughly the GENERAL direction/
-#        area you want the "Investigate the disturbance" arrow to point at.
-#        Keep it a fair distance from Clue_Burrows itself — the point is a
-#        vague direction, not a straight line to the clue.
-#      - Clue_Burrows — the actual interactable (burrows/tracks). Drag this to
-#        the specific spot where the rat fight should happen, somewhere in the
-#        general vicinity DisturbanceMarker points toward, but not right next
-#        to it.
+# 4. In the Scene dock you'll now see two new nodes under the scene root:
+#      - Clue_Burrows — the interactable (burrows/tracks). Drag this onto real,
+#        walkable ground somewhere deeper into the wetland than the Q01 clues
+#        — this is BOTH the object you interact with AND where the objective
+#        arrow points, so wherever you put it is exactly where the player ends
+#        up. It's placed at a fixed default position (6, 0.5, -8) that has no
+#        knowledge of your actual terrain shape there — you MUST move it onto
+#        solid ground you can actually reach, or the rat fight will never
+#        trigger.
 #      - Q02Director — leave this wherever it lands, it has no transform that
 #        matters.
 # 5. Save the scene (Ctrl+S).
@@ -31,16 +31,6 @@ func _run() -> void:
 	if root == null:
 		push_error("Open 'main terrain.scn' as the active scene tab first, then run this script.")
 		return
-
-	if not root.has_node("DisturbanceMarker"):
-		var marker := Node3D.new()
-		marker.name = "DisturbanceMarker"
-		root.add_child(marker)
-		marker.owner = root
-		marker.position = Vector3(10, 0.5, -14)
-		print("Added DisturbanceMarker.")
-	else:
-		print("DisturbanceMarker already exists — left as-is.")
 
 	if not root.has_node("Clue_Burrows"):
 		var clue := KnowledgeObjectScene.instantiate()
@@ -63,4 +53,4 @@ func _run() -> void:
 	else:
 		print("Q02Director already exists — left as-is.")
 
-	print("Q02 setup done. Reposition DisturbanceMarker and Clue_Burrows per the comments above, then save the scene.")
+	print("Q02 setup done. Drag Clue_Burrows onto real, reachable ground deeper in the wetland, then save the scene.")

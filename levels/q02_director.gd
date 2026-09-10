@@ -48,11 +48,15 @@ func _ready() -> void:
 		_begin()
 
 func _begin() -> void:
-	# "DisturbanceMarker" is a plain Node3D placed a distance away from the
-	# actual Clue_Burrows — this is the "marker points to a general area, not
-	# an exact path" step. If it's missing, fall back to text-only.
-	var marker = get_tree().current_scene.find_child("DisturbanceMarker", true, false)
-	PlayerData.set_objective(marker, "Investigate the disturbance", "Something else is out here. Find the source.")
+	# Points the objective arrow straight at the actual clue. An earlier
+	# version pointed at a separate "DisturbanceMarker" placed some distance
+	# away (for a "general area, not exact path" feel) — but with no level
+	# detail built yet to reward exploring around a vague area, that just read
+	# as the marker doing nothing. One node to place, no risk of the marker
+	# and the clue drifting apart. Revisit the vague-marker version once the
+	# wetlands have real environmental detail to explore through.
+	var clue = get_tree().current_scene.find_child("Clue_Burrows", true, false)
+	PlayerData.set_objective(clue, "Investigate the disturbance", "Something else is out here. Find the source.")
 
 	_state = SequenceState.WAITING_FOR_SCAN
 

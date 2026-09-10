@@ -52,14 +52,14 @@ func _perform_interaction() -> void:
 	
 	await card.closed
 	
-	# Only unlock and show notification if this is the first time scanning it
+	# Only unlock if this is the first time scanning it.
 	if not _is_scanned:
 		_is_scanned = true
 		PlayerData.unlock_knowledge(knowledge_id)
-		
-		if _hud and _hud.has_method("show_notification"):
+
+		if _hud and _hud.has_method("show_knowledge_unlocked"):
 			var title = db_entry.get("title", "Discovery")
-			_hud.show_notification("NEW KNOWLEDGE", title + " Unlocked", 2.5)
+			_hud.show_knowledge_unlocked(title)
 
 func _set_highlight(active: bool) -> void:
 	if _target_mesh and _outline_mat:
