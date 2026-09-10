@@ -448,10 +448,17 @@ func _build_knowledge_toast() -> void:
 	style.content_margin_bottom = 12
 	_knowledge_toast_panel.add_theme_stylebox_override("panel", style)
 
-	_knowledge_toast_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_knowledge_toast_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	# Fixed top-left anchor for its entire lifecycle (resting AND flying) — the
+	# resting position is computed manually in show_knowledge_unlocked() from
+	# the panel's actual settled size each time, rather than relying on
+	# anchor/grow-direction auto-recentering. That auto-recentering depends on
+	# the container's size already reflecting the new title text at the moment
+	# the anchor preset is (re)applied, which isn't guaranteed to have happened
+	# yet in the same frame the text changes — causing an intermittent
+	# off-center toast for titles of different lengths.
+	_knowledge_toast_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_knowledge_toast_panel.grow_horizontal = Control.GROW_DIRECTION_END
 	_knowledge_toast_panel.grow_vertical = Control.GROW_DIRECTION_END
-	_knowledge_toast_panel.position.y = 190
 
 	var vbox = VBoxContainer.new()
 	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -493,15 +500,19 @@ func show_knowledge_unlocked(title: String) -> void:
 	if _knowledge_toast_tween and _knowledge_toast_tween.is_valid():
 		_knowledge_toast_tween.kill()
 
-	# Reset to resting state at its anchored position before each run.
-	_knowledge_toast_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_knowledge_toast_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_knowledge_toast_panel.grow_vertical = Control.GROW_DIRECTION_END
-	_knowledge_toast_panel.position.y = 190
 	_knowledge_toast_panel.scale = Vector2(0.85, 0.85)
 	_knowledge_toast_panel.modulate.a = 0.0
 	_knowledge_toast_panel.visible = true
-	await get_tree().process_frame # let the container settle so size/pivot are correct
+
+	# Let the container fully re-measure itself for the NEW title text before
+	# computing a centered position from its size — two frames to be safe,
+	# since container re-layout is deferred and isn't guaranteed to finish
+	# within a single frame.
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var rest_x = (_root.size.x - _knowledge_toast_panel.size.x) / 2.0
+	_knowledge_toast_panel.position = Vector2(rest_x, 190)
 	_knowledge_toast_panel.pivot_offset = _knowledge_toast_panel.size / 2.0
 
 	if AudioManager.has_method("play_sfx"):
@@ -519,16 +530,8 @@ func show_knowledge_unlocked(title: String) -> void:
 	_knowledge_toast_tween.tween_interval(1.4)
 
 	# Fly and shrink into the Knowledge book button, like the entry is being
-	# filed away. Switching to a fixed top-left anchor (no grow) lets us
-	# animate global_position directly without the anchor system fighting it.
-	_knowledge_toast_tween.tween_callback(func():
-		var start_pos = _knowledge_toast_panel.global_position
-		_knowledge_toast_panel.set_anchors_preset(Control.PRESET_TOP_LEFT)
-		_knowledge_toast_panel.grow_horizontal = Control.GROW_DIRECTION_END
-		_knowledge_toast_panel.grow_vertical = Control.GROW_DIRECTION_END
-		_knowledge_toast_panel.global_position = start_pos
-	)
-
+	# filed away. The panel is top-left anchored for its whole lifecycle now,
+	# so global_position can be tweened directly with no anchor swap needed.
 	var target_pos: Vector2 = _knowledge_btn.get_global_rect().get_center()
 	_knowledge_toast_tween.set_parallel(true)
 	_knowledge_toast_tween.tween_property(_knowledge_toast_panel, "global_position", target_pos, 0.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)

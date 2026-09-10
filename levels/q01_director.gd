@@ -81,12 +81,14 @@ func _on_knowledge_scanned(clue_node: Node, kid: String) -> void:
 
 	_state = SequenceState.FIGHTING_MOSQUITO
 
-	# Small delay so Sterling's flavor text plays before the mosquito shows up.
-	# No separate "WARNING" system alert here on purpose — that treatment reads
-	# as an emergency-level alarm, which is overselling a single mosquito.
-	# Sterling's line above already carries the "something's wrong" beat; the
-	# mosquito's buzzing sound and it flying into view do the rest.
-	await get_tree().create_timer(2.0).timeout
+	# Wait for the player to actually tap through Sterling's line before the
+	# mosquito shows up, instead of a fixed timer — they read at their own
+	# pace. No separate "WARNING" system alert here on purpose — that
+	# treatment reads as an emergency-level alarm, which is overselling a
+	# single mosquito. Sterling's line above already carries the "something's
+	# wrong" beat; the mosquito's buzzing sound and it flying into view do
+	# the rest.
+	await _wait_for_dialogue()
 
 	var spawn_pos = _find_safe_spawn_point(clue_node as Node3D, spawn_distance)
 
@@ -140,10 +142,11 @@ func _on_mosquito_defeated() -> void:
 	if _hud and _hud.has_method("show_subtitle"):
 		_hud.show_subtitle("STERLING (RADIO)", "That wasn't the only one. More incoming — stay sharp.", 4.0)
 
-	# A real breather before the escalation — long enough to see the first
-	# mosquito's XP orbs land and actually read Sterling's line, not just a
-	# beat before the next fight starts.
-	await get_tree().create_timer(7.0).timeout
+	# Wait for the player to tap through this line — plenty of time to see the
+	# first mosquito's XP orbs land and actually read Sterling's line, instead
+	# of a fixed beat before the next fight starts regardless of whether
+	# they've finished reading.
+	await _wait_for_dialogue()
 
 	var player = get_tree().get_first_node_in_group("player")
 	if not (player and player is Node3D):
@@ -183,3 +186,12 @@ func _finish_sequence() -> void:
 	PlayerData.set_objective(null, "Explore deeper into the wetlands")
 
 	completed.emit()
+
+## Waits for the player to tap through the currently-shown subtitle before
+## continuing — falls back to a fixed delay if there's no HUD to report a
+## dismissal (e.g. a test scene), so this never hangs forever.
+func _wait_for_dialogue() -> void:
+	if _hud and _hud.has_signal("subtitle_dismissed"):
+		await _hud.subtitle_dismissed
+	else:
+		await get_tree().create_timer(2.0).timeout

@@ -67,9 +67,10 @@ func _on_burrows_scanned(clue_node: Node) -> void:
 	if _hud and _hud.has_method("show_subtitle"):
 		_hud.show_subtitle("STERLING (RADIO)", "Those burrows are fresh — and something's had the local wildlife running scared.", 4.0)
 
-	# Breathing room before the fight starts, same reasoning as Q01: give the
-	# player time to read the line instead of the pack landing on top of it.
-	await get_tree().create_timer(4.0).timeout
+	# Wait for the player to tap through this line before the pack shows up —
+	# same reasoning as Q01: let them read at their own pace instead of a
+	# fixed timer that might land the pack before they've finished reading.
+	await _wait_for_dialogue()
 
 	_living_rats.clear()
 	for i in range(rat_pack_size):
@@ -126,3 +127,12 @@ func _on_rat_died() -> void:
 	PlayerData.set_objective(null, "Explore deeper into the wetlands")
 
 	completed.emit()
+
+## Waits for the player to tap through the currently-shown subtitle before
+## continuing — falls back to a fixed delay if there's no HUD to report a
+## dismissal (e.g. a test scene), so this never hangs forever.
+func _wait_for_dialogue() -> void:
+	if _hud and _hud.has_signal("subtitle_dismissed"):
+		await _hud.subtitle_dismissed
+	else:
+		await get_tree().create_timer(2.0).timeout
