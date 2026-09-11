@@ -305,7 +305,16 @@ func _process_ai_state_machine(delta: float) -> void:
 						# Flying enemies aim slightly above the player's center
 						dir.y += 0.3 
 						
-					dir = dir.normalized()
+					# Add separation to avoid clumping
+					var separation = Vector3.ZERO
+					for other in get_tree().get_nodes_in_group("enemies"):
+						if other != self and is_instance_valid(other):
+							var dist = global_position.distance_to(other.global_position)
+							if dist < 1.5:
+								separation += (global_position - other.global_position).normalized() * (1.5 - dist)
+					
+					dir = (dir.normalized() + separation * 0.8).normalized()
+					
 					velocity.x = dir.x * speed
 					if not uses_gravity:
 						velocity.y = dir.y * speed

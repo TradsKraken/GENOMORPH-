@@ -104,6 +104,7 @@ func _on_burrows_scanned(clue_node: Node) -> void:
 		var spawn_pos = _find_safe_spawn_point(clue_node as Node3D, spawn_distance)
 		var rat = RatScene.instantiate()
 		rat.position = spawn_pos
+		rat.is_dynamic = true
 		get_tree().current_scene.add_child(rat)
 		rat.global_position = spawn_pos
 		rat.tree_exited.connect(_on_rat_died)

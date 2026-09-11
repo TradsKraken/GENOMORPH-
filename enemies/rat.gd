@@ -3,6 +3,12 @@ extends EnemyBase
 
 @export var bite_damage: float = 6.0
 
+var _anim_player: AnimationPlayer
+var _idle_anim: String = ""
+var _walk_anim: String = ""
+var _attack_anim: String = ""
+var is_spawning: bool = false
+
 func _ready() -> void:
 	max_health = 25.0
 	super._ready()
@@ -13,32 +19,83 @@ func _ready() -> void:
 	recovery_time = 0.8
 	patrol_radius = 4.0
 
-	var anim_player = _find_animation_player(self)
-	if anim_player:
-		var anims = anim_player.get_animation_list()
-		if anims.size() > 0:
-			anim_player.play(anims[0])
+	_anim_player = _find_animation_player(self)
+	if _anim_player:
+		var anims = _anim_player.get_animation_list()
+		for a in anims:
+			var a_lower = a.to_lower()
+			if "idle" in a_lower:
+				_idle_anim = a
+			elif "walk" in a_lower or "run" in a_lower:
+				_walk_anim = a
+			elif "attack" in a_lower or "bite" in a_lower:
+				_attack_anim = a
+
+		# Set loops if found
+		if _idle_anim != "":
+			_anim_player.get_animation(_idle_anim).loop_mode = Animation.LOOP_LINEAR
+		if _walk_anim != "":
+			_anim_player.get_animation(_walk_anim).loop_mode = Animation.LOOP_LINEAR
+		if _attack_anim != "":
+			_anim_player.get_animation(_attack_anim).loop_mode = Animation.LOOP_NONE
+
+		if _idle_anim != "":
+			_anim_player.play(_idle_anim)
+		elif anims.size() > 0:
+			_anim_player.play(anims[0])
 
 	if is_dynamic:
 		_play_spawn_animation()
 
+func _physics_process(delta: float) -> void:
+	if is_spawning:
+		return
+	super._physics_process(delta)
+
+func _process(_delta: float) -> void:
+	# Simple animation state machine
+	if is_dead:
+		return
+	if velocity.length_squared() > 0.1 and _walk_anim != "":
+		if _anim_player and _anim_player.current_animation != _walk_anim and _anim_player.current_animation != _attack_anim:
+			_anim_player.play(_walk_anim)
+	elif _idle_anim != "":
+		if _anim_player and _anim_player.current_animation != _idle_anim and _anim_player.current_animation != _attack_anim:
+			_anim_player.play(_idle_anim)
+
 func _play_spawn_animation() -> void:
-	# Temporarily disable gravity and collisions while burrowing up
+	# Freeze AI state machine and physics until fully spawned
+	is_spawning = true
+	current_state = AIState.IDLE
+	
 	uses_gravity = false
 	set_collision_layer_value(1, false)
 	set_collision_mask_value(1, false)
 
-	var target_y = position.y
-	position.y -= 2.0 # Start underground
+	var nutria = get_node_or_null("Nutria")
+	if nutria:
+		nutria.visible = false
+	
+	# Small random delay so they don't all pop up at the exact same time
+	await get_tree().create_timer(randf_range(0.2, 0.5)).timeout
 
-	var tw = create_tween()
-	tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(self, "position:y", target_y, 0.8)
-	tw.tween_callback(func():
-		uses_gravity = true
-		set_collision_layer_value(1, true)
-		set_collision_mask_value(1, true)
-	)
+	# Trigger Mud Particles (burrowing animation)
+	var mud = get_node_or_null("MudParticles")
+	if mud:
+		mud.one_shot = true
+		mud.emitting = true
+
+	# Wait for the particles to fly up before popping the rat in
+	await get_tree().create_timer(0.6).timeout
+	
+	# Rat instantly appears after the mud animation
+	if nutria:
+		nutria.visible = true
+	
+	uses_gravity = true
+	set_collision_layer_value(1, true)
+	set_collision_mask_value(1, true)
+	is_spawning = false
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
@@ -50,6 +107,9 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 	return null
 
 func _perform_attack() -> void:
+	if _anim_player and _attack_anim != "":
+		_anim_player.play(_attack_anim)
+
 	if not target or not is_instance_valid(target):
 		_finish_attack()
 		return

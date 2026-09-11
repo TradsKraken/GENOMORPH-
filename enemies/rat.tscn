@@ -1,23 +1,28 @@
 [gd_scene format=3 uid="uid://rat0000001"]
 
 [ext_resource type="Script" path="res://enemies/rat.gd" id="1_rat_script"]
+[ext_resource type="PackedScene" uid="uid://cruadvqw46nb4" path="res://Models/nutria/Nutria.glb" id="2_nutria"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.18
-height = 0.5
+radius = 0.2
+height = 0.6
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-radius = 0.18
-height = 0.5
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mud"]
+albedo_color = Color(0.28, 0.2, 0.13, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
-albedo_color = Color(0.32, 0.24, 0.18, 1)
+[sub_resource type="BoxMesh" id="BoxMesh_mud"]
+material = SubResource("StandardMaterial3D_mud")
+size = Vector3(0.1, 0.1, 0.1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_snout"]
-size = Vector3(0.16, 0.12, 0.16)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_snout"]
-albedo_color = Color(0.45, 0.32, 0.24, 1)
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_mud"]
+emission_shape = 1
+emission_sphere_radius = 0.6
+direction = Vector3(0, 1, 0)
+spread = 60.0
+initial_velocity_min = 3.0
+initial_velocity_max = 7.0
+scale_min = 0.8
+scale_max = 2.5
 
 [node name="Rat" type="CharacterBody3D" groups=["enemies"]]
 script = ExtResource("1_rat_script")
@@ -26,15 +31,17 @@ speed = 3.5
 exp_value = 6.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.25, 0)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.3, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.25, 0)
-mesh = SubResource("CapsuleMesh_body")
-surface_material_override/0 = SubResource("StandardMaterial3D_body")
+[node name="Nutria" parent="." instance=ExtResource("2_nutria")]
+transform = Transform3D(0.4, 0, 0, 0, 0.4, 0, 0, 0, 0.4, 0, 0, 0)
 
-[node name="SnoutMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -0.22)
-mesh = SubResource("BoxMesh_snout")
-surface_material_override/0 = SubResource("StandardMaterial3D_snout")
+[node name="MudParticles" type="GPUParticles3D" parent="."]
+emitting = false
+amount = 60
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.8
+process_material = SubResource("ParticleProcessMaterial_mud")
+draw_pass_1 = SubResource("BoxMesh_mud")
