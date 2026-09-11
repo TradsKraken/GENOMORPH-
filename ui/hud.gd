@@ -2251,8 +2251,8 @@ func _draw() -> void:
 
 func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> void:
 	var color_hex = "40c0ff" # Default Sterling blue
-	if speaker == "Lolo Palaka":
-		color_hex = "40ff80" # Greenish for Palaka
+	if speaker == "Lolo Palaka" or "frog" in speaker.to_lower() or speaker == "PLAYER":
+		color_hex = "40ff80" # Greenish for the frog conversation (Player included, so the whole exchange shares one sound cue)
 		if AudioManager.has_method("play_sfx"):
 			AudioManager.play_sfx("palaka_convo")
 	elif "sterling" in speaker.to_lower():

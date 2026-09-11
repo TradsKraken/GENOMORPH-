@@ -25,6 +25,8 @@ var _state: SequenceState = SequenceState.INIT
 var _living_rats: Array[Node] = []
 var _scout_rat: Node3D = null
 var _scout_fled: bool = false
+var _clue: Node3D = null
+var _clue_sighted: bool = false
 
 func _ready() -> void:
 	add_to_group("q02_director")
@@ -55,6 +57,14 @@ func _ready() -> void:
 			_begin()
 
 func _process(delta: float) -> void:
+	if _state == SequenceState.WAITING_FOR_SCAN and not _clue_sighted and is_instance_valid(_clue):
+		var player = get_tree().get_first_node_in_group("player")
+		if player and player is Node3D:
+			if player.global_position.distance_to(_clue.global_position) < 10.0:
+				_clue_sighted = true
+				if _hud and _hud.has_method("show_subtitle"):
+					_hud.show_subtitle("STERLING (RADIO)", "Hold on — burrow holes, fresh tracks. Something's nesting right there. Take a closer look.", 4.5)
+
 	if _state == SequenceState.WAITING_FOR_SCAN and is_instance_valid(_scout_rat) and not _scout_fled:
 		var player = get_tree().get_first_node_in_group("player")
 		if player and player is Node3D:
@@ -67,6 +77,10 @@ func _process(delta: float) -> void:
 				tw.tween_callback(_scout_rat.queue_free)
 
 func _begin() -> void:
+	if _hud and _hud.has_method("show_subtitle"):
+		_hud.show_subtitle("STERLING (RADIO)", "I'm picking up some strange readings up ahead. See if you can find the source.", 4.0)
+		await _wait_for_dialogue()
+
 	# Points the objective arrow straight at the actual clue. An earlier
 	# version pointed at a separate "DisturbanceMarker" placed some distance
 	# away (for a "general area, not exact path" feel) — but with no level
@@ -78,6 +92,9 @@ func _begin() -> void:
 	PlayerData.set_objective(clue, "Investigate the disturbance", "Something else is out here. Find the source.")
 
 	if clue:
+		_clue = clue as Node3D
+		_spawn_burrow_visual(clue as Node3D)
+
 		_scout_rat = RatScene.instantiate()
 		_scout_rat.position = clue.global_position + Vector3(0, 0, 1.5)
 		get_tree().current_scene.add_child(_scout_rat)
@@ -86,6 +103,59 @@ func _begin() -> void:
 		_scout_rat.set_physics_process(false)
 
 	_state = SequenceState.WAITING_FOR_SCAN
+
+## Clue_Burrows has no matching art in the terrain (unlike Q01's clues, which
+## get re-parented onto the level's existing dirty-water/dead-plant/trash
+## meshes) — so without this, the clue was a completely invisible trigger.
+## Builds a small dug-up mud mound with dark burrow holes, procedurally, since
+## there's no imported "rat burrow" mesh asset to place instead.
+func _spawn_burrow_visual(clue: Node3D) -> void:
+	var mud_mat = StandardMaterial3D.new()
+	mud_mat.albedo_color = Color(0.26, 0.18, 0.11)
+	mud_mat.roughness = 1.0
+
+	var mound = MeshInstance3D.new()
+	var mound_mesh = CylinderMesh.new()
+	mound_mesh.top_radius = 0.5
+	mound_mesh.bottom_radius = 0.9
+	mound_mesh.height = 0.35
+	mound_mesh.radial_segments = 12
+	mound.mesh = mound_mesh
+	mound.material_override = mud_mat
+	clue.add_child(mound)
+	mound.owner = null
+	mound.position = Vector3(0, 0.17, 0)
+
+	var hole_mat = StandardMaterial3D.new()
+	hole_mat.albedo_color = Color(0.02, 0.015, 0.015)
+	hole_mat.roughness = 1.0
+
+	var hole_offsets = [Vector2(0.18, 0.08), Vector2(-0.2, -0.12), Vector2(0.02, -0.24)]
+	for offset in hole_offsets:
+		var hole = MeshInstance3D.new()
+		var hole_mesh = CylinderMesh.new()
+		hole_mesh.top_radius = 0.13
+		hole_mesh.bottom_radius = 0.13
+		hole_mesh.height = 0.08
+		hole_mesh.radial_segments = 8
+		hole.mesh = hole_mesh
+		hole.material_override = hole_mat
+		mound.add_child(hole)
+		hole.position = Vector3(offset.x, 0.18, offset.y)
+
+	# Loose dirt clumps scattered around the base for a freshly-dug look.
+	for i in range(6):
+		var clump = MeshInstance3D.new()
+		var clump_mesh = SphereMesh.new()
+		var clump_radius = randf_range(0.08, 0.17)
+		clump_mesh.radius = clump_radius
+		clump_mesh.height = clump_radius * 1.6
+		clump.mesh = clump_mesh
+		clump.material_override = mud_mat
+		clue.add_child(clump)
+		var angle = randf() * TAU
+		var r = randf_range(0.7, 1.15)
+		clump.position = Vector3(cos(angle) * r, 0.05, sin(angle) * r)
 
 func _on_burrows_scanned(clue_node: Node) -> void:
 	if _state != SequenceState.WAITING_FOR_SCAN: return

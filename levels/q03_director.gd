@@ -155,11 +155,12 @@ func _on_rat_died() -> void:
 
 	if _wave == 1:
 		_wave = 2
-		_spawn_rats()
 		if not is_instance_valid(_hud):
 			_hud = get_tree().get_first_node_in_group("hud")
 		if _hud and _hud.has_method("show_subtitle"):
 			_hud.show_subtitle("STERLING (RADIO)", "More coming out of the mud! Hold them back!", 3.0)
+			await _wait_for_dialogue()
+		_spawn_rats()
 		return
 
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
@@ -168,13 +169,39 @@ func _on_rat_died() -> void:
 
 	_state = SequenceState.AWAITING_RESTORE
 
-	if not is_instance_valid(_hud):
-		_hud = get_tree().get_first_node_in_group("hud")
-	if _hud and _hud.has_method("show_subtitle"):
-		_hud.show_subtitle("STERLING (RADIO)", "Clear. Now let's give this patch a real chance — the Purification Module should reach this far.", 5.0)
+	await _play_frog_conversation()
 
 	var restore_point = get_tree().current_scene.find_child("HabitatRestorePoint", true, false)
 	PlayerData.set_objective(restore_point, "Restore the damaged habitat", "Interact with the critical damaged area.")
+
+## The player's first real conversation with a native species — plays once the
+## rat pack is cleared, before the restore objective is handed out. Ties into
+## the game's genome/transformation premise: whatever the player's been
+## absorbing has started letting them understand animal speech, which is why
+## the player reacts with shock instead of this being treated as normal.
+func _play_frog_conversation() -> void:
+	if not is_instance_valid(_hud):
+		_hud = get_tree().get_first_node_in_group("hud")
+	if not (_hud and _hud.has_method("show_subtitle")):
+		return
+
+	_hud.show_subtitle("PLAYER", "...wait. Did you just — did that frog just *say* something?", 4.0)
+	await _wait_for_dialogue()
+
+	_hud.show_subtitle("NATIVE FROG", "You can hear me? That's... new. Usually your kind can't.", 4.0)
+	await _wait_for_dialogue()
+
+	_hud.show_subtitle("PLAYER", "I don't— I don't know how. But I understood every word of that.", 4.0)
+	await _wait_for_dialogue()
+
+	_hud.show_subtitle("NATIVE FROG", "Whatever's changing in you, it's opened something. No time to puzzle over it now, though.", 5.0)
+	await _wait_for_dialogue()
+
+	_hud.show_subtitle("NATIVE FROG", "There's a patch of ground past here, poisoned and dying. Clean it, and it'll breathe again. I'll meet you there once it's safe.", 6.0)
+	await _wait_for_dialogue()
+
+	_hud.show_subtitle("STERLING (RADIO)", "...Did you just have a conversation with a frog? Log that. Focus — the restoration comes first.", 5.0)
+	await _wait_for_dialogue()
 
 func _on_habitat_restored() -> void:
 	if _state != SequenceState.AWAITING_RESTORE:
@@ -188,6 +215,11 @@ func _on_habitat_restored() -> void:
 
 	if not is_instance_valid(_hud):
 		_hud = get_tree().get_first_node_in_group("hud")
+	if _hud and _hud.has_method("show_subtitle"):
+		_hud.show_subtitle("NATIVE FROG", "The ground feels right again. Thank you — I won't forget this.", 5.0)
+
+	await _wait_for_dialogue()
+
 	if _hud and _hud.has_method("show_subtitle"):
 		_hud.show_subtitle("STERLING (RADIO)", "...I'm reading something. A biological signal, close by. That's not one of ours — not yet.", 6.0)
 

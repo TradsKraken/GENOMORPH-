@@ -56,6 +56,11 @@ func _ready() -> void:
 				anim.loop_mode = Animation.LOOP_LINEAR
 			_anim_player.play(_idle_anim)
 
+	# Snap to the real ground on spawn — whatever height this node was placed
+	# at in the editor doesn't always match the actual terrain surface below
+	# it, which is why it could end up hovering.
+	global_position.y = _get_ground_height(global_position, global_position.y)
+
 	var zone := Area3D.new()
 	zone.name = "AmbushTrigger"
 	zone.collision_layer = 0
@@ -91,6 +96,40 @@ func _on_body_entered(body: Node3D) -> void:
 	print("[FROG DEBUG] player confirmed — emitting player_approached")
 	player_approached.emit()
 
+## Same raycast-down technique the quest directors use for safe enemy spawns —
+## finds the actual terrain height under a point instead of assuming flat
+## ground, so hops land on the real surface instead of floating or sinking.
+func _get_ground_height(pos: Vector3, fallback: float) -> float:
+	var space := get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(
+		pos + Vector3(0, 10.0, 0),
+		pos - Vector3(0, 20.0, 0)
+	)
+	var hit := space.intersect_ray(query)
+	if hit.has("position"):
+		return (hit["position"] as Vector3).y
+	return fallback
+
+## Plays the jump animation stretched or compressed to exactly match how long
+## the physical hop tween takes — same trick player.gd uses for its real jump
+## (speed_scale = anim.length / actual_air_time) — so the leap and the visual
+## landing frame always line up instead of drifting out of sync.
+func _play_synced_hop_anim(hop_duration: float) -> void:
+	if not (_anim_player and _jump_anim != ""):
+		return
+	var anim = _anim_player.get_animation(_jump_anim)
+	_anim_player.play(_jump_anim)
+	if anim and anim.length > 0.0 and hop_duration > 0.0:
+		_anim_player.speed_scale = anim.length / hop_duration
+	else:
+		_anim_player.speed_scale = 1.0
+
+func _play_idle_anim() -> void:
+	if _anim_player:
+		_anim_player.speed_scale = 1.0
+		if _idle_anim != "":
+			_anim_player.play(_idle_anim)
+
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
 		return node
@@ -116,22 +155,24 @@ func _do_panic_jump() -> void:
 		return
 	var offset = Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0)).normalized() * randf_range(0.3, 1.5)
 	var target = global_position + offset
+	var target_ground_y = _get_ground_height(target, global_position.y)
+	target.y = target_ground_y
 	var mid = global_position.lerp(target, 0.5)
-	mid.y += randf_range(0.5, 1.2)
+	mid.y = max(global_position.y, target.y) + randf_range(0.5, 1.2)
 
 	if offset.length_squared() > 0.01:
 		rotation.y = atan2(offset.x, offset.z)
-	if _anim_player and _jump_anim != "":
-		_anim_player.play(_jump_anim)
+
+	var hop_duration := 0.4
+	_play_synced_hop_anim(hop_duration)
 
 	_panic_tween = create_tween()
 	_panic_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_panic_tween.tween_property(self, "global_position", mid, 0.2)
+	_panic_tween.tween_property(self, "global_position", mid, hop_duration * 0.5)
 	_panic_tween.set_ease(Tween.EASE_IN)
-	_panic_tween.tween_property(self, "global_position", Vector3(target.x, global_position.y, target.z), 0.2)
+	_panic_tween.tween_property(self, "global_position", target, hop_duration * 0.5)
 	_panic_tween.tween_callback(func():
-		if _anim_player and _idle_anim != "":
-			_anim_player.play(_idle_anim)
+		_play_idle_anim()
 		if _is_panicking:
 			await get_tree().create_timer(randf_range(0.1, 0.5)).timeout
 			_do_panic_jump()
@@ -147,8 +188,7 @@ func move_to_safety(target_pos: Vector3) -> void:
 func _do_safe_hop(target_pos: Vector3) -> void:
 	var dist = global_position.distance_to(target_pos)
 	if dist < 0.5:
-		if _anim_player and _idle_anim != "":
-			_anim_player.play(_idle_anim)
+		_play_idle_anim()
 		return
 
 	var max_hop_dist = 2.0
@@ -160,21 +200,23 @@ func _do_safe_hop(target_pos: Vector3) -> void:
 
 	var hop_dist = min(dist, max_hop_dist)
 	var end_pos = global_position + dir * hop_dist
-	end_pos.y = target_pos.y if dist <= max_hop_dist else global_position.y
+	# Always raycast for the real ground height at the landing spot instead of
+	# assuming flat terrain between here and the target — this is what made
+	# the frog look like it was floating/sinking mid-hop on uneven ground.
+	end_pos.y = _get_ground_height(end_pos, target_pos.y if dist <= max_hop_dist else global_position.y)
 	var mid_pos = global_position.lerp(end_pos, 0.5)
-	mid_pos.y += 1.0
+	mid_pos.y = max(global_position.y, end_pos.y) + 1.0
 
-	if _anim_player and _jump_anim != "":
-		_anim_player.play(_jump_anim)
+	var hop_duration := 0.5
+	_play_synced_hop_anim(hop_duration)
 
 	var tw = create_tween()
 	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tw.tween_property(self, "global_position", mid_pos, 0.25)
+	tw.tween_property(self, "global_position", mid_pos, hop_duration * 0.5)
 	tw.set_ease(Tween.EASE_IN)
-	tw.tween_property(self, "global_position", end_pos, 0.25)
+	tw.tween_property(self, "global_position", end_pos, hop_duration * 0.5)
 	tw.tween_callback(func():
-		if _anim_player and _idle_anim != "":
-			_anim_player.play(_idle_anim)
+		_play_idle_anim()
 		await get_tree().create_timer(0.2).timeout
 		_do_safe_hop(target_pos)
 	)
