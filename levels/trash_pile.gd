@@ -11,6 +11,7 @@ func _ready() -> void:
 	health = max_health
 	# Must be in the "enemies" group for the player's basic attack to find and hit it
 	add_to_group("enemies")
+	add_to_group("trash")
 	
 	if get_tree().current_scene:
 		var scene_path = get_tree().current_scene.scene_file_path

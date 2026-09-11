@@ -468,6 +468,31 @@ func _trigger_splashdown_aoe() -> void:
 			if dist <= splash_radius + 2.0: # slightly larger cleanse radius
 				sludge.cleanse()
 
+## Finds the closest valid target in a group. Cleanup targets are queried
+## separately so a nearby rat cannot steal an attack intended for trash.
+func _find_closest_target_in_group(group_name: String, attack_range: float) -> Node3D:
+	var closest_target: Node3D = null
+	var closest_distance := attack_range
+
+	for candidate in get_tree().get_nodes_in_group(group_name):
+		if not (candidate is Node3D):
+			continue
+		if not candidate.has_method("take_damage") or candidate.get("is_dead"):
+			continue
+
+		var distance := global_position.distance_to((candidate as Node3D).global_position)
+		if distance < closest_distance:
+			closest_target = candidate as Node3D
+			closest_distance = distance
+
+	return closest_target
+
+func _find_attack_target(attack_range: float) -> Node3D:
+	var trash_target := _find_closest_target_in_group("trash", attack_range)
+	if trash_target:
+		return trash_target
+	return _find_closest_target_in_group("enemies", attack_range)
+
 func _attack() -> void:
 	print("[ATTACK DEBUG] _attack() entered. current_animation=", (animation_player.current_animation if animation_player else "null"),
 		" is_playing=", (animation_player.is_playing() if animation_player else "null"),
@@ -496,17 +521,12 @@ func _attack() -> void:
 	var attack_range = 4.0
 	_show_attack_range(attack_range, Color(1.0, 0.2, 0.2))
 	
-	# MVP Attack Logic: Damage closest enemy in front
+	# Cleanup objects take priority over enemies while the player is nearby.
 	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power, 1.0)
-	var closest_enemy = null
-	var closest_dist = attack_range
-	
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if enemy.has_method("take_damage") and not enemy.get("is_dead"):
-			var dist = global_position.distance_to(enemy.global_position)
-			if dist < closest_dist:
-				closest_enemy = enemy
-				closest_dist = dist
+	var closest_enemy := _find_attack_target(attack_range)
+	var closest_dist: float = attack_range
+	if closest_enemy:
+		closest_dist = global_position.distance_to(closest_enemy.global_position)
 					
 	
 	if closest_enemy:
@@ -550,17 +570,9 @@ func _skill1() -> void:
 	var attack_range = 5.0
 	_show_attack_range(attack_range, Color(0.2, 0.6, 1.0))
 	
-	# Sticky Tongue Whip: Damage closest enemy at short range
+	# Sticky Tongue Whip also prioritizes nearby cleanup targets.
 	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power, 1.5)
-	var closest_enemy = null
-	var closest_dist = attack_range
-	
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if enemy.has_method("take_damage") and not enemy.get("is_dead"):
-			var dist = global_position.distance_to(enemy.global_position)
-			if dist < closest_dist:
-				closest_enemy = enemy
-				closest_dist = dist
+	var closest_enemy := _find_attack_target(attack_range)
 					
 	if closest_enemy:
 		# Auto-aim: Snap rotation to face the target
