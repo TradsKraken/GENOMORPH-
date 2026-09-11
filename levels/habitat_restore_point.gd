@@ -16,17 +16,34 @@ signal restored
 ## habitat is restored. Leave empty if there's nothing to hide.
 @export var damaged_visual_path: NodePath
 
+@export var trash_piles: Array[NodePath] = []
+
 var _is_restored: bool = false
+var _trash_count: int = 0
 
 func _ready() -> void:
 	super._ready()
-	interact_prompt = "Restore"
+	# Disable normal interaction prompt since it's event-driven now
+	set_active(false)
+	interact_prompt = ""
+	
+	# Connect to all assigned trash piles
+	for path in trash_piles:
+		if path.is_empty(): continue
+		var pile = get_node_or_null(path)
+		if pile and pile.has_signal("destroyed"):
+			pile.destroyed.connect(_on_trash_destroyed)
+			_trash_count += 1
+
+func _on_trash_destroyed() -> void:
+	_trash_count -= 1
+	if _trash_count <= 0 and not _is_restored:
+		_perform_interaction()
 
 func _perform_interaction() -> void:
 	if _is_restored:
 		return
 	_is_restored = true
-	set_active(false)
 
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("exp_collect")
@@ -34,8 +51,24 @@ func _perform_interaction() -> void:
 	_fade_out_damaged_visual()
 	_spawn_purify_effect()
 	_spawn_persistent_glow()
+	_drop_genome()
 
 	restored.emit()
+
+func _drop_genome() -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_notification"):
+		hud.show_notification("HABITAT RESTORED", "Salamander Genome Data Extracted.")
+	
+	# Automatically add genome
+	PlayerData.add_genome_fragment()
+	
+	# Spawn visual pickup object if it exists
+	var orb_scene = load("res://levels/genome_fragment.tscn")
+	if orb_scene:
+		var orb = orb_scene.instantiate()
+		get_parent().add_child(orb)
+		orb.global_position = global_position + Vector3(0, 1.5, 0)
 
 func _fade_out_damaged_visual() -> void:
 	if damaged_visual_path.is_empty():

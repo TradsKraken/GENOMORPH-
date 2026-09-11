@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="GENOMORPH"
-config/version="0.1.222"
+config/version="0.1.223"
 run/main_scene="res://ui/startup.tscn"
 config/features=PackedStringArray("4.7", "Mobile")
 config/icon="res://assets/Geno_Icon.png"
