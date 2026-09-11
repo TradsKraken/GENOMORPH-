@@ -20,6 +20,10 @@ var _anim_player: AnimationPlayer = null
 var _is_safe: bool = false
 var _has_triggered: bool = false
 var _debug_timer: float = 0.0
+var _is_panicking: bool = false
+var _panic_tween: Tween = null
+var _idle_anim: String = ""
+var _jump_anim: String = ""
 
 func _ready() -> void:
 	add_to_group("native_frog")
@@ -36,19 +40,21 @@ func _ready() -> void:
 		# player's shared "FrogArmature|Frog_Attack" animation (forcing it
 		# into an infinite loop) whenever that name happened to sort first.
 		# Look specifically for an idle-named animation instead.
-		var idle_name := ""
 		for a in anims:
-			if "idle" in a.to_lower():
-				idle_name = a
-				break
-		if idle_name == "" and anims.size() > 0:
-			idle_name = anims[0]
+			var lower_a = a.to_lower()
+			if "idle" in lower_a:
+				_idle_anim = a
+			elif "jump" in lower_a:
+				_jump_anim = a
+		
+		if _idle_anim == "" and anims.size() > 0:
+			_idle_anim = anims[0]
 
-		if idle_name != "":
-			var anim = _anim_player.get_animation(idle_name)
+		if _idle_anim != "":
+			var anim = _anim_player.get_animation(_idle_anim)
 			if anim:
 				anim.loop_mode = Animation.LOOP_LINEAR
-			_anim_player.play(idle_name)
+			_anim_player.play(_idle_anim)
 
 	var zone := Area3D.new()
 	zone.name = "AmbushTrigger"
@@ -94,17 +100,81 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 			return ap
 	return null
 
-## Hops to safety in two small bounces rather than a straight glide, then
-## settles for good. Safe to call more than once — only the first call moves it.
+func set_panicking(p: bool) -> void:
+	if _is_safe:
+		p = false
+	_is_panicking = p
+	if p and _panic_tween == null:
+		_do_panic_jump()
+	elif not p and _panic_tween != null:
+		_panic_tween.kill()
+		_panic_tween = null
+
+func _do_panic_jump() -> void:
+	if not _is_panicking or _is_safe:
+		_panic_tween = null
+		return
+	var offset = Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0)).normalized() * randf_range(0.3, 1.5)
+	var target = global_position + offset
+	var mid = global_position.lerp(target, 0.5)
+	mid.y += randf_range(0.5, 1.2)
+
+	if offset.length_squared() > 0.01:
+		rotation.y = atan2(offset.x, offset.z)
+	if _anim_player and _jump_anim != "":
+		_anim_player.play(_jump_anim)
+
+	_panic_tween = create_tween()
+	_panic_tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_panic_tween.tween_property(self, "global_position", mid, 0.2)
+	_panic_tween.set_ease(Tween.EASE_IN)
+	_panic_tween.tween_property(self, "global_position", Vector3(target.x, global_position.y, target.z), 0.2)
+	_panic_tween.tween_callback(func():
+		if _anim_player and _idle_anim != "":
+			_anim_player.play(_idle_anim)
+		if _is_panicking:
+			await get_tree().create_timer(randf_range(0.1, 0.5)).timeout
+			_do_panic_jump()
+	)
+
 func move_to_safety(target_pos: Vector3) -> void:
+	set_panicking(false)
 	if _is_safe:
 		return
 	_is_safe = true
+	_do_safe_hop(target_pos)
 
-	var mid_pos = global_position.lerp(target_pos, 0.5)
+func _do_safe_hop(target_pos: Vector3) -> void:
+	var dist = global_position.distance_to(target_pos)
+	if dist < 0.5:
+		if _anim_player and _idle_anim != "":
+			_anim_player.play(_idle_anim)
+		return
+
+	var max_hop_dist = 2.0
+	var dir = (target_pos - global_position).normalized()
+	dir.y = 0
+	if dir.length_squared() > 0.01:
+		dir = dir.normalized()
+		rotation.y = atan2(dir.x, dir.z)
+
+	var hop_dist = min(dist, max_hop_dist)
+	var end_pos = global_position + dir * hop_dist
+	end_pos.y = target_pos.y if dist <= max_hop_dist else global_position.y
+	var mid_pos = global_position.lerp(end_pos, 0.5)
 	mid_pos.y += 1.0
 
+	if _anim_player and _jump_anim != "":
+		_anim_player.play(_jump_anim)
+
 	var tw = create_tween()
-	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(self, "global_position", mid_pos, 0.4)
-	tw.tween_property(self, "global_position", target_pos, 0.4)
+	tw.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "global_position", mid_pos, 0.25)
+	tw.set_ease(Tween.EASE_IN)
+	tw.tween_property(self, "global_position", end_pos, 0.25)
+	tw.tween_callback(func():
+		if _anim_player and _idle_anim != "":
+			_anim_player.play(_idle_anim)
+		await get_tree().create_timer(0.2).timeout
+		_do_safe_hop(target_pos)
+	)

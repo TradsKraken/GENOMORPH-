@@ -19,6 +19,27 @@ func _ready() -> void:
 		if anims.size() > 0:
 			anim_player.play(anims[0])
 
+	if is_dynamic:
+		_play_spawn_animation()
+
+func _play_spawn_animation() -> void:
+	# Temporarily disable gravity and collisions while burrowing up
+	uses_gravity = false
+	set_collision_layer_value(1, false)
+	set_collision_mask_value(1, false)
+
+	var target_y = position.y
+	position.y -= 2.0 # Start underground
+
+	var tw = create_tween()
+	tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(self, "position:y", target_y, 0.8)
+	tw.tween_callback(func():
+		uses_gravity = true
+		set_collision_layer_value(1, true)
+		set_collision_mask_value(1, true)
+	)
+
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	if node is AnimationPlayer:
 		return node

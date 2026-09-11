@@ -23,6 +23,8 @@ enum SequenceState {
 
 var _state: SequenceState = SequenceState.INIT
 var _living_rats: Array[Node] = []
+var _scout_rat: Node3D = null
+var _scout_fled: bool = false
 
 func _ready() -> void:
 	add_to_group("q02_director")
@@ -52,6 +54,18 @@ func _ready() -> void:
 			# No Q01Director in this scene (e.g. a test level) — just start.
 			_begin()
 
+func _process(delta: float) -> void:
+	if _state == SequenceState.WAITING_FOR_SCAN and is_instance_valid(_scout_rat) and not _scout_fled:
+		var player = get_tree().get_first_node_in_group("player")
+		if player and player is Node3D:
+			if player.global_position.distance_to(_scout_rat.global_position) < 15.0:
+				_scout_fled = true
+				_scout_rat.set_physics_process(false)
+				var tw = create_tween()
+				tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+				tw.tween_property(_scout_rat, "position:y", _scout_rat.position.y - 2.0, 0.6)
+				tw.tween_callback(_scout_rat.queue_free)
+
 func _begin() -> void:
 	# Points the objective arrow straight at the actual clue. An earlier
 	# version pointed at a separate "DisturbanceMarker" placed some distance
@@ -62,6 +76,14 @@ func _begin() -> void:
 	# wetlands have real environmental detail to explore through.
 	var clue = get_tree().current_scene.find_child("Clue_Burrows", true, false)
 	PlayerData.set_objective(clue, "Investigate the disturbance", "Something else is out here. Find the source.")
+
+	if clue:
+		_scout_rat = RatScene.instantiate()
+		_scout_rat.position = clue.global_position + Vector3(0, 0, 1.5)
+		get_tree().current_scene.add_child(_scout_rat)
+		_scout_rat.global_position = clue.global_position + Vector3(0, 0, 1.5)
+		# Temporarily disable its AI processing so it just stands idle
+		_scout_rat.set_physics_process(false)
 
 	_state = SequenceState.WAITING_FOR_SCAN
 

@@ -31,15 +31,17 @@ func _ready() -> void:
 			
 	# Add 3D audio for flying sound
 	if AudioManager.sounds.has("mosquito_fly") and AudioManager.sounds["mosquito_fly"] != null:
-		var fly_sfx = AudioStreamPlayer3D.new()
+		print("[MOSQUITO] Creating fly_sfx AudioStreamPlayer")
+		var fly_sfx = AudioStreamPlayer.new()
 		fly_sfx.stream = AudioManager.sounds["mosquito_fly"]
 		fly_sfx.autoplay = true
-		fly_sfx.unit_size = 5.0
-		fly_sfx.max_distance = 40.0
 		fly_sfx.volume_db = 12.0
 		fly_sfx.bus = "Master"
 		add_child(fly_sfx)
 		fly_sfx.play()
+		print("[MOSQUITO] Playing fly_sfx: ", fly_sfx.playing, " at volume: ", fly_sfx.volume_db)
+	else:
+		print("[MOSQUITO] No mosquito_fly sound found in AudioManager!")
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 

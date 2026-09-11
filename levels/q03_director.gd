@@ -31,6 +31,7 @@ enum SequenceState {
 
 var _state: SequenceState = SequenceState.INIT
 var _living_rats: Array[Node] = []
+var _wave: int = 1
 
 func _ready() -> void:
 	add_to_group("q03_director")
@@ -96,18 +97,25 @@ func _on_frog_approached() -> void:
 	await _wait_for_dialogue()
 
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
-	var anchor: Node3D = frog if frog else (get_tree().get_first_node_in_group("player") as Node3D)
+	if frog and frog.has_method("set_panicking"):
+		frog.set_panicking(true)
 
+	_wave = 1
+	_spawn_rats()
+
+func _spawn_rats() -> void:
+	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
+	var anchor: Node3D = frog if frog else (get_tree().get_first_node_in_group("player") as Node3D)
 	_living_rats.clear()
 	for i in range(rat_pack_size):
 		var spawn_pos = _find_safe_spawn_point(anchor, spawn_distance)
 		var rat = RatScene.instantiate()
 		rat.position = spawn_pos
+		rat.is_dynamic = true
 		get_tree().current_scene.add_child(rat)
 		rat.global_position = spawn_pos
 		rat.tree_exited.connect(_on_rat_died)
 		_living_rats.append(rat)
-
 	PlayerData.set_objective(null, "Clear the invasive rats", "%d remaining" % _living_rats.size())
 
 ## Same approach as Q01Director/Q02Director — anchor to the player (provably
@@ -144,6 +152,19 @@ func _on_rat_died() -> void:
 	if _living_rats.size() > 0:
 		PlayerData.set_objective(null, "Clear the invasive rats", "%d remaining" % _living_rats.size())
 		return
+
+	if _wave == 1:
+		_wave = 2
+		_spawn_rats()
+		if not is_instance_valid(_hud):
+			_hud = get_tree().get_first_node_in_group("hud")
+		if _hud and _hud.has_method("show_subtitle"):
+			_hud.show_subtitle("STERLING (RADIO)", "More coming out of the mud! Hold them back!", 3.0)
+		return
+
+	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
+	if frog and frog.has_method("set_panicking"):
+		frog.set_panicking(false)
 
 	_state = SequenceState.AWAITING_RESTORE
 
