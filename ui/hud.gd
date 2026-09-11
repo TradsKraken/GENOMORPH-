@@ -161,9 +161,9 @@ func _input(event: InputEvent) -> void:
 				_hide_genome_popup()
 				
 	if _subtitle_panel and _subtitle_panel.visible and _subtitle_panel.modulate.a > 0.5:
-		if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
-			if event.is_pressed() and _subtitle_time_shown > 1.0:
-				hide_subtitle()
+		# Allow tapping anywhere on the screen to dismiss the subtitle
+		if event is InputEventScreenTouch and event.is_pressed() and _subtitle_time_shown > 1.0:
+			hide_subtitle()
 
 func add_minimap_marker(node: Node3D, color: Color = Color(0.2, 1.0, 0.4), hover: bool = true) -> void:
 	if not is_instance_valid(_marker_layer): return

@@ -6,15 +6,14 @@ extends EditorScript
 # How to run:
 # 1. Open "res://levels/main terrain.scn" and make it the active scene tab.
 # 2. Open this file, File > Run (or Ctrl+Shift+X).
-# 3. In the Scene dock you'll see four new nodes under the scene root, all at
+# 3. In the Scene dock you'll see three new nodes under the scene root, all at
 #    arbitrary default positions that know nothing about your actual terrain —
 #    reposition every one of them onto real, walkable ground:
 #      - NativeFrog — the frog in danger. Place it somewhere deeper into the
-#        wetland than Q02's rat fight.
-#      - AmbushZone — an invisible trigger area. Put it AROUND NativeFrog
-#        (same rough spot) — walking into this is what starts the second rat
-#        fight. Resize its CollisionShape3D if you want a bigger/smaller
-#        trigger radius (default 6m).
+#        wetland than Q02's rat fight. It carries its own ambush-trigger area
+#        (built in code, no separate node to place) — walking near it is what
+#        starts the second rat fight. Adjust its "Ambush Radius" export in the
+#        Inspector if you want a bigger/smaller trigger radius (default 6m).
 #      - HabitatRestorePoint — the interactable "critical damaged area."
 #        Place it near NativeFrog, somewhere that reads as visibly damaged.
 #      - SafeSpot — where NativeFrog hops to once the habitat is restored.
@@ -22,6 +21,10 @@ extends EditorScript
 #      - Q03Director — leave this wherever it lands, it has no transform that
 #        matters.
 # 4. Save the scene (Ctrl+S).
+#
+# If you ran an earlier version of this script, it also removes the old
+# standalone "AmbushZone" node — that's no longer used now that the trigger
+# lives on NativeFrog itself.
 #
 # Safe to run more than once — it skips any node that already exists by name.
 
@@ -35,6 +38,12 @@ func _run() -> void:
 		push_error("Open 'main terrain.scn' as the active scene tab first, then run this script.")
 		return
 
+	if root.has_node("AmbushZone"):
+		var old_zone = root.get_node("AmbushZone")
+		old_zone.get_parent().remove_child(old_zone)
+		old_zone.free()
+		print("Removed the old standalone AmbushZone node (superseded by NativeFrog's own trigger).")
+
 	if not root.has_node("NativeFrog"):
 		var frog := Node3D.new()
 		frog.name = "NativeFrog"
@@ -45,24 +54,6 @@ func _run() -> void:
 		print("Added NativeFrog.")
 	else:
 		print("NativeFrog already exists — left as-is.")
-
-	if not root.has_node("AmbushZone"):
-		var zone := Area3D.new()
-		zone.name = "AmbushZone"
-		zone.collision_layer = 0
-		zone.collision_mask = 3
-		var shape := CollisionShape3D.new()
-		var sphere := SphereShape3D.new()
-		sphere.radius = 6.0
-		shape.shape = sphere
-		zone.add_child(shape)
-		root.add_child(zone)
-		zone.owner = root
-		shape.owner = root
-		zone.position = Vector3(-6, 0.5, -20)
-		print("Added AmbushZone.")
-	else:
-		print("AmbushZone already exists — left as-is.")
 
 	if not root.has_node("HabitatRestorePoint"):
 		var restore := HabitatRestorePointScene.instantiate()
@@ -94,4 +85,4 @@ func _run() -> void:
 	else:
 		print("Q03Director already exists — left as-is.")
 
-	print("Q03 setup done. Reposition NativeFrog, AmbushZone, HabitatRestorePoint, and SafeSpot per the comments above, then save the scene.")
+	print("Q03 setup done. Reposition NativeFrog, HabitatRestorePoint, and SafeSpot per the comments above, then save the scene.")

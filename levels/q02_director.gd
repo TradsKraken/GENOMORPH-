@@ -36,16 +36,21 @@ func _ready() -> void:
 
 	# Don't start until Q01 (the wake-up/mosquito sequence) actually finishes —
 	# starting on our own fixed timer would race Q01's objective and dialogue.
-	var q01_nodes = get_tree().get_nodes_in_group("q01_director")
-	if q01_nodes.size() > 0:
-		var q01 = q01_nodes[0]
-		if "_state" in q01 and q01._state == Q01Director.SequenceState.DONE:
-			_begin()
-		else:
-			q01.completed.connect(_begin)
-	else:
-		# No Q01Director in this scene (e.g. a test level) — just start.
+	# PlayerData.q01_completed is checked first because it's a persistent
+	# state flag, not a node lookup — relying on sibling _ready() order
+	# happening to match creation order (director nodes were added to the
+	# scene in the order their setup scripts were run) worked, but only by
+	# luck, not by any actual guarantee.
+	if PlayerData.q01_completed:
 		_begin()
+	else:
+		var q01_nodes = get_tree().get_nodes_in_group("q01_director")
+		if q01_nodes.size() > 0:
+			var q01 = q01_nodes[0]
+			q01.completed.connect(_begin)
+		else:
+			# No Q01Director in this scene (e.g. a test level) — just start.
+			_begin()
 
 func _begin() -> void:
 	# Points the objective arrow straight at the actual clue. An earlier
@@ -126,6 +131,7 @@ func _on_rat_died() -> void:
 
 	PlayerData.set_objective(null, "Explore deeper into the wetlands")
 
+	PlayerData.q02_completed = true
 	completed.emit()
 
 ## Waits for the player to tap through the currently-shown subtitle before

@@ -130,6 +130,15 @@ var inventory: Array = []
 var genome_fragments: int = 0
 var has_seen_prologue: bool = false
 var has_seen_minimap_tutorial: bool = false
+
+# Runtime-only flags so a quest director can check "did the previous quest
+# already finish?" without depending on sibling _ready() order matching
+# creation order (which happened to work by luck, not guarantee — see
+# how has_seen_prologue avoids the same race for the prologue->Q01 handoff).
+# Not persisted to save data since none of these directors restore their
+# _state on load either.
+var q01_completed: bool = false
+var q02_completed: bool = false
 var max_genome_fragments: int = 12
 var minigame_started: bool = false
 

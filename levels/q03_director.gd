@@ -20,7 +20,6 @@ const RatScene = preload("res://enemies/rat.tscn")
 signal completed
 
 var _hud: Node = null
-var _ambush_triggered: bool = false
 
 enum SequenceState {
 	INIT,
@@ -37,39 +36,47 @@ func _ready() -> void:
 	add_to_group("q03_director")
 
 	_hud = get_tree().get_first_node_in_group("hud")
+	print("[Q03 DEBUG] _ready() — hud found: ", is_instance_valid(_hud))
 
-	var ambush_zone = get_tree().current_scene.find_child("AmbushZone", true, false)
-	if ambush_zone and ambush_zone.has_signal("body_entered"):
-		ambush_zone.body_entered.connect(_on_ambush_zone_entered)
+	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
+	print("[Q03 DEBUG] NativeFrog found: ", frog, " at ", (frog.global_position if frog else "n/a"))
+	if frog and frog.has_signal("player_approached"):
+		frog.player_approached.connect(_on_frog_approached)
+		print("[Q03 DEBUG] connected to NativeFrog.player_approached")
 
 	var restore_point = get_tree().current_scene.find_child("HabitatRestorePoint", true, false)
+	print("[Q03 DEBUG] HabitatRestorePoint found: ", restore_point)
 	if restore_point and restore_point.has_signal("restored"):
 		restore_point.restored.connect(_on_habitat_restored)
 
 	# Don't start until Q02 (the first rat pack) actually finishes.
-	var q02_nodes = get_tree().get_nodes_in_group("q02_director")
-	if q02_nodes.size() > 0:
-		var q02 = q02_nodes[0]
-		if "_state" in q02 and q02._state == Q02Director.SequenceState.DONE:
-			_begin()
-		else:
-			q02.completed.connect(_begin)
-	else:
-		# No Q02Director in this scene (e.g. a test level) — just start.
+	# PlayerData.q02_completed is checked first — see the matching comment in
+	# q02_director.gd for why this is more reliable than the node/group lookup.
+	if PlayerData.q02_completed:
+		print("[Q03 DEBUG] PlayerData.q02_completed already true — starting immediately")
 		_begin()
+	else:
+		var q02_nodes = get_tree().get_nodes_in_group("q02_director")
+		print("[Q03 DEBUG] q02_completed=false, q02_director nodes found: ", q02_nodes.size())
+		if q02_nodes.size() > 0:
+			var q02 = q02_nodes[0]
+			q02.completed.connect(_begin)
+			print("[Q03 DEBUG] waiting on Q02Director.completed signal")
+		else:
+			# No Q02Director in this scene (e.g. a test level) — just start.
+			print("[Q03 DEBUG] no Q02Director found either — starting anyway")
+			_begin()
 
 func _begin() -> void:
+	print("[Q03 DEBUG] _begin() called — state now APPROACHING")
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
-	var target: Node3D = frog if frog else get_tree().current_scene.find_child("AmbushZone", true, false)
-	PlayerData.set_objective(target, "Something's still not right", "There's a healthier patch of wetland nearby — but it isn't safe yet.")
+	PlayerData.set_objective(frog, "Something's still not right", "There's a healthier patch of wetland nearby — but it isn't safe yet.")
 
 	_state = SequenceState.APPROACHING
 
-func _on_ambush_zone_entered(body: Node) -> void:
+func _on_frog_approached() -> void:
+	print("[Q03 DEBUG] _on_frog_approached() fired — current _state=", _state)
 	if _state != SequenceState.APPROACHING: return
-	if _ambush_triggered: return
-	if not body.is_in_group("player"): return
-	_ambush_triggered = true
 
 	_state = SequenceState.FIGHTING_RATS
 
@@ -79,7 +86,7 @@ func _on_ambush_zone_entered(body: Node) -> void:
 	await _wait_for_dialogue()
 
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
-	var anchor: Node3D = frog if frog else (body as Node3D)
+	var anchor: Node3D = frog if frog else (get_tree().get_first_node_in_group("player") as Node3D)
 
 	_living_rats.clear()
 	for i in range(rat_pack_size):

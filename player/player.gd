@@ -73,6 +73,7 @@ var _respawn_point: Vector3 = Vector3.ZERO
 var _is_using_skill: bool = false
 var _skill1_cooldown_timer: float = 0.0
 var damage_cooldown_timer: float = 0.0
+var _attack_debug_timer: float = 0.0 # TEMPORARY — remove once the attack-spam bug is confirmed fixed.
 @export var damage_cooldown_duration: float = 1.0
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
@@ -97,11 +98,14 @@ func _ready() -> void:
 	
 	if animation_player == null:
 		animation_player = _find_animation_player(self)
-		if animation_player:
-			var walk = animation_player.get_animation(anim_walk)
-			if walk: walk.loop_mode = Animation.LOOP_LINEAR
-			var idle = animation_player.get_animation(anim_idle)
-			if idle: idle.loop_mode = Animation.LOOP_LINEAR
+	
+	if animation_player:
+		var walk = animation_player.get_animation(anim_walk)
+		if walk: walk.loop_mode = Animation.LOOP_LINEAR
+		var idle = animation_player.get_animation(anim_idle)
+		if idle: idle.loop_mode = Animation.LOOP_LINEAR
+		var attack = animation_player.get_animation("FrogArmature|Frog_Attack")
+		if attack: attack.loop_mode = Animation.LOOP_NONE
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	for child in node.get_children():
@@ -239,9 +243,17 @@ func _physics_process(delta: float) -> void:
 	# ── Attacking ────────────────────────────────────────────────────────────
 	if not input_locked:
 		if Input.is_action_just_pressed("attack"):
+			print("[ATTACK DEBUG] is_action_just_pressed(attack)=true")
 			_attack()
 		if Input.is_action_just_pressed("skill1"):
 			_skill1()
+
+	_attack_debug_timer += delta
+	if _attack_debug_timer > 1.0:
+		_attack_debug_timer = 0.0
+		print("[ATTACK DEBUG] tick — is_action_pressed(attack)=", Input.is_action_pressed("attack"),
+			" current_animation=", (animation_player.current_animation if animation_player else "null"),
+			" is_playing=", (animation_player.is_playing() if animation_player else "null"))
 
 	var was_on_floor = is_on_floor()
 	move_and_slide()
@@ -457,13 +469,26 @@ func _trigger_splashdown_aoe() -> void:
 				sludge.cleanse()
 
 func _attack() -> void:
+	print("[ATTACK DEBUG] _attack() entered. current_animation=", (animation_player.current_animation if animation_player else "null"),
+		" is_playing=", (animation_player.is_playing() if animation_player else "null"),
+		" loop_mode=", (animation_player.get_animation("FrogArmature|Frog_Attack").loop_mode if animation_player and animation_player.get_animation("FrogArmature|Frog_Attack") else "null"))
 	if animation_player and animation_player.current_animation == "FrogArmature|Frog_Attack" and animation_player.is_playing():
+		print("[ATTACK DEBUG] _attack() blocked — already playing")
 		return
-		
+
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
 	if animation_player:
+		# Re-assert this every time rather than trusting the one-time _ready()
+		# setup: this Animation resource is shared (loaded from the same .glb)
+		# across every instance of the Frog model, so any other code touching
+		# it — e.g. an NPC using the same model — can silently flip this back
+		# to looping. See native_frog.gd for the actual case that caused this.
+		var attack_anim = animation_player.get_animation("FrogArmature|Frog_Attack")
+		if attack_anim:
+			attack_anim.loop_mode = Animation.LOOP_NONE
 		animation_player.play("FrogArmature|Frog_Attack", 0.1, 2.0)
+		print("[ATTACK DEBUG] play() called for attack animation")
 		
 	AudioManager.play_sfx("lunge", randf_range(0.9, 1.1))
 		
@@ -709,6 +734,7 @@ func _update_animation(direction: Vector3) -> void:
 		should_play = true
 
 	if should_play:
+		print("[ANIM DEBUG] _update_animation playing '", target_anim, "' (was '", animation_player.current_animation, "')")
 		animation_player.play(target_anim, anim_blend_time)
 
 	# ── Sync Animation Speed ──────────────────────────────────────────────────
