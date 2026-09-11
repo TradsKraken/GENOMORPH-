@@ -74,12 +74,22 @@ func _begin() -> void:
 
 	_state = SequenceState.APPROACHING
 
+	if frog:
+		frog.set("_has_triggered", false)
+		var player = get_tree().get_first_node_in_group("player")
+		if player and is_instance_valid(player) and player is Node3D:
+			if frog.global_position.distance_to((player as Node3D).global_position) <= frog.get("ambush_radius"):
+				frog.set("_has_triggered", true)
+				_on_frog_approached()
+
 func _on_frog_approached() -> void:
 	print("[Q03 DEBUG] _on_frog_approached() fired — current _state=", _state)
 	if _state != SequenceState.APPROACHING: return
 
 	_state = SequenceState.FIGHTING_RATS
 
+	if not is_instance_valid(_hud):
+		_hud = get_tree().get_first_node_in_group("hud")
 	if _hud and _hud.has_method("show_subtitle"):
 		_hud.show_subtitle("STERLING (RADIO)", "Wait — that frog's not alone. Rats, closing in on it.", 4.0)
 
@@ -137,6 +147,8 @@ func _on_rat_died() -> void:
 
 	_state = SequenceState.AWAITING_RESTORE
 
+	if not is_instance_valid(_hud):
+		_hud = get_tree().get_first_node_in_group("hud")
 	if _hud and _hud.has_method("show_subtitle"):
 		_hud.show_subtitle("STERLING (RADIO)", "Clear. Now let's give this patch a real chance — the Purification Module should reach this far.", 5.0)
 
@@ -153,6 +165,8 @@ func _on_habitat_restored() -> void:
 	if frog and frog.has_method("move_to_safety") and safe_spot:
 		frog.move_to_safety(safe_spot.global_position)
 
+	if not is_instance_valid(_hud):
+		_hud = get_tree().get_first_node_in_group("hud")
 	if _hud and _hud.has_method("show_subtitle"):
 		_hud.show_subtitle("STERLING (RADIO)", "...I'm reading something. A biological signal, close by. That's not one of ours — not yet.", 6.0)
 
@@ -167,6 +181,8 @@ func _on_habitat_restored() -> void:
 ## continuing — falls back to a fixed delay if there's no HUD to report a
 ## dismissal (e.g. a test scene), so this never hangs forever.
 func _wait_for_dialogue() -> void:
+	if not is_instance_valid(_hud):
+		_hud = get_tree().get_first_node_in_group("hud")
 	if _hud and _hud.has_signal("subtitle_dismissed"):
 		await _hud.subtitle_dismissed
 	else:
