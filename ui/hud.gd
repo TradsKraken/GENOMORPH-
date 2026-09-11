@@ -73,6 +73,10 @@ var _zone_status_panel: PanelContainer
 var _zone_status_lbl: RichTextLabel
 var _zone_status_tween: Tween
 
+var _cleanup_progress_panel: PanelContainer
+var _cleanup_progress_bar: ProgressBar
+var _cleanup_progress_label: Label
+
 var _notification_panel: PanelContainer
 var _notification_title: Label
 var _notification_text: RichTextLabel
@@ -334,6 +338,73 @@ func hide_zone_status() -> void:
 	_zone_status_tween = create_tween()
 	_zone_status_tween.tween_property(_zone_status_panel, "modulate:a", 0.0, 0.3)
 	_zone_status_tween.tween_callback(func(): _zone_status_panel.visible = false)
+
+# ── Habitat Cleanup Progress (Top Center) ────────────────────────────────────
+
+func show_cleanup_progress(cleared: int, total: int) -> void:
+	if total <= 0:
+		hide_cleanup_progress()
+		return
+
+	_build_cleanup_progress()
+	_cleanup_progress_bar.max_value = total
+	_cleanup_progress_bar.value = clampi(cleared, 0, total)
+	_cleanup_progress_label.text = "HABITAT CLEANUP  %d / %d" % [cleared, total]
+	_cleanup_progress_panel.visible = true
+
+func hide_cleanup_progress() -> void:
+	if _cleanup_progress_panel:
+		_cleanup_progress_panel.visible = false
+
+func _build_cleanup_progress() -> void:
+	if _cleanup_progress_panel:
+		return
+
+	_cleanup_progress_panel = PanelContainer.new()
+	_cleanup_progress_panel.name = "CleanupProgressPanel"
+	_cleanup_progress_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_cleanup_progress_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_cleanup_progress_panel.offset_top = 92
+	_cleanup_progress_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.03, 0.10, 0.07, 0.90)
+	panel_style.border_color = Color(0.30, 0.95, 0.60, 0.85)
+	panel_style.set_border_width_all(2)
+	panel_style.set_corner_radius_all(12)
+	panel_style.content_margin_left = 18
+	panel_style.content_margin_right = 18
+	panel_style.content_margin_top = 8
+	panel_style.content_margin_bottom = 10
+	_cleanup_progress_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 5)
+	_cleanup_progress_panel.add_child(box)
+
+	_cleanup_progress_label = Label.new()
+	_cleanup_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_cleanup_progress_label.add_theme_font_size_override("font_size", 15)
+	_cleanup_progress_label.add_theme_color_override("font_color", Color(0.78, 1.0, 0.84))
+	box.add_child(_cleanup_progress_label)
+
+	_cleanup_progress_bar = ProgressBar.new()
+	_cleanup_progress_bar.custom_minimum_size = Vector2(270, 14)
+	_cleanup_progress_bar.show_percentage = false
+	_cleanup_progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(0.01, 0.03, 0.02, 0.95)
+	bar_bg.set_corner_radius_all(7)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = Color(0.18, 0.92, 0.48)
+	bar_fill.set_corner_radius_all(7)
+	_cleanup_progress_bar.add_theme_stylebox_override("background", bar_bg)
+	_cleanup_progress_bar.add_theme_stylebox_override("fill", bar_fill)
+	box.add_child(_cleanup_progress_bar)
+
+	_root.add_child(_cleanup_progress_panel)
+	_cleanup_progress_panel.visible = false
 
 # ── Cinematic Notification Banner ─────────────────────────────────────────────
 

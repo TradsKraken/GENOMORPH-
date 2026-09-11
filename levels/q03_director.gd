@@ -172,7 +172,10 @@ func _on_rat_died() -> void:
 	await _play_frog_conversation()
 
 	var restore_point = get_tree().current_scene.find_child("HabitatRestorePoint", true, false)
-	PlayerData.set_objective(restore_point, "Restore the damaged habitat", "Interact with the critical damaged area.")
+	if restore_point and restore_point.has_method("begin_cleanup"):
+		restore_point.begin_cleanup()
+	else:
+		PlayerData.set_objective(restore_point, "Restore the damaged habitat", "Interact with the critical damaged area.")
 
 ## The player's first real conversation with a native species — plays once the
 ## rat pack is cleared, before the restore objective is handed out. Ties into

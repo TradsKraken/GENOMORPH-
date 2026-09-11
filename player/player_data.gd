@@ -173,9 +173,10 @@ func set_object_state(scene_path: String, node_path: String, state: Dictionary) 
 	if not world_state.has(scene_path):
 		world_state[scene_path] = {}
 	world_state[scene_path][node_path] = state
-func add_genome_fragment() -> void:
+func add_genome_fragment(announce: bool = true) -> void:
 	genome_fragments = mini(genome_fragments + 1, max_genome_fragments)
-	genome_collected.emit(genome_fragments, max_genome_fragments)
+	if announce:
+		genome_collected.emit(genome_fragments, max_genome_fragments)
 
 
 # ── Stamina API ───────────────────────────────────────────────────────────────

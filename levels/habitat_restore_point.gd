@@ -16,10 +16,18 @@ signal restored
 ## habitat is restored. Leave empty if there's nothing to hide.
 @export var damaged_visual_path: NodePath
 
+## Legacy/manual cleanup targets. TrashPile scenes can still be assigned here.
 @export var trash_piles: Array[NodePath] = []
+
+## Optional manual reference to the plain Node that contains this quest's trash.
+## If empty, Q03 automatically uses the node named "Q03TrashRegion".
+@export var cleanup_region: NodePath
 
 var _is_restored: bool = false
 var _trash_count: int = 0
+var _trash_total: int = 0
+var _cleanup_started: bool = false
+var _registered_trash: Array[Node] = []
 
 func _ready() -> void:
 	super._ready()
@@ -27,26 +35,102 @@ func _ready() -> void:
 	set_active(false)
 	interact_prompt = ""
 	
-	# Connect to all assigned trash piles
+	# Connect to explicitly assigned legacy TrashPile nodes.
 	for path in trash_piles:
 		if path.is_empty(): continue
-		var pile = get_node_or_null(path)
-		if pile and pile.has_signal("destroyed"):
-			pile.destroyed.connect(_on_trash_destroyed)
-			_trash_count += 1
+		_register_trash(get_node_or_null(path))
+
+	# Deferred so every placed trash object has completed _ready() before this
+	# point scans the children of its assigned cleanup region.
+	call_deferred("_register_region_trash")
+
+func _register_region_trash() -> void:
+	var region: Node = null
+	if not cleanup_region.is_empty():
+		region = get_node_or_null(cleanup_region)
+	else:
+		# The default Q03 setup requires no Inspector assignment: create a
+		# plain Node called Q03TrashRegion and place the trash objects beneath it.
+		region = get_tree().current_scene.find_child("Q03TrashRegion", true, false)
+
+	if region == null:
+		push_warning("Q03 cleanup region not found. Add a plain Node named Q03TrashRegion and make its trash objects children of it.")
+		return
+
+	_register_trash_children(region)
+
+func _register_trash_children(parent: Node) -> void:
+	for child in parent.get_children():
+		# Both reusable Trash objects and the older TrashPile scene expose a
+		# cleanup signal. Looking at the actual child hierarchy means a level
+		# designer only needs to put the object under Q03TrashRegion; no group
+		# setup or additional Inspector assignment is required.
+		_register_trash(child)
+		_register_trash_children(child)
+
+func _register_trash(trash: Node) -> void:
+	if trash == null or _registered_trash.has(trash):
+		return
+
+	if trash.has_signal("cleaned"):
+		trash.connect("cleaned", _on_trash_destroyed)
+	elif trash.has_signal("destroyed"):
+		trash.connect("destroyed", _on_trash_destroyed)
+	else:
+		return
+
+	_registered_trash.append(trash)
+	_trash_count += 1
+	_trash_total += 1
+
+## Called by Q03 after the native-frog conversation. Keeping this dormant until
+## then prevents a level's cleanup objective from overwriting Q01/Q02.
+func begin_cleanup() -> void:
+	if _is_restored or _cleanup_started:
+		return
+
+	_cleanup_started = true
+	if _trash_count > 0:
+		PlayerData.set_objective(null, "Clear the habitat trash", "%d remaining" % _trash_count)
+		_update_cleanup_progress()
+	else:
+		_enable_restore()
 
 func _on_trash_destroyed() -> void:
 	_trash_count -= 1
-	if _trash_count <= 0 and not _is_restored:
-		_perform_interaction()
+	if not _cleanup_started or _is_restored:
+		return
+	_update_cleanup_progress()
+	if _trash_count > 0:
+		PlayerData.set_objective(null, "Clear the habitat trash", "%d remaining" % _trash_count)
+	else:
+		_enable_restore()
+
+func _enable_restore() -> void:
+	set_active(true)
+	PlayerData.set_objective(self, "Restore the damaged habitat", "The habitat is clear. Activate the Purification Module.")
+
+func _update_cleanup_progress() -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_cleanup_progress"):
+		hud.show_cleanup_progress(_trash_total - _trash_count, _trash_total)
+
+func _hide_cleanup_progress() -> void:
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("hide_cleanup_progress"):
+		hud.hide_cleanup_progress()
 
 func _perform_interaction() -> void:
-	if _is_restored:
+	if _is_restored or not _cleanup_started or _trash_count > 0:
 		return
 	_is_restored = true
+	set_active(false)
+	_hide_cleanup_progress()
 
 	if AudioManager.has_method("play_sfx"):
 		AudioManager.play_sfx("exp_collect")
+
+	PlayerData.set_objective(null, "")
 
 	_fade_out_damaged_visual()
 	_spawn_purify_effect()
@@ -58,17 +142,12 @@ func _perform_interaction() -> void:
 func _drop_genome() -> void:
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud and hud.has_method("show_notification"):
-		hud.show_notification("HABITAT RESTORED", "Salamander Genome Data Extracted.")
-	
-	# Automatically add genome
-	PlayerData.add_genome_fragment()
-	
-	# Spawn visual pickup object if it exists
-	var orb_scene = load("res://levels/genome_fragment.tscn")
-	if orb_scene:
-		var orb = orb_scene.instantiate()
-		get_parent().add_child(orb)
-		orb.global_position = global_position + Vector3(0, 1.5, 0)
+		hud.show_notification("SALAMANDER GENOME RECOVERED", "Habitat restoration data secured.")
+
+	# This is the quest's only genome reward. It intentionally skips the
+	# generic fragment popup because the dedicated notification above already
+	# communicates the reward; spawning a second pickup used to award it twice.
+	PlayerData.add_genome_fragment(false)
 
 func _fade_out_damaged_visual() -> void:
 	if damaged_visual_path.is_empty():
