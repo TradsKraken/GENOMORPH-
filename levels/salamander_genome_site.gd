@@ -43,6 +43,7 @@ func _perform_interaction() -> void:
 
 	var first_recovery := PlayerData.recover_salamander_genome()
 	if first_recovery:
+		PlayerData.award_progression_reward("salamander_discovery", 100.0, 3)
 		var hud := get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("show_notification"):
 			hud.show_notification("Salamander Form Unlocked", "Species genomes unlock forms. Try Salamander using the form circle at the top of the screen.", 6.0)

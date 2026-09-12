@@ -185,6 +185,7 @@ func _finish_sequence() -> void:
 	PlayerData.set_objective(null, "Explore deeper into the wetlands")
 
 	PlayerData.q01_completed = true
+	PlayerData.award_progression_reward("q01_complete", 40.0)
 	completed.emit()
 
 ## Waits for the player to tap through the currently-shown subtitle before

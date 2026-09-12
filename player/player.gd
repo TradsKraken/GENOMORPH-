@@ -83,12 +83,16 @@ var _attack_debug_timer: float = 0.0 # TEMPORARY — remove once the attack-spam
 @export var damage_cooldown_duration: float = 1.0
 var _attack_animation: String = FROG_ATTACK_ANIMATION
 var _salamander_form: Node3D
-var _ultimate_damage_tick: float = 0.0
-var _ultimate_aura: MeshInstance3D
+const AdaptationCombat = preload("res://combat/adaptation_combat.gd")
+var _adaptation: Node
+var _monitor_form: Node3D
+var _basic_cooldown := 0.0
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
+	_adaptation = AdaptationCombat.new()
+	add_child(_adaptation)
 	if PlayerData.has_saved_position:
 		global_position = PlayerData.player_position
 		PlayerData.has_saved_position = false
@@ -102,6 +106,9 @@ func _ready() -> void:
 		InputMap.add_action("skill1")
 	if not InputMap.has_action("ultimate"):
 		InputMap.add_action("ultimate")
+		var event := InputEventKey.new()
+		event.physical_keycode = KEY_R
+		InputMap.action_add_event("ultimate", event)
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
 	
@@ -122,30 +129,31 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 	return null
 
 func _on_active_species_changed(species_id: String) -> void:
+	cancel_aiming_jump()
 	_apply_species_form(species_id)
 
 func _apply_species_form(species_id: String) -> void:
 	var frog_form := get_node_or_null("Frog") as Node3D
-	if species_id == "salamander":
-		if is_instance_valid(frog_form):
-			frog_form.visible = false
-		if not is_instance_valid(_salamander_form):
-			_salamander_form = SALAMANDER_FORM_SCENE.instantiate() as Node3D
-			_salamander_form.name = "SalamanderForm"
-			add_child(_salamander_form)
-			_hide_from_minimap(_salamander_form)
-		_salamander_form.visible = true
-	else:
-		if is_instance_valid(_salamander_form):
-			_salamander_form.visible = false
-		if is_instance_valid(frog_form):
-			frog_form.visible = true
-
+	if species_id == "salamander" and not is_instance_valid(_salamander_form):
+		_salamander_form = SALAMANDER_FORM_SCENE.instantiate() as Node3D
+		add_child(_salamander_form)
+		_hide_from_minimap(_salamander_form)
+	if species_id == "water_monitor" and not is_instance_valid(_monitor_form):
+		var scene := load("res://Models/Water Monitor Lizard/Water Monitor Lizard.glb") as PackedScene
+		_monitor_form = scene.instantiate() as Node3D
+		add_child(_monitor_form)
+		_hide_from_minimap(_monitor_form)
+	if frog_form: frog_form.visible = species_id == "frog"
+	if is_instance_valid(_salamander_form): _salamander_form.visible = species_id == "salamander"
+	if is_instance_valid(_monitor_form): _monitor_form.visible = species_id == "water_monitor"
 	_configure_species_animations(species_id)
 
 func _configure_species_animations(species_id: String) -> void:
-	animation_player = _find_animation_player(_salamander_form if species_id == "salamander" and is_instance_valid(_salamander_form) else self)
-	if species_id == "salamander":
+	var form: Node = get_node_or_null("Frog")
+	if species_id == "salamander": form = _salamander_form
+	if species_id == "water_monitor": form = _monitor_form
+	animation_player = _find_animation_player(form) if form else null
+	if species_id != "frog":
 		# The supplied Salamander model includes Walk and three attack clips, but
 		# no idle clip. Leaving it paused while standing preserves its rest pose.
 		anim_idle = ""
@@ -228,9 +236,9 @@ func _find_joystick() -> void:
 
 func _physics_process(delta: float) -> void:
 	# ── Stamina recovery ─────────────────────────────────────────────────────
-	PlayerData.recover_stamina(delta, stamina_recovery_rate * PlayerData.get_stamina_recovery_multiplier() * PlayerData.get_ultimate_speed_multiplier())
-	PlayerData.update_ultimate(delta)
-	_process_ultimate(delta)
+	PlayerData.recover_stamina(delta, float(PlayerData.AdaptationRules.SPECIES.get(PlayerData.active_species, {}).get("recovery", stamina_recovery_rate)) * PlayerData.get_stamina_recovery_multiplier() * PlayerData.ultimate_effect("stamina_recovery"))
+	_adaptation.tick(delta)
+	_basic_cooldown = maxf(0.0, _basic_cooldown - delta)
 	_process_auto_heal(delta)
 	if _skill1_cooldown_timer > 0.0:
 		_skill1_cooldown_timer -= delta
@@ -280,13 +288,13 @@ func _physics_process(delta: float) -> void:
 			var current_accel := acceleration
 			
 			# Synchronize movement speed to the animation frame
-			if animation_player and animation_player.current_animation == anim_walk and animation_player.is_playing():
+			if PlayerData.active_species == "frog" and animation_player and animation_player.current_animation == anim_walk and animation_player.is_playing():
 				var pos := animation_player.current_animation_position
 				var length := animation_player.current_animation_length
 				if length > 0.0:
 					# Use a sine wave squared to make the player stop at the ends and move fast in the middle
 					var phase := (pos / length) * PI
-					current_speed = speed * pow(sin(phase), 2) * 2.0
+					current_speed = speed * PlayerData.get_ultimate_speed_multiplier() * pow(sin(phase), 2) * 2.0
 					current_accel = acceleration * 2.0 # Track the curve faster
 					
 			# Walk on the ground
@@ -344,7 +352,9 @@ func take_damage(amount: float) -> void:
 	damage_cooldown_timer = damage_cooldown_duration
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
-	PlayerData.take_damage(amount * (1.0 - PlayerData.get_ultimate_damage_reduction()))
+	var actual_damage := amount * (1.0 - PlayerData.get_ultimate_damage_reduction())
+	PlayerData.take_damage(actual_damage)
+	PlayerData.gain_ultimate_charge(minf(actual_damage, 30.0) * 0.5)
 	
 	# Apply brief flinch (red flash) without blocking movement
 	var mesh = _find_mesh(self)
@@ -361,9 +371,10 @@ func take_damage(amount: float) -> void:
 		var cam := get_viewport().get_camera_3d()
 		if cam:
 			var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-			hud.show_float_text("-" + str(roundi(amount)), scr, Color.RED)
+			hud.show_float_text("-" + str(roundi(actual_damage)), scr, Color.RED)
 	
 	if PlayerData.health <= 0:
+		PlayerData.end_ultimate()
 		PlayerData.heal(PlayerData.max_health)
 		
 		var spawn_pos = _respawn_point
@@ -387,8 +398,6 @@ func _process_auto_heal(delta: float) -> void:
 			_heal_timer -= 2.0
 			if PlayerData.health < PlayerData.max_health:
 				var heal_amount := 5.0 * PlayerData.get_health_recovery_multiplier()
-				if PlayerData.ultimate_active and str(PlayerData.get_current_species_data().get("equipped_ultimate_category", "")) == "defense":
-					heal_amount *= 2.0
 				PlayerData.heal(heal_amount)
 				# Visual feedback for heal
 				var hud := get_tree().get_first_node_in_group("hud")
@@ -399,55 +408,11 @@ func _process_auto_heal(delta: float) -> void:
 						hud.show_float_text("+%d" % roundi(heal_amount), scr, Color.GREEN)
 
 func _activate_ultimate() -> void:
-	if not PlayerData.activate_ultimate():
-		AudioManager.play_sfx("error", 1.0, 5.0)
-		return
-	AudioManager.play_sfx("level_up")
-	_create_ultimate_aura()
-	var hud := get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_notification"):
-		var ultimate := PlayerData.get_equipped_ultimate_definition()
-		hud.show_notification(str(ultimate.get("name", "Ultimate")) + " Active", "%d seconds of adaptation active." % roundi(PlayerData.ultimate_remaining), 2.0)
+	if _adaptation.activate():
+		AudioManager.play_sfx("level_up")
 
-func _process_ultimate(delta: float) -> void:
-	if not PlayerData.ultimate_active:
-		if is_instance_valid(_ultimate_aura):
-			_ultimate_aura.queue_free()
-			_ultimate_aura = null
-		return
-	if is_instance_valid(_ultimate_aura):
-		_ultimate_aura.rotation.y += delta * 2.0
-	var category := str(PlayerData.get_current_species_data().get("equipped_ultimate_category", ""))
-	if category != "attack":
-		return
-	_ultimate_damage_tick -= delta
-	if _ultimate_damage_tick > 0.0:
-		return
-	_ultimate_damage_tick = 1.0
-	var level := PlayerData.get_equipped_ultimate_level()
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		if enemy is Node3D and enemy.has_method("take_damage") and not enemy.get("is_dead"):
-			if global_position.distance_to((enemy as Node3D).global_position) <= 4.0:
-				enemy.take_damage(8.0 * level)
-
-func _create_ultimate_aura() -> void:
-	if is_instance_valid(_ultimate_aura):
-		_ultimate_aura.queue_free()
-	_ultimate_aura = MeshInstance3D.new()
-	var mesh := SphereMesh.new()
-	mesh.radius = 1.15
-	mesh.height = 2.3
-	var material := StandardMaterial3D.new()
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.2, 1.0, 0.45, 0.22)
-	material.emission_enabled = true
-	material.emission = Color(0.1, 1.0, 0.35)
-	material.emission_energy_multiplier = 1.5
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mesh.material = material
-	_ultimate_aura.mesh = mesh
-	_ultimate_aura.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(_ultimate_aura)
+func use_secondary_skill() -> bool:
+	return _adaptation.use_skill2()
 
 func _find_mesh(node: Node) -> MeshInstance3D:
 	for child in node.get_children():
@@ -461,9 +426,10 @@ func _find_mesh(node: Node) -> MeshInstance3D:
 # ── Splashdown Jump Mechanics ────────────────────────────────────────────────
 
 func start_aiming_jump() -> void:
+	if input_locked or PlayerData.active_species != "frog": return
 	if not is_on_floor() or is_jumping: return
 	
-	if PlayerData.stamina < jump_stamina_cost:
+	if PlayerData.stamina < jump_stamina_cost * PlayerData.ultimate_effect("stamina_cost"):
 		AudioManager.play_sfx("error", 1.0, 5.0)
 		return
 		
@@ -528,7 +494,7 @@ func execute_splash_jump(is_quick_tap: bool) -> void:
 				hud.show_float_text("TOO LATE!", scr, Color.GRAY)
 		return
 		
-	if not PlayerData.use_stamina(jump_stamina_cost / PlayerData.get_ultimate_speed_multiplier()):
+	if not PlayerData.use_stamina(jump_stamina_cost * PlayerData.ultimate_effect("stamina_cost")):
 		AudioManager.play_sfx("error", 1.0, 5.0)
 		return
 		
@@ -558,7 +524,7 @@ func _trigger_splashdown_aoe() -> void:
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
 	var splash_radius = 4.5
-	var splash_damage = 25.0
+	var splash_damage = PlayerData.attack_power * 1.8
 	
 	# Visual feedback
 	var hud := get_tree().get_first_node_in_group("hud")
@@ -616,6 +582,9 @@ func _find_attack_target(attack_range: float) -> Node3D:
 	return _find_closest_target_in_group("enemies", attack_range)
 
 func _attack() -> void:
+	if input_locked or get_tree().paused or _basic_cooldown > 0.0:
+		return
+	_basic_cooldown = 0.5 / PlayerData.ultimate_effect("attack_speed")
 	print("[ATTACK DEBUG] _attack() entered. current_animation=", (animation_player.current_animation if animation_player else "null"),
 		" is_playing=", (animation_player.is_playing() if animation_player else "null"),
 		" loop_mode=", (animation_player.get_animation(_attack_animation).loop_mode if animation_player and not _attack_animation.is_empty() and animation_player.get_animation(_attack_animation) else "null"))
@@ -634,7 +603,7 @@ func _attack() -> void:
 		var attack_anim = animation_player.get_animation(_attack_animation) if not _attack_animation.is_empty() else null
 		if attack_anim:
 			attack_anim.loop_mode = Animation.LOOP_NONE
-			animation_player.play(_attack_animation, 0.1, 2.0)
+			animation_player.play(_attack_animation, 0.1, 2.0 * PlayerData.ultimate_effect("attack_speed"))
 			print("[ATTACK DEBUG] play() called for attack animation")
 		
 	AudioManager.play_sfx("lunge", randf_range(0.9, 1.1))
@@ -674,13 +643,14 @@ func _attack() -> void:
 	pass
 
 func _skill1() -> void:
-	if _is_using_skill or _skill1_cooldown_timer > 0.0:
+	if input_locked or get_tree().paused or _is_using_skill or _skill1_cooldown_timer > 0.0:
 		return
 		
-	if not PlayerData.use_stamina(25.0):
-		AudioManager.play_sfx("error", 1.0, 5.0)
+	if PlayerData.active_species != "frog":
+		_skill1_cooldown_timer = (12.0 if PlayerData.active_species == "salamander" else 5.0) * PlayerData.get_cooldown_multiplier()
+		PlayerData.skill1_cooldown_started.emit(_skill1_cooldown_timer)
+		_adaptation.use_skill1()
 		return
-		
 	_is_using_skill = true
 	_skill1_cooldown_timer = 3.0 * PlayerData.get_cooldown_multiplier()
 	PlayerData.skill1_cooldown_started.emit(_skill1_cooldown_timer)

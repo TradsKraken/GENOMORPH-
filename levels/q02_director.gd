@@ -225,6 +225,7 @@ func _on_rat_died() -> void:
 	PlayerData.set_objective(null, "Explore deeper into the wetlands")
 
 	PlayerData.q02_completed = true
+	PlayerData.award_progression_reward("q02_complete", 40.0)
 	completed.emit()
 
 ## Waits for the player to tap through the currently-shown subtitle before

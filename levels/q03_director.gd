@@ -267,6 +267,7 @@ func _play_frog_conversation() -> void:
 func _on_habitat_restored() -> void:
 	if _state != SequenceState.AWAITING_RESTORE:
 		return
+	PlayerData.award_progression_reward("native_frog_rescue", 40.0, 3)
 	_state = SequenceState.DONE
 
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
