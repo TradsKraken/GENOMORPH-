@@ -11,8 +11,11 @@ class_name NativeFrog
 ## was the exact bug Q02's original "DisturbanceMarker" had).
 
 signal player_approached
+signal defense_health_changed(current: float, maximum: float)
+signal defense_failed
 
 @export var ambush_radius: float = 6.0
+@export var defense_max_health: float = 100.0
 
 const FrogModel = preload("res://Models/Frog.glb")
 
@@ -24,6 +27,8 @@ var _is_panicking: bool = false
 var _panic_tween: Tween = null
 var _idle_anim: String = ""
 var _jump_anim: String = ""
+var _defense_health: float = 100.0
+var _defense_active: bool = false
 
 func _ready() -> void:
 	add_to_group("native_frog")
@@ -148,6 +153,28 @@ func set_panicking(p: bool) -> void:
 	elif not p and _panic_tween != null:
 		_panic_tween.kill()
 		_panic_tween = null
+
+func begin_defense() -> void:
+	if _is_safe:
+		return
+	_defense_active = true
+	_defense_health = defense_max_health
+	set_panicking(true)
+	defense_health_changed.emit(_defense_health, defense_max_health)
+
+func stop_defense() -> void:
+	_defense_active = false
+	set_panicking(false)
+
+func take_damage(amount: float) -> void:
+	if not _defense_active or _is_safe:
+		return
+	_defense_health = maxf(0.0, _defense_health - amount)
+	defense_health_changed.emit(_defense_health, defense_max_health)
+	if _defense_health <= 0.0:
+		_defense_active = false
+		set_panicking(false)
+		defense_failed.emit()
 
 func _do_panic_jump() -> void:
 	if not _is_panicking or _is_safe:

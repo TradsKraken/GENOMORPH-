@@ -86,6 +86,10 @@ var _cleanup_progress_panel: PanelContainer
 var _cleanup_progress_bar: ProgressBar
 var _cleanup_progress_label: Label
 
+var _frog_defense_panel: PanelContainer
+var _frog_defense_bar: ProgressBar
+var _frog_defense_label: Label
+
 var _notification_panel: PanelContainer
 var _notification_title: Label
 var _notification_text: RichTextLabel
@@ -157,6 +161,7 @@ func _ready() -> void:
 	_build_genome_popup()
 	_build_minimap()
 	_build_zone_status()
+	_build_frog_defense_status()
 	_build_notification_panel()
 	_build_knowledge_toast()
 
@@ -415,6 +420,64 @@ func _build_cleanup_progress() -> void:
 
 	_root.add_child(_cleanup_progress_panel)
 	_cleanup_progress_panel.visible = false
+
+# ── Native Frog Defense (Q03) ───────────────────────────────────────────────
+
+func _build_frog_defense_status() -> void:
+	if is_instance_valid(_frog_defense_panel):
+		return
+
+	_frog_defense_panel = PanelContainer.new()
+	_frog_defense_panel.name = "FrogDefensePanel"
+	_frog_defense_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_frog_defense_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_frog_defense_panel.offset_top = 172.0
+	_frog_defense_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.14, 0.035, 0.045, 0.91)
+	panel_style.border_color = Color(1.0, 0.38, 0.46, 0.95)
+	panel_style.set_border_width_all(2)
+	panel_style.set_corner_radius_all(12)
+	panel_style.content_margin_left = 18
+	panel_style.content_margin_right = 18
+	panel_style.content_margin_top = 7
+	panel_style.content_margin_bottom = 9
+	_frog_defense_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 4)
+	_frog_defense_panel.add_child(box)
+	_frog_defense_label = Label.new()
+	_frog_defense_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_frog_defense_label.add_theme_font_size_override("font_size", 14)
+	_frog_defense_label.add_theme_color_override("font_color", Color(1.0, 0.80, 0.82))
+	box.add_child(_frog_defense_label)
+	_frog_defense_bar = ProgressBar.new()
+	_frog_defense_bar.custom_minimum_size = Vector2(285, 13)
+	_frog_defense_bar.show_percentage = false
+	_frog_defense_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(0.08, 0.01, 0.02, 0.95)
+	bar_bg.set_corner_radius_all(7)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = Color(0.98, 0.27, 0.34)
+	bar_fill.set_corner_radius_all(7)
+	_frog_defense_bar.add_theme_stylebox_override("background", bar_bg)
+	_frog_defense_bar.add_theme_stylebox_override("fill", bar_fill)
+	box.add_child(_frog_defense_bar)
+	_root.add_child(_frog_defense_panel)
+	_frog_defense_panel.visible = false
+
+func show_frog_defense(current: float, maximum: float) -> void:
+	_build_frog_defense_status()
+	_frog_defense_bar.max_value = maximum
+	_frog_defense_bar.value = clampf(current, 0.0, maximum)
+	_frog_defense_label.text = "PROTECT NATIVE FROG  %d / %d" % [roundi(current), roundi(maximum)]
+	_frog_defense_panel.visible = true
+
+func hide_frog_defense() -> void:
+	if is_instance_valid(_frog_defense_panel):
+		_frog_defense_panel.visible = false
 
 # ── Cinematic Notification Banner ─────────────────────────────────────────────
 

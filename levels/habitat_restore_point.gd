@@ -79,6 +79,11 @@ func _register_trash(trash: Node) -> void:
 	else:
 		return
 
+	# Q03 trash is part of a later objective. Lock it immediately after it is
+	# registered so a player cannot clear/save it before reaching this phase.
+	if trash.has_method("set_cleanup_enabled"):
+		trash.set_cleanup_enabled(_cleanup_started)
+
 	_registered_trash.append(trash)
 	_trash_count += 1
 	_trash_total += 1
@@ -90,6 +95,9 @@ func begin_cleanup() -> void:
 		return
 
 	_cleanup_started = true
+	for trash in _registered_trash:
+		if is_instance_valid(trash) and trash.has_method("set_cleanup_enabled"):
+			trash.set_cleanup_enabled(true)
 	if _trash_count > 0:
 		PlayerData.set_objective(null, "Clear the habitat trash", "%d remaining" % _trash_count)
 		_update_cleanup_progress()

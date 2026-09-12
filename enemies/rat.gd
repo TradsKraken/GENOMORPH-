@@ -8,6 +8,7 @@ var _idle_anim: String = ""
 var _walk_anim: String = ""
 var _attack_anim: String = ""
 var is_spawning: bool = false
+var _defense_target: Node3D = null
 
 func _ready() -> void:
 	max_health = 25.0
@@ -105,6 +106,23 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 		if ap:
 			return ap
 	return null
+
+## Q03's rats begin by attacking the threatened native frog. The first hit
+## from the player pulls their attention away, making protection an active
+## combat choice instead of a passive countdown.
+func set_defense_target(defense_target: Node3D) -> void:
+	_defense_target = defense_target
+	target = defense_target
+	current_state = AIState.CHASE
+
+func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
+	super.take_damage(amount, knockback)
+	if is_dead or target != _defense_target:
+		return
+	var player := get_tree().get_first_node_in_group("player") as Node3D
+	if is_instance_valid(player):
+		target = player
+		current_state = AIState.CHASE
 
 func _perform_attack() -> void:
 	if _anim_player and _attack_anim != "":

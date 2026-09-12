@@ -26,13 +26,11 @@ signal cleaned
 
 var health: float = 0.0
 var is_dead: bool = false
+var _cleanup_enabled: bool = true
 
 func _ready() -> void:
 	health = cleanup_health
-	add_to_group("trash")
-	# Reuses the existing Frog attack targeting while keeping the separate
-	# "trash" group available for cleanup objectives.
-	add_to_group("enemies")
+	set_cleanup_enabled(_cleanup_enabled)
 
 	if get_tree().current_scene:
 		var scene_path := get_tree().current_scene.scene_file_path
@@ -41,7 +39,7 @@ func _ready() -> void:
 			queue_free()
 
 func take_damage(amount: float, _knockback: Vector3 = Vector3.ZERO) -> void:
-	if is_dead:
+	if is_dead or not _cleanup_enabled:
 		return
 
 	health -= amount
@@ -63,3 +61,15 @@ func clean_up() -> void:
 
 func get_trash_type_name() -> String:
 	return trash_type
+
+## Q03 locks its registered habitat trash until the cleanup objective begins.
+## Objects remain visible in the world but cannot steal attack targeting or
+## be permanently removed ahead of the intended restoration step.
+func set_cleanup_enabled(enabled: bool) -> void:
+	_cleanup_enabled = enabled
+	if enabled:
+		add_to_group("trash")
+		add_to_group("enemies")
+	else:
+		remove_from_group("trash")
+		remove_from_group("enemies")

@@ -6,12 +6,16 @@ signal destroyed
 @export var max_health: float = 30.0
 var health: float
 var is_dead: bool = false
+var _cleanup_enabled: bool = true
 
 func _ready() -> void:
 	health = max_health
-	# Must be in the "enemies" group for the player's basic attack to find and hit it
-	add_to_group("enemies")
-	add_to_group("trash")
+	set_cleanup_enabled(_cleanup_enabled)
+	# The source GLB is an asset collection: its rubbish-bin mesh is stored
+	# several metres away from the imported scene root.  Without correcting
+	# that, the visible pile, its collider, and the point the player attacks do
+	# not agree.  Do this deferred so every imported mesh is in the scene tree.
+	call_deferred("_align_visual_and_collision")
 	
 	if get_tree().current_scene:
 		var scene_path = get_tree().current_scene.scene_file_path
@@ -21,6 +25,71 @@ func _ready() -> void:
 			return
 			
 	_add_highlight_effect()
+
+func _align_visual_and_collision() -> void:
+	var meshes: Array[MeshInstance3D] = []
+	_collect_meshes(self, meshes)
+	var trash_mesh := _find_rubbish_mesh(meshes)
+	if trash_mesh == null:
+		push_warning("TrashPile could not find the rubbish-bin mesh to align its collision.")
+		return
+
+	# This GLB also contains decorative cattails, roots, and a rock.  They are
+	# separate assets rather than part of the rubbish pile, so keep only the
+	# actual bin mesh in this reusable cleanup prop.
+	for mesh in meshes:
+		mesh.visible = mesh == trash_mesh
+
+	var bounds := _get_world_bounds(trash_mesh)
+	if bounds.size == Vector3.ZERO:
+		return
+
+	# Place the centre of the bins above this node and sit their lowest point on
+	# the ground.  The StaticBody3D root is now exactly where the player sees it.
+	var desired_center := global_position + Vector3(0.0, bounds.size.y * 0.5, 0.0)
+	trash_mesh.global_position += desired_center - bounds.get_center()
+	bounds = _get_world_bounds(trash_mesh)
+	_fit_collision_to_bounds(bounds)
+
+func _collect_meshes(node: Node, meshes: Array[MeshInstance3D]) -> void:
+	for child in node.get_children():
+		if child is MeshInstance3D:
+			meshes.append(child)
+		_collect_meshes(child, meshes)
+
+func _find_rubbish_mesh(meshes: Array[MeshInstance3D]) -> MeshInstance3D:
+	for mesh in meshes:
+		var mesh_name := mesh.name.to_lower()
+		if "rubbish" in mesh_name or "bin" in mesh_name or "trash" in mesh_name:
+			return mesh
+	return null
+
+func _get_world_bounds(mesh: MeshInstance3D) -> AABB:
+	var local_bounds := mesh.get_aabb()
+	var first_corner := true
+	var bounds := AABB()
+	for x in [local_bounds.position.x, local_bounds.end.x]:
+		for y in [local_bounds.position.y, local_bounds.end.y]:
+			for z in [local_bounds.position.z, local_bounds.end.z]:
+				var corner := mesh.global_transform * Vector3(x, y, z)
+				if first_corner:
+					bounds.position = corner
+					first_corner = false
+				else:
+					bounds = bounds.expand(corner)
+	return bounds
+
+func _fit_collision_to_bounds(world_bounds: AABB) -> void:
+	var collision := get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if collision == null or not collision.shape is BoxShape3D:
+		return
+
+	# Each placed pile needs its own shape; otherwise resizing a shared scene
+	# resource would make every pile inherit the last pile's dimensions.
+	collision.shape = collision.shape.duplicate()
+	var box := collision.shape as BoxShape3D
+	box.size = world_bounds.size + Vector3(0.15, 0.05, 0.15)
+	collision.global_position = world_bounds.get_center()
 
 func _add_highlight_effect() -> void:
 	# Add a pulsing light to draw attention
@@ -36,7 +105,7 @@ func _add_highlight_effect() -> void:
 	tw.tween_property(light, "light_energy", 0.5, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func take_damage(amount: float, _knockback: Vector3 = Vector3.ZERO) -> void:
-	if is_dead:
+	if is_dead or not _cleanup_enabled:
 		return
 		
 	health -= amount
@@ -64,6 +133,17 @@ func die() -> void:
 	
 	destroyed.emit()
 	queue_free()
+
+## Used by HabitatRestorePoint to keep Q03's cleanup props intact until its
+## restoration phase is active. Other TrashPile instances remain enabled.
+func set_cleanup_enabled(enabled: bool) -> void:
+	_cleanup_enabled = enabled
+	if enabled:
+		add_to_group("enemies")
+		add_to_group("trash")
+	else:
+		remove_from_group("enemies")
+		remove_from_group("trash")
 
 func _spawn_destruction_particles() -> void:
 	var particles = GPUParticles3D.new()
