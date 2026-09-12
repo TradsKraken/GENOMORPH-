@@ -33,6 +33,8 @@ var _species_toggle: Button
 var _species_toggle_portrait: TextureRect
 var _species_toggle_symbol: Label
 var _species_selector_expanded: bool = false
+var _salamander_guide_active: bool = false
+var _species_guide_tween: Tween
 
 var _interact_btn: Button
 var _current_interact_source: Node
@@ -865,6 +867,31 @@ func _set_species_selector_expanded(expanded: bool) -> void:
 		_species_selector.modulate.a = 0.0
 		var tween := create_tween()
 		tween.tween_property(_species_selector, "modulate:a", 1.0, 0.12)
+	if _salamander_guide_active:
+		_update_species_guide_highlight()
+
+func guide_salamander_transformation() -> void:
+	_salamander_guide_active = PlayerData.active_species != "salamander"
+	_update_species_guide_highlight()
+
+func _update_species_guide_highlight() -> void:
+	if _species_guide_tween and _species_guide_tween.is_valid():
+		_species_guide_tween.kill()
+	if is_instance_valid(_species_toggle):
+		_species_toggle.self_modulate = Color.WHITE
+	for button in _species_slot_buttons.values():
+		if is_instance_valid(button):
+			button.self_modulate = Color.WHITE
+	if not _salamander_guide_active:
+		return
+	var target := _species_toggle
+	if _species_selector_expanded:
+		target = _species_slot_buttons.get("salamander") as Button
+	if not is_instance_valid(target):
+		return
+	_species_guide_tween = create_tween().set_loops()
+	_species_guide_tween.tween_property(target, "self_modulate", Color(1.5, 1.5, 0.8), 0.55)
+	_species_guide_tween.tween_property(target, "self_modulate", Color.WHITE, 0.55)
 
 func _refresh_species_selector() -> void:
 	var active_slot: Dictionary = {"id": "frog", "name": "Frog", "short_name": "FROG"}
@@ -945,7 +972,7 @@ func _on_species_slot_pressed(species_id: String) -> void:
 		for slot_data in _get_species_selector_slots():
 			if str(slot_data["id"]) == species_id:
 				selected_name = str(slot_data["name"])
-		show_notification(selected_name + " Profile Active", "Transformation profile selected.", 2.5)
+		show_notification(selected_name + " Form Active", "Transformation complete. Move around and try your attacks.", 3.5)
 	_refresh_species_selector()
 	_set_species_selector_expanded(false)
 
@@ -2091,7 +2118,7 @@ func start_tutorial() -> void:
 
 	await _tut_spotlight(_skill3_btn,
 		"ULTIMATE \u2014 LOCKED \u2620\ufe0f",
-		"Your [b]Ultimate Ability[/b] is currently locked.\n\nCollect [color=#33ff88]Genome Fragments[/color] scattered through the environment to reconstruct your suit and unlock its full power.",
+		"Your [b]Ultimate Ability[/b] is currently locked.\n\n[color=#33ff88]Genome Fragments[/color] help reconstruct your suit.\n\n[b]Species genomes[/b], like the Salamander genome, unlock new forms. Follow your objectives to discover them.",
 		"Tap to acknowledge")
 
 	await _tut_finish()
@@ -2303,7 +2330,7 @@ func _tut_spotlight_in_canvas(target: Control, canvas: Node, title: String, desc
 
 func _tut_finish() -> void:
 	_tut_title_lbl.text = "FIELD BRIEFING COMPLETE"
-	_tut_desc_lbl.text = "You are now fully operational, Volunteer.\n\nSterling is standing by on comms. The ecosystem is counting on you.\n\nFind the first [color=#33ff88]Genome Fragment[/color] and begin the reconstruction."
+	_tut_desc_lbl.text = "Your suit is ready, Volunteer. Sterling is standing by on comms.\n\nFollow your [color=#33ff88]current objective[/color] to help the wetland and search for lost genomes.\n\n[b]Fragments repair the suit. Species genomes unlock forms.[/b]"
 	_tut_tap_hint.text = "\u25bc Tap anywhere to begin"
 	var vp = get_viewport().get_visible_rect().size
 	await get_tree().process_frame
@@ -2948,6 +2975,9 @@ func _connect_signals() -> void:
 	_refresh_species_selector()
 
 func _on_active_species_changed(_species_id: String) -> void:
+	if _species_id == "salamander":
+		_salamander_guide_active = false
+	_update_species_guide_highlight()
 	_rebuild_species_selector()
 
 func _on_skill1_cooldown(duration: float) -> void:

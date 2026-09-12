@@ -25,6 +25,7 @@ enum SequenceState {
 	FIGHTING_RATS,
 	AWAITING_RESTORE,
 	AWAITING_GENOME,
+	AWAITING_TRANSFORMATION,
 	DONE
 }
 
@@ -260,6 +261,9 @@ func _play_frog_conversation() -> void:
 	_hud.show_subtitle("STERLING (RADIO)", "...Did you just have a conversation with a frog? Log that. Focus — the restoration comes first.", 5.0)
 	await _wait_for_dialogue()
 
+	_hud.show_subtitle("STERLING (RADIO)", "There's a faint genome signal in that damaged habitat. Contamination is interfering. Clear the trash, then use the Purification Module so the suit can read it.", 7.0)
+	await _wait_for_dialogue()
+
 func _on_habitat_restored() -> void:
 	if _state != SequenceState.AWAITING_RESTORE:
 		return
@@ -273,7 +277,7 @@ func _on_habitat_restored() -> void:
 	if not is_instance_valid(_hud):
 		_hud = get_tree().get_first_node_in_group("hud")
 	if _hud and _hud.has_method("show_subtitle"):
-		_hud.show_subtitle("STERLING (RADIO)", "Habitat restored. I found the signal — a Salamander genome is close by. Recover it.", 5.0)
+		_hud.show_subtitle("STERLING (RADIO)", "The contamination is gone — the suit can read the signal now. It's the lost Salamander genome! Follow the marker and recover it to unlock Salamander form.", 7.0)
 
 	await _wait_for_dialogue()
 	if PlayerData.salamander_genome_recovered:
@@ -289,7 +293,7 @@ func _on_habitat_restored() -> void:
 	site.set_active(true)
 	if not site.genome_recovered.is_connected(_on_salamander_genome_recovered):
 		site.genome_recovered.connect(_on_salamander_genome_recovered)
-	PlayerData.set_objective(site, "Recover the Salamander genome", "Follow the biological signal in the restored habitat.")
+	PlayerData.set_objective(site, "Recover the Salamander genome", "Follow the marker to the glowing Salamander signal. Approach it and tap Recover Genome.")
 
 func _get_salamander_genome_site() -> SalamanderGenomeSite:
 	var existing := get_tree().current_scene.find_child("SalamanderGenomeSite", true, false)
@@ -322,6 +326,18 @@ func _find_fixed_genome_site_point(restore_point: Node3D) -> Vector3:
 func _on_salamander_genome_recovered(_site: SalamanderGenomeSite) -> void:
 	if _state != SequenceState.AWAITING_GENOME:
 		return
+	_state = SequenceState.AWAITING_TRANSFORMATION
+	PlayerData.set_objective(null, "Try Salamander form", "Tap the form circle at the top of the screen, then select Salamander.")
+	if not PlayerData.active_species_changed.is_connected(_on_first_transformation):
+		PlayerData.active_species_changed.connect(_on_first_transformation)
+	if _hud and _hud.has_method("guide_salamander_transformation"):
+		_hud.guide_salamander_transformation()
+	_on_first_transformation(PlayerData.active_species)
+
+func _on_first_transformation(species_id: String) -> void:
+	if _state != SequenceState.AWAITING_TRANSFORMATION or species_id != "salamander":
+		return
+	PlayerData.active_species_changed.disconnect(_on_first_transformation)
 	_state = SequenceState.DONE
 	PlayerData.set_objective(null, "")
 	completed.emit()

@@ -1,12 +1,14 @@
 extends InteractableBase
 class_name SalamanderGenomeSite
 
+const SalamanderScene = preload("res://Models/Salamander/Salamander.glb")
+
 ## Q03's fixed, named discovery. It deliberately does not use
 ## GenomeFragment: this is a species genome, not another generic counter item.
 signal genome_recovered(site: SalamanderGenomeSite)
 
 @export var objective_text: String = "Recover the Salamander genome"
-@export var objective_desc: String = "Follow the signal to the recovered habitat."
+@export var objective_desc: String = "Approach the glowing Salamander signal and tap Recover Genome."
 
 var _recovered: bool = false
 var _signal_light: OmniLight3D
@@ -23,6 +25,11 @@ func _ready() -> void:
 func set_active(active: bool) -> void:
 	super.set_active(active)
 	_set_signal_visible(active and not _recovered)
+	# The player may already be standing here when purification reveals it.
+	if active and is_inside_tree():
+		for body in get_overlapping_bodies():
+			if body.is_in_group("player"):
+				_on_body_entered(body)
 
 func _process(_delta: float) -> void:
 	if _signal_light and not _recovered:
@@ -38,7 +45,7 @@ func _perform_interaction() -> void:
 	if first_recovery:
 		var hud := get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("show_notification"):
-			hud.show_notification("Salamander Genome Recovered", "Species data secured. Salamander genome unlocked.", 4.0)
+			hud.show_notification("Salamander Form Unlocked", "Species genomes unlock forms. Try Salamander using the form circle at the top of the screen.", 6.0)
 
 	genome_recovered.emit(self)
 	if _signal_light:
@@ -58,19 +65,36 @@ func _build_signal_visual() -> void:
 	visual.name = "SignalVisual"
 	add_child(visual)
 
-	var core := MeshInstance3D.new()
-	var sphere := SphereMesh.new()
-	sphere.radius = 0.38
-	sphere.height = 0.76
 	var material := StandardMaterial3D.new()
 	material.albedo_color = Color(0.18, 0.95, 0.55)
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.emission_enabled = true
 	material.emission = Color(0.12, 1.0, 0.48)
 	material.emission_energy_multiplier = 2.5
-	sphere.material = material
-	core.mesh = sphere
-	core.position.y = 1.0
-	visual.add_child(core)
+	var hologram := SalamanderScene.instantiate() as Node3D
+	visual.add_child(hologram)
+	# Normalize the imported model to a two-metre display, regardless of asset scale.
+	var bounds := AABB()
+	var has_bounds := false
+	for mesh_node in hologram.find_children("*", "MeshInstance3D", true, false):
+		var mesh := mesh_node as MeshInstance3D
+		mesh.material_override = material
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var local_bounds: AABB = (hologram.global_transform.affine_inverse() * mesh.global_transform) * mesh.get_aabb()
+		bounds = bounds.merge(local_bounds) if has_bounds else local_bounds
+		has_bounds = true
+	if has_bounds:
+		var display_scale := 2.0 / maxf(bounds.size.x, maxf(bounds.size.y, maxf(bounds.size.z, 0.01)))
+		hologram.scale = Vector3.ONE * display_scale
+		hologram.position = Vector3(0.0, 1.0, 0.0) - bounds.get_center() * display_scale
+
+	var label := Label3D.new()
+	label.text = "SALAMANDER GENOME SIGNAL"
+	label.position.y = 2.3
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.font_size = 40
+	label.pixel_size = 0.008
+	visual.add_child(label)
 
 	var ring := MeshInstance3D.new()
 	var torus := TorusMesh.new()
