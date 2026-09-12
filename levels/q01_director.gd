@@ -53,9 +53,8 @@ func _ready() -> void:
 			_start_sequence()
 
 func _start_sequence() -> void:
-	# A short beat after control is handed back, so the objective doesn't
-	# appear the instant the conversation ends.
-	await get_tree().create_timer(2.0).timeout
+	# A brief beat lets the player regain their bearings before the objective.
+	await get_tree().create_timer(0.5).timeout
 
 	# The HUD's quest display reads from PlayerData.current_objective_text/desc
 	# (see hud.gd) — not from the separate QuestManager autoload, which

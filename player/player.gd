@@ -83,6 +83,8 @@ var _attack_debug_timer: float = 0.0 # TEMPORARY — remove once the attack-spam
 @export var damage_cooldown_duration: float = 1.0
 var _attack_animation: String = FROG_ATTACK_ANIMATION
 var _salamander_form: Node3D
+var _ultimate_damage_tick: float = 0.0
+var _ultimate_aura: MeshInstance3D
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -98,6 +100,8 @@ func _ready() -> void:
 		InputMap.add_action("attack")
 	if not InputMap.has_action("skill1"):
 		InputMap.add_action("skill1")
+	if not InputMap.has_action("ultimate"):
+		InputMap.add_action("ultimate")
 	# Defer joystick lookup so the entire scene tree is ready first.
 	call_deferred("_find_joystick")
 	
@@ -224,7 +228,9 @@ func _find_joystick() -> void:
 
 func _physics_process(delta: float) -> void:
 	# ── Stamina recovery ─────────────────────────────────────────────────────
-	PlayerData.recover_stamina(delta, stamina_recovery_rate)
+	PlayerData.recover_stamina(delta, stamina_recovery_rate * PlayerData.get_stamina_recovery_multiplier() * PlayerData.get_ultimate_speed_multiplier())
+	PlayerData.update_ultimate(delta)
+	_process_ultimate(delta)
 	_process_auto_heal(delta)
 	if _skill1_cooldown_timer > 0.0:
 		_skill1_cooldown_timer -= delta
@@ -270,7 +276,7 @@ func _physics_process(delta: float) -> void:
 	# ── Movement / Walking ────────────────────────────────────────────────────
 	if direction != Vector3.ZERO:
 		if is_on_floor():
-			var current_speed := speed
+			var current_speed := speed * PlayerData.get_ultimate_speed_multiplier()
 			var current_accel := acceleration
 			
 			# Synchronize movement speed to the animation frame
@@ -307,6 +313,8 @@ func _physics_process(delta: float) -> void:
 			_attack()
 		if Input.is_action_just_pressed("skill1"):
 			_skill1()
+		if Input.is_action_just_pressed("ultimate"):
+			_activate_ultimate()
 
 	_attack_debug_timer += delta
 	if _attack_debug_timer > 1.0:
@@ -336,7 +344,7 @@ func take_damage(amount: float) -> void:
 	damage_cooldown_timer = damage_cooldown_duration
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
-	PlayerData.take_damage(amount)
+	PlayerData.take_damage(amount * (1.0 - PlayerData.get_ultimate_damage_reduction()))
 	
 	# Apply brief flinch (red flash) without blocking movement
 	var mesh = _find_mesh(self)
@@ -378,14 +386,68 @@ func _process_auto_heal(delta: float) -> void:
 		if _heal_timer >= 2.0:
 			_heal_timer -= 2.0
 			if PlayerData.health < PlayerData.max_health:
-				PlayerData.heal(5.0)
+				var heal_amount := 5.0 * PlayerData.get_health_recovery_multiplier()
+				if PlayerData.ultimate_active and str(PlayerData.get_current_species_data().get("equipped_ultimate_category", "")) == "defense":
+					heal_amount *= 2.0
+				PlayerData.heal(heal_amount)
 				# Visual feedback for heal
 				var hud := get_tree().get_first_node_in_group("hud")
 				if hud and hud.has_method("show_float_text"):
 					var cam := get_viewport().get_camera_3d()
 					if cam:
 						var scr := cam.unproject_position(global_position + Vector3(0, 1.5, 0))
-						hud.show_float_text("+5", scr, Color.GREEN)
+						hud.show_float_text("+%d" % roundi(heal_amount), scr, Color.GREEN)
+
+func _activate_ultimate() -> void:
+	if not PlayerData.activate_ultimate():
+		AudioManager.play_sfx("error", 1.0, 5.0)
+		return
+	AudioManager.play_sfx("level_up")
+	_create_ultimate_aura()
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud and hud.has_method("show_notification"):
+		var ultimate := PlayerData.get_equipped_ultimate_definition()
+		hud.show_notification(str(ultimate.get("name", "Ultimate")) + " Active", "%d seconds of adaptation active." % roundi(PlayerData.ultimate_remaining), 2.0)
+
+func _process_ultimate(delta: float) -> void:
+	if not PlayerData.ultimate_active:
+		if is_instance_valid(_ultimate_aura):
+			_ultimate_aura.queue_free()
+			_ultimate_aura = null
+		return
+	if is_instance_valid(_ultimate_aura):
+		_ultimate_aura.rotation.y += delta * 2.0
+	var category := str(PlayerData.get_current_species_data().get("equipped_ultimate_category", ""))
+	if category != "attack":
+		return
+	_ultimate_damage_tick -= delta
+	if _ultimate_damage_tick > 0.0:
+		return
+	_ultimate_damage_tick = 1.0
+	var level := PlayerData.get_equipped_ultimate_level()
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if enemy is Node3D and enemy.has_method("take_damage") and not enemy.get("is_dead"):
+			if global_position.distance_to((enemy as Node3D).global_position) <= 4.0:
+				enemy.take_damage(8.0 * level)
+
+func _create_ultimate_aura() -> void:
+	if is_instance_valid(_ultimate_aura):
+		_ultimate_aura.queue_free()
+	_ultimate_aura = MeshInstance3D.new()
+	var mesh := SphereMesh.new()
+	mesh.radius = 1.15
+	mesh.height = 2.3
+	var material := StandardMaterial3D.new()
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.albedo_color = Color(0.2, 1.0, 0.45, 0.22)
+	material.emission_enabled = true
+	material.emission = Color(0.1, 1.0, 0.35)
+	material.emission_energy_multiplier = 1.5
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mesh.material = material
+	_ultimate_aura.mesh = mesh
+	_ultimate_aura.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_ultimate_aura)
 
 func _find_mesh(node: Node) -> MeshInstance3D:
 	for child in node.get_children():
@@ -466,7 +528,7 @@ func execute_splash_jump(is_quick_tap: bool) -> void:
 				hud.show_float_text("TOO LATE!", scr, Color.GRAY)
 		return
 		
-	if not PlayerData.use_stamina(jump_stamina_cost):
+	if not PlayerData.use_stamina(jump_stamina_cost / PlayerData.get_ultimate_speed_multiplier()):
 		AudioManager.play_sfx("error", 1.0, 5.0)
 		return
 		
@@ -511,7 +573,7 @@ func _trigger_splashdown_aoe() -> void:
 		if enemy.has_method("take_damage") and not enemy.get("is_dead"):
 			var dist = global_position.distance_to(enemy.global_position)
 			if dist <= splash_radius:
-				enemy.take_damage(splash_damage)
+				enemy.take_damage(splash_damage * PlayerData.get_ultimate_damage_multiplier())
 				_spawn_hit_particles(enemy.global_position, 1.5)
 				hit_any = true
 				
@@ -582,7 +644,7 @@ func _attack() -> void:
 	_show_attack_range(attack_range, Color(1.0, 0.2, 0.2))
 	
 	# Cleanup objects take priority over enemies while the player is nearby.
-	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power, 1.0)
+	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power * PlayerData.get_ultimate_damage_multiplier(), 1.0)
 	var closest_enemy := _find_attack_target(attack_range)
 	var closest_dist: float = attack_range
 	if closest_enemy:
@@ -620,8 +682,8 @@ func _skill1() -> void:
 		return
 		
 	_is_using_skill = true
-	_skill1_cooldown_timer = 3.0
-	PlayerData.skill1_cooldown_started.emit(3.0)
+	_skill1_cooldown_timer = 3.0 * PlayerData.get_cooldown_multiplier()
+	PlayerData.skill1_cooldown_started.emit(_skill1_cooldown_timer)
 	
 	_time_since_combat = 0.0
 	_heal_timer = 0.0
@@ -631,7 +693,7 @@ func _skill1() -> void:
 	_show_attack_range(attack_range, Color(0.2, 0.6, 1.0))
 	
 	# Sticky Tongue Whip also prioritizes nearby cleanup targets.
-	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power, 1.5)
+	var damage = DamageCalculator.calculate_player_damage(PlayerData.attack_power * PlayerData.get_ultimate_damage_multiplier(), 1.5)
 	var closest_enemy := _find_attack_target(attack_range)
 					
 	if closest_enemy:

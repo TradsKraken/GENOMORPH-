@@ -1484,8 +1484,9 @@ func _build_action_buttons() -> void:
 		_skill3_btn.offset_bottom = -190
 		_skill3_btn.offset_left   = -140
 		_skill3_btn.offset_top    = -270
-	_skill3_btn.disabled = true
-	_skill3_btn.modulate = Color(0.5, 0.5, 0.5, 0.5) # Locked visual state
+	if skill3_is_new:
+		_skill3_btn.pressed.connect(func(): Input.action_press("ultimate"); Input.action_release("ultimate"))
+	_refresh_ultimate_button()
 
 	# 5. Interact Button
 	var interact_is_new = not _root.has_node("InteractBtn")
@@ -2948,6 +2949,10 @@ func _connect_signals() -> void:
 		pd.active_species_changed.connect(_on_active_species_changed)
 	if pd.has_signal("species_unlocked"):
 		pd.species_unlocked.connect(_rebuild_species_selector)
+	if pd.has_signal("progression_changed"):
+		pd.progression_changed.connect(func(_species_id: String): _refresh_ultimate_button())
+	if pd.has_signal("ultimate_state_changed"):
+		pd.ultimate_state_changed.connect(_on_ultimate_state_changed)
 	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
 	if PlayerData.has_signal("knowledge_read"):
 		PlayerData.knowledge_read.connect(_on_knowledge_read)
@@ -2973,12 +2978,29 @@ func _connect_signals() -> void:
 	_exp_bar.value      = pd.experience
 	_lvl_lbl.text       = str(pd.level)
 	_refresh_species_selector()
+	_refresh_ultimate_button()
 
 func _on_active_species_changed(_species_id: String) -> void:
 	if _species_id == "salamander":
 		_salamander_guide_active = false
 	_update_species_guide_highlight()
 	_rebuild_species_selector()
+	_refresh_ultimate_button()
+
+func _refresh_ultimate_button() -> void:
+	if not is_instance_valid(_skill3_btn):
+		return
+	var definition := PlayerData.get_equipped_ultimate_definition()
+	var level := PlayerData.get_equipped_ultimate_level()
+	var unlocked := level > 0
+	_skill3_btn.disabled = not unlocked or PlayerData.ultimate_active
+	_skill3_btn.modulate = Color.WHITE if unlocked else Color(0.5, 0.5, 0.5, 0.5)
+	_skill3_btn.tooltip_text = "%s Lv%d" % [str(definition.get("name", "Ultimate locked")), level] if unlocked else "Develop an Ultimate in Character Telemetry"
+
+func _on_ultimate_state_changed(active: bool, remaining: float) -> void:
+	_refresh_ultimate_button()
+	if active and is_instance_valid(_skill3_btn):
+		_skill3_btn.tooltip_text = "Ultimate active: %ds" % ceili(remaining)
 
 func _on_skill1_cooldown(duration: float) -> void:
 	if not is_instance_valid(_skill1_btn): return
@@ -3317,8 +3339,8 @@ func play_boot_sequence() -> void:
 			child.modulate.a = 0.0
 			
 	var tw = create_tween()
-	tw.tween_interval(2.0)
-	tw.tween_property(boot_overlay, "color:a", 0.0, 3.0)
+	tw.tween_interval(0.25)
+	tw.tween_property(boot_overlay, "color:a", 0.0, 0.8)
 	
 	tw.tween_callback(func():
 		var hud_tw = create_tween()
@@ -3326,9 +3348,9 @@ func play_boot_sequence() -> void:
 			if child is CanvasItem and child != boot_overlay and child != _subtitle_panel and child != _menu_panel and child != _tutorial_panel:
 				hud_tw.tween_property(child, "modulate:a", 1.0, 0.5)
 				hud_tw.tween_interval(0.2)
-	).set_delay(2.0)
+	).set_delay(0.25)
 	
-	tw.tween_callback(boot_overlay.queue_free).set_delay(1.0)
+	tw.tween_callback(boot_overlay.queue_free).set_delay(0.25)
 
 func get_fog_data() -> String:
 	if _fog_manager and _fog_manager.has_method("get_fog_data"):

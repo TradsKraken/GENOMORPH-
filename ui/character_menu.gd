@@ -198,90 +198,77 @@ func _build_skills_tab() -> void:
 	skills_tab.add_theme_constant_override("margin_bottom", 24)
 	_tab_container.add_child(skills_tab)
 	
-	var vbox = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	skills_tab.add_child(vbox)
-	
-	var sp_lbl = Label.new()
-	sp_lbl.text = "Available Skill Points: " + str(PlayerData.skill_points)
-	sp_lbl.add_theme_font_override("font", tech_font)
-	sp_lbl.add_theme_font_size_override("font_size", 24)
-	sp_lbl.add_theme_color_override("font_color", Color(0.9, 0.8, 0.3))
-	vbox.add_child(sp_lbl)
-	
-	var create_upgrade = func(title: String, desc: String, action: Callable):
-		var hbox = HBoxContainer.new()
-		
-		var info_vbox = VBoxContainer.new()
-		info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		
-		var t_lbl = Label.new()
-		t_lbl.text = title
-		t_lbl.add_theme_font_override("font", tech_font)
-		t_lbl.add_theme_font_size_override("font_size", 22)
-		t_lbl.add_theme_color_override("font_color", Color(1, 1, 1))
-		info_vbox.add_child(t_lbl)
-		
-		var d_lbl = Label.new()
-		d_lbl.text = desc
-		d_lbl.add_theme_font_override("font", tech_font)
-		d_lbl.add_theme_font_size_override("font_size", 16)
-		d_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8))
-		info_vbox.add_child(d_lbl)
-		
-		hbox.add_child(info_vbox)
-		
-		var btn = Button.new()
-		btn.text = "UPGRADE (1 SP)"
-		btn.add_theme_font_override("font", tech_font)
-		btn.custom_minimum_size = Vector2(140, 40)
-		btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		
-		var normal = StyleBoxFlat.new()
-		normal.bg_color = Color(0.1, 0.2, 0.15, 0.8)
-		normal.border_color = Color(0.3, 0.8, 0.4, 0.5)
-		normal.set_border_width_all(1)
-		btn.add_theme_stylebox_override("normal", normal)
-		
-		var hover = normal.duplicate()
-		hover.bg_color = Color(0.2, 0.4, 0.25, 0.9)
-		hover.border_color = Color(0.4, 1.0, 0.5, 1.0)
-		btn.add_theme_stylebox_override("hover", hover)
-		
-		if PlayerData.skill_points <= 0:
-			btn.disabled = true
-			btn.modulate = Color(0.5, 0.5, 0.5, 0.5)
-			
-		btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
-		btn.pressed.connect(func():
-			if PlayerData.skill_points > 0:
-				PlayerData.skill_points -= 1
-				action.call()
-				# Rebuild or update
-				sp_lbl.text = "Available Skill Points: " + str(PlayerData.skill_points)
-				if PlayerData.skill_points <= 0:
-					for child in vbox.get_children():
-						if child is HBoxContainer:
-							var b = child.get_child(1) as Button
-							if b: b.disabled = true; b.modulate = Color(0.5, 0.5, 0.5, 0.5)
+	_populate_skills_tab(skills_tab)
+
+func _populate_skills_tab(skills_tab: MarginContainer) -> void:
+	for child in skills_tab.get_children():
+		child.queue_free()
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	skills_tab.add_child(scroll)
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 10)
+	scroll.add_child(vbox)
+	var profile := PlayerData.get_current_species_data()
+	var header := Label.new()
+	header.text = "%s ADAPTATION PROFILE  •  %d AP  •  %d GENOME" % [PlayerData.active_species.to_upper(), PlayerData.skill_points, int(profile.get("genomes_available", 0))]
+	header.add_theme_font_override("font", tech_font)
+	header.add_theme_font_size_override("font_size", 20)
+	header.add_theme_color_override("font_color", Color(0.9, 0.8, 0.3))
+	vbox.add_child(header)
+	var section := Label.new()
+	section.text = "BIOLOGICAL ATTRIBUTES"
+	section.add_theme_font_override("font", tech_font)
+	section.add_theme_font_size_override("font_size", 16)
+	section.add_theme_color_override("font_color", Color(0.45, 0.9, 0.72))
+	vbox.add_child(section)
+	for attribute_id in PlayerData.ATTRIBUTE_DEFINITIONS:
+		var definition: Dictionary = PlayerData.ATTRIBUTE_DEFINITIONS[attribute_id]
+		var count := PlayerData.get_attribute_upgrade_count(attribute_id)
+		var cost := PlayerData.get_attribute_upgrade_cost(attribute_id)
+		var row := HBoxContainer.new()
+		var label := Label.new()
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_override("font", tech_font)
+		label.text = "%s  Lv%d  —  %s" % [definition["name"], count, definition["description"]]
+		row.add_child(label)
+		var button := Button.new()
+		button.text = "+  (%d AP)" % cost
+		button.disabled = PlayerData.skill_points < cost
+		button.pressed.connect(func():
+			if PlayerData.upgrade_attribute(attribute_id):
+				AudioManager.play_sfx("level_up")
+				_populate_skills_tab(skills_tab)
 		)
-		hbox.add_child(btn)
-		
-		vbox.add_child(hbox)
-		
-	create_upgrade.call("Vitality Synthesis", "Increase Max Health by 20.", func():
-		PlayerData.max_health += 20.0
-		PlayerData.health += 20.0
-		PlayerData.health_changed.emit(PlayerData.health, PlayerData.max_health)
-	)
-	create_upgrade.call("Endurance Weave", "Increase Max Stamina by 20.", func():
-		PlayerData.max_stamina += 20.0
-		PlayerData.stamina += 20.0
-		PlayerData.stamina_changed.emit(PlayerData.stamina, PlayerData.max_stamina)
-	)
-	create_upgrade.call("Muscle Density", "Increase Attack Power by 5.", func():
-		PlayerData.attack_power += 5.0
-	)
+		row.add_child(button)
+		vbox.add_child(row)
+	var ultimate_header := Label.new()
+	ultimate_header.text = "ULTIMATE ADAPTATION  •  Spend 1 Genome to develop or equip a path"
+	ultimate_header.add_theme_font_override("font", tech_font)
+	ultimate_header.add_theme_font_size_override("font_size", 16)
+	ultimate_header.add_theme_color_override("font_color", Color(0.45, 0.9, 0.72))
+	vbox.add_child(ultimate_header)
+	for category in ["attack", "defense", "agility"]:
+		var ultimate: Dictionary = PlayerData.ULTIMATE_DEFINITIONS.get(PlayerData.active_species, {}).get(category, {})
+		var level := int(profile.get(category + "_ultimate_level", 0))
+		var equipped: bool = str(profile.get("equipped_ultimate_category", "")) == category
+		var row := HBoxContainer.new()
+		var label := Label.new()
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_override("font", tech_font)
+		label.text = "%s%s  Lv%d — %s" % [category.to_upper() + ": ", str(ultimate.get("name", "Unknown")), level, "EQUIPPED" if equipped else str(ultimate.get("description", ""))]
+		row.add_child(label)
+		var button := Button.new()
+		button.text = "MAX" if level >= 3 else "DEVELOP"
+		button.disabled = level >= 3 or int(profile.get("genomes_available", 0)) < 1
+		button.pressed.connect(func():
+			if PlayerData.develop_ultimate(category):
+				AudioManager.play_sfx("level_up")
+				_populate_skills_tab(skills_tab)
+		)
+		row.add_child(button)
+		vbox.add_child(row)
 
 
 func _build_inventory_tab() -> void:
