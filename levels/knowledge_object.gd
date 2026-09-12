@@ -61,6 +61,7 @@ func _perform_interaction() -> void:
 	if not _is_scanned:
 		_is_scanned = true
 		PlayerData.unlock_knowledge(knowledge_id)
+		PlayerData.award_progression_reward("investigation:" + knowledge_id, 5.0)
 
 		if _hud and _hud.has_method("show_knowledge_unlocked"):
 			var title = db_entry.get("title", "Discovery")

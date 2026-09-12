@@ -3,7 +3,7 @@ extends CharacterBody3D
 
 @export var max_health: float = 50.0
 @export var speed: float = 2.0
-@export var exp_value: float = 10.0
+@export var exp_value: float = 3.0
 @export var enemy_level: int = 1
 @export var label_height_offset: float = 1.8
 @export var base_scale: float = 1.0
@@ -31,6 +31,7 @@ var knockback_velocity: Vector3 = Vector3.ZERO
 
 var health: float
 var is_dead: bool = false
+var stagger_remaining: float = 0.0
 var is_dynamic: bool = false
 var target: Node3D = null
 
@@ -161,6 +162,7 @@ func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
 	if is_dead or not visible:
 		return
 	
+	PlayerData.gain_ultimate_charge(minf(maxf(0.0, amount), health) * 0.25)
 	health -= amount
 	_show_damage_text(amount)
 	knockback_velocity = knockback
@@ -196,6 +198,12 @@ func die() -> void:
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
+		return
+	if stagger_remaining > 0.0:
+		stagger_remaining -= delta
+		velocity = knockback_velocity
+		knockback_velocity = knockback_velocity.move_toward(Vector3.ZERO, delta * 20.0)
+		move_and_slide()
 		return
 	
 	if target == null:
@@ -372,12 +380,12 @@ func _spawn_exp_orb() -> void:
 	var exp_script = load("res://levels/exp_orb.gd")
 	if exp_script:
 		AudioManager.play_sfx("exp_drop", randf_range(0.9, 1.1))
-		var orb_count := randi_range(5, 10)
+		var orb_count := 1
 		for i in range(orb_count):
 			var orb = exp_script.new()
 			orb.global_position = global_position
 			if "exp_grant" in orb:
-				orb.exp_grant = 2.0
+				orb.exp_grant = exp_value
 			if "velocity" in orb:
 				var angle = randf() * TAU
 				var spd = randf_range(3.0, 7.0)

@@ -15,6 +15,14 @@ signal salamander_genome_unlocked
 signal species_unlocked(species_id: String)
 signal active_species_changed(species_id: String)
 signal skill1_cooldown_started(duration: float)
+signal progression_changed(species_id: String)
+signal ultimate_charge_changed(charge: float)
+signal genome_earned(species_id: String)
+signal adaptation_level_gained(new_level: int)
+signal skill2_cooldown_started(duration: float)
+
+const AdaptationRules = preload("res://systems/adaptation_rules.gd")
+signal ultimate_state_changed(active: bool, remaining: float)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
 var current_objective_desc: String = ""
@@ -74,10 +82,44 @@ var species_progression: Dictionary = {
 	}
 }
 
+const ATTRIBUTE_DEFINITIONS := {
+	"health": {"key": "health_upgrades", "name": "Health", "description": "+5% capacity per upgrade; strongest health adaptation sets shared maximum"},
+	"attack": {"key": "attack_power_upgrades", "name": "Attack Power", "description": "+6 ATK per AP invested; base ATK grows with level"},
+	"stamina": {"key": "stamina_upgrades", "name": "Stamina", "description": "+5% maximum stamina per upgrade"},
+	"stamina_recovery": {"key": "stamina_recovery_upgrades", "name": "Stamina Recovery", "description": "+5% stamina recovery per upgrade"},
+	"cooldown": {"key": "cooldown_reduction_upgrades", "name": "Cooldown Reduction", "description": "-3% ability cooldown per upgrade"},
+	"health_recovery": {"key": "health_recovery_upgrades", "name": "Health Recovery", "description": "+5% health recovery per upgrade"}
+}
+
+const ULTIMATE_DEFINITIONS = AdaptationRules.ULTIMATES
+var ultimate_active: bool = false
+var ultimate_remaining: float = 0.0
+var ultimate_charge: float = 0.0
+var _ultimate_effects: Dictionary = {}
+var claimed_progression_rewards: Dictionary = {}
+
+func _make_species_profile() -> Dictionary:
+	return {
+		"is_unlocked": true, "current_xp": 0.0, "current_level": 1, "unspent_ap": 0,
+		"health_upgrades": 0, "attack_power_upgrades": 0, "stamina_upgrades": 0,
+		"stamina_recovery_upgrades": 0, "cooldown_reduction_upgrades": 0, "health_recovery_upgrades": 0,
+		"genomes_earned": 0, "genomes_spent": 0, "genomes_available": 0,
+		"attack_ultimate_level": 0, "defense_ultimate_level": 0, "agility_ultimate_level": 0,
+		"equipped_ultimate_category": ""
+	}
+
+func _ensure_profile(species_id: String) -> Dictionary:
+	if not species_progression.has(species_id):
+		species_progression[species_id] = _make_species_profile()
+	var profile: Dictionary = species_progression[species_id]
+	var defaults := _make_species_profile()
+	for key in defaults:
+		if not profile.has(key):
+			profile[key] = defaults[key]
+	return profile
+
 func get_current_species_data() -> Dictionary:
-	if not species_progression.has(active_species):
-		return {}
-	return species_progression[active_species]
+	return _ensure_profile(active_species)
 
 func is_species_unlocked(species_id: String) -> bool:
 	return species_progression.has(species_id) and species_progression[species_id].get("is_unlocked", false)
@@ -89,6 +131,7 @@ func set_active_species(species_id: String) -> bool:
 	if species_id == active_species or not is_species_unlocked(species_id):
 		return false
 	active_species = species_id
+	end_ultimate()
 	health = minf(health, max_health)
 	stamina = minf(stamina, max_stamina)
 	health_changed.emit(health, max_health)
@@ -96,7 +139,163 @@ func set_active_species(species_id: String) -> bool:
 	exp_changed.emit(experience, exp_to_next)
 	level_changed.emit(level)
 	active_species_changed.emit(active_species)
+	skill_points_changed.emit(skill_points)
+	progression_changed.emit(active_species)
 	return true
+
+func get_attribute_upgrade_count(attribute_id: String) -> int:
+	var definition: Dictionary = ATTRIBUTE_DEFINITIONS.get(attribute_id, {})
+	return int(get_current_species_data().get(definition.get("key", ""), 0))
+
+func get_attribute_upgrade_cost(attribute_id: String) -> int:
+	return AdaptationRules.attribute_cost(get_attribute_upgrade_count(attribute_id))
+
+func attribute_value(attribute_id: String, extra: int = 0) -> String:
+	var count := get_attribute_upgrade_count(attribute_id) + extra
+	match attribute_id:
+		"health": return "%.1f shared HP" % maxf(max_health, base_shared_health * (1.0 + 0.05 * count))
+		"attack": return "%.1f ATK" % (15.0 + 4.0 * (level - 1) + 6.0 * AdaptationRules.total_attribute_cost(count))
+		"stamina": return "%.1f stamina" % (float(AdaptationRules.SPECIES.get(active_species, {}).get("stamina", 100.0)) * (1.0 + 0.05 * count))
+		"stamina_recovery": return "%.1f/s" % (float(AdaptationRules.SPECIES.get(active_species, {}).get("recovery", 10.0)) * (1.0 + 0.05 * count))
+		"health_recovery": return "%.1f HP / 2s" % (5.0 * (1.0 + 0.05 * count))
+		"cooldown": return "-%d%%" % roundi(minf(0.75, 0.03 * count) * 100.0)
+	return ""
+
+func unlock_species(species_id: String) -> bool:
+	if not AdaptationRules.SPECIES.has(species_id) or is_species_unlocked(species_id):
+		return false
+	_ensure_profile(species_id)["is_unlocked"] = true
+	species_unlocked.emit(species_id)
+	return true
+
+func award_progression_reward(reward_id: String, xp: float, ap: int = 0) -> bool:
+	if claimed_progression_rewards.has(reward_id):
+		return false
+	claimed_progression_rewards[reward_id] = active_species
+	gain_exp(xp)
+	skill_points += maxi(0, ap)
+	progression_changed.emit(active_species)
+	return true
+
+func upgrade_attribute(attribute_id: String) -> bool:
+	if not ATTRIBUTE_DEFINITIONS.has(attribute_id):
+		return false
+	var profile := get_current_species_data()
+	var key: String = ATTRIBUTE_DEFINITIONS[attribute_id]["key"]
+	var cost := get_attribute_upgrade_cost(attribute_id)
+	if int(profile.get("unspent_ap", 0)) < cost:
+		return false
+	profile["unspent_ap"] = int(profile["unspent_ap"]) - cost
+	profile[key] = int(profile.get(key, 0)) + 1
+	if int(profile[key]) % 5 == 0:
+		profile["genomes_earned"] = int(profile.get("genomes_earned", 0)) + 1
+		profile["genomes_available"] = int(profile.get("genomes_available", 0)) + 1
+		genome_earned.emit(active_species)
+	_emit_progression_changed()
+	return true
+
+func ultimate_purchase_action(category: String) -> String:
+	if not ULTIMATE_DEFINITIONS.get(active_species, {}).has(category):
+		return "Unavailable"
+	var profile := get_current_species_data()
+	if str(profile.equipped_ultimate_category) != category:
+		return "Unlock & equip" if int(profile.get(category + "_ultimate_level", 0)) == 0 else "Switch path"
+	return "Upgrade" if int(profile.get(category + "_ultimate_level", 0)) < 3 else "Max level"
+
+func develop_ultimate(category: String) -> bool:
+	if ultimate_active or not ULTIMATE_DEFINITIONS.get(active_species, {}).has(category):
+		return false
+	var profile := get_current_species_data()
+	if int(profile.genomes_available) < 1:
+		return false
+	var key := category + "_ultimate_level"
+	var rank := int(profile[key])
+	if str(profile.equipped_ultimate_category) == category:
+		if rank >= 3:
+			return false
+		profile[key] = rank + 1
+	else:
+		# Changing specialization costs one Genome but retains its previous rank.
+		profile[key] = maxi(1, rank)
+	profile.equipped_ultimate_category = category
+	profile.genomes_available = int(profile.genomes_available) - 1
+	profile.genomes_spent = int(profile.genomes_spent) + 1
+	_emit_progression_changed()
+	return true
+
+func get_equipped_ultimate_level() -> int:
+	var category: String = str(get_current_species_data().get("equipped_ultimate_category", ""))
+	return int(get_current_species_data().get(category + "_ultimate_level", 0)) if category != "" else 0
+
+func get_equipped_ultimate_definition() -> Dictionary:
+	var category: String = str(get_current_species_data().get("equipped_ultimate_category", ""))
+	return ULTIMATE_DEFINITIONS.get(active_species, {}).get(category, {})
+
+func get_stamina_recovery_multiplier() -> float:
+	return 1.0 + 0.05 * get_attribute_upgrade_count("stamina_recovery")
+
+func get_health_recovery_multiplier() -> float:
+	return 1.0 + 0.05 * get_attribute_upgrade_count("health_recovery")
+
+func get_cooldown_multiplier() -> float:
+	return maxf(0.25, 1.0 - 0.03 * get_attribute_upgrade_count("cooldown"))
+
+func ultimate_effect(key: String, fallback: float = 1.0) -> float:
+	return float(_ultimate_effects.get(key, fallback)) if ultimate_active else fallback
+
+func get_ultimate_damage_multiplier() -> float:
+	return ultimate_effect("damage")
+
+func get_ultimate_damage_reduction() -> float:
+	return ultimate_effect("resistance", 0.0)
+
+func get_ultimate_speed_multiplier() -> float:
+	return ultimate_effect("speed")
+
+func gain_ultimate_charge(amount: float) -> void:
+	if ultimate_active or amount <= 0.0:
+		return
+	ultimate_charge = clampf(ultimate_charge + amount, 0.0, 100.0)
+	ultimate_charge_changed.emit(ultimate_charge)
+
+func can_activate_ultimate() -> bool:
+	return health > 0.0 and not ultimate_active and get_equipped_ultimate_level() > 0 and ultimate_charge >= 100.0
+
+func activate_ultimate() -> bool:
+	if not can_activate_ultimate():
+		return false
+	_ultimate_effects = AdaptationRules.effects(active_species, str(get_current_species_data().equipped_ultimate_category), get_equipped_ultimate_level())
+	if _ultimate_effects.is_empty():
+		return false
+	ultimate_active = true
+	ultimate_charge = 0.0
+	ultimate_remaining = float(_ultimate_effects.get("duration", 8.0))
+	ultimate_charge_changed.emit(ultimate_charge)
+	ultimate_state_changed.emit(true, ultimate_remaining)
+	return true
+
+func update_ultimate(delta: float) -> void:
+	if not ultimate_active:
+		return
+	ultimate_remaining = maxf(0.0, ultimate_remaining - delta)
+	if ultimate_remaining <= 0.0:
+		end_ultimate()
+	else:
+		ultimate_state_changed.emit(true, ultimate_remaining)
+
+func end_ultimate() -> void:
+	ultimate_active = false
+	ultimate_remaining = 0.0
+	_ultimate_effects.clear()
+	ultimate_state_changed.emit(false, 0.0)
+
+func _emit_progression_changed() -> void:
+	health = minf(health, max_health)
+	stamina = minf(stamina, max_stamina)
+	skill_points_changed.emit(skill_points)
+	health_changed.emit(health, max_health)
+	stamina_changed.emit(stamina, max_stamina)
+	progression_changed.emit(active_species)
 
 # ── Base Shared Stats (Tuning) ────────────────────────────────────────────────
 var base_shared_health: float = 100.0
@@ -106,8 +305,12 @@ var base_attack_power: float = 20.0
 # ── Volunteer Shared Resources ────────────────────────────────────────────────
 var max_health: float:
 	get:
-		var sp_data = get_current_species_data()
-		var upgrades = sp_data.get("health_upgrades", 0) if sp_data else 0
+		# Shared maximum is stable on transformation. Species still own their
+		# upgrade counts/Genome milestones; use the strongest developed capacity.
+		var upgrades := 0
+		for profile in species_progression.values():
+			if profile.get("is_unlocked", false):
+				upgrades = maxi(upgrades, int(profile.get("health_upgrades", 0)))
 		return base_shared_health * (1.0 + 0.05 * upgrades)
 var health: float      = 100.0
 
@@ -115,7 +318,7 @@ var max_stamina: float:
 	get:
 		var sp_data = get_current_species_data()
 		var upgrades = sp_data.get("stamina_upgrades", 0) if sp_data else 0
-		return base_species_stamina * (1.0 + 0.05 * upgrades)
+		return float(AdaptationRules.SPECIES.get(active_species, {}).get("stamina", base_species_stamina)) * (1.0 + 0.05 * upgrades)
 var stamina: float     = 100.0
 
 var level: int:
@@ -144,7 +347,7 @@ var attack_power: float:
 	get:
 		var sp_data = get_current_species_data()
 		var upgrades = sp_data.get("attack_power_upgrades", 0) if sp_data else 0
-		return base_attack_power * (1.0 + 0.05 * upgrades)
+		return 15.0 + 4.0 * (level - 1) + 6.0 * AdaptationRules.total_attribute_cost(int(upgrades))
 
 var defense: float = 5.0
 var speed: float = 4.0
@@ -268,11 +471,13 @@ func heal(amount: float) -> void:
 
 # ── EXP / Level API ───────────────────────────────────────────────────────────
 const XP_THRESHOLDS: Array[float] = [
-	0.0, 100.0, 250.0, 450.0, 700.0, 1000.0, 1350.0, 1750.0, 2200.0, 2700.0, 3250.0, 3850.0, 4500.0, 5200.0, 6000.0
+	0.0, 12.0, 26.0, 42.0, 61.0, 83.0, 108.0, 137.0, 171.0, 210.0, 256.0, 309.0, 370.0, 441.0, 524.0
 ]
 
 func gain_exp(amount: float) -> void:
-	experience += amount
+	if amount <= 0.0:
+		return
+	experience = minf(XP_THRESHOLDS[-1], experience + amount)
 	
 	var max_level = XP_THRESHOLDS.size()
 	while level < max_level and experience >= XP_THRESHOLDS[level]:
@@ -280,12 +485,14 @@ func gain_exp(amount: float) -> void:
 		
 	var next_req = XP_THRESHOLDS[level] if level < max_level else XP_THRESHOLDS[max_level - 1]
 	exp_changed.emit(experience, next_req)
+	progression_changed.emit(active_species)
 
 func _do_level_up() -> void:
 	level += 1
 	skill_points += 2
 	AudioManager.play_sfx("level_up")
 	level_changed.emit(level)
+	adaptation_level_gained.emit(level)
 
 
 # ── Knowledge Base ────────────────────────────────────────────────────────────
@@ -604,6 +811,10 @@ func save_game(slot: int = -1) -> void:
 		"speed": speed,
 		"inventory": inventory,
 		"genome_fragments": genome_fragments,
+		"species_progression": species_progression,
+		"progression_version": 2,
+		"ultimate_charge": ultimate_charge,
+		"claimed_progression_rewards": claimed_progression_rewards,
 		"active_species": active_species,
 		"salamander_genome_recovered": salamander_genome_recovered,
 		"max_genome_fragments": max_genome_fragments,
@@ -617,7 +828,7 @@ func save_game(slot: int = -1) -> void:
 		"current_scene_path": current_scene_path,
 		"timestamp": timestamp,
 		"biome_name": biome_name,
-		"active_form": "Small Native Frog",
+		"active_form": active_species.replace("_", " ").capitalize(),
 		"player_pos_x": player_position.x,
 		"player_pos_y": player_position.y,
 		"player_pos_z": player_position.z,
@@ -650,24 +861,13 @@ func load_game(slot: int = -1) -> bool:
 		if error == OK:
 			var data: Variant = json.get_data()
 			if typeof(data) == TYPE_DICTIONARY:
-				health = data.get("health", 100.0)
-				max_health = data.get("max_health", 100.0)
-				stamina = data.get("stamina", 100.0)
-				max_stamina = data.get("max_stamina", 100.0)
-				level = data.get("level", 1)
-				experience = data.get("experience", 0.0)
-				skill_points = data.get("skill_points", 0)
-				attack_power = data.get("attack_power", 10.0)
+				restore_progression(data)
+				health = clampf(float(data.get("health", max_health)), 0.0, max_health)
+				stamina = clampf(float(data.get("stamina", max_stamina)), 0.0, max_stamina)
 				defense = data.get("defense", 5.0)
 				speed = data.get("speed", 4.0)
 				inventory = data.get("inventory", [])
 				genome_fragments = data.get("genome_fragments", 0)
-				var saved_salamander_genome: bool = data.get("salamander_genome_recovered", false)
-				var saved_active_species: String = str(data.get("active_species", "frog"))
-				salamander_genome_recovered = false
-				if saved_salamander_genome:
-					recover_salamander_genome()
-				active_species = saved_active_species if is_species_unlocked(saved_active_species) else "frog"
 				frogs_helped = data.get("frogs_helped", 0)
 				total_frogs = data.get("total_frogs", 7)
 				minigame_started = data.get("minigame_started", false)
@@ -717,25 +917,70 @@ func load_game(slot: int = -1) -> bool:
 				var loaded_obj_text: String = data.get("current_objective_text", "")
 				current_objective = null
 				current_objective_text = ""
-				objective_changed.emit()
+				objective_changed.emit(null)
 				if loaded_obj_text != "":
 					call_deferred("_restore_objective", loaded_obj_path, loaded_obj_text)
 					
 				return true
 	return false
 
+func restore_progression(data: Dictionary) -> void:
+	end_ultimate()
+	species_progression = {"frog": _make_species_profile()}
+	var saved: Variant = data.get("species_progression", {})
+	if saved is Dictionary and not saved.is_empty():
+		for species_id in AdaptationRules.SPECIES:
+			if saved.get(species_id) is Dictionary:
+				species_progression[species_id] = saved[species_id].duplicate(true)
+				var profile := _ensure_profile(species_id)
+				profile.current_level = clampi(int(profile.current_level), 1, 15)
+				profile.current_xp = clampf(float(profile.current_xp), 0.0, XP_THRESHOLDS[-1])
+				profile.unspent_ap = maxi(0, int(profile.unspent_ap))
+				for attribute in ATTRIBUTE_DEFINITIONS.values():
+					profile[attribute.key] = clampi(int(profile[attribute.key]), 0, 100)
+				for category in ["attack", "defense", "agility"]:
+					var key: String = category + "_ultimate_level"
+					profile[key] = clampi(int(profile[key]), 0, 3)
+				if not ULTIMATE_DEFINITIONS[species_id].has(str(profile.equipped_ultimate_category)):
+					profile.equipped_ultimate_category = ""
+				profile.genomes_earned = maxi(0, int(profile.genomes_earned))
+				profile.genomes_spent = clampi(int(profile.genomes_spent), 0, int(profile.genomes_earned))
+				profile.genomes_available = int(profile.genomes_earned) - int(profile.genomes_spent)
+	else:
+		var profile := _ensure_profile("frog")
+		profile.current_level = clampi(int(data.get("level", 1)), 1, 15)
+		profile.current_xp = clampf(float(data.get("experience", 0.0)), 0.0, XP_THRESHOLDS[-1])
+		profile.unspent_ap = maxi(0, int(data.get("skill_points", 0)))
+		# Old flat-stat saves carry health/stamina investments but no species profiles.
+		profile.health_upgrades = maxi(0, roundi((float(data.get("max_health", 100.0)) - 100.0) / 5.0))
+		profile.stamina_upgrades = maxi(0, roundi((float(data.get("max_stamina", 100.0)) - 100.0) / 5.0))
+	salamander_genome_recovered = bool(data.get("salamander_genome_recovered", false)) or is_species_unlocked("salamander")
+	if salamander_genome_recovered:
+		_ensure_profile("salamander").is_unlocked = true
+	active_species = str(data.get("active_species", "frog"))
+	if not is_species_unlocked(active_species):
+		active_species = "frog"
+	ultimate_charge = clampf(float(data.get("ultimate_charge", 0.0)), 0.0, 100.0)
+	var rewards: Variant = data.get("claimed_progression_rewards", {})
+	claimed_progression_rewards = rewards.duplicate(true) if rewards is Dictionary else {}
+	ultimate_charge_changed.emit(ultimate_charge)
+	_emit_progression_changed()
+
 func reset_data(slot: int = -1) -> void:
 	if slot != -1:
 		current_save_slot = slot
 	active_species = "frog"
-	max_health = 100.0
+	species_progression = {"frog": _make_species_profile()}
+	end_ultimate()
+	ultimate_charge = 0.0
+	claimed_progression_rewards.clear()
+	q01_completed = false
+	q02_completed = false
 	health = 100.0
-	max_stamina = 100.0
 	stamina = 100.0
 	level = 1
 	experience = 0.0
 	skill_points = 0
-	attack_power = 10.0
 	defense = 5.0
 	speed = 4.0
 	inventory.clear()
@@ -764,4 +1009,4 @@ func reset_data(slot: int = -1) -> void:
 	
 	current_objective = null
 	current_objective_text = ""
-	objective_changed.emit()
+	objective_changed.emit(null)

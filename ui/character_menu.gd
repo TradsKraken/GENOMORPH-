@@ -1,329 +1,229 @@
 extends CanvasLayer
-
 class_name CharacterMenu
 
 signal closed
-
-var _panel: Control
+const Rules = preload("res://systems/adaptation_rules.gd")
+var _panel: PanelContainer
 var _tab_container: TabContainer
-var tech_font: SystemFont
+var _header: Label
+var _summary: Label
+var _stats: Label
+var _inventory: Label
+var _feedback: Label
+var _attribute_rows: Dictionary = {}
+var _ultimate_rows: Dictionary = {}
+var _confirmation: ConfirmationDialog
+var _pending_category := ""
+var _pending_species := ""
+var _was_paused := false
 
 func _ready() -> void:
-	layer = 100 # Ensure it's above other UI
-	process_mode = PROCESS_MODE_ALWAYS
-	
-	tech_font = SystemFont.new()
-	tech_font.font_names = PackedStringArray(["Rajdhani", "Orbitron", "Consolas", "Courier New", "monospace"])
-
-	# Full screen frosted glass background
-	var bg_rect := ColorRect.new()
-	var blur_mat := ShaderMaterial.new()
-	var shader := Shader.new()
-	shader.code = "shader_type canvas_item;\nuniform sampler2D screen_texture : hint_screen_texture, filter_linear_mipmap;\nvoid fragment(){\n\tCOLOR = mix(textureLod(screen_texture, SCREEN_UV, 2.5), vec4(0.02, 0.04, 0.08, 1.0), 0.65);\n}"
-	blur_mat.shader = shader
-	bg_rect.material = blur_mat
-	bg_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(bg_rect)
-	
-	# Center panel
-	_panel = Control.new()
-	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_panel.custom_minimum_size = Vector2(800, 500)
-	
-	# Center it properly
-	_panel.offset_left = -400
-	_panel.offset_right = 400
-	_panel.offset_top = -250
-	_panel.offset_bottom = 250
-	
-	# Tech Panel Background
-	var panel_bg := ColorRect.new()
-	panel_bg.color = Color(0.04, 0.08, 0.12, 0.9)
-	panel_bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel.add_child(panel_bg)
-	
-	# Scanlines
-	var scanlines := ColorRect.new()
-	scanlines.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var scan_mat := ShaderMaterial.new()
-	scan_mat.shader = load("res://ui/scanlines.gdshader")
-	scanlines.material = scan_mat
-	scanlines.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_panel.add_child(scanlines)
-	
-	# Mechanical Borders Overlay
-	var borders := Control.new()
-	borders.set_anchors_preset(Control.PRESET_FULL_RECT)
-	borders.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var b_script := GDScript.new()
-	b_script.source_code = "extends Control\nfunc _draw():\n\tvar c = Color(0.9, 0.7, 0.1, 0.9)\n\tvar r = get_rect().size\n\tvar l = 24.0\n\tvar t = 2.0\n\tdraw_rect(Rect2(0,0,l,t), c); draw_rect(Rect2(0,0,t,l), c)\n\tdraw_rect(Rect2(r.x-l,0,l,t), c); draw_rect(Rect2(r.x-t,0,t,l), c)\n\tdraw_rect(Rect2(0,r.y-t,l,t), c); draw_rect(Rect2(0,r.y-l,t,l), c)\n\tdraw_rect(Rect2(r.x-l,r.y-t,l,t), c); draw_rect(Rect2(r.x-t,r.y-l,t,l), c)\n\tvar c2 = Color(0.9, 0.7, 0.1, 0.4)\n\tfor p in [Vector2(40,40), Vector2(r.x-40,40), Vector2(40,r.y-40), Vector2(r.x-40,r.y-40)]:\n\t\tdraw_line(p-Vector2(8,0), p+Vector2(8,0), c2, 1)\n\t\tdraw_line(p-Vector2(0,8), p+Vector2(0,8), c2, 1)"
-	b_script.reload()
-	borders.set_script(b_script)
-	_panel.add_child(borders)
-	
-	var margin := MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	margin.add_theme_constant_override("margin_left", 24)
-	margin.add_theme_constant_override("margin_right", 24)
-	margin.add_theme_constant_override("margin_top", 24)
-	margin.add_theme_constant_override("margin_bottom", 24)
-	_panel.add_child(margin)
-	
-	var main_vbox := VBoxContainer.new()
-	main_vbox.add_theme_constant_override("separation", 16)
-	margin.add_child(main_vbox)
-	
-	# Header
-	var header_hbox := HBoxContainer.new()
-	main_vbox.add_child(header_hbox)
-	
-	var title := Label.new()
-	title.text = "CHARACTER TELEMETRY"
-	title.add_theme_font_override("font", tech_font)
-	title.add_theme_font_size_override("font_size", 28)
-	title.add_theme_color_override("font_color", Color(0.9, 0.8, 0.3))
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header_hbox.add_child(title)
-	
-	var close_btn := Button.new()
-	close_btn.text = "CLOSE"
-	close_btn.add_theme_font_override("font", tech_font)
-	close_btn.custom_minimum_size = Vector2(100, 40)
-	
-	var btn_normal := StyleBoxFlat.new()
-	btn_normal.bg_color = Color(0.05, 0.1, 0.15, 0.8)
-	btn_normal.border_color = Color(0.9, 0.7, 0.1, 0.5)
-	btn_normal.set_border_width_all(1)
-	btn_normal.set_corner_radius_all(0)
-	close_btn.add_theme_stylebox_override("normal", btn_normal)
-	
-	var btn_hover := btn_normal.duplicate()
-	btn_hover.bg_color = Color(0.3, 0.2, 0.1, 0.9)
-	btn_hover.border_color = Color(0.9, 0.8, 0.1, 1.0)
-	close_btn.add_theme_stylebox_override("hover", btn_hover)
-	
-	close_btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
-	close_btn.pressed.connect(_on_close)
-	header_hbox.add_child(close_btn)
-	
-	var sep := HSeparator.new()
-	var sep_style := StyleBoxLine.new()
-	sep_style.color = Color(0.9, 0.7, 0.1, 0.3)
-	sep_style.thickness = 1
-	sep.add_theme_stylebox_override("separator", sep_style)
-	main_vbox.add_child(sep)
-	
-	# TabContainer
+	layer = 100
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_was_paused = get_tree().paused
+	get_tree().paused = true
+	add_to_group("progression_menu")
+	var backdrop := ColorRect.new()
+	backdrop.color = Color(0.01, 0.025, 0.035, 0.94)
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(backdrop)
+	_panel = PanelContainer.new()
+	_panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_panel.offset_left = 40
+	_panel.offset_right = -40
+	_panel.offset_top = 24
+	_panel.offset_bottom = -24
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("101f26")
+	style.border_color = Color("50c99b")
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(12)
+	style.content_margin_left = 24
+	style.content_margin_right = 24
+	style.content_margin_top = 16
+	style.content_margin_bottom = 16
+	_panel.add_theme_stylebox_override("panel", style)
+	add_child(_panel)
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 10)
+	_panel.add_child(body)
+	var top := HBoxContainer.new()
+	body.add_child(top)
+	_header = _label("", 24)
+	top.add_child(_header)
+	var close := _button("CLOSE")
+	close.name = "CLOSE"
+	close.pressed.connect(_on_close)
+	top.add_child(close)
+	_summary = _label("", 18)
+	_summary.modulate = Color("8fe7bd")
+	body.add_child(_summary)
 	_tab_container = TabContainer.new()
+	_tab_container.name = "TabContainer"
 	_tab_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_tab_container.add_theme_font_override("font", tech_font)
-	_tab_container.add_theme_font_size_override("font_size", 18)
-	
-	var tab_bg := StyleBoxFlat.new()
-	tab_bg.bg_color = Color(0.02, 0.04, 0.06, 0.6)
-	tab_bg.border_color = Color(0.9, 0.7, 0.1, 0.2)
-	tab_bg.set_border_width_all(1)
-	_tab_container.add_theme_stylebox_override("panel", tab_bg)
-	_tab_container.add_theme_stylebox_override("tab_selected", btn_hover)
-	_tab_container.add_theme_stylebox_override("tab_unselected", btn_normal)
-	
-	main_vbox.add_child(_tab_container)
-	
-	_build_stats_tab()
-	_build_skills_tab()
-	_build_inventory_tab()
-	
-	_update_skills_tab_title(PlayerData.skill_points)
-	if PlayerData.has_signal("skill_points_changed"):
-		PlayerData.skill_points_changed.connect(_update_skills_tab_title)
-		
+	_tab_container.add_theme_font_size_override("font_size", 20)
+	body.add_child(_tab_container)
+	_stats = _label("", 20)
+	_tab("STATS").add_child(_stats)
+	var attributes := _tab("ATTRIBUTES")
+	attributes.add_child(_label("Spend Attribute Points (AP). Every 5 upgrades in the same attribute earns 1 adaptation Genome for this species.", 18))
+	for id in PlayerData.ATTRIBUTE_DEFINITIONS:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 18)
+		attributes.add_child(row)
+		var info := VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(info)
+		var title := _label("", 21)
+		info.add_child(title)
+		var detail := _label("", 16)
+		detail.modulate = Color("b4c9cd")
+		info.add_child(detail)
+		var upgrade := _button("")
+		upgrade.name = "Upgrade_" + str(id)
+		upgrade.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		upgrade.pressed.connect(_buy_attribute.bind(str(id)))
+		row.add_child(upgrade)
+		_attribute_rows[id] = {"title": title, "detail": detail, "button": upgrade}
+	var ultimates := _tab("ULTIMATES")
+	ultimates.add_child(_label("One path equipped per species. Unlock, upgrade or switch for 1 adaptation Genome. Switching retains the path's previous level. Fight to fill the shared meter, then tap ULT.", 18))
+	for category in ["attack", "defense", "agility"]:
+		var card := VBoxContainer.new()
+		card.add_theme_constant_override("separation", 6)
+		ultimates.add_child(card)
+		var top_row := HBoxContainer.new()
+		card.add_child(top_row)
+		var title := _label("", 22)
+		top_row.add_child(title)
+		var develop := _button("")
+		develop.name = "Develop_" + category
+		develop.pressed.connect(_ask_ultimate.bind(category))
+		top_row.add_child(develop)
+		var detail := _label("", 16)
+		card.add_child(detail)
+		var effects := _label("", 16)
+		effects.modulate = Color("8fe7bd")
+		card.add_child(effects)
+		_ultimate_rows[category] = {"title": title, "detail": detail, "effects": effects, "button": develop}
+	_inventory = _label("", 20)
+	_tab("INVENTORY").add_child(_inventory)
+	_feedback = _label("Tap your level badge to return here. Change form using the circle at the top of the game screen.", 16)
+	body.add_child(_feedback)
+	_confirmation = ConfirmationDialog.new()
+	_confirmation.title = "Develop Ultimate Adaptation"
+	_confirmation.ok_button_text = "Spend 1 Genome"
+	_confirmation.confirmed.connect(_confirm_ultimate)
+	add_child(_confirmation)
+	PlayerData.progression_changed.connect(_refresh)
+	PlayerData.active_species_changed.connect(_refresh)
+	PlayerData.skill_points_changed.connect(_on_points_changed)
+	_refresh()
 	if PlayerData.skill_points > 0:
 		_tab_container.current_tab = 1
-	
-	add_child(_panel)
 
-func _update_skills_tab_title(points: int) -> void:
-	if is_instance_valid(_tab_container) and _tab_container.get_tab_count() > 1:
-		if points > 0:
-			_tab_container.set_tab_title(1, "SKILLS (!)")
-		else:
-			_tab_container.set_tab_title(1, "SKILLS")
+func _label(text: String, font_size: int) -> Label:
+	var label := Label.new()
+	label.text = text
+	label.add_theme_font_size_override("font_size", font_size)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return label
 
+func _button(text: String) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(180, 48)
+	button.add_theme_font_size_override("font_size", 18)
+	return button
 
-func _build_stats_tab() -> void:
-	var stats_tab = MarginContainer.new()
-	stats_tab.name = "STATS"
-	stats_tab.add_theme_constant_override("margin_left", 24)
-	stats_tab.add_theme_constant_override("margin_right", 24)
-	stats_tab.add_theme_constant_override("margin_top", 24)
-	stats_tab.add_theme_constant_override("margin_bottom", 24)
-	_tab_container.add_child(stats_tab)
-	
-	var grid = GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 64)
-	grid.add_theme_constant_override("v_separation", 16)
-	stats_tab.add_child(grid)
-	
-	var add_stat = func(label: String, value: String, color: Color):
-		var lbl_name = Label.new()
-		lbl_name.text = label
-		lbl_name.add_theme_font_override("font", tech_font)
-		lbl_name.add_theme_font_size_override("font_size", 24)
-		lbl_name.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8))
-		grid.add_child(lbl_name)
-		
-		var lbl_val = Label.new()
-		lbl_val.text = value
-		lbl_val.add_theme_font_override("font", tech_font)
-		lbl_val.add_theme_font_size_override("font_size", 24)
-		lbl_val.add_theme_color_override("font_color", color)
-		grid.add_child(lbl_val)
-	
-	add_stat.call("Level", str(PlayerData.level), Color(0.9, 0.8, 0.3))
-	add_stat.call("Experience", "%d / %d" % [int(PlayerData.experience), int(PlayerData.exp_to_next)], Color(1.0, 0.8, 0.1))
-	add_stat.call("Max Health", str(PlayerData.max_health), Color(1.0, 0.3, 0.4))
-	add_stat.call("Max Stamina", str(PlayerData.max_stamina), Color(0.6, 0.3, 1.0))
-	add_stat.call("Attack Power", str(PlayerData.attack_power), Color(0.9, 0.5, 0.2))
-	add_stat.call("Defense", str(PlayerData.defense), Color(0.3, 0.8, 0.9))
-	add_stat.call("Speed", str(PlayerData.speed), Color(0.4, 0.9, 0.3))
+func _tab(title: String) -> VBoxContainer:
+	var scroll := ScrollContainer.new()
+	scroll.name = title
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_tab_container.add_child(scroll)
+	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation", 16)
+	scroll.add_child(box)
+	return box
 
+func _refresh(_species_id: String = "") -> void:
+	if not is_instance_valid(_header):
+		return
+	var data := PlayerData.get_current_species_data()
+	var species := PlayerData.active_species
+	var species_info: Dictionary = Rules.SPECIES.get(species, {})
+	_header.text = "%s — ADAPTATION PROFILE" % str(species_info.get("name", species)).to_upper()
+	_summary.text = "Level %d / 15  •  %d / %d XP  •  %d AP  •  %d adaptation Genomes  •  ULT %d%%" % [PlayerData.level, PlayerData.experience, PlayerData.exp_to_next, PlayerData.skill_points, data.genomes_available, PlayerData.ultimate_charge]
+	_tab_container.set_tab_title(1, "ATTRIBUTES (!)" if PlayerData.skill_points > 0 else "ATTRIBUTES")
+	_tab_container.set_tab_title(2, "ULTIMATES (!)" if int(data.genomes_available) > 0 else "ULTIMATES")
+	var stat_lines: PackedStringArray = [str(species_info.get("role", "")), ""]
+	for id in _attribute_rows:
+		var definition: Dictionary = PlayerData.ATTRIBUTE_DEFINITIONS[id]
+		var row: Dictionary = _attribute_rows[id]
+		var count := PlayerData.get_attribute_upgrade_count(id)
+		var cost := PlayerData.get_attribute_upgrade_cost(id)
+		row.title.text = "%s   %s → %s" % [definition.name, PlayerData.attribute_value(id), PlayerData.attribute_value(id, 1)]
+		row.detail.text = "%d upgrades  •  %d / 5 toward next Genome  •  %s" % [count, count % 5, definition.description]
+		row.button.text = "+ Upgrade · %d AP" % cost
+		row.button.disabled = PlayerData.skill_points < cost
+		stat_lines.append("%s: %s" % [definition.name, PlayerData.attribute_value(id)])
+	stat_lines.append("\nAbilities: " + " · ".join(species_info.get("skills", [])))
+	stat_lines.append("\nEarn XP from quests, investigation, restoration and combat. Each level grants 2 AP. Progress belongs to this species.")
+	_stats.text = "\n".join(stat_lines)
+	for category in _ultimate_rows:
+		var row: Dictionary = _ultimate_rows[category]
+		var definition: Dictionary = Rules.ULTIMATES.get(species, {}).get(category, {})
+		var rank := int(data.get(category + "_ultimate_level", 0))
+		var equipped := str(data.equipped_ultimate_category) == str(category)
+		var action := PlayerData.ultimate_purchase_action(category)
+		row.title.text = "%s · %s  Lv%d%s" % [str(category).to_upper(), definition.get("name", "Undiscovered"), rank, "  [EQUIPPED]" if equipped else ""]
+		row.detail.text = definition.get("description", "Recover this species first.")
+		var lines: PackedStringArray = []
+		for r in range(1, 4):
+			lines.append("Lv%d%s: %s" % [r, " (current)" if r == rank else "", Rules.effect_summary(species, category, r)])
+		row.effects.text = "\n".join(lines)
+		row.button.text = action + (" · 1 Genome" if action != "Max level" else "")
+		row.button.disabled = PlayerData.ultimate_active or int(data.genomes_available) < 1 or action in ["Max level", "Unavailable"]
+	_inventory.text = "Suit fragments: %d / %d\n%s adaptation Genomes: %d available (%d earned, %d spent)\n\nSpecies discovery unlocks a form. Adaptation Genomes come from attributes and develop its Ultimates.\n\n%s" % [PlayerData.genome_fragments, PlayerData.max_genome_fragments, str(species_info.get("name", species)), data.genomes_available, data.genomes_earned, data.genomes_spent, "\n".join(PlayerData.inventory)]
 
-func _build_skills_tab() -> void:
-	var skills_tab = MarginContainer.new()
-	skills_tab.name = "SKILLS"
-	skills_tab.add_theme_constant_override("margin_left", 24)
-	skills_tab.add_theme_constant_override("margin_right", 24)
-	skills_tab.add_theme_constant_override("margin_top", 24)
-	skills_tab.add_theme_constant_override("margin_bottom", 24)
-	_tab_container.add_child(skills_tab)
-	
-	var vbox = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	skills_tab.add_child(vbox)
-	
-	var sp_lbl = Label.new()
-	sp_lbl.text = "Available Skill Points: " + str(PlayerData.skill_points)
-	sp_lbl.add_theme_font_override("font", tech_font)
-	sp_lbl.add_theme_font_size_override("font_size", 24)
-	sp_lbl.add_theme_color_override("font_color", Color(0.9, 0.8, 0.3))
-	vbox.add_child(sp_lbl)
-	
-	var create_upgrade = func(title: String, desc: String, action: Callable):
-		var hbox = HBoxContainer.new()
-		
-		var info_vbox = VBoxContainer.new()
-		info_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		
-		var t_lbl = Label.new()
-		t_lbl.text = title
-		t_lbl.add_theme_font_override("font", tech_font)
-		t_lbl.add_theme_font_size_override("font_size", 22)
-		t_lbl.add_theme_color_override("font_color", Color(1, 1, 1))
-		info_vbox.add_child(t_lbl)
-		
-		var d_lbl = Label.new()
-		d_lbl.text = desc
-		d_lbl.add_theme_font_override("font", tech_font)
-		d_lbl.add_theme_font_size_override("font_size", 16)
-		d_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8))
-		info_vbox.add_child(d_lbl)
-		
-		hbox.add_child(info_vbox)
-		
-		var btn = Button.new()
-		btn.text = "UPGRADE (1 SP)"
-		btn.add_theme_font_override("font", tech_font)
-		btn.custom_minimum_size = Vector2(140, 40)
-		btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		
-		var normal = StyleBoxFlat.new()
-		normal.bg_color = Color(0.1, 0.2, 0.15, 0.8)
-		normal.border_color = Color(0.3, 0.8, 0.4, 0.5)
-		normal.set_border_width_all(1)
-		btn.add_theme_stylebox_override("normal", normal)
-		
-		var hover = normal.duplicate()
-		hover.bg_color = Color(0.2, 0.4, 0.25, 0.9)
-		hover.border_color = Color(0.4, 1.0, 0.5, 1.0)
-		btn.add_theme_stylebox_override("hover", hover)
-		
-		if PlayerData.skill_points <= 0:
-			btn.disabled = true
-			btn.modulate = Color(0.5, 0.5, 0.5, 0.5)
-			
-		btn.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
-		btn.pressed.connect(func():
-			if PlayerData.skill_points > 0:
-				PlayerData.skill_points -= 1
-				action.call()
-				# Rebuild or update
-				sp_lbl.text = "Available Skill Points: " + str(PlayerData.skill_points)
-				if PlayerData.skill_points <= 0:
-					for child in vbox.get_children():
-						if child is HBoxContainer:
-							var b = child.get_child(1) as Button
-							if b: b.disabled = true; b.modulate = Color(0.5, 0.5, 0.5, 0.5)
-		)
-		hbox.add_child(btn)
-		
-		vbox.add_child(hbox)
-		
-	create_upgrade.call("Vitality Synthesis", "Increase Max Health by 20.", func():
-		PlayerData.max_health += 20.0
-		PlayerData.health += 20.0
-		PlayerData.health_changed.emit(PlayerData.health, PlayerData.max_health)
-	)
-	create_upgrade.call("Endurance Weave", "Increase Max Stamina by 20.", func():
-		PlayerData.max_stamina += 20.0
-		PlayerData.stamina += 20.0
-		PlayerData.stamina_changed.emit(PlayerData.stamina, PlayerData.max_stamina)
-	)
-	create_upgrade.call("Muscle Density", "Increase Attack Power by 5.", func():
-		PlayerData.attack_power += 5.0
-	)
+func _on_points_changed(_points: int) -> void:
+	_refresh()
 
+func _buy_attribute(id: String) -> void:
+	var genomes_before := int(PlayerData.get_current_species_data().genomes_available)
+	if not PlayerData.upgrade_attribute(id):
+		_feedback.text = "Not enough AP for this upgrade."
+		return
+	AudioManager.play_sfx("tap_button")
+	_feedback.text = "%s upgraded to %s." % [PlayerData.ATTRIBUTE_DEFINITIONS[id].name, PlayerData.attribute_value(id)]
+	if int(PlayerData.get_current_species_data().genomes_available) > genomes_before:
+		_feedback.text += " Adaptation Genome earned! Open ULTIMATES to choose a path."
 
-func _build_inventory_tab() -> void:
-	var inv_tab = MarginContainer.new()
-	inv_tab.name = "INVENTORY"
-	inv_tab.add_theme_constant_override("margin_left", 24)
-	inv_tab.add_theme_constant_override("margin_right", 24)
-	inv_tab.add_theme_constant_override("margin_top", 24)
-	inv_tab.add_theme_constant_override("margin_bottom", 24)
-	_tab_container.add_child(inv_tab)
-	
-	var vbox = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 16)
-	inv_tab.add_child(vbox)
-	
-	var list = ItemList.new()
-	list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	list.add_theme_font_override("font", tech_font)
-	list.add_theme_font_size_override("font_size", 20)
-	
-	var list_bg := StyleBoxFlat.new()
-	list_bg.bg_color = Color(0.02, 0.04, 0.06, 0.6)
-	list_bg.border_color = Color(0.1, 0.9, 0.7, 0.2)
-	list_bg.set_border_width_all(1)
-	list.add_theme_stylebox_override("panel", list_bg)
-	list.add_theme_constant_override("v_separation", 8)
-	
-	# Add Genome Fragments
-	if PlayerData.genome_fragments > 0:
-		list.add_item("Genome Fragments (x%d)" % PlayerData.genome_fragments)
-	
-	for item in PlayerData.inventory:
-		list.add_item(str(item))
-		
-	if list.item_count == 0:
-		list.add_item("-- Empty --")
-		list.set_item_disabled(0, true)
-		
-	vbox.add_child(list)
+func _ask_ultimate(category: String) -> void:
+	_pending_category = category
+	_pending_species = PlayerData.active_species
+	var data := PlayerData.get_current_species_data()
+	var rank := int(data.get(category + "_ultimate_level", 0))
+	var equipped := str(data.equipped_ultimate_category) == category
+	var result_rank := rank + 1 if equipped else maxi(1, rank)
+	var definition: Dictionary = Rules.ULTIMATES[_pending_species][category]
+	_confirmation.dialog_text = "%s %s at Lv%d?\nCosts 1 %s adaptation Genome.\nOther path levels are retained.\n\n%s" % [PlayerData.ultimate_purchase_action(category), definition.name, result_rank, _pending_species.replace("_", " ").capitalize(), Rules.effect_summary(_pending_species, category, result_rank)]
+	_confirmation.popup_centered(Vector2i(640, 250))
 
+func _confirm_ultimate() -> void:
+	if PlayerData.active_species != _pending_species or not PlayerData.develop_ultimate(_pending_category):
+		_feedback.text = "Could not develop this path. Check your Genome balance and active Ultimate."
+		return
+	_feedback.text = "%s equipped. Fight to fill the shared meter, then tap ULT." % PlayerData.get_equipped_ultimate_definition().name
+	AudioManager.play_sfx("level_up")
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and not _confirmation.visible:
+		get_viewport().set_input_as_handled()
+		_on_close()
 
 func _on_close() -> void:
-	get_tree().paused = false
+	get_tree().paused = _was_paused
 	closed.emit()
 	queue_free()

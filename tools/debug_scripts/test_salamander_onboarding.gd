@@ -16,7 +16,25 @@ func _ready() -> void:
 func _run() -> void:
 	var hud_script := load("res://ui/hud.gd") as GDScript
 	assert(hud_script.can_instantiate(), "The transformation HUD must compile")
+	var menu_script := load("res://ui/character_menu.gd") as GDScript
+	assert(menu_script.can_instantiate(), "The progression menu must compile")
+	var player_script := load("res://player/player.gd") as GDScript
+	assert(player_script.can_instantiate(), "The player Ultimate logic must compile")
 	var data := get_tree().root.get_node("PlayerData")
+	data.reset_data()
+	data.skill_points = 9
+	assert(data.get_attribute_upgrade_cost("attack") == 1, "First attribute upgrade should cost 1 AP")
+	for _step in range(5):
+		assert(data.upgrade_attribute("attack"), "Each funded Attack upgrade should succeed")
+	assert(data.get_attribute_upgrade_count("attack") == 5, "Attack upgrades must be stored per species")
+	assert(data.get_current_species_data()["genomes_available"] == 1, "Five upgrades must earn one Genome")
+	assert(data.get_attribute_upgrade_cost("attack") == 1, "Second Genome must match the GDD table")
+	assert(data.develop_ultimate("attack"), "A Genome must develop an Ultimate")
+	assert(data.get_equipped_ultimate_level() == 1, "Developed Ultimate should be equipped at level 1")
+	data.gain_ultimate_charge(100.0)
+	assert(data.activate_ultimate(), "Developed Ultimate must activate with full charge")
+	assert(data.ultimate_effect("poison", 0.0) > 0.0, "Toxic Trail must grant poison")
+	data.end_ultimate()
 	data.salamander_genome_recovered = false
 	data.species_progression.erase("salamander")
 	data.active_species = "frog"
@@ -48,7 +66,7 @@ func _run() -> void:
 	assert(data.current_objective_text.is_empty(), "Completed guide must clear its objective")
 	await site._perform_interaction()
 	assert(_completion_count == 1, "Repeated recovery must not repeat quest completion")
-	print("PASS: Salamander recovery, guidance, transformation, and duplicate recovery")
+	print("PASS: Progression, Ultimate, Salamander recovery, guidance, transformation, and duplicate recovery")
 	level.queue_free()
 	await get_tree().process_frame
 	get_tree().quit()

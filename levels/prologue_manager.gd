@@ -10,16 +10,11 @@ var camera: Camera3D = null
 
 var dialog_index = 0
 var dialog_sequence = [
-	{ "speaker": "STERLING", "text": "Volunteer! Volunteer, do you copy? The biometric stream is haywire—please respond!", "duration": 4.0 },
-	{ "speaker": "VOLUNTEER", "text": "I'm here. I'm... I'm down in the mud. Sterling, I'm a frog. I'm literally a frog.", "duration": 4.0 },
-	{ "speaker": "STERLING", "text": "I know. I'm sorry. Just — stay still. I'm trying to read what's left.", "duration": 4.0 },
-	{ "speaker": "STERLING", "text": "The DSEE discharged. All twelve genomes — gone from the suit. Released as raw biological energy. I don't know where they landed.", "duration": 6.0 },
-	{ "speaker": "STERLING", "text": "The water, the soil... anything that was close enough could have absorbed fragments. Whatever is living in that wetland right now — I don't know what it is anymore.", "duration": 7.0 },
-	{ "speaker": "VOLUNTEER", "text": "What do I do?", "duration": 2.0 },
-	{ "speaker": "STERLING", "text": "The data is still out there somewhere. It has to be. Your suit's Purification Module is still active — if you can find what absorbed those genomes and get close enough, the suit may be able to read and recover what's left.", "duration": 8.0 },
-	{ "speaker": "VOLUNTEER", "text": "Starting from a frog.", "duration": 3.0 },
-	{ "speaker": "STERLING", "text": "...Starting from a frog. I'm sorry.", "duration": 3.0 },
-	{ "speaker": "STERLING", "text": "Your suit is locked to Frog form for now. Go carefully, Volunteer. Whatever is out there — it isn't ordinary anymore.", "duration": 6.0 }
+	{ "speaker": "STERLING", "text": "Volunteer, do you copy? The suit survived, but its biometric stream is unstable.", "duration": 3.2 },
+	{ "speaker": "VOLUNTEER", "text": "I do. Sterling... I'm a frog.", "duration": 2.5 },
+	{ "speaker": "STERLING", "text": "The DSEE discharge scattered the suit's genomes through the wetland. The water and soil absorbed them.", "duration": 4.0 },
+	{ "speaker": "STERLING", "text": "Your Purification Module can recover genome data from nearby signals. Get close enough to scan them.", "duration": 3.8 },
+	{ "speaker": "STERLING", "text": "Frog form is all we have for now. Move carefully and investigate the wetland.", "duration": 3.2 }
 ]
 
 func _ready() -> void:
@@ -55,7 +50,7 @@ func _start_sequence() -> void:
 			huds[0].play_boot_sequence()
 
 	current_state = State.HUD_BOOT
-	await get_tree().create_timer(4.0).timeout # Wait for boot sequence fade in
+	await get_tree().create_timer(1.2).timeout
 
 	# Straight into the conversation — the player is still locked and the
 	# camera is still in its close intro framing throughout.
@@ -71,6 +66,7 @@ func _play_next_dialog() -> void:
 
 			if not huds[0].is_connected("subtitle_dismissed", _on_subtitle_dismissed):
 				huds[0].subtitle_dismissed.connect(_on_subtitle_dismissed)
+			_auto_advance_dialogue(dialog_index, line.duration, huds[0])
 	else:
 		_finish_prologue()
 
@@ -78,6 +74,12 @@ func _on_subtitle_dismissed() -> void:
 	if current_state == State.RADIO:
 		dialog_index += 1
 		_play_next_dialog()
+
+func _auto_advance_dialogue(line_index: int, duration: float, hud: Node) -> void:
+	await get_tree().create_timer(duration).timeout
+	if current_state == State.RADIO and dialog_index == line_index and is_instance_valid(hud):
+		if hud.has_method("hide_subtitle"):
+			hud.hide_subtitle()
 
 func _finish_prologue() -> void:
 	current_state = State.PLAYING

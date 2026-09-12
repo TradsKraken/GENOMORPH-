@@ -1484,8 +1484,9 @@ func _build_action_buttons() -> void:
 		_skill3_btn.offset_bottom = -190
 		_skill3_btn.offset_left   = -140
 		_skill3_btn.offset_top    = -270
-	_skill3_btn.disabled = true
-	_skill3_btn.modulate = Color(0.5, 0.5, 0.5, 0.5) # Locked visual state
+	if not _skill3_btn.pressed.is_connected(_on_ultimate_pressed):
+		_skill3_btn.pressed.connect(_on_ultimate_pressed)
+	_refresh_ultimate_button()
 
 	# 5. Interact Button
 	var interact_is_new = not _root.has_node("InteractBtn")
@@ -2238,7 +2239,8 @@ func _tut_character_menu() -> void:
 	# Sub-tutorial: highlight each tab
 	var tab_data = [
 		["STATS TAB", "This tab shows your [b]character statistics[/b]:\n\n[color=#ffcc00]Level[/color], [color=#ff3b5c]Health[/color], [color=#9400ff]Stamina[/color], [color=#ff8833]Attack Power[/color], [color=#33aaff]Defense[/color], [color=#44ff44]Speed[/color].\n\n[b]Tap the STATS tab[/b] to view it."],
-		["SKILLS TAB", "Here you can spend [color=#ffcc00]Skill Points[/color] earned from leveling up.\n\nUpgrade Vitality, Endurance, and Attack Power.\n\n[b]Tap the SKILLS tab[/b] to view it."],
+		["ATTRIBUTES TAB", "Earn [color=#ffcc00]2 Attribute Points[/color] per level, plus quest rewards.\n\nChoose among six attributes. Five upgrades in one attribute earn an adaptation Genome.\n\n[b]Tap ATTRIBUTES[/b] to see values and prices."],
+		["ULTIMATES TAB", "Spend adaptation Genomes to unlock, upgrade or switch one Ultimate path.\n\nEach species has its own paths. Fight to fill the shared charge meter, then tap ULT."],
 		["INVENTORY TAB", "This shows everything you are carrying.\n\n[color=#33ff88]Genome Fragments[/color] collected will appear here.\n\n[b]Tap the INVENTORY tab[/b] to view it."],
 	]
 	for i in range(tab_data.size()):
@@ -2879,7 +2881,12 @@ var _jump_start_pos: Vector2
 func _on_jump_btn_input(event: InputEvent) -> void:
 	var player = get_tree().get_first_node_in_group("player")
 	if player == null: return
-	
+	if PlayerData.active_species != "frog":
+		if event is InputEventScreenTouch and event.pressed:
+			player.use_secondary_skill()
+		elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			player.use_secondary_skill()
+		return
 	if event is InputEventScreenTouch or (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT):
 		if event.is_pressed():
 			stop_highlight_jump()
@@ -2948,6 +2955,14 @@ func _connect_signals() -> void:
 		pd.active_species_changed.connect(_on_active_species_changed)
 	if pd.has_signal("species_unlocked"):
 		pd.species_unlocked.connect(_rebuild_species_selector)
+	if pd.has_signal("progression_changed"):
+		pd.progression_changed.connect(func(_species_id: String): _refresh_ultimate_button())
+	PlayerData.ultimate_charge_changed.connect(func(_charge: float): _refresh_ultimate_button())
+	PlayerData.genome_earned.connect(_on_adaptation_genome_earned)
+	PlayerData.adaptation_level_gained.connect(_on_adaptation_level_gained)
+	PlayerData.skill2_cooldown_started.connect(_on_skill2_cooldown)
+	if pd.has_signal("ultimate_state_changed"):
+		pd.ultimate_state_changed.connect(_on_ultimate_state_changed)
 	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
 	if PlayerData.has_signal("knowledge_read"):
 		PlayerData.knowledge_read.connect(_on_knowledge_read)
@@ -2973,12 +2988,93 @@ func _connect_signals() -> void:
 	_exp_bar.value      = pd.experience
 	_lvl_lbl.text       = str(pd.level)
 	_refresh_species_selector()
+	_refresh_ultimate_button()
 
 func _on_active_species_changed(_species_id: String) -> void:
 	if _species_id == "salamander":
 		_salamander_guide_active = false
 	_update_species_guide_highlight()
 	_rebuild_species_selector()
+	_refresh_ultimate_button()
+
+func _on_ultimate_pressed() -> void:
+	var player := get_tree().get_first_node_in_group("player")
+	if player and player.has_method("_activate_ultimate"):
+		player._activate_ultimate()
+
+func _refresh_ultimate_button() -> void:
+	if not is_instance_valid(_skill3_btn):
+		return
+	var definition := PlayerData.get_equipped_ultimate_definition()
+	var rank := PlayerData.get_equipped_ultimate_level()
+	var name_label := _skill3_btn.get_node_or_null("UltimateName") as Label
+	if name_label == null:
+		name_label = Label.new()
+		name_label.name = "UltimateName"
+		name_label.position = Vector2(-45, -24)
+		name_label.size = Vector2(170, 20)
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.add_theme_font_size_override("font_size", 13)
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_skill3_btn.add_child(name_label)
+	name_label.text = str(definition.get("name", "ULTIMATE"))
+	var meter := _skill3_btn.get_node_or_null("ChargeMeter") as ProgressBar
+	if meter == null:
+		meter = ProgressBar.new()
+		meter.name = "ChargeMeter"
+		meter.position = Vector2(8, 72)
+		meter.size = Vector2(64, 5)
+		meter.show_percentage = false
+		meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_skill3_btn.add_child(meter)
+	meter.value = PlayerData.ultimate_charge
+	_skill3_btn.icon = null
+	_skill3_btn.add_theme_font_size_override("font_size", 17)
+	_skill3_btn.disabled = not PlayerData.can_activate_ultimate()
+	if rank == 0:
+		_skill3_btn.text = "ULT\nLOCKED"
+		_skill3_btn.tooltip_text = "Earn an adaptation Genome, then open the level badge → ULTIMATES."
+	elif PlayerData.ultimate_active:
+		_skill3_btn.text = "ULT\n%ds" % ceili(PlayerData.ultimate_remaining)
+		_skill3_btn.tooltip_text = str(definition.get("name", "")) + " active"
+	else:
+		_skill3_btn.text = "ULT\n" + ("READY" if PlayerData.ultimate_charge >= 100.0 else "%d%%" % PlayerData.ultimate_charge)
+		_skill3_btn.tooltip_text = "%s Lv%d — charge by fighting" % [definition.get("name", ""), rank]
+	_skill3_btn.modulate = Color(0.5, 0.6, 0.6) if rank == 0 else Color.WHITE
+	var names: Array = PlayerData.AdaptationRules.SPECIES.get(PlayerData.active_species, {}).get("skills", [])
+	if names.size() == 3 and is_instance_valid(_skill1_btn) and is_instance_valid(_jump_btn):
+		_skill1_btn.tooltip_text = str(names[1])
+		_jump_btn.tooltip_text = str(names[2])
+		_skill1_btn.icon = load("res://assets/TONGUE ATTACK.svg") if PlayerData.active_species == "frog" else null
+		_jump_btn.icon = load("res://assets/SPLASH BUTTON.svg") if PlayerData.active_species == "frog" else null
+		_skill1_btn.text = "" if PlayerData.active_species == "frog" else ("HEAL" if PlayerData.active_species == "salamander" else "SWEEP")
+		_jump_btn.text = "" if PlayerData.active_species == "frog" else ("TOXIC" if PlayerData.active_species == "salamander" else "BITE")
+		_skill1_btn.add_theme_font_size_override("font_size", 16)
+		_jump_btn.add_theme_font_size_override("font_size", 16)
+
+func _on_ultimate_state_changed(_active: bool, _remaining: float) -> void:
+	_refresh_ultimate_button()
+
+func _on_adaptation_genome_earned(species: String) -> void:
+	show_notification("Adaptation Genome Earned", "%s: open your level badge → ULTIMATES to develop a path." % species.replace("_", " ").capitalize(), 4.0)
+
+func _on_adaptation_level_gained(new_level: int) -> void:
+	show_notification("Level %d — +2 AP" % new_level, "Tap your level badge → ATTRIBUTES to spend your points.", 3.0)
+
+func _on_skill2_cooldown(duration: float) -> void:
+	if not is_instance_valid(_jump_btn):
+		return
+	var label := _jump_btn.get_node_or_null("CooldownText") as Label
+	if label == null:
+		label = Label.new()
+		label.name = "CooldownText"
+		label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_jump_btn.add_child(label)
+	var tween := create_tween()
+	tween.tween_method(func(value: float): label.text = "%ds" % ceili(value) if value > 0.0 else "", duration, 0.0, duration)
 
 func _on_skill1_cooldown(duration: float) -> void:
 	if not is_instance_valid(_skill1_btn): return
@@ -3032,13 +3128,10 @@ func _on_stamina(value: float, maximum: float) -> void:
 	_stam_bar.value = value
 	
 	if _skill1_btn:
-		if value < 25.0:
-			_skill1_btn.modulate = Color(0.3, 0.3, 0.3, 0.8)
-		else:
-			_skill1_btn.modulate = Color.WHITE
+		_skill1_btn.modulate = Color.WHITE
 			
 	if _jump_btn:
-		if value < 30.0:
+		if value < 30.0 * PlayerData.ultimate_effect("stamina_cost"):
 			_jump_btn.modulate = Color(0.3, 0.3, 0.3, 0.8)
 		else:
 			_jump_btn.modulate = Color.WHITE
@@ -3056,8 +3149,7 @@ func _on_level(new_level: int) -> void:
 	tw.tween_property(_lvl_lbl, "modulate", C_EXP, 0.1)
 	tw.tween_property(_lvl_lbl, "modulate", Color.WHITE, 0.5)
 	
-	var screen_pos = Vector2(get_viewport().size.x / 2.0, 200)
-	show_float_text("LEVEL UP! +1 Skill Point", screen_pos, Color(1.0, 0.8, 0.2))
+	_lvl_lbl.tooltip_text = "Level %d — tap to upgrade attributes and Ultimates" % new_level
 
 func _on_skill_points_changed(points: int) -> void:
 	if is_instance_valid(_level_badge):
@@ -3090,7 +3182,8 @@ func _on_badge_gui_input(event: InputEvent) -> void:
 		_open_character_menu()
 
 func _open_character_menu() -> void:
-	get_tree().paused = true
+	if get_tree().get_first_node_in_group("progression_menu"):
+		return
 	var menu = load("res://ui/character_menu.gd").new()
 	_root.add_child(menu)
 	
@@ -3317,8 +3410,8 @@ func play_boot_sequence() -> void:
 			child.modulate.a = 0.0
 			
 	var tw = create_tween()
-	tw.tween_interval(2.0)
-	tw.tween_property(boot_overlay, "color:a", 0.0, 3.0)
+	tw.tween_interval(0.25)
+	tw.tween_property(boot_overlay, "color:a", 0.0, 0.8)
 	
 	tw.tween_callback(func():
 		var hud_tw = create_tween()
@@ -3326,9 +3419,9 @@ func play_boot_sequence() -> void:
 			if child is CanvasItem and child != boot_overlay and child != _subtitle_panel and child != _menu_panel and child != _tutorial_panel:
 				hud_tw.tween_property(child, "modulate:a", 1.0, 0.5)
 				hud_tw.tween_interval(0.2)
-	).set_delay(2.0)
+	).set_delay(0.25)
 	
-	tw.tween_callback(boot_overlay.queue_free).set_delay(1.0)
+	tw.tween_callback(boot_overlay.queue_free).set_delay(0.25)
 
 func get_fog_data() -> String:
 	if _fog_manager and _fog_manager.has_method("get_fog_data"):
