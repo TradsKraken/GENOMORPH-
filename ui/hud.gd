@@ -972,7 +972,7 @@ func _on_species_slot_pressed(species_id: String) -> void:
 		for slot_data in _get_species_selector_slots():
 			if str(slot_data["id"]) == species_id:
 				selected_name = str(slot_data["name"])
-		show_notification(selected_name + " Form Active", "Transformation complete. Move around and try your attacks.", 3.5)
+		show_notification(selected_name.to_upper(), "Form active", 2.5)
 	_refresh_species_selector()
 	_set_species_selector_expanded(false)
 
@@ -3007,40 +3007,138 @@ func _refresh_ultimate_button() -> void:
 		return
 	var definition := PlayerData.get_equipped_ultimate_definition()
 	var rank := PlayerData.get_equipped_ultimate_level()
+	var charge := PlayerData.ultimate_charge
+
+	# ── Name label above the button ──
 	var name_label := _skill3_btn.get_node_or_null("UltimateName") as Label
 	if name_label == null:
 		name_label = Label.new()
 		name_label.name = "UltimateName"
-		name_label.position = Vector2(-45, -24)
-		name_label.size = Vector2(170, 20)
+		name_label.position = Vector2(-45, -22)
+		name_label.size = Vector2(170, 18)
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		name_label.add_theme_font_size_override("font_size", 13)
+		name_label.add_theme_font_size_override("font_size", 11)
 		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_skill3_btn.add_child(name_label)
 	name_label.text = str(definition.get("name", "ULTIMATE"))
+	name_label.add_theme_color_override("font_color", Color("8fe7bd") if rank > 0 else Color(0.4, 0.5, 0.5))
+
+	# ── Charge meter bar under button ──
 	var meter := _skill3_btn.get_node_or_null("ChargeMeter") as ProgressBar
 	if meter == null:
 		meter = ProgressBar.new()
 		meter.name = "ChargeMeter"
-		meter.position = Vector2(8, 72)
-		meter.size = Vector2(64, 5)
+		meter.position = Vector2(6, 73)
+		meter.size = Vector2(68, 4)
 		meter.show_percentage = false
 		meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = Color("50e8a8")
+		fill.set_corner_radius_all(2)
+		meter.add_theme_stylebox_override("fill", fill)
+		var bg := StyleBoxFlat.new()
+		bg.bg_color = Color(0.08, 0.12, 0.14, 0.8)
+		bg.set_corner_radius_all(2)
+		meter.add_theme_stylebox_override("background", bg)
 		_skill3_btn.add_child(meter)
-	meter.value = PlayerData.ultimate_charge
+	meter.value = charge
+
+	# ── Button style & text ──
 	_skill3_btn.icon = null
-	_skill3_btn.add_theme_font_size_override("font_size", 17)
+	_skill3_btn.add_theme_font_size_override("font_size", 16)
 	_skill3_btn.disabled = not PlayerData.can_activate_ultimate()
+
+	# State-based styling
+	var btn_style := StyleBoxFlat.new()
+	btn_style.set_corner_radius_all(40)
+	btn_style.shadow_offset = Vector2(0, 3)
+	btn_style.anti_aliasing = true
+
 	if rank == 0:
+		# LOCKED — dim, desaturated
 		_skill3_btn.text = "ULT\nLOCKED"
-		_skill3_btn.tooltip_text = "Earn an adaptation Genome, then open the level badge → ULTIMATES."
+		_skill3_btn.tooltip_text = "Locked — earn a Genome first"
+		btn_style.bg_color = Color(0.06, 0.08, 0.12, 0.5)
+		btn_style.border_color = Color(0.25, 0.30, 0.35, 0.5)
+		btn_style.set_border_width_all(2)
+		btn_style.shadow_color = Color(0, 0, 0, 0.3)
+		btn_style.shadow_size = 4
+		name_label.visible = false
+		meter.visible = false
 	elif PlayerData.ultimate_active:
+		# ACTIVE — bright glowing border
 		_skill3_btn.text = "ULT\n%ds" % ceili(PlayerData.ultimate_remaining)
 		_skill3_btn.tooltip_text = str(definition.get("name", "")) + " active"
+		btn_style.bg_color = Color(0.12, 0.35, 0.25, 0.9)
+		btn_style.border_color = Color("50e8a8")
+		btn_style.set_border_width_all(3)
+		btn_style.shadow_color = Color(0.2, 1.0, 0.6, 0.4)
+		btn_style.shadow_size = 12
+		name_label.visible = true
+		meter.visible = false
+		_skill3_btn.add_theme_color_override("font_color", Color("d6ffe8"))
+	elif charge >= 100.0:
+		# READY — pulsing gold glow
+		_skill3_btn.text = "ULT\nREADY"
+		_skill3_btn.tooltip_text = "%s Lv%d — READY" % [definition.get("name", ""), rank]
+		btn_style.bg_color = Color(0.18, 0.16, 0.06, 0.85)
+		btn_style.border_color = Color("ffd666")
+		btn_style.set_border_width_all(3)
+		btn_style.shadow_color = Color(1.0, 0.84, 0.3, 0.45)
+		btn_style.shadow_size = 14
+		name_label.visible = true
+		meter.visible = false
+		_skill3_btn.add_theme_color_override("font_color", Color("ffd666"))
+		# Pulse animation
+		if not _skill3_btn.has_meta("_ult_pulsing"):
+			_skill3_btn.set_meta("_ult_pulsing", true)
+			var tw := create_tween().set_loops()
+			tw.tween_property(_skill3_btn, "modulate", Color(1.15, 1.1, 0.95), 0.6).set_trans(Tween.TRANS_SINE)
+			tw.tween_property(_skill3_btn, "modulate", Color.WHITE, 0.6).set_trans(Tween.TRANS_SINE)
+			_skill3_btn.set_meta("_ult_pulse_tween", tw)
 	else:
-		_skill3_btn.text = "ULT\n" + ("READY" if PlayerData.ultimate_charge >= 100.0 else "%d%%" % PlayerData.ultimate_charge)
+		# CHARGING — standard look with progress
+		_skill3_btn.text = "ULT\n%d%%" % charge
 		_skill3_btn.tooltip_text = "%s Lv%d — charge by fighting" % [definition.get("name", ""), rank]
-	_skill3_btn.modulate = Color(0.5, 0.6, 0.6) if rank == 0 else Color.WHITE
+		btn_style.bg_color = Color(0.05, 0.09, 0.16, 0.65)
+		btn_style.border_color = Color(0.35, 0.70, 0.60, 0.55)
+		btn_style.set_border_width_all(2)
+		btn_style.shadow_color = Color(0, 0, 0, 0.35)
+		btn_style.shadow_size = 6
+		name_label.visible = true
+		meter.visible = true
+		_skill3_btn.add_theme_color_override("font_color", Color("b4d6cc"))
+		# Stop pulse if it was running
+		if _skill3_btn.has_meta("_ult_pulsing"):
+			_skill3_btn.remove_meta("_ult_pulsing")
+			var old_tw = _skill3_btn.get_meta("_ult_pulse_tween", null)
+			if old_tw and old_tw is Tween:
+				old_tw.kill()
+			_skill3_btn.modulate = Color.WHITE
+
+	# Stop pulse for non-ready states
+	if charge < 100.0 or rank == 0 or PlayerData.ultimate_active:
+		if _skill3_btn.has_meta("_ult_pulsing"):
+			_skill3_btn.remove_meta("_ult_pulsing")
+			var old_tw = _skill3_btn.get_meta("_ult_pulse_tween", null)
+			if old_tw and old_tw is Tween:
+				old_tw.kill()
+			_skill3_btn.modulate = Color.WHITE
+
+	# Apply styles
+	var pressed := btn_style.duplicate() as StyleBoxFlat
+	pressed.bg_color = btn_style.bg_color.lightened(0.2)
+	pressed.shadow_size = 2
+	var hover := btn_style.duplicate() as StyleBoxFlat
+	hover.bg_color = btn_style.bg_color.lightened(0.08)
+	hover.border_color = btn_style.border_color.lightened(0.15)
+	_skill3_btn.add_theme_stylebox_override("normal", btn_style)
+	_skill3_btn.add_theme_stylebox_override("hover", hover)
+	_skill3_btn.add_theme_stylebox_override("pressed", pressed)
+	_skill3_btn.add_theme_stylebox_override("disabled", btn_style)
+	_skill3_btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+
+	# Update skill buttons
 	var names: Array = PlayerData.AdaptationRules.SPECIES.get(PlayerData.active_species, {}).get("skills", [])
 	if names.size() == 3 and is_instance_valid(_skill1_btn) and is_instance_valid(_jump_btn):
 		_skill1_btn.tooltip_text = str(names[1])
@@ -3056,10 +3154,10 @@ func _on_ultimate_state_changed(_active: bool, _remaining: float) -> void:
 	_refresh_ultimate_button()
 
 func _on_adaptation_genome_earned(species: String) -> void:
-	show_notification("Adaptation Genome Earned", "%s: open your level badge → ULTIMATES to develop a path." % species.replace("_", " ").capitalize(), 4.0)
+	show_notification("GENOME EARNED", "Tap LV badge to upgrade.", 3.5)
 
 func _on_adaptation_level_gained(new_level: int) -> void:
-	show_notification("Level %d — +2 AP" % new_level, "Tap your level badge → ATTRIBUTES to spend your points.", 3.0)
+	show_notification("LEVEL %d" % new_level, "+2 AP earned", 2.5)
 
 func _on_skill2_cooldown(duration: float) -> void:
 	if not is_instance_valid(_jump_btn):
