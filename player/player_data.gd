@@ -11,6 +11,7 @@ signal level_changed(new_level: int)
 signal skill_points_changed(points: int)
 signal objective_changed(target_node: Node3D)
 signal genome_collected(current: int, total: int)
+signal salamander_genome_unlocked
 signal skill1_cooldown_started(duration: float)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
@@ -48,6 +49,7 @@ func _restore_objective(path_str: String, text: String, desc: String = "") -> vo
 
 # ── Species Progression ───────────────────────────────────────────────────────
 var active_species: String = "frog"
+var salamander_genome_recovered: bool = false
 var species_progression: Dictionary = {
 	"frog": {
 		"is_unlocked": true,
@@ -177,6 +179,35 @@ func add_genome_fragment(announce: bool = true) -> void:
 	genome_fragments = mini(genome_fragments + 1, max_genome_fragments)
 	if announce:
 		genome_collected.emit(genome_fragments, max_genome_fragments)
+
+## Q03's reward is a named genome discovery, separate from the generic
+## reconstruction fragments scattered around the world.
+func recover_salamander_genome() -> bool:
+	if salamander_genome_recovered:
+		return false
+	salamander_genome_recovered = true
+	if not species_progression.has("salamander"):
+		species_progression["salamander"] = {
+			"is_unlocked": true,
+			"current_xp": 0.0,
+			"current_level": 1,
+			"unspent_ap": 0,
+			"health_upgrades": 0,
+			"attack_power_upgrades": 0,
+			"stamina_upgrades": 0,
+			"stamina_recovery_upgrades": 0,
+			"cooldown_reduction_upgrades": 0,
+			"health_recovery_upgrades": 0,
+			"genomes_earned": 0,
+			"genomes_spent": 0,
+			"genomes_available": 0,
+			"attack_ultimate_level": 0,
+			"defense_ultimate_level": 0,
+			"agility_ultimate_level": 0,
+			"equipped_ultimate_category": ""
+		}
+	salamander_genome_unlocked.emit()
+	return true
 
 
 # ── Stamina API ───────────────────────────────────────────────────────────────
@@ -551,6 +582,7 @@ func save_game(slot: int = -1) -> void:
 		"speed": speed,
 		"inventory": inventory,
 		"genome_fragments": genome_fragments,
+		"salamander_genome_recovered": salamander_genome_recovered,
 		"max_genome_fragments": max_genome_fragments,
 		"frogs_helped": frogs_helped,
 		"total_frogs": total_frogs,
@@ -607,6 +639,10 @@ func load_game(slot: int = -1) -> bool:
 				speed = data.get("speed", 4.0)
 				inventory = data.get("inventory", [])
 				genome_fragments = data.get("genome_fragments", 0)
+				var saved_salamander_genome: bool = data.get("salamander_genome_recovered", false)
+				salamander_genome_recovered = false
+				if saved_salamander_genome:
+					recover_salamander_genome()
 				frogs_helped = data.get("frogs_helped", 0)
 				total_frogs = data.get("total_frogs", 7)
 				minigame_started = data.get("minigame_started", false)
@@ -665,6 +701,7 @@ func load_game(slot: int = -1) -> bool:
 func reset_data(slot: int = -1) -> void:
 	if slot != -1:
 		current_save_slot = slot
+	active_species = "frog"
 	max_health = 100.0
 	health = 100.0
 	max_stamina = 100.0
@@ -677,6 +714,8 @@ func reset_data(slot: int = -1) -> void:
 	speed = 4.0
 	inventory.clear()
 	genome_fragments = 0
+	salamander_genome_recovered = false
+	species_progression.erase("salamander")
 	frogs_helped = 0
 	total_frogs = 7
 	minigame_started = false

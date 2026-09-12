@@ -135,19 +135,8 @@ func _perform_interaction() -> void:
 	_fade_out_damaged_visual()
 	_spawn_purify_effect()
 	_spawn_persistent_glow()
-	_drop_genome()
 
 	restored.emit()
-
-func _drop_genome() -> void:
-	var hud := get_tree().get_first_node_in_group("hud")
-	if hud and hud.has_method("show_notification"):
-		hud.show_notification("SALAMANDER GENOME RECOVERED", "Habitat restoration data secured.")
-
-	# This is the quest's only genome reward. It intentionally skips the
-	# generic fragment popup because the dedicated notification above already
-	# communicates the reward; spawning a second pickup used to award it twice.
-	PlayerData.add_genome_fragment(false)
 
 func _fade_out_damaged_visual() -> void:
 	if damaged_visual_path.is_empty():

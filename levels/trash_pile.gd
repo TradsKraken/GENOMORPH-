@@ -19,6 +19,21 @@ func _ready() -> void:
 		if PlayerData.is_object_destroyed(scene_path, node_path_str):
 			queue_free()
 			return
+			
+	_add_highlight_effect()
+
+func _add_highlight_effect() -> void:
+	# Add a pulsing light to draw attention
+	var light = OmniLight3D.new()
+	light.light_color = Color(0.8, 1.0, 0.4) # Sickly yellow-green
+	light.light_energy = 0.5
+	light.omni_range = 4.0
+	light.position = Vector3(0, 1.5, 0)
+	add_child(light)
+	
+	var tw = create_tween().set_loops()
+	tw.tween_property(light, "light_energy", 1.5, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(light, "light_energy", 0.5, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func take_damage(amount: float, _knockback: Vector3 = Vector3.ZERO) -> void:
 	if is_dead:

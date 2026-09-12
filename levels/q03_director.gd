@@ -6,13 +6,11 @@ class_name Q03Director
 ## unlocks "Restore the damaged habitat"; restoring it sends the frog to
 ## safety and ends with Sterling detecting a biological signal.
 ##
-## IMPORTANT: the actual Salamander Genome discovery / transformation system
-## does not exist yet (PlayerData has no species-switching code at all). This
-## director ends with a clearly-labeled placeholder objective and a
-## `completed` signal for whoever builds that system next — it does not
-## pretend the transformation already works.
+## Restoring the habitat reveals one fixed Salamander genome site. It is a
+## named species reward, never a random generic genome-fragment pickup.
 
 const RatScene = preload("res://enemies/rat.tscn")
+const SalamanderGenomeSiteScene = preload("res://levels/salamander_genome_site.tscn")
 
 @export var rat_pack_size: int = 2
 @export var spawn_distance: float = 5.0
@@ -26,6 +24,7 @@ enum SequenceState {
 	APPROACHING,
 	FIGHTING_RATS,
 	AWAITING_RESTORE,
+	AWAITING_GENOME,
 	DONE
 }
 
@@ -49,6 +48,12 @@ func _ready() -> void:
 	print("[Q03 DEBUG] HabitatRestorePoint found: ", restore_point)
 	if restore_point and restore_point.has_signal("restored"):
 		restore_point.restored.connect(_on_habitat_restored)
+
+	# The site can be placed in the scene from the beginning so its position is
+	# authored by the level designer, but it must not be collectible early.
+	var genome_site = get_tree().current_scene.find_child("SalamanderGenomeSite", true, false)
+	if genome_site is SalamanderGenomeSite:
+		genome_site.set_active(false)
 
 	# Don't start until Q02 (the first rat pack) actually finishes.
 	# PlayerData.q02_completed is checked first — see the matching comment in
@@ -219,18 +224,57 @@ func _on_habitat_restored() -> void:
 	if not is_instance_valid(_hud):
 		_hud = get_tree().get_first_node_in_group("hud")
 	if _hud and _hud.has_method("show_subtitle"):
-		_hud.show_subtitle("NATIVE FROG", "The ground feels right again. Thank you — I won't forget this.", 5.0)
+		_hud.show_subtitle("STERLING (RADIO)", "Habitat restored. I found the signal — a Salamander genome is close by. Recover it.", 5.0)
 
 	await _wait_for_dialogue()
+	if PlayerData.salamander_genome_recovered:
+		PlayerData.set_objective(null, "")
+		completed.emit()
+		return
 
-	if _hud and _hud.has_method("show_subtitle"):
-		_hud.show_subtitle("STERLING (RADIO)", "...I'm reading something. A biological signal, close by. That's not one of ours — not yet.", 6.0)
+	var site := _get_salamander_genome_site()
+	if site == null:
+		push_error("Q03 could not create its Salamander genome site.")
+		return
+	_state = SequenceState.AWAITING_GENOME
+	site.set_active(true)
+	if not site.genome_recovered.is_connected(_on_salamander_genome_recovered):
+		site.genome_recovered.connect(_on_salamander_genome_recovered)
+	PlayerData.set_objective(site, "Recover the Salamander genome", "Follow the biological signal in the restored habitat.")
 
-	await _wait_for_dialogue()
+func _get_salamander_genome_site() -> SalamanderGenomeSite:
+	var existing := get_tree().current_scene.find_child("SalamanderGenomeSite", true, false)
+	if existing is SalamanderGenomeSite:
+		return existing
 
-	# Placeholder hand-off — see the class-level note at the top of this file.
-	PlayerData.set_objective(null, "Follow the signal", "Something new is out here. (Salamander Genome discovery — not yet implemented.)")
+	# A saved level should contain this fixed node. This fallback keeps Q03
+	# playable in an older scene and anchors it at one deterministic position
+	# beside the restore point, never at a random location around the player.
+	var restore_point := get_tree().current_scene.find_child("HabitatRestorePoint", true, false)
+	if not (restore_point is Node3D):
+		return null
+	var site := SalamanderGenomeSiteScene.instantiate() as SalamanderGenomeSite
+	site.name = "SalamanderGenomeSite"
+	get_tree().current_scene.add_child(site)
+	site.global_position = _find_fixed_genome_site_point(restore_point as Node3D)
+	return site
 
+func _find_fixed_genome_site_point(restore_point: Node3D) -> Vector3:
+	var intended := restore_point.global_position + Vector3(6.0, 10.0, -4.0)
+	var query := PhysicsRayQueryParameters3D.create(
+		intended,
+		intended - Vector3(0.0, 30.0, 0.0)
+	)
+	var hit := restore_point.get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.has("position"):
+		return (hit["position"] as Vector3) + Vector3(0.0, 0.15, 0.0)
+	return restore_point.global_position + Vector3(6.0, 0.15, -4.0)
+
+func _on_salamander_genome_recovered(_site: SalamanderGenomeSite) -> void:
+	if _state != SequenceState.AWAITING_GENOME:
+		return
+	_state = SequenceState.DONE
+	PlayerData.set_objective(null, "")
 	completed.emit()
 
 ## Waits for the player to tap through the currently-shown subtitle before

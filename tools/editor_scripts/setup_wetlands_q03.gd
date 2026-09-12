@@ -18,6 +18,8 @@ extends EditorScript
 #        Place it near NativeFrog, somewhere that reads as visibly damaged.
 #      - SafeSpot — where NativeFrog hops to once the habitat is restored.
 #        Place it somewhere nearby that reads as safe/healthier.
+#      - SalamanderGenomeSite — the fixed biological signal revealed after
+#        restoration. Place it nearby on walkable ground.
 #      - Q03Director — leave this wherever it lands, it has no transform that
 #        matters.
 # 4. Save the scene (Ctrl+S).
@@ -31,6 +33,7 @@ extends EditorScript
 const HabitatRestorePointScene = preload("res://levels/habitat_restore_point.tscn")
 const NativeFrogScript = preload("res://levels/native_frog.gd")
 const Q03DirectorScript = preload("res://levels/q03_director.gd")
+const SalamanderGenomeSiteScene = preload("res://levels/salamander_genome_site.tscn")
 
 func _run() -> void:
 	var root := get_editor_interface().get_edited_scene_root()
@@ -75,6 +78,16 @@ func _run() -> void:
 	else:
 		print("SafeSpot already exists — left as-is.")
 
+	if not root.has_node("SalamanderGenomeSite"):
+		var genome_site := SalamanderGenomeSiteScene.instantiate()
+		genome_site.name = "SalamanderGenomeSite"
+		root.add_child(genome_site)
+		genome_site.owner = root
+		genome_site.position = Vector3(-11, 0.5, -25)
+		print("Added SalamanderGenomeSite.")
+	else:
+		print("SalamanderGenomeSite already exists — left as-is.")
+
 	if not root.has_node("Q03Director"):
 		var director := Node.new()
 		director.name = "Q03Director"
@@ -85,4 +98,4 @@ func _run() -> void:
 	else:
 		print("Q03Director already exists — left as-is.")
 
-	print("Q03 setup done. Reposition NativeFrog, HabitatRestorePoint, and SafeSpot per the comments above, then save the scene.")
+	print("Q03 setup done. Reposition NativeFrog, HabitatRestorePoint, SafeSpot, and SalamanderGenomeSite per the comments above, then save the scene.")
