@@ -12,6 +12,8 @@ signal skill_points_changed(points: int)
 signal objective_changed(target_node: Node3D)
 signal genome_collected(current: int, total: int)
 signal salamander_genome_unlocked
+signal species_unlocked(species_id: String)
+signal active_species_changed(species_id: String)
 signal skill1_cooldown_started(duration: float)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
@@ -76,6 +78,25 @@ func get_current_species_data() -> Dictionary:
 	if not species_progression.has(active_species):
 		return {}
 	return species_progression[active_species]
+
+func is_species_unlocked(species_id: String) -> bool:
+	return species_progression.has(species_id) and species_progression[species_id].get("is_unlocked", false)
+
+## Switches the progression profile used by the player. The HUD owns the
+## selection UI; the physical form can be hooked up here when its scene/model
+## is introduced.
+func set_active_species(species_id: String) -> bool:
+	if species_id == active_species or not is_species_unlocked(species_id):
+		return false
+	active_species = species_id
+	health = minf(health, max_health)
+	stamina = minf(stamina, max_stamina)
+	health_changed.emit(health, max_health)
+	stamina_changed.emit(stamina, max_stamina)
+	exp_changed.emit(experience, exp_to_next)
+	level_changed.emit(level)
+	active_species_changed.emit(active_species)
+	return true
 
 # ── Base Shared Stats (Tuning) ────────────────────────────────────────────────
 var base_shared_health: float = 100.0
@@ -206,6 +227,7 @@ func recover_salamander_genome() -> bool:
 			"agility_ultimate_level": 0,
 			"equipped_ultimate_category": ""
 		}
+	species_unlocked.emit("salamander")
 	salamander_genome_unlocked.emit()
 	return true
 
@@ -582,6 +604,7 @@ func save_game(slot: int = -1) -> void:
 		"speed": speed,
 		"inventory": inventory,
 		"genome_fragments": genome_fragments,
+		"active_species": active_species,
 		"salamander_genome_recovered": salamander_genome_recovered,
 		"max_genome_fragments": max_genome_fragments,
 		"frogs_helped": frogs_helped,
@@ -640,9 +663,11 @@ func load_game(slot: int = -1) -> bool:
 				inventory = data.get("inventory", [])
 				genome_fragments = data.get("genome_fragments", 0)
 				var saved_salamander_genome: bool = data.get("salamander_genome_recovered", false)
+				var saved_active_species: String = str(data.get("active_species", "frog"))
 				salamander_genome_recovered = false
 				if saved_salamander_genome:
 					recover_salamander_genome()
+				active_species = saved_active_species if is_species_unlocked(saved_active_species) else "frog"
 				frogs_helped = data.get("frogs_helped", 0)
 				total_frogs = data.get("total_frogs", 7)
 				minigame_started = data.get("minigame_started", false)
@@ -686,6 +711,7 @@ func load_game(slot: int = -1) -> bool:
 				stamina_changed.emit(stamina, max_stamina)
 				level_changed.emit(level)
 				exp_changed.emit(experience, exp_to_next)
+				active_species_changed.emit(active_species)
 				
 				var loaded_obj_path: String = data.get("current_objective_path", "")
 				var loaded_obj_text: String = data.get("current_objective_text", "")
@@ -734,6 +760,7 @@ func reset_data(slot: int = -1) -> void:
 	stamina_changed.emit(stamina, max_stamina)
 	level_changed.emit(level)
 	exp_changed.emit(experience, exp_to_next)
+	active_species_changed.emit(active_species)
 	
 	current_objective = null
 	current_objective_text = ""

@@ -25,6 +25,11 @@ var _lvl_lbl:    Label
 var _level_badge: Label
 var _status_group: Control
 
+# Top-centre transformation selector. Keeping these as fixed slots preserves a
+# clear four-form silhouette while the genome roster is still growing.
+var _species_selector: PanelContainer
+var _species_slot_buttons: Dictionary = {}
+
 var _interact_btn: Button
 var _current_interact_source: Node
 var _interact_callback: Callable
@@ -130,6 +135,7 @@ func _ready() -> void:
 		add_child(_root)
 
 	_build_player_status()
+	_build_species_selector()
 	_build_action_buttons()
 	_build_cancel_zone()
 	_build_menu_panel()
@@ -623,6 +629,194 @@ func _bounce_knowledge_button() -> void:
 	var tw = create_tween()
 	tw.tween_property(_knowledge_btn, "scale", Vector2(1.25, 1.25), 0.12).set_ease(Tween.EASE_OUT)
 	tw.tween_property(_knowledge_btn, "scale", Vector2(1.0, 1.0), 0.18).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+# ── Transformation Selector (Top Centre) ─────────────────────────────────────
+
+func _build_species_selector() -> void:
+	if _root.has_node("SpeciesSelector"):
+		_species_selector = _root.get_node("SpeciesSelector") as PanelContainer
+		_refresh_species_selector()
+		return
+
+	_species_selector = PanelContainer.new()
+	_species_selector.name = "SpeciesSelector"
+	_species_selector.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_species_selector.offset_left = -220.0
+	_species_selector.offset_top = 14.0
+	_species_selector.offset_right = 220.0
+	_species_selector.offset_bottom = 126.0
+	_species_selector.mouse_filter = Control.MOUSE_FILTER_STOP
+	_species_selector.z_index = 5
+	var selector_style := StyleBoxFlat.new()
+	selector_style.bg_color = Color(0.025, 0.055, 0.065, 0.88)
+	selector_style.border_color = Color(0.29, 0.82, 0.70, 0.46)
+	selector_style.set_border_width_all(1)
+	selector_style.set_corner_radius_all(18)
+	selector_style.shadow_color = Color(0.0, 0.0, 0.0, 0.42)
+	selector_style.shadow_size = 8
+	selector_style.content_margin_top = 5
+	selector_style.content_margin_bottom = 6
+	_species_selector.add_theme_stylebox_override("panel", selector_style)
+	_root.add_child(_species_selector)
+
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 1)
+	_species_selector.add_child(content)
+
+	var header := Label.new()
+	header.name = "Header"
+	header.text = "TRANSFORMATION  •  ACTIVE FORM: FROG"
+	header.add_theme_font_size_override("font_size", 12)
+	header.add_theme_color_override("font_color", Color(0.64, 0.94, 0.84, 0.95))
+	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	header.custom_minimum_size = Vector2(0, 19)
+	header.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(header)
+
+	var slots := HBoxContainer.new()
+	slots.name = "Slots"
+	slots.alignment = BoxContainer.ALIGNMENT_CENTER
+	slots.add_theme_constant_override("separation", 13)
+	slots.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	content.add_child(slots)
+
+	for slot_data in _get_species_selector_slots():
+		var species_id := str(slot_data["id"])
+		var slot := VBoxContainer.new()
+		slot.name = species_id.capitalize() + "Slot"
+		slot.custom_minimum_size = Vector2(88, 78)
+		slot.alignment = BoxContainer.ALIGNMENT_CENTER
+		slot.add_theme_constant_override("separation", -1)
+		slots.add_child(slot)
+
+		var button := Button.new()
+		button.name = "SpeciesButton"
+		button.custom_minimum_size = Vector2(64, 64)
+		button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		button.focus_mode = Control.FOCUS_NONE
+		button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		button.pressed.connect(_on_species_slot_pressed.bind(species_id))
+		slot.add_child(button)
+
+		var frog_portrait := TextureRect.new()
+		frog_portrait.name = "FrogPortrait"
+		frog_portrait.texture = load("res://assets/Geno_Icon.png")
+		frog_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		frog_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		frog_portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+		frog_portrait.offset_left = 6.0
+		frog_portrait.offset_top = 6.0
+		frog_portrait.offset_right = -6.0
+		frog_portrait.offset_bottom = -6.0
+		frog_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		frog_portrait.visible = species_id == "frog"
+		button.add_child(frog_portrait)
+
+		var symbol := Label.new()
+		symbol.name = "Symbol"
+		symbol.set_anchors_preset(Control.PRESET_FULL_RECT)
+		symbol.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		symbol.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		symbol.add_theme_font_size_override("font_size", 19)
+		symbol.add_theme_color_override("font_color", Color(0.68, 0.96, 0.82, 0.95))
+		symbol.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(symbol)
+
+		var name_label := Label.new()
+		name_label.name = "Name"
+		name_label.custom_minimum_size = Vector2(88, 14)
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_label.add_theme_font_size_override("font_size", 11)
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		slot.add_child(name_label)
+
+		_species_slot_buttons[species_id] = button
+
+	_refresh_species_selector()
+
+func _get_species_selector_slots() -> Array[Dictionary]:
+	var slots: Array[Dictionary] = [{"id": "frog", "name": "Frog", "short_name": "FROG"}]
+	for species_id in PlayerData.species_progression:
+		if species_id == "frog":
+			continue
+		var display_name := str(species_id).replace("_", " ").capitalize()
+		slots.append({
+			"id": str(species_id),
+			"name": display_name,
+			"short_name": display_name.substr(0, 3).to_upper(),
+		})
+	while slots.size() < 4:
+		slots.append({"id": "locked_%d" % slots.size(), "name": "Unknown", "short_name": "?"})
+	if slots.size() > 4:
+		slots.resize(4)
+	return slots
+
+func _rebuild_species_selector(_species_id: String = "") -> void:
+	if is_instance_valid(_species_selector):
+		_root.remove_child(_species_selector)
+		_species_selector.queue_free()
+	_species_selector = null
+	_species_slot_buttons.clear()
+	_build_species_selector()
+
+func _refresh_species_selector() -> void:
+	if not is_instance_valid(_species_selector):
+		return
+	var header := _species_selector.get_node_or_null("VBoxContainer/Header") as Label
+	var active_name := "Frog"
+	for slot_data in _get_species_selector_slots():
+		if str(slot_data["id"]) == PlayerData.active_species:
+			active_name = str(slot_data["name"])
+	if is_instance_valid(header):
+		header.text = "TRANSFORMATION  •  ACTIVE FORM: " + active_name.to_upper()
+
+	for slot_data in _get_species_selector_slots():
+		var species_id := str(slot_data["id"])
+		var button := _species_slot_buttons.get(species_id) as Button
+		if not is_instance_valid(button):
+			continue
+		var unlocked := PlayerData.is_species_unlocked(species_id)
+		var active := unlocked and PlayerData.active_species == species_id
+		button.disabled = not unlocked
+		button.tooltip_text = "Select " + str(slot_data["name"]) + " transformation" if unlocked else "Genome data locked"
+
+		var normal := StyleBoxFlat.new()
+		normal.bg_color = Color(0.07, 0.15, 0.15, 0.98) if unlocked else Color(0.035, 0.045, 0.06, 0.9)
+		normal.border_color = Color(0.40, 1.0, 0.72, 1.0) if active else (Color(0.27, 0.62, 0.54, 0.72) if unlocked else Color(0.20, 0.25, 0.31, 0.82))
+		normal.set_border_width_all(3 if active else 2)
+		normal.set_corner_radius_all(32)
+		normal.shadow_color = Color(0.1, 1.0, 0.65, 0.22) if active else Color(0, 0, 0, 0.32)
+		normal.shadow_size = 6 if active else 3
+		button.add_theme_stylebox_override("normal", normal)
+		button.add_theme_stylebox_override("disabled", normal)
+
+		var hover := normal.duplicate() as StyleBoxFlat
+		hover.bg_color = Color(0.12, 0.28, 0.24, 1.0)
+		hover.border_color = Color(0.66, 1.0, 0.84, 1.0)
+		button.add_theme_stylebox_override("hover", hover)
+		button.add_theme_stylebox_override("pressed", hover)
+
+		var frog_portrait := button.get_node_or_null("FrogPortrait") as TextureRect
+		if is_instance_valid(frog_portrait):
+			frog_portrait.visible = unlocked and species_id == "frog"
+		var symbol := button.get_node_or_null("Symbol") as Label
+		if is_instance_valid(symbol):
+			symbol.visible = not (unlocked and species_id == "frog")
+			symbol.text = str(slot_data["short_name"]) if unlocked else "?"
+			symbol.add_theme_color_override("font_color", Color(0.68, 0.96, 0.82, 0.95) if unlocked else Color(0.36, 0.41, 0.48, 0.78))
+		var name_label := button.get_parent().get_node_or_null("Name") as Label
+		if is_instance_valid(name_label):
+			name_label.text = ("ACTIVE" if active else str(slot_data["name"]).to_upper()) if unlocked else "LOCKED"
+			name_label.add_theme_color_override("font_color", Color(0.54, 1.0, 0.74, 1.0) if active else (Color(0.75, 0.84, 0.84, 0.92) if unlocked else Color(0.38, 0.43, 0.49, 0.85)))
+
+func _on_species_slot_pressed(species_id: String) -> void:
+	if PlayerData.set_active_species(species_id) and is_instance_valid(_notification_panel):
+		var selected_name := species_id.capitalize()
+		for slot_data in _get_species_selector_slots():
+			if str(slot_data["id"]) == species_id:
+				selected_name = str(slot_data["name"])
+		show_notification(selected_name + " Profile Active", "Transformation profile selected.", 2.5)
+	_refresh_species_selector()
 
 # ── Player Status (Top Left) ──────────────────────────────────────────────────
 
@@ -2592,6 +2786,10 @@ func _connect_signals() -> void:
 	pd.level_changed.connect(_on_level)
 	if pd.has_signal("skill_points_changed"):
 		pd.skill_points_changed.connect(_on_skill_points_changed)
+	if pd.has_signal("active_species_changed"):
+		pd.active_species_changed.connect(_on_active_species_changed)
+	if pd.has_signal("species_unlocked"):
+		pd.species_unlocked.connect(_rebuild_species_selector)
 	PlayerData.knowledge_unlocked.connect(_on_knowledge_unlocked)
 	if PlayerData.has_signal("knowledge_read"):
 		PlayerData.knowledge_read.connect(_on_knowledge_read)
@@ -2616,6 +2814,10 @@ func _connect_signals() -> void:
 	_exp_bar.max_value  = pd.exp_to_next
 	_exp_bar.value      = pd.experience
 	_lvl_lbl.text       = str(pd.level)
+	_refresh_species_selector()
+
+func _on_active_species_changed(_species_id: String) -> void:
+	_refresh_species_selector()
 
 func _on_skill1_cooldown(duration: float) -> void:
 	if not is_instance_valid(_skill1_btn): return

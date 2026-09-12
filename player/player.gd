@@ -57,6 +57,12 @@ extends CharacterBody3D
 ## Speed at which animations blend/transition.
 @export var anim_blend_time: float = 0.15
 
+const FROG_IDLE_ANIMATION := "FrogArmature|Frog_Idle"
+const FROG_WALK_ANIMATION := "FrogArmature|Frog_Jump"
+const FROG_JUMP_ANIMATION := "FrogArmature|Frog_Jump"
+const FROG_ATTACK_ANIMATION := "FrogArmature|Frog_Attack"
+const SALAMANDER_FORM_SCENE := preload("res://Models/Salamander/Salamander.glb")
+
 ## Reference to the on-screen virtual joystick (found at runtime via group).
 var _joystick = null
 
@@ -75,6 +81,8 @@ var _skill1_cooldown_timer: float = 0.0
 var damage_cooldown_timer: float = 0.0
 var _attack_debug_timer: float = 0.0 # TEMPORARY — remove once the attack-spam bug is confirmed fixed.
 @export var damage_cooldown_duration: float = 1.0
+var _attack_animation: String = FROG_ATTACK_ANIMATION
+var _salamander_form: Node3D
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -96,16 +104,9 @@ func _ready() -> void:
 	_build_reticle()
 	_hide_from_minimap(self)
 	
-	if animation_player == null:
-		animation_player = _find_animation_player(self)
-	
-	if animation_player:
-		var walk = animation_player.get_animation(anim_walk)
-		if walk: walk.loop_mode = Animation.LOOP_LINEAR
-		var idle = animation_player.get_animation(anim_idle)
-		if idle: idle.loop_mode = Animation.LOOP_LINEAR
-		var attack = animation_player.get_animation("FrogArmature|Frog_Attack")
-		if attack: attack.loop_mode = Animation.LOOP_NONE
+	if not PlayerData.active_species_changed.is_connected(_on_active_species_changed):
+		PlayerData.active_species_changed.connect(_on_active_species_changed)
+	_apply_species_form(PlayerData.active_species)
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	for child in node.get_children():
@@ -115,6 +116,65 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 		if result != null:
 			return result
 	return null
+
+func _on_active_species_changed(species_id: String) -> void:
+	_apply_species_form(species_id)
+
+func _apply_species_form(species_id: String) -> void:
+	var frog_form := get_node_or_null("Frog") as Node3D
+	if species_id == "salamander":
+		if is_instance_valid(frog_form):
+			frog_form.visible = false
+		if not is_instance_valid(_salamander_form):
+			_salamander_form = SALAMANDER_FORM_SCENE.instantiate() as Node3D
+			_salamander_form.name = "SalamanderForm"
+			add_child(_salamander_form)
+			_hide_from_minimap(_salamander_form)
+		_salamander_form.visible = true
+	else:
+		if is_instance_valid(_salamander_form):
+			_salamander_form.visible = false
+		if is_instance_valid(frog_form):
+			frog_form.visible = true
+
+	_configure_species_animations(species_id)
+
+func _configure_species_animations(species_id: String) -> void:
+	animation_player = _find_animation_player(_salamander_form if species_id == "salamander" and is_instance_valid(_salamander_form) else self)
+	if species_id == "salamander":
+		# The supplied Salamander model includes Walk and three attack clips, but
+		# no idle clip. Leaving it paused while standing preserves its rest pose.
+		anim_idle = ""
+		anim_walk = _find_animation_name("walk")
+		anim_jump = anim_walk
+		_attack_animation = _find_animation_name("attack middle")
+		if _attack_animation.is_empty():
+			_attack_animation = _find_animation_name("attack")
+	else:
+		anim_idle = FROG_IDLE_ANIMATION
+		anim_walk = FROG_WALK_ANIMATION
+		anim_jump = FROG_JUMP_ANIMATION
+		_attack_animation = FROG_ATTACK_ANIMATION
+
+	if not is_instance_valid(animation_player):
+		return
+	var walk := animation_player.get_animation(anim_walk) if not anim_walk.is_empty() else null
+	if walk:
+		walk.loop_mode = Animation.LOOP_LINEAR
+	var idle := animation_player.get_animation(anim_idle) if not anim_idle.is_empty() else null
+	if idle:
+		idle.loop_mode = Animation.LOOP_LINEAR
+	var attack := animation_player.get_animation(_attack_animation) if not _attack_animation.is_empty() else null
+	if attack:
+		attack.loop_mode = Animation.LOOP_NONE
+
+func _find_animation_name(keyword: String) -> String:
+	if not is_instance_valid(animation_player):
+		return ""
+	for animation_name in animation_player.get_animation_list():
+		if String(animation_name).to_lower().contains(keyword.to_lower()):
+			return String(animation_name)
+	return ""
 
 func _hide_from_minimap(node: Node) -> void:
 	if node is VisualInstance3D:
@@ -496,8 +556,8 @@ func _find_attack_target(attack_range: float) -> Node3D:
 func _attack() -> void:
 	print("[ATTACK DEBUG] _attack() entered. current_animation=", (animation_player.current_animation if animation_player else "null"),
 		" is_playing=", (animation_player.is_playing() if animation_player else "null"),
-		" loop_mode=", (animation_player.get_animation("FrogArmature|Frog_Attack").loop_mode if animation_player and animation_player.get_animation("FrogArmature|Frog_Attack") else "null"))
-	if animation_player and animation_player.current_animation == "FrogArmature|Frog_Attack" and animation_player.is_playing():
+		" loop_mode=", (animation_player.get_animation(_attack_animation).loop_mode if animation_player and not _attack_animation.is_empty() and animation_player.get_animation(_attack_animation) else "null"))
+	if animation_player and not _attack_animation.is_empty() and animation_player.current_animation == _attack_animation and animation_player.is_playing():
 		print("[ATTACK DEBUG] _attack() blocked — already playing")
 		return
 
@@ -509,11 +569,11 @@ func _attack() -> void:
 		# across every instance of the Frog model, so any other code touching
 		# it — e.g. an NPC using the same model — can silently flip this back
 		# to looping. See native_frog.gd for the actual case that caused this.
-		var attack_anim = animation_player.get_animation("FrogArmature|Frog_Attack")
+		var attack_anim = animation_player.get_animation(_attack_animation) if not _attack_animation.is_empty() else null
 		if attack_anim:
 			attack_anim.loop_mode = Animation.LOOP_NONE
-		animation_player.play("FrogArmature|Frog_Attack", 0.1, 2.0)
-		print("[ATTACK DEBUG] play() called for attack animation")
+			animation_player.play(_attack_animation, 0.1, 2.0)
+			print("[ATTACK DEBUG] play() called for attack animation")
 		
 	AudioManager.play_sfx("lunge", randf_range(0.9, 1.1))
 		
@@ -719,7 +779,7 @@ func _update_animation(direction: Vector3) -> void:
 	if animation_player == null:
 		return
 
-	if animation_player.current_animation == "FrogArmature|Frog_Attack" and animation_player.is_playing():
+	if not _attack_animation.is_empty() and animation_player.current_animation == _attack_animation and animation_player.is_playing():
 		return
 
 	var target_anim: String
@@ -736,16 +796,20 @@ func _update_animation(direction: Vector3) -> void:
 		if animation_player:
 			var anim = animation_player.get_animation(target_anim)
 			if anim: anim.loop_mode = Animation.LOOP_LINEAR
-	else:
+	elif not anim_idle.is_empty():
 		# Standing still → idle breathing
 		target_anim = anim_idle
+	else:
+		# Salamander has no idle clip; preserve its imported rest pose.
+		animation_player.pause()
+		return
 
 	# Only switch if the animation actually changed or if a ground animation stopped playing
 	var should_play = animation_player.current_animation != target_anim
 	if is_on_floor() and not animation_player.is_playing():
 		should_play = true
 
-	if should_play:
+	if should_play and not target_anim.is_empty() and animation_player.has_animation(target_anim):
 		print("[ANIM DEBUG] _update_animation playing '", target_anim, "' (was '", animation_player.current_animation, "')")
 		animation_player.play(target_anim, anim_blend_time)
 
