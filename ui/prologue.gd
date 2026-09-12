@@ -20,6 +20,9 @@ var _text_label: RichTextLabel
 var _current_sub_idx: int = -1
 var _is_fading_out: bool = false
 
+const MAIN_TERRAIN_PATH = "res://levels/main terrain.scn"
+var _preload_started: bool = false
+
 func _ready() -> void:
 	set_anchors_preset(PRESET_FULL_RECT)
 	
@@ -95,6 +98,14 @@ func _ready() -> void:
 			
 	_video_player.finished.connect(_finish_prologue)
 	_video_player.play()
+	
+	# ── Pre-load the main terrain in the background while the video plays ──
+	var err = ResourceLoader.load_threaded_request(MAIN_TERRAIN_PATH)
+	if err == OK:
+		_preload_started = true
+		print("[PRELOAD] Started background loading of main terrain")
+	else:
+		push_warning("[PRELOAD] Could not start background load, will use SceneLoader fallback")
 
 func _process(_delta: float) -> void:
 	if not _video_player.is_playing():
@@ -146,7 +157,7 @@ func _finish_prologue() -> void:
 	tw.tween_callback(func():
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
-		get_node("/root/SceneLoader").load_scene("res://levels/main terrain.scn")
+		_transition_to_terrain()
 	)
 
 func _start_fade_out() -> void:
@@ -159,5 +170,19 @@ func _start_fade_out() -> void:
 		_video_player.stop()
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
-		get_node("/root/SceneLoader").load_scene("res://levels/main terrain.scn")
+		_transition_to_terrain()
 	)
+
+func _transition_to_terrain() -> void:
+	# If the background preload finished, use it directly (instant transition)
+	if _preload_started:
+		var status = ResourceLoader.load_threaded_get_status(MAIN_TERRAIN_PATH)
+		if status == ResourceLoader.THREAD_LOAD_LOADED:
+			print("[PRELOAD] Terrain was pre-loaded! Switching instantly.")
+			var packed_scene = ResourceLoader.load_threaded_get(MAIN_TERRAIN_PATH)
+			get_tree().change_scene_to_packed(packed_scene)
+			return
+		else:
+			print("[PRELOAD] Terrain not ready yet (status=%d), falling back to SceneLoader" % status)
+	# Fallback: use the normal loading screen
+	get_node("/root/SceneLoader").load_scene(MAIN_TERRAIN_PATH)

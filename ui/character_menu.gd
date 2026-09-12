@@ -84,7 +84,7 @@ func _ready() -> void:
 	add_child(center_container)
 
 	_panel = PanelContainer.new()
-	_panel.custom_minimum_size = Vector2(560, 360)
+	_panel.custom_minimum_size = Vector2(800, 560)
 	var style := StyleBoxFlat.new()
 	style.bg_color = C_BG
 	style.border_color = C_BORDER
@@ -100,7 +100,7 @@ func _ready() -> void:
 	_panel.add_theme_stylebox_override("panel", style)
 	_panel.modulate.a = 0.0
 	_panel.scale = Vector2(0.95, 0.95)
-	_panel.pivot_offset = Vector2(280, 180) # Half of 560x360
+	_panel.pivot_offset = Vector2(400, 280) # Half of 800x560
 	center_container.add_child(_panel)
 
 	var body := VBoxContainer.new()

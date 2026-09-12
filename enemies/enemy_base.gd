@@ -321,7 +321,10 @@ func _process_ai_state_machine(delta: float) -> void:
 							if dist < 1.5:
 								separation += (global_position - other.global_position).normalized() * (1.5 - dist)
 					
-					dir = (dir.normalized() + separation * 0.8).normalized()
+					var target_dir = dir.normalized()
+					var steer_dir = _get_steer_direction(target_dir)
+					
+					dir = (steer_dir + separation * 0.8).normalized()
 					
 					velocity.x = dir.x * speed
 					if not uses_gravity:
@@ -364,6 +367,48 @@ func _face_direction(dir: Vector3, delta: float) -> void:
 	if dir.length_squared() > 0.01:
 		var target_y = atan2(dir.x, dir.z)
 		rotation.y = lerp_angle(rotation.y, target_y, 10.0 * delta)
+
+func _get_steer_direction(target_dir: Vector3) -> Vector3:
+	var space_state = get_world_3d().direct_space_state
+	var num_rays = 12
+	var ray_length = 3.0
+	var base_pos = global_position + Vector3(0, 0.5, 0)
+	
+	var final_dir = Vector3.ZERO
+	var obstacle_hit = false
+	
+	for i in range(num_rays):
+		var angle = (float(i) / float(num_rays)) * TAU
+		var ray_dir = Vector3(cos(angle), 0, sin(angle))
+		
+		# Base interest: how much this ray aligns with our desired direction
+		var interest = maxf(0.0, ray_dir.dot(target_dir))
+		
+		# Only cast ray if we have some interest in this direction
+		if interest > 0.0:
+			var query = PhysicsRayQueryParameters3D.create(base_pos, base_pos + ray_dir * ray_length)
+			query.collision_mask = 1 # Environment / StaticBody only (assuming layer 1)
+			
+			var result = space_state.intersect_ray(query)
+			if result:
+				obstacle_hit = true
+				var dist = base_pos.distance_to(result.position)
+				# Strong penalty if close to obstacle
+				var penalty = (1.0 - (dist / ray_length))
+				interest -= penalty * 1.5
+				
+			if interest > 0.0:
+				final_dir += ray_dir * interest
+				
+	if not obstacle_hit:
+		return target_dir # Fast path if no obstacles
+		
+	if final_dir.length_squared() < 0.01:
+		# If all forward options are blocked, try to slide sideways
+		var right = Vector3(-target_dir.z, 0, target_dir.x)
+		return right
+		
+	return final_dir.normalized()
 
 # Virtual function for subclasses
 func _perform_attack() -> void:

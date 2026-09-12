@@ -47,10 +47,16 @@ func _ready() -> void:
 	if max_spawns <= 0:
 		max_spawns = 1
 		
-	# Spawn all enemies at once
+	# Spawn enemies across multiple frames to avoid blocking
+	_deferred_spawn_all()
+
+func _deferred_spawn_all() -> void:
 	for i in range(max_spawns):
 		_spawn_enemy(i)
-		
+		# Yield one frame between each spawn so we don't block
+		if i < max_spawns - 1:
+			await get_tree().process_frame
+	
 	if not spawn_asleep_initially:
 		call_deferred("_activate_next_enemy")
 
