@@ -1,0 +1,364 @@
+STARTING IMPORT FOR: Terrain
+Processing Mesh: tree_lp_11_007
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_008
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_007
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_002
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_001
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_019
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_021
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: plane_010
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_011
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_042
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_043
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_044
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_001
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_006
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_007
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_012
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_013
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_010
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_018
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_028
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_022
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_037
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_038
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_039
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_041
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_026
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_002
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_008
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cylinder_009
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_001
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_005
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_006
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_013
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_018
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_019
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: vert
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_021
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_025
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_026
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_028
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_029
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_027
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_032
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_033
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_034
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_035
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_020
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_023
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_024
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_036
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_037
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_038
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_039
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_040
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_020
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_022
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_023
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_024
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_001
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_002
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_003
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_004
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_005
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_006
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_008
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_009
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: tree_lp_11_010
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_030
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: cube_031
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: plane_204
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_003
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_004
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_005
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_006
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_009
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_010
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_011
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_012
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_013
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_014
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_015
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_016
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_017
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_018
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_019
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: icosphere_020
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+Processing Mesh: grass_001
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_002
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_003
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_004
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_005
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_006
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_007
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_008
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_009
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_010
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_011
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_012
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_013
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_014
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_015
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_016
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_017
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_018
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_019
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_020
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_021
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_022
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_023
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_024
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_025
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_026
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_027
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_028
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_029
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_030
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_031
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_032
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_033
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_034
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_035
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_036
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_037
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_039
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_040
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_038
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_041
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_042
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_043
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_044
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_045
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_046
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_047
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_048
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: grass_049
+ -> Skipping collision (grass/leaf/flower)
+Processing Mesh: cylinder_005
+ -> Created trimesh collision
+ -> Set owner for 1 collision nodes
+IMPORT FINISHED
