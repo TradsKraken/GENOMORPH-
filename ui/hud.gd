@@ -63,6 +63,7 @@ var _subtitle_tween: Tween
 var _objective_panel: HBoxContainer
 var _objective_lbl: Label
 var _subtitle_time_shown: float = 0.0
+var _subtitle_min_dismiss_time: float = 0.2
 
 var _jump_highlight_tw: Tween
 var _attack_highlight_tw: Tween
@@ -177,9 +178,12 @@ func _input(event: InputEvent) -> void:
 				_hide_genome_popup()
 				
 	if _subtitle_panel and _subtitle_panel.visible and _subtitle_panel.modulate.a > 0.5:
-		# Allow tapping anywhere on the screen to dismiss the subtitle
-		if event is InputEventScreenTouch and event.is_pressed() and _subtitle_time_shown > 1.0:
-			hide_subtitle()
+		# Allow tapping anywhere on the screen to skip typing or dismiss the subtitle
+		if (event is InputEventScreenTouch or event is InputEventMouseButton) and event.is_pressed():
+			if _subtitle_label.visible_ratio < 1.0:
+				_subtitle_label.visible_characters = -1 # Show all instantly
+			elif _subtitle_time_shown >= _subtitle_min_dismiss_time:
+				hide_subtitle()
 
 func add_minimap_marker(node: Node3D, color: Color = Color(0.2, 1.0, 0.4), hover: bool = true) -> void:
 	if not is_instance_valid(_marker_layer): return
@@ -242,6 +246,12 @@ func remove_minimap_marker(node: Node3D) -> void:
 
 func _process(delta: float) -> void:
 	_subtitle_time_shown += delta
+	
+	if is_instance_valid(_subtitle_panel) and _subtitle_panel.visible:
+		if _subtitle_label.visible_ratio < 1.0 and _subtitle_label.visible_characters >= 0:
+			var chars_to_show = _subtitle_time_shown * 45.0 # Typing speed
+			_subtitle_label.visible_characters = int(chars_to_show)
+
 	if is_instance_valid(_level_badge):
 		_level_badge.visible = PlayerData.skill_points > 0
 		_level_badge.text = str(PlayerData.skill_points)
@@ -2611,7 +2621,7 @@ func _draw() -> void:
 	arrow.set("target_node", PlayerData.current_objective)
 
 
-func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> void:
+func show_subtitle(speaker: String, text: String, _duration: float = 4.0, min_dismiss_time: float = 0.2) -> void:
 	var color_hex = "40c0ff" # Default Sterling blue
 	if speaker == "Lolo Palaka" or "frog" in speaker.to_lower() or speaker == "PLAYER":
 		color_hex = "40ff80" # Greenish for the frog conversation (Player included, so the whole exchange shares one sound cue)
@@ -2624,7 +2634,9 @@ func show_subtitle(speaker: String, text: String, _duration: float = 4.0) -> voi
 	PlayerData.add_message(speaker, text, color_hex)
 		
 	_subtitle_label.text = "[center][b][color=#" + color_hex + "]" + speaker + ":[/color][/b] " + text + "\n[font_size=16][color=#888888](Tap to continue)[/color][/font_size][/center]"
+	_subtitle_label.visible_characters = 0
 	_subtitle_time_shown = 0.0
+	_subtitle_min_dismiss_time = maxf(0.0, min_dismiss_time)
 	
 	if _subtitle_tween and _subtitle_tween.is_valid():
 		_subtitle_tween.kill()
@@ -2650,7 +2662,27 @@ func hide_action_buttons() -> void:
 	if _jump_btn:   _jump_btn.modulate.a = 0.0
 	if _skill1_btn: _skill1_btn.modulate.a = 0.0
 	if _skill3_btn: _skill3_btn.modulate.a = 0.0
+
+func enable_cutscene_mode(enabled: bool) -> void:
+	var target_alpha = 0.0 if enabled else 1.0
+	var tw = create_tween().set_parallel(true)
 	
+	if is_instance_valid(_minimap_panel):
+		tw.tween_property(_minimap_panel, "modulate:a", target_alpha, 0.3)
+	if is_instance_valid(_objective_panel):
+		tw.tween_property(_objective_panel, "modulate:a", target_alpha, 0.3)
+	if is_instance_valid(_quest_log_panel):
+		tw.tween_property(_quest_log_panel, "modulate:a", target_alpha, 0.3)
+		
+	if is_instance_valid(_attack_btn): tw.tween_property(_attack_btn, "modulate:a", target_alpha, 0.3)
+	if is_instance_valid(_jump_btn): tw.tween_property(_jump_btn, "modulate:a", target_alpha, 0.3)
+	if is_instance_valid(_skill1_btn): tw.tween_property(_skill1_btn, "modulate:a", target_alpha, 0.3)
+	if is_instance_valid(_skill3_btn): tw.tween_property(_skill3_btn, "modulate:a", target_alpha, 0.3)
+	
+	var joysticks = get_tree().get_nodes_in_group("joystick")
+	if joysticks.size() > 0 and is_instance_valid(joysticks[0]):
+		tw.tween_property(joysticks[0], "modulate:a", target_alpha, 0.3)
+
 func start_ui_walkthrough(steps: Array) -> void:
 	_walkthrough_steps = steps
 	_current_step_index = 0

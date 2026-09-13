@@ -26,7 +26,7 @@ extends Camera3D
 ## Smooth-follow speed. Lower = lazier follow, higher = snappier.
 @export var follow_speed: float = 8.0
 
-enum ViewMode { TOP_DOWN, THIRD_PERSON }
+enum ViewMode { TOP_DOWN, THIRD_PERSON, CUTSCENE }
 @export var view_mode: ViewMode = ViewMode.TOP_DOWN
 
 @export_group("Third Person Settings")
@@ -35,6 +35,8 @@ enum ViewMode { TOP_DOWN, THIRD_PERSON }
 @export var tp_horizontal_offset: float = 0.5
 @export var tp_mouse_sensitivity: float = 0.003
 
+var _cutscene_target1: Node3D = null
+var _cutscene_target2: Node3D = null
 
 ## Set to true if this scene is being loaded as the main menu background.
 @export var is_main_menu: bool = false
@@ -179,11 +181,48 @@ func _process(delta: float) -> void:
 		_target_ground_y = _player.global_position.y
 
 	_last_ground_y = lerp(_last_ground_y, _target_ground_y, 8.0 * delta)
+	
+	if view_mode == ViewMode.CUTSCENE and is_instance_valid(_cutscene_target1) and is_instance_valid(_cutscene_target2):
+		_apply_cutscene_position(delta)
+	else:
+		_apply_position(follow_speed * delta)
 
-	_apply_position(follow_speed * delta)
+var _previous_view_mode: ViewMode = ViewMode.TOP_DOWN
 
+func start_cutscene(target1: Node3D, target2: Node3D) -> void:
+	_cutscene_target1 = target1
+	_cutscene_target2 = target2
+	_previous_view_mode = view_mode
+	view_mode = ViewMode.CUTSCENE
+
+func stop_cutscene() -> void:
+	view_mode = _previous_view_mode
+	_cutscene_target1 = null
+	_cutscene_target2 = null
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
+func _apply_cutscene_position(delta: float) -> void:
+	var pos1 = _cutscene_target1.global_position
+	var pos2 = _cutscene_target2.global_position
+	
+	var mid_point = pos1.lerp(pos2, 0.5)
+	var dir_to_target = pos1.direction_to(pos2)
+	var right_dir = dir_to_target.cross(Vector3.UP).normalized()
+	if right_dir.length_squared() < 0.1: right_dir = Vector3.RIGHT
+	
+	# A side-on, eye-level two-shot keeps both speakers visible. Scale the
+	# distance with their separation so close conversations are not cramped.
+	var framing_distance := clampf(pos1.distance_to(pos2) * 0.9 + 1.5, 3.5, 5.5)
+	var target_pos = mid_point + Vector3(0, 1.05, 0) + right_dir * framing_distance
+	var target_look = mid_point + Vector3(0, 0.65, 0)
+	
+	global_position = global_position.lerp(target_pos, clampf(5.0 * delta, 0.0, 1.0))
+	
+	# Smoothly look at the target
+	var current_transform = global_transform
+	var target_transform = current_transform.looking_at(target_look, Vector3.UP)
+	global_transform = current_transform.interpolate_with(target_transform, clampf(5.0 * delta, 0.0, 1.0))
 
 func _apply_position(weight: float) -> void:
 	var ground_pos := _player.global_position

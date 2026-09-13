@@ -224,27 +224,53 @@ func _play_frog_conversation() -> void:
 		_hud = get_tree().get_first_node_in_group("hud")
 	if not (_hud and _hud.has_method("show_subtitle")):
 		return
+	var cutscene_camera := _start_frog_conversation_cutscene()
+	await get_tree().create_timer(0.45).timeout
 
-	_hud.show_subtitle("PLAYER", "...wait. Did you just — did that frog just *say* something?", 4.0)
+	await _play_frog_conversation_line("PLAYER", "...wait. Did you just — did that frog just *say* something?", 1.5)
+	await _play_frog_conversation_line("NATIVE FROG", "You can hear me? That's... new. Usually your kind can't.", 1.5)
+	await _play_frog_conversation_line("PLAYER", "I don't— I don't know how. But I understood every word of that.", 1.5)
+	await _play_frog_conversation_line("NATIVE FROG", "Whatever's changing in you, it's opened something. No time to puzzle over it now, though.", 1.8)
+	await _play_frog_conversation_line("NATIVE FROG", "There's a patch of ground past here, poisoned and dying. Clean it, and it'll breathe again. I'll meet you there once it's safe.", 2.2)
+	_end_frog_conversation_cutscene(cutscene_camera)
+	await _play_frog_conversation_line("STERLING (RADIO)", "...Did you just have a conversation with a frog? Log that. Focus — the restoration comes first.", 1.8)
+	await _play_frog_conversation_line("STERLING (RADIO)", "There's a faint genome signal in that damaged habitat. Contamination is interfering. Clear the trash, then use the Purification Module so the suit can read it.", 2.2)
+
+func _play_frog_conversation_line(speaker: String, text: String, minimum_time: float) -> void:
+	_hud.show_subtitle(speaker, text, 0.0, minimum_time)
 	await _wait_for_dialogue()
 
-	_hud.show_subtitle("NATIVE FROG", "You can hear me? That's... new. Usually your kind can't.", 4.0)
-	await _wait_for_dialogue()
+func _start_frog_conversation_cutscene() -> Camera3D:
+	var frog := get_tree().current_scene.find_child("NativeFrog", true, false) as Node3D
+	var player := get_tree().get_first_node_in_group("player") as Node3D
+	if not (is_instance_valid(frog) and is_instance_valid(player)):
+		return null
+	var player_look_target := frog.global_position
+	player_look_target.y = player.global_position.y
+	player.look_at(player_look_target, Vector3.UP)
+	var frog_look_target := player.global_position
+	frog_look_target.y = frog.global_position.y
+	frog.look_at(frog_look_target, Vector3.UP)
+	if "input_locked" in player:
+		player.set("input_locked", true)
+	if player.has_method("cancel_aiming_jump"):
+		player.cancel_aiming_jump()
+	if _hud and _hud.has_method("enable_cutscene_mode"):
+		_hud.enable_cutscene_mode(true)
+	var camera := get_viewport().get_camera_3d()
+	if camera and camera.has_method("start_cutscene"):
+		camera.start_cutscene(frog, player)
+		return camera
+	return null
 
-	_hud.show_subtitle("PLAYER", "I don't— I don't know how. But I understood every word of that.", 4.0)
-	await _wait_for_dialogue()
-
-	_hud.show_subtitle("NATIVE FROG", "Whatever's changing in you, it's opened something. No time to puzzle over it now, though.", 5.0)
-	await _wait_for_dialogue()
-
-	_hud.show_subtitle("NATIVE FROG", "There's a patch of ground past here, poisoned and dying. Clean it, and it'll breathe again. I'll meet you there once it's safe.", 6.0)
-	await _wait_for_dialogue()
-
-	_hud.show_subtitle("STERLING (RADIO)", "...Did you just have a conversation with a frog? Log that. Focus — the restoration comes first.", 5.0)
-	await _wait_for_dialogue()
-
-	_hud.show_subtitle("STERLING (RADIO)", "There's a faint genome signal in that damaged habitat. Contamination is interfering. Clear the trash, then use the Purification Module so the suit can read it.", 7.0)
-	await _wait_for_dialogue()
+func _end_frog_conversation_cutscene(camera: Camera3D) -> void:
+	if camera and camera.has_method("stop_cutscene"):
+		camera.stop_cutscene()
+	var player := get_tree().get_first_node_in_group("player")
+	if player and "input_locked" in player:
+		player.set("input_locked", false)
+	if _hud and _hud.has_method("enable_cutscene_mode"):
+		_hud.enable_cutscene_mode(false)
 
 func _on_habitat_restored() -> void:
 	if _state != SequenceState.AWAITING_RESTORE:

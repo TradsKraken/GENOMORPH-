@@ -206,6 +206,41 @@ func _start_dialog() -> void:
 		_is_talking = false
 		return
 		
+	var player = get_tree().get_first_node_in_group("player")
+	var main_camera = null
+	var root = get_tree().current_scene
+	if root:
+		var all_cams = root.find_children("*", "Camera3D", true, false)
+		for cam in all_cams:
+			if cam.has_method("start_cutscene"):
+				main_camera = cam
+				break
+	if not main_camera:
+		main_camera = get_viewport().get_camera_3d()
+	
+	print("[NPC_FROG] _start_dialog called")
+	print("[NPC_FROG] player = ", player)
+	print("[NPC_FROG] main_camera = ", main_camera)
+	if main_camera:
+		print("[NPC_FROG] main_camera script = ", main_camera.get_script())
+		print("[NPC_FROG] has start_cutscene = ", main_camera.has_method("start_cutscene"))
+	
+	if hud.has_method("enable_cutscene_mode"):
+		hud.enable_cutscene_mode(true)
+		
+	if player:
+		if main_camera and main_camera.has_method("start_cutscene"):
+			print("[NPC_FROG] Calling start_cutscene!")
+			main_camera.start_cutscene(self, player)
+		else:
+			print("[NPC_FROG] CANNOT call start_cutscene - camera has no method!")
+		
+		if player.has_method("set"):
+			player.set("input_locked", true)
+			if player.has_method("cancel_aiming_jump"):
+				player.cancel_aiming_jump()
+
+		
 	var just_completed = false
 	
 	if not is_helped:
@@ -328,6 +363,15 @@ func _start_dialog() -> void:
 		
 		if _anim_player:
 			_anim_player.play("FrogArmature|Frog_Idle")
+			
+	if main_camera and main_camera.has_method("stop_cutscene"):
+		main_camera.stop_cutscene()
+		
+	if player and player.has_method("set"):
+		player.set("input_locked", false)
+			
+	if hud.has_method("enable_cutscene_mode"):
+		hud.enable_cutscene_mode(false)
 	
 	_is_talking = false
 
