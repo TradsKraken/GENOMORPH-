@@ -35,7 +35,10 @@ var _wave: int = 1
 
 func _ready() -> void:
 	add_to_group("q03_director")
-
+	var saved_checkpoint := PlayerData.get_quest_checkpoint("q03")
+	if saved_checkpoint == "completed":
+		_state = SequenceState.DONE
+		return
 	_hud = get_tree().get_first_node_in_group("hud")
 	print("[Q03 DEBUG] _ready() — hud found: ", is_instance_valid(_hud))
 
@@ -57,6 +60,18 @@ func _ready() -> void:
 	var genome_site = get_tree().current_scene.find_child("SalamanderGenomeSite", true, false)
 	if genome_site is SalamanderGenomeSite:
 		genome_site.set_active(false)
+
+	# Restore a save made at a durable Q03 milestone.  This runs only after
+	# the scene's quest nodes have connected their signals and finished _ready.
+	if saved_checkpoint == "awaiting_restore":
+		call_deferred("_resume_restore")
+		return
+	if saved_checkpoint == "awaiting_genome":
+		call_deferred("_resume_genome_recovery")
+		return
+	if saved_checkpoint == "awaiting_transformation":
+		call_deferred("_resume_transformation")
+		return
 
 	# Don't start until Q02 (the first rat pack) actually finishes.
 	# PlayerData.q02_completed is checked first — see the matching comment in
@@ -82,6 +97,7 @@ func _begin() -> void:
 	PlayerData.set_objective(frog, "Something's still not right", "There's a healthier patch of wetland nearby — but it isn't safe yet.")
 
 	_state = SequenceState.APPROACHING
+	PlayerData.set_quest_checkpoint("q03", "approaching")
 
 	if frog:
 		frog.set("_has_triggered", false)
@@ -96,6 +112,7 @@ func _on_frog_approached() -> void:
 	if _state != SequenceState.APPROACHING: return
 
 	_state = SequenceState.FIGHTING_RATS
+	PlayerData.set_quest_checkpoint("q03", "fighting_rats")
 
 	if not is_instance_valid(_hud):
 		_hud = get_tree().get_first_node_in_group("hud")
@@ -205,6 +222,7 @@ func _on_rat_died() -> void:
 		frog.stop_defense()
 
 	_state = SequenceState.AWAITING_RESTORE
+	PlayerData.set_quest_checkpoint("q03", "awaiting_restore")
 
 	await _play_frog_conversation()
 
@@ -276,6 +294,11 @@ func _on_habitat_restored() -> void:
 	if _state != SequenceState.AWAITING_RESTORE:
 		return
 	PlayerData.award_progression_reward("native_frog_rescue", 40.0, 3)
+	# The restoration is Q03's durable completion point.  The Salamander site
+	# and Q04 can now resume from their own saved state without restarting this
+	# encounter on the next load.
+	PlayerData.q03_completed = true
+	PlayerData.set_quest_checkpoint("q03", "awaiting_genome")
 	_state = SequenceState.DONE
 
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
@@ -336,6 +359,7 @@ func _on_salamander_genome_recovered(_site: SalamanderGenomeSite) -> void:
 	if _state != SequenceState.AWAITING_GENOME:
 		return
 	_state = SequenceState.AWAITING_TRANSFORMATION
+	PlayerData.set_quest_checkpoint("q03", "awaiting_transformation")
 	PlayerData.set_objective(null, "Try Salamander form", "Tap the form circle at the top of the screen, then select Salamander.")
 	if not PlayerData.active_species_changed.is_connected(_on_first_transformation):
 		PlayerData.active_species_changed.connect(_on_first_transformation)
@@ -348,8 +372,37 @@ func _on_first_transformation(species_id: String) -> void:
 		return
 	PlayerData.active_species_changed.disconnect(_on_first_transformation)
 	_state = SequenceState.DONE
+	PlayerData.set_quest_checkpoint("q03", "completed")
 	PlayerData.set_objective(null, "")
 	completed.emit()
+
+func _resume_restore() -> void:
+	_state = SequenceState.AWAITING_RESTORE
+	var restore_point := get_tree().current_scene.find_child("HabitatRestorePoint", true, false)
+	if restore_point and restore_point.has_method("begin_cleanup"):
+		restore_point.begin_cleanup()
+	else:
+		push_error("Q03 could not restore the habitat checkpoint.")
+
+func _resume_genome_recovery() -> void:
+	_state = SequenceState.AWAITING_GENOME
+	var site := _get_salamander_genome_site()
+	if site == null:
+		push_error("Q03 could not restore the Salamander genome checkpoint.")
+		return
+	site.set_active(true)
+	if not site.genome_recovered.is_connected(_on_salamander_genome_recovered):
+		site.genome_recovered.connect(_on_salamander_genome_recovered)
+	PlayerData.set_objective(site, "Recover the Salamander genome", "Follow the marker to the glowing Salamander signal. Approach it and tap Recover Genome.")
+
+func _resume_transformation() -> void:
+	_state = SequenceState.AWAITING_TRANSFORMATION
+	PlayerData.set_objective(null, "Try Salamander form", "Tap the form circle at the top of the screen, then select Salamander.")
+	if not PlayerData.active_species_changed.is_connected(_on_first_transformation):
+		PlayerData.active_species_changed.connect(_on_first_transformation)
+	if _hud and _hud.has_method("guide_salamander_transformation"):
+		_hud.guide_salamander_transformation()
+	_on_first_transformation(PlayerData.active_species)
 
 ## Waits for the player to tap through the currently-shown subtitle before
 ## continuing — falls back to a fixed delay if there's no HUD to report a

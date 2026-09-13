@@ -365,6 +365,12 @@ var has_seen_minimap_tutorial: bool = false
 # _state on load either.
 var q01_completed: bool = false
 var q02_completed: bool = false
+var q03_completed: bool = false
+var q04_completed: bool = false
+# Fine-grained quest checkpoints. Completion booleans alone cannot restore a
+# save made halfway through a multi-step quest (for example, after its trash
+# is cleared but before the habitat-restoration interaction).
+var quest_progress: Dictionary = {}
 var max_genome_fragments: int = 12
 var minigame_started: bool = false
 
@@ -399,6 +405,12 @@ func set_object_state(scene_path: String, node_path: String, state: Dictionary) 
 	if not world_state.has(scene_path):
 		world_state[scene_path] = {}
 	world_state[scene_path][node_path] = state
+
+func set_quest_checkpoint(quest_id: String, checkpoint: String) -> void:
+	quest_progress[quest_id] = checkpoint
+
+func get_quest_checkpoint(quest_id: String) -> String:
+	return str(quest_progress.get(quest_id, ""))
 func add_genome_fragment(announce: bool = true) -> void:
 	genome_fragments = mini(genome_fragments + 1, max_genome_fragments)
 	if announce:
@@ -823,6 +835,11 @@ func save_game(slot: int = -1) -> void:
 		"minigame_started": minigame_started,
 		"has_seen_prologue": has_seen_prologue,
 		"lolo_palaka_intro_done": lolo_palaka_intro_done,
+		"q01_completed": q01_completed,
+		"q02_completed": q02_completed,
+		"q03_completed": q03_completed,
+		"q04_completed": q04_completed,
+		"quest_progress": quest_progress,
 		"unlocked_knowledge": unlocked_knowledge,
 		"unread_knowledge": unread_knowledge,
 		"current_scene_path": current_scene_path,
@@ -841,6 +858,7 @@ func save_game(slot: int = -1) -> void:
 		obj_path_str = str(get_tree().current_scene.get_path_to(current_objective))
 	data["current_objective_path"] = obj_path_str
 	data["current_objective_text"] = current_objective_text
+	data["current_objective_desc"] = current_objective_desc
 	
 	var file = FileAccess.open(get_save_path(slot), FileAccess.WRITE)
 	if file:
@@ -873,6 +891,13 @@ func load_game(slot: int = -1) -> bool:
 				minigame_started = data.get("minigame_started", false)
 				has_seen_prologue = data.get("has_seen_prologue", false)
 				lolo_palaka_intro_done = data.get("lolo_palaka_intro_done", false)
+				q01_completed = data.get("q01_completed", false)
+				q02_completed = data.get("q02_completed", false)
+				q03_completed = data.get("q03_completed", false)
+				q04_completed = data.get("q04_completed", false)
+				var saved_quest_progress: Variant = data.get("quest_progress", {})
+				quest_progress = saved_quest_progress.duplicate(true) if saved_quest_progress is Dictionary else {}
+				_migrate_legacy_quest_progress(data)
 				
 				var loaded_knowledge: Array = data.get("unlocked_knowledge", [])
 				unlocked_knowledge.clear()
@@ -915,11 +940,12 @@ func load_game(slot: int = -1) -> bool:
 				
 				var loaded_obj_path: String = data.get("current_objective_path", "")
 				var loaded_obj_text: String = data.get("current_objective_text", "")
+				var loaded_obj_desc: String = data.get("current_objective_desc", "")
 				current_objective = null
 				current_objective_text = ""
 				objective_changed.emit(null)
 				if loaded_obj_text != "":
-					call_deferred("_restore_objective", loaded_obj_path, loaded_obj_text)
+					call_deferred("_restore_objective", loaded_obj_path, loaded_obj_text, loaded_obj_desc)
 					
 				return true
 	return false
@@ -966,6 +992,19 @@ func restore_progression(data: Dictionary) -> void:
 	ultimate_cooldown_changed.emit(ultimate_cooldown_remaining, ULTIMATE_COOLDOWN_DURATION)
 	_emit_progression_changed()
 
+func _migrate_legacy_quest_progress(data: Dictionary) -> void:
+	# Saves created before quest_progress still contain enough information to
+	# resume their current milestone instead of replaying the whole quest.
+	if not quest_progress.has("q03"):
+		if q03_completed:
+			quest_progress["q03"] = "completed"
+		elif salamander_genome_recovered:
+			quest_progress["q03"] = "awaiting_transformation"
+		elif str(data.get("current_objective_text", "")) == "Restore the damaged habitat":
+			quest_progress["q03"] = "awaiting_restore"
+		elif claimed_progression_rewards.has("native_frog_rescue"):
+			quest_progress["q03"] = "awaiting_genome"
+
 func reset_data(slot: int = -1) -> void:
 	if slot != -1:
 		current_save_slot = slot
@@ -977,6 +1016,9 @@ func reset_data(slot: int = -1) -> void:
 	claimed_progression_rewards.clear()
 	q01_completed = false
 	q02_completed = false
+	q03_completed = false
+	q04_completed = false
+	quest_progress.clear()
 	health = 100.0
 	stamina = 100.0
 	level = 1

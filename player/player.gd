@@ -413,6 +413,12 @@ func _find_joystick() -> void:
 	if sticks.size() > 0:
 		_joystick = sticks[0]
 
+func get_species_speed() -> float:
+	match PlayerData.active_species:
+		"salamander": return speed * 1.6
+		"water_monitor": return speed * 1.3
+		_: return speed
+
 
 func _physics_process(delta: float) -> void:
 	# ── Stamina recovery ─────────────────────────────────────────────────────
@@ -464,7 +470,7 @@ func _physics_process(delta: float) -> void:
 	# ── Movement / Walking ────────────────────────────────────────────────────
 	if direction != Vector3.ZERO:
 		if is_on_floor():
-			var current_speed := speed * PlayerData.get_ultimate_speed_multiplier()
+			var current_speed := get_species_speed() * PlayerData.get_ultimate_speed_multiplier()
 			var current_accel := acceleration
 			
 			# Synchronize movement speed to the animation frame
@@ -474,7 +480,7 @@ func _physics_process(delta: float) -> void:
 				if length > 0.0:
 					# Use a sine wave squared to make the player stop at the ends and move fast in the middle
 					var phase := (pos / length) * PI
-					current_speed = speed * PlayerData.get_ultimate_speed_multiplier() * pow(sin(phase), 2) * 2.0
+					current_speed = get_species_speed() * PlayerData.get_ultimate_speed_multiplier() * pow(sin(phase), 2) * 2.0
 					current_accel = acceleration * 2.0 # Track the curve faster
 					
 			# Walk on the ground
@@ -1034,8 +1040,13 @@ func _update_animation(direction: Vector3) -> void:
 				if air_time > 0.0:
 					animation_player.speed_scale = anim.length / air_time
 	elif target_anim == anim_walk:
-		# Scale walking hop to movement speed, doubled for faster animation
-		animation_player.speed_scale = clamp((speed / 2.5) * 1.2, 0.5, 4.0)
+		var current_s := get_species_speed()
+		if PlayerData.active_species == "salamander":
+			# Salamander needs a slightly different ratio to stop foot sliding
+			animation_player.speed_scale = clamp(current_s / 2.0, 0.5, 4.0)
+		else:
+			# Scale walking hop to movement speed, doubled for faster animation
+			animation_player.speed_scale = clamp((current_s / 2.5) * 1.2, 0.5, 4.0)
 	else:
 		# Idle
 		animation_player.speed_scale = 1.0

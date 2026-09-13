@@ -30,6 +30,11 @@ var _clue_sighted: bool = false
 
 func _ready() -> void:
 	add_to_group("q02_director")
+	# Do not replay completed encounters after loading a save.  Q03 reads the
+	# persisted q02_completed checkpoint and will start itself when appropriate.
+	if PlayerData.q02_completed:
+		_state = SequenceState.DONE
+		return
 
 	_hud = get_tree().get_first_node_in_group("hud")
 

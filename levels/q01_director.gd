@@ -23,6 +23,12 @@ var _living_swarm: Array[Node] = []
 
 func _ready() -> void:
 	add_to_group("q01_director")
+	# This quest has already been completed in the loaded save.  Leaving the
+	# director dormant prevents its opening objective and enemy encounters from
+	# overwriting the player's later progress.
+	if PlayerData.q01_completed:
+		_state = SequenceState.DONE
+		return
 
 	# Add a slight delay to let the scene fully load and HUD initialize
 	await get_tree().create_timer(1.5).timeout

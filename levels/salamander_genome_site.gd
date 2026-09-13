@@ -47,6 +47,10 @@ func _perform_interaction() -> void:
 		var hud := get_tree().get_first_node_in_group("hud")
 		if hud and hud.has_method("show_notification"):
 			hud.show_notification("Salamander Form Unlocked", "Species genomes unlock forms. Try Salamander using the form circle at the top of the screen.", 6.0)
+		
+		# Give player the prompt to move forward into the Q04 trigger
+		if not PlayerData.q04_completed:
+			PlayerData.set_objective(null, "Test the Salamander Form", "Switch to the Salamander form and proceed deeper into the wetlands.")
 
 	genome_recovered.emit(self)
 	if _signal_light:
