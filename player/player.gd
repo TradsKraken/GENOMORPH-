@@ -263,15 +263,36 @@ func _play_transformation_effect() -> void:
 	var flash := OmniLight3D.new()
 	flash.name = "TransformationFlash"
 	flash.light_color = Color(0.25, 1.0, 0.65)
-	flash.light_energy = 4.0
-	flash.omni_range = 4.0
+	flash.light_energy = 6.0
+	flash.omni_range = 6.0
 	effect.add_child(flash)
+	
+	var orb_mesh := SphereMesh.new()
+	orb_mesh.radius = 0.5
+	orb_mesh.height = 1.0
+	var orb_mat := StandardMaterial3D.new()
+	orb_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	orb_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	orb_mat.albedo_color = Color(0.8, 1.0, 0.9, 0.8)
+	orb_mat.emission_enabled = true
+	orb_mat.emission = Color(0.4, 1.0, 0.7)
+	orb_mat.emission_energy_multiplier = 4.0
+	orb_mesh.material = orb_mat
+	var orb := MeshInstance3D.new()
+	orb.mesh = orb_mesh
+	orb.position.y = 0.5
+	orb.scale = Vector3(0.1, 0.1, 0.1)
+	effect.add_child(orb)
 
 	var tween := effect.create_tween().set_parallel(true)
 	tween.tween_property(ring, "scale", Vector3(1.8, 1.8, 1.8), 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_property(ring, "rotation:y", TAU, 0.8).set_trans(Tween.TRANS_LINEAR)
 	tween.tween_property(ring_material, "albedo_color:a", 0.0, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.tween_property(flash, "light_energy", 0.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	
+	tween.tween_property(orb, "scale", Vector3(2.5, 2.5, 2.5), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(orb_mat, "albedo_color:a", 0.0, 0.6).set_delay(0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	
 	await get_tree().create_timer(0.85).timeout
 	effect.queue_free()
 
