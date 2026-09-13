@@ -88,6 +88,8 @@ const AdaptationCombat = preload("res://combat/adaptation_combat.gd")
 var _adaptation: Node
 var _monitor_form: Node3D
 var _basic_cooldown := 0.0
+var _transformation_serial := 0
+var _visual_species := ""
 
 # ── Lifecycle ────────────────────────────────────────────────────────────────
 
@@ -118,7 +120,15 @@ func _ready() -> void:
 	
 	if not PlayerData.active_species_changed.is_connected(_on_active_species_changed):
 		PlayerData.active_species_changed.connect(_on_active_species_changed)
-	_apply_species_form(PlayerData.active_species)
+		
+	_visual_species = PlayerData.active_species
+	_instantiate_species_form(_visual_species)
+	
+	var frog_form = get_node_or_null("Frog") as Node3D
+	if frog_form: frog_form.visible = _visual_species == "frog"
+	if is_instance_valid(_salamander_form): _salamander_form.visible = _visual_species == "salamander"
+	if is_instance_valid(_monitor_form): _monitor_form.visible = _visual_species == "water_monitor"
+	_configure_species_animations(_visual_species)
 
 func _find_animation_player(node: Node) -> AnimationPlayer:
 	for child in node.get_children():
@@ -130,13 +140,145 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 	return null
 
 func _on_active_species_changed(species_id: String) -> void:
+	if species_id == _visual_species:
+		return
+		
+	var old_species := _visual_species
+	_visual_species = species_id
 	cancel_aiming_jump()
-	_apply_species_form(species_id)
+	
+	_transformation_serial += 1
+	var transition_id := _transformation_serial
+	input_locked = true
+	
+	# 1. Ensure new form exists
+	_instantiate_species_form(species_id)
+	
+	var old_form := _get_species_form(old_species)
+	var new_form := _get_species_form(species_id)
+	
+	var old_target_scale := Vector3.ONE
+	if is_instance_valid(old_form):
+		old_target_scale = old_form.scale
+	
+	# 2. Animate out the old form
+	if is_instance_valid(old_form):
+		var tw_out = create_tween().set_parallel(true)
+		tw_out.tween_property(old_form, "scale", Vector3.ZERO, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+		await tw_out.finished
+		
+		if transition_id != _transformation_serial: return
+		old_form.visible = false
+		old_form.scale = old_target_scale # restore for later
 
-func _apply_species_form(species_id: String) -> void:
-	var frog_form := get_node_or_null("Frog") as Node3D
+	# 3. Play the transformation particle flash
+	_play_transformation_effect()
+	
+	if not is_instance_valid(new_form):
+		input_locked = false
+		return
+		
+	# 4. Hide all other forms to be safe
+	var frog_form = get_node_or_null("Frog") as Node3D
+	if frog_form and frog_form != new_form: frog_form.visible = false
+	if is_instance_valid(_salamander_form) and _salamander_form != new_form: _salamander_form.visible = false
+	if is_instance_valid(_monitor_form) and _monitor_form != new_form: _monitor_form.visible = false
+
+	# 5. Animate in the new form
+	var new_target_scale = new_form.scale
+	if new_target_scale == Vector3.ZERO:
+		new_target_scale = Vector3(2.0, 2.0, 2.0) if species_id == "salamander" else (Vector3(0.5, 0.5, 0.5) if species_id == "water_monitor" else Vector3.ONE)
+	
+	new_form.scale = Vector3.ZERO
+	new_form.visible = true
+	_configure_species_animations(species_id)
+	
+	var tw_in = create_tween().set_parallel(true)
+	tw_in.tween_property(new_form, "scale", new_target_scale, 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	await tw_in.finished
+	
+	if transition_id != _transformation_serial: return
+	input_locked = false
+
+func _get_species_form(species_id: String) -> Node3D:
+	match species_id:
+		"frog": return get_node_or_null("Frog") as Node3D
+		"salamander": return _salamander_form
+		"water_monitor": return _monitor_form
+	return null
+
+func _play_transformation_effect() -> void:
+	var effect := Node3D.new()
+	effect.name = "TransformationEffect"
+	effect.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(effect)
+
+	var ring_mesh := TorusMesh.new()
+	ring_mesh.inner_radius = 0.52
+	ring_mesh.outer_radius = 0.60
+	ring_mesh.rings = 32
+	ring_mesh.ring_segments = 12
+	var ring_material := StandardMaterial3D.new()
+	ring_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	ring_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	ring_material.albedo_color = Color(0.25, 1.0, 0.68, 0.9)
+	ring_material.emission_enabled = true
+	ring_material.emission = Color(0.05, 1.0, 0.45)
+	ring_material.emission_energy_multiplier = 3.0
+	ring_mesh.material = ring_material
+	var ring := MeshInstance3D.new()
+	ring.name = "DNAEnergyRing"
+	ring.mesh = ring_mesh
+	ring.position.y = 0.05
+	ring.scale = Vector3(0.2, 0.2, 0.2)
+	effect.add_child(ring)
+
+	var particle_mesh := SphereMesh.new()
+	particle_mesh.radius = 0.055
+	particle_mesh.height = 0.11
+	var particle_material := StandardMaterial3D.new()
+	particle_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	particle_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	particle_material.albedo_color = Color(0.35, 1.0, 0.72, 0.95)
+	particle_material.emission_enabled = true
+	particle_material.emission = Color(0.1, 1.0, 0.5)
+	particle_material.emission_energy_multiplier = 2.5
+	particle_mesh.material = particle_material
+	var particles := CPUParticles3D.new()
+	particles.name = "TransformationParticles"
+	particles.amount = 28
+	particles.lifetime = 0.9
+	particles.one_shot = true
+	particles.explosiveness = 0.85
+	particles.direction = Vector3(0, 1, 0)
+	particles.spread = 42.0
+	particles.initial_velocity_min = 1.2
+	particles.initial_velocity_max = 2.5
+	particles.gravity = Vector3(0, -0.8, 0)
+	particles.scale_amount_min = 0.7
+	particles.scale_amount_max = 1.4
+	particles.mesh = particle_mesh
+	effect.add_child(particles)
+
+	var flash := OmniLight3D.new()
+	flash.name = "TransformationFlash"
+	flash.light_color = Color(0.25, 1.0, 0.65)
+	flash.light_energy = 4.0
+	flash.omni_range = 4.0
+	effect.add_child(flash)
+
+	var tween := effect.create_tween().set_parallel(true)
+	tween.tween_property(ring, "scale", Vector3(1.8, 1.8, 1.8), 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(ring, "rotation:y", TAU, 0.8).set_trans(Tween.TRANS_LINEAR)
+	tween.tween_property(ring_material, "albedo_color:a", 0.0, 0.8).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(flash, "light_energy", 0.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	await get_tree().create_timer(0.85).timeout
+	effect.queue_free()
+
+func _instantiate_species_form(species_id: String) -> void:
 	if species_id == "salamander" and not is_instance_valid(_salamander_form):
 		_salamander_form = SALAMANDER_FORM_SCENE.instantiate() as Node3D
+		_salamander_form.scale = Vector3(2.0, 2.0, 2.0)
 		add_child(_salamander_form)
 		_hide_from_minimap(_salamander_form)
 	if species_id == "water_monitor" and not is_instance_valid(_monitor_form):
@@ -144,10 +286,6 @@ func _apply_species_form(species_id: String) -> void:
 		_monitor_form = scene.instantiate() as Node3D
 		add_child(_monitor_form)
 		_hide_from_minimap(_monitor_form)
-	if frog_form: frog_form.visible = species_id == "frog"
-	if is_instance_valid(_salamander_form): _salamander_form.visible = species_id == "salamander"
-	if is_instance_valid(_monitor_form): _monitor_form.visible = species_id == "water_monitor"
-	_configure_species_animations(species_id)
 
 func _configure_species_animations(species_id: String) -> void:
 	var form: Node = get_node_or_null("Frog")

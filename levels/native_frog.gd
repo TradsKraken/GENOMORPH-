@@ -190,8 +190,8 @@ func _create_defense_health_bar() -> void:
 	bg_gradient.set_color(1, Color(0.08, 0.10, 0.10, 0.9))
 	var bg_texture := GradientTexture2D.new()
 	bg_texture.gradient = bg_gradient
-	bg_texture.width = 110
-	bg_texture.height = 12
+	bg_texture.width = 135
+	bg_texture.height = 14
 	_defense_hp_bg = Sprite3D.new()
 	_defense_hp_bg.texture = bg_texture
 	_defense_hp_bg.billboard = BaseMaterial3D.BILLBOARD_ENABLED
@@ -205,14 +205,14 @@ func _create_defense_health_bar() -> void:
 	fg_gradient.set_color(1, Color(0.30, 0.95, 0.48, 1.0))
 	var fg_texture := GradientTexture2D.new()
 	fg_texture.gradient = fg_gradient
-	fg_texture.width = 110
-	fg_texture.height = 12
+	fg_texture.width = 135
+	fg_texture.height = 14
 	_defense_hp_fg = Sprite3D.new()
 	_defense_hp_fg.texture = fg_texture
 	_defense_hp_fg.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_defense_hp_fg.no_depth_test = true
 	_defense_hp_fg.centered = false
-	_defense_hp_fg.offset = Vector2(-55, -6)
+	_defense_hp_fg.offset = Vector2(-67.5, -7)
 	_defense_hp_fg.position = Vector3(0, defense_bar_height, 0.001)
 	_defense_hp_fg.pixel_size = 0.01
 	add_child(_defense_hp_fg)
@@ -223,7 +223,7 @@ func _update_defense_health_bar() -> void:
 		return
 	var ratio := maxf(0.001, _defense_health / defense_max_health)
 	_defense_hp_fg.scale.x = ratio
-	_defense_hp_fg.offset.x = -55.0 / ratio
+	_defense_hp_fg.offset.x = -67.5 / ratio
 
 func _set_defense_health_bar_visible(is_visible: bool) -> void:
 	if is_instance_valid(_defense_hp_bg):

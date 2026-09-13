@@ -130,6 +130,7 @@ func _run() -> void:
 	# Distinct abilities and poison stacking.
 	PlayerData.unlock_species("salamander")
 	PlayerData.set_active_species("salamander")
+	await get_tree().create_timer(0.9).timeout
 	PlayerData.health = 30.0
 	player._skill1_cooldown_timer = 0.0
 	player._skill1()
@@ -153,6 +154,7 @@ func _run() -> void:
 	for species in Rules.SPECIES:
 		PlayerData.unlock_species(species)
 		PlayerData.set_active_species(species)
+		await get_tree().create_timer(0.9).timeout
 		var profile := PlayerData.get_current_species_data()
 		profile.genomes_available = 20
 		for category in ["attack", "defense", "agility"]:
@@ -161,12 +163,14 @@ func _run() -> void:
 			check(PlayerData.ultimate_remaining > 0.0, "Data-driven duration")
 			PlayerData.end_ultimate()
 	PlayerData.set_active_species("frog")
+	await get_tree().create_timer(0.9).timeout
 	PlayerData.develop_ultimate("attack")
 	player._activate_ultimate()
 	player._adaptation.tick(0.1)
 	check(enemy.has_node("AdaptationPoison"), "Frog Toxic Trail poisons nearby enemy")
 	PlayerData.end_ultimate()
 	PlayerData.set_active_species("water_monitor")
+	await get_tree().create_timer(0.9).timeout
 	PlayerData.develop_ultimate("attack")
 	for node in get_children():
 		if node.get_script() == load("res://combat/adaptation_field.gd"):
