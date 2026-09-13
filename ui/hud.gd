@@ -94,6 +94,11 @@ var _notification_title: Label
 var _notification_text: RichTextLabel
 var _notification_tween: Tween
 
+var _level_up_cinematic_panel: VBoxContainer
+var _level_up_title: Label
+var _level_up_subtitle: Label
+var _level_up_tween: Tween
+
 var _knowledge_toast_panel: PanelContainer
 var _knowledge_toast_title: Label
 var _knowledge_toast_label: Label
@@ -160,7 +165,9 @@ func _ready() -> void:
 	_build_genome_popup()
 	_build_minimap()
 	_build_zone_status()
+	_build_cleanup_progress()
 	_build_notification_panel()
+	_build_level_up_cinematic()
 	_build_knowledge_toast()
 
 	_connect_signals()
@@ -437,18 +444,28 @@ func _build_notification_panel() -> void:
 		
 	_notification_panel = PanelContainer.new()
 	_notification_panel.name = "NotificationPanel"
-	_notification_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_notification_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_notification_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_notification_panel.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_notification_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_notification_panel.grow_vertical = Control.GROW_DIRECTION_END
 	_notification_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_notification_panel.custom_minimum_size = Vector2(800, 150)
+	_notification_panel.offset_top = 24
+	_notification_panel.offset_right = -24
+	_notification_panel.custom_minimum_size = Vector2(340, 80)
 	
 	var style = StyleBoxFlat.new()
-	# Translucent dark gradient style strip across the middle
-	style.bg_color = Color(0.0, 0.0, 0.0, 0.6)
-	style.set_border_width_all(0)
-	style.content_margin_top = 30
-	style.content_margin_bottom = 30
+	style.bg_color = Color(0.02, 0.04, 0.06, 0.85)
+	style.set_corner_radius_all(12)
+	style.border_color = Color(0.9, 0.8, 0.2, 0.7)
+	style.border_width_left = 6
+	style.border_width_top = 1
+	style.border_width_right = 1
+	style.border_width_bottom = 1
+	style.shadow_color = Color(0, 0, 0, 0.3)
+	style.shadow_size = 10
+	style.content_margin_left = 20
+	style.content_margin_top = 16
+	style.content_margin_right = 20
+	style.content_margin_bottom = 16
 	_notification_panel.add_theme_stylebox_override("panel", style)
 	
 	var vbox = VBoxContainer.new()
@@ -458,12 +475,11 @@ func _build_notification_panel() -> void:
 	
 	_notification_title = Label.new()
 	_notification_title.name = "NotifTitle"
-	_notification_title.add_theme_font_size_override("font_size", 42)
-	_notification_title.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2)) # Gold
+	_notification_title.add_theme_font_size_override("font_size", 16)
+	_notification_title.add_theme_color_override("font_color", Color(0.9, 0.8, 0.2))
 	_notification_title.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
-	_notification_title.add_theme_constant_override("shadow_offset_y", 2)
-	_notification_title.add_theme_constant_override("shadow_outline_size", 4)
-	_notification_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_notification_title.add_theme_constant_override("shadow_offset_y", 1)
+	_notification_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_notification_title.text = "OBJECTIVE COMPLETE"
 	vbox.add_child(_notification_title)
 	
@@ -473,9 +489,9 @@ func _build_notification_panel() -> void:
 	_notification_text.fit_content = true
 	_notification_text.scroll_active = false
 	_notification_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_notification_text.add_theme_font_size_override("normal_font_size", 20)
-	_notification_text.add_theme_color_override("default_color", Color(0.8, 0.8, 0.8))
-	_notification_text.custom_minimum_size = Vector2(600, 30)
+	_notification_text.add_theme_font_size_override("normal_font_size", 14)
+	_notification_text.add_theme_color_override("default_color", Color(0.85, 0.85, 0.85))
+	_notification_text.custom_minimum_size = Vector2(300, 20)
 	vbox.add_child(_notification_text)
 	
 	_root.add_child(_notification_panel)
@@ -487,32 +503,102 @@ func show_notification(title: String, text: String, duration: float = 4.0) -> vo
 	if not is_instance_valid(_notification_panel): return
 	
 	_notification_title.text = title.to_upper()
-	_notification_text.text = "[center]" + text + "[/center]"
+	_notification_text.text = text
 	_notification_panel.visible = true
+	_notification_panel.reset_size() # Force layout update
 	
 	if AudioManager.has_method("play_sfx"):
-		AudioManager.play_sfx("palaka_convo") # Play a grander sound if available
+		AudioManager.play_sfx("palaka_convo")
 	
 	if _notification_tween and _notification_tween.is_valid():
 		_notification_tween.kill()
 		
-	# Cinematic scale and fade in
-	_notification_panel.scale = Vector2(1.2, 1.2)
 	_notification_panel.modulate.a = 0.0
-	_notification_panel.pivot_offset = _notification_panel.size / 2.0
+	var viewport_width = get_viewport().get_visible_rect().size.x
+	var target_x = viewport_width - _notification_panel.size.x - 24
+	_notification_panel.position.x = viewport_width + 50 # Start slightly off-screen
 	
 	_notification_tween = create_tween()
 	_notification_tween.set_parallel(true)
 	
-	# Scale down slightly and fade in
-	_notification_tween.tween_property(_notification_panel, "scale", Vector2(1.0, 1.0), 0.8).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUINT)
-	_notification_tween.tween_property(_notification_panel, "modulate:a", 1.0, 0.8)
+	_notification_tween.tween_property(_notification_panel, "position:x", target_x, 0.55).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	_notification_tween.tween_property(_notification_panel, "modulate:a", 1.0, 0.4)
 	
 	_notification_tween.chain().tween_interval(duration)
 	
-	# Fade out smoothly
-	_notification_tween.chain().tween_property(_notification_panel, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_notification_tween.chain().tween_property(_notification_panel, "modulate:a", 0.0, 0.5).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	_notification_tween.chain().tween_callback(func(): _notification_panel.visible = false)
+
+# ── Cinematic Level Up Text ───────────────────────────────────────────────────
+
+func _build_level_up_cinematic() -> void:
+	if _root.has_node("LevelUpCinematic"):
+		_level_up_cinematic_panel = _root.find_child("LevelUpCinematic", true, false)
+		return
+		
+	_level_up_cinematic_panel = VBoxContainer.new()
+	_level_up_cinematic_panel.name = "LevelUpCinematic"
+	_level_up_cinematic_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_level_up_cinematic_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_level_up_cinematic_panel.grow_vertical = Control.GROW_DIRECTION_END
+	_level_up_cinematic_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_level_up_cinematic_panel.alignment = BoxContainer.ALIGNMENT_CENTER
+	_level_up_cinematic_panel.add_theme_constant_override("separation", 5)
+	
+	_level_up_title = Label.new()
+	_level_up_title.add_theme_font_size_override("font_size", 56)
+	_level_up_title.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3)) # Bright Gold
+	_level_up_title.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	_level_up_title.add_theme_constant_override("shadow_offset_y", 2)
+	_level_up_title.add_theme_constant_override("shadow_outline_size", 8)
+	_level_up_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_level_up_cinematic_panel.add_child(_level_up_title)
+	
+	_level_up_subtitle = Label.new()
+	_level_up_subtitle.add_theme_font_size_override("font_size", 24)
+	_level_up_subtitle.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9, 0.9))
+	_level_up_subtitle.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.5))
+	_level_up_subtitle.add_theme_constant_override("shadow_offset_y", 1)
+	_level_up_subtitle.add_theme_constant_override("shadow_outline_size", 4)
+	_level_up_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_level_up_cinematic_panel.add_child(_level_up_subtitle)
+	
+	_root.add_child(_level_up_cinematic_panel)
+	_level_up_cinematic_panel.visible = false
+	_level_up_cinematic_panel.modulate.a = 0.0
+
+func show_level_up_cinematic(title: String, subtitle: String, duration: float = 3.5) -> void:
+	if not is_instance_valid(_level_up_cinematic_panel): return
+	
+	_level_up_title.text = title.to_upper()
+	_level_up_subtitle.text = subtitle
+	_level_up_cinematic_panel.visible = true
+	
+	if AudioManager.has_method("play_sfx"):
+		AudioManager.play_sfx("level_up")
+		
+	if _level_up_tween and _level_up_tween.is_valid():
+		_level_up_tween.kill()
+		
+	_level_up_cinematic_panel.modulate.a = 0.0
+	var base_y = 120.0 # Start a bit down from the top
+	_level_up_cinematic_panel.position.y = base_y + 20.0
+	
+	_level_up_tween = create_tween()
+	_level_up_tween.set_parallel(true)
+	
+	# Fade in and drift up slightly to base position
+	_level_up_tween.tween_property(_level_up_cinematic_panel, "modulate:a", 1.0, 1.0).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	_level_up_tween.tween_property(_level_up_cinematic_panel, "position:y", base_y, 1.5).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	
+	# Wait
+	_level_up_tween.chain().tween_interval(duration)
+	
+	# Fade out and drift up a bit more
+	_level_up_tween.chain().tween_property(_level_up_cinematic_panel, "modulate:a", 0.0, 1.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
+	_level_up_tween.chain().tween_property(_level_up_cinematic_panel, "position:y", base_y - 30.0, 1.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
+	
+	_level_up_tween.chain().tween_callback(func(): _level_up_cinematic_panel.visible = false)
 
 # ── Knowledge Unlocked Toast (flies into the Knowledge book button) ───────────
 
@@ -3084,7 +3170,7 @@ func _on_adaptation_genome_earned(species: String) -> void:
 	show_notification("GENOME EARNED", "Tap LV badge to upgrade.", 3.5)
 
 func _on_adaptation_level_gained(new_level: int) -> void:
-	show_notification("LEVEL %d" % new_level, "+2 AP earned", 2.5)
+	show_level_up_cinematic("LEVEL %d" % new_level, "+2 AP earned", 2.5)
 
 func _on_skill2_cooldown(duration: float) -> void:
 	if not is_instance_valid(_jump_btn):
