@@ -345,18 +345,14 @@ func _animate_open() -> void:
 	for id in _attribute_rows:
 		var card: PanelContainer = _attribute_rows[id]["card"]
 		card.modulate.a = 0.0
-		card.position.y += 12
 		var ctw := create_tween().set_parallel(true)
 		ctw.tween_property(card, "modulate:a", 1.0, 0.2).set_delay(delay).set_trans(Tween.TRANS_SINE)
-		ctw.tween_property(card, "position:y", card.position.y - 12, 0.25).set_delay(delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		delay += 0.04
 	for cat in _ultimate_rows:
 		var card: PanelContainer = _ultimate_rows[cat]["card"]
 		card.modulate.a = 0.0
-		card.position.y += 12
 		var ctw := create_tween().set_parallel(true)
 		ctw.tween_property(card, "modulate:a", 1.0, 0.2).set_delay(delay).set_trans(Tween.TRANS_SINE)
-		ctw.tween_property(card, "position:y", card.position.y - 12, 0.25).set_delay(delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		delay += 0.04
 
 func _animate_close() -> void:

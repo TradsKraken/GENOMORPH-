@@ -11,11 +11,11 @@ class_name NativeFrog
 ## was the exact bug Q02's original "DisturbanceMarker" had).
 
 signal player_approached
-signal defense_health_changed(current: float, maximum: float)
 signal defense_failed
 
 @export var ambush_radius: float = 6.0
 @export var defense_max_health: float = 100.0
+@export var defense_bar_height: float = 1.15
 
 const FrogModel = preload("res://Models/Frog.glb")
 
@@ -29,12 +29,15 @@ var _idle_anim: String = ""
 var _jump_anim: String = ""
 var _defense_health: float = 100.0
 var _defense_active: bool = false
+var _defense_hp_bg: Sprite3D
+var _defense_hp_fg: Sprite3D
 
 func _ready() -> void:
 	add_to_group("native_frog")
 
 	var model = FrogModel.instantiate()
 	add_child(model)
+	_create_defense_health_bar()
 
 	_anim_player = _find_animation_player(model)
 	if _anim_player:
@@ -159,22 +162,74 @@ func begin_defense() -> void:
 		return
 	_defense_active = true
 	_defense_health = defense_max_health
+	_update_defense_health_bar()
+	_set_defense_health_bar_visible(true)
 	set_panicking(true)
-	defense_health_changed.emit(_defense_health, defense_max_health)
 
 func stop_defense() -> void:
 	_defense_active = false
+	_set_defense_health_bar_visible(false)
 	set_panicking(false)
 
 func take_damage(amount: float) -> void:
 	if not _defense_active or _is_safe:
 		return
 	_defense_health = maxf(0.0, _defense_health - amount)
-	defense_health_changed.emit(_defense_health, defense_max_health)
+	_update_defense_health_bar()
 	if _defense_health <= 0.0:
 		_defense_active = false
+		_set_defense_health_bar_visible(false)
 		set_panicking(false)
 		defense_failed.emit()
+
+## A local 3D health bar follows the frog while it panics and hops. This keeps
+## the rescue target readable without adding a separate screen-HUD container.
+func _create_defense_health_bar() -> void:
+	var bg_gradient := Gradient.new()
+	bg_gradient.set_color(0, Color(0.08, 0.10, 0.10, 0.9))
+	bg_gradient.set_color(1, Color(0.08, 0.10, 0.10, 0.9))
+	var bg_texture := GradientTexture2D.new()
+	bg_texture.gradient = bg_gradient
+	bg_texture.width = 110
+	bg_texture.height = 12
+	_defense_hp_bg = Sprite3D.new()
+	_defense_hp_bg.texture = bg_texture
+	_defense_hp_bg.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_defense_hp_bg.no_depth_test = true
+	_defense_hp_bg.position = Vector3(0, defense_bar_height, 0)
+	_defense_hp_bg.pixel_size = 0.01
+	add_child(_defense_hp_bg)
+
+	var fg_gradient := Gradient.new()
+	fg_gradient.set_color(0, Color(0.30, 0.95, 0.48, 1.0))
+	fg_gradient.set_color(1, Color(0.30, 0.95, 0.48, 1.0))
+	var fg_texture := GradientTexture2D.new()
+	fg_texture.gradient = fg_gradient
+	fg_texture.width = 110
+	fg_texture.height = 12
+	_defense_hp_fg = Sprite3D.new()
+	_defense_hp_fg.texture = fg_texture
+	_defense_hp_fg.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_defense_hp_fg.no_depth_test = true
+	_defense_hp_fg.centered = false
+	_defense_hp_fg.offset = Vector2(-55, -6)
+	_defense_hp_fg.position = Vector3(0, defense_bar_height, 0.001)
+	_defense_hp_fg.pixel_size = 0.01
+	add_child(_defense_hp_fg)
+	_set_defense_health_bar_visible(false)
+
+func _update_defense_health_bar() -> void:
+	if not is_instance_valid(_defense_hp_fg):
+		return
+	var ratio := maxf(0.001, _defense_health / defense_max_health)
+	_defense_hp_fg.scale.x = ratio
+	_defense_hp_fg.offset.x = -55.0 / ratio
+
+func _set_defense_health_bar_visible(is_visible: bool) -> void:
+	if is_instance_valid(_defense_hp_bg):
+		_defense_hp_bg.visible = is_visible
+	if is_instance_valid(_defense_hp_fg):
+		_defense_hp_fg.visible = is_visible
 
 func _do_panic_jump() -> void:
 	if not _is_panicking or _is_safe:

@@ -162,7 +162,6 @@ func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
 	if is_dead or not visible:
 		return
 	
-	PlayerData.gain_ultimate_charge(minf(maxf(0.0, amount), health) * 0.25)
 	health -= amount
 	_show_damage_text(amount)
 	knockback_velocity = knockback

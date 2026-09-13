@@ -16,13 +16,13 @@ signal species_unlocked(species_id: String)
 signal active_species_changed(species_id: String)
 signal skill1_cooldown_started(duration: float)
 signal progression_changed(species_id: String)
-signal ultimate_charge_changed(charge: float)
 signal genome_earned(species_id: String)
 signal adaptation_level_gained(new_level: int)
 signal skill2_cooldown_started(duration: float)
 
 const AdaptationRules = preload("res://systems/adaptation_rules.gd")
 signal ultimate_state_changed(active: bool, remaining: float)
+signal ultimate_cooldown_changed(remaining: float, duration: float)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
 var current_objective_desc: String = ""
@@ -94,7 +94,8 @@ const ATTRIBUTE_DEFINITIONS := {
 const ULTIMATE_DEFINITIONS = AdaptationRules.ULTIMATES
 var ultimate_active: bool = false
 var ultimate_remaining: float = 0.0
-var ultimate_charge: float = 0.0
+const ULTIMATE_COOLDOWN_DURATION := 10.0
+var ultimate_cooldown_remaining: float = 0.0
 var _ultimate_effects: Dictionary = {}
 var claimed_progression_rewards: Dictionary = {}
 
@@ -252,14 +253,8 @@ func get_ultimate_damage_reduction() -> float:
 func get_ultimate_speed_multiplier() -> float:
 	return ultimate_effect("speed")
 
-func gain_ultimate_charge(amount: float) -> void:
-	if ultimate_active or amount <= 0.0:
-		return
-	ultimate_charge = clampf(ultimate_charge + amount, 0.0, 100.0)
-	ultimate_charge_changed.emit(ultimate_charge)
-
 func can_activate_ultimate() -> bool:
-	return health > 0.0 and not ultimate_active and get_equipped_ultimate_level() > 0 and ultimate_charge >= 100.0
+	return health > 0.0 and not ultimate_active and ultimate_cooldown_remaining <= 0.0 and get_equipped_ultimate_level() > 0
 
 func activate_ultimate() -> bool:
 	if not can_activate_ultimate():
@@ -268,26 +263,31 @@ func activate_ultimate() -> bool:
 	if _ultimate_effects.is_empty():
 		return false
 	ultimate_active = true
-	ultimate_charge = 0.0
 	ultimate_remaining = float(_ultimate_effects.get("duration", 8.0))
-	ultimate_charge_changed.emit(ultimate_charge)
 	ultimate_state_changed.emit(true, ultimate_remaining)
 	return true
 
 func update_ultimate(delta: float) -> void:
-	if not ultimate_active:
+	if ultimate_active:
+		ultimate_remaining = maxf(0.0, ultimate_remaining - delta)
+		if ultimate_remaining <= 0.0:
+			# The cooldown deliberately starts only after the full effect ends.
+			end_ultimate(true)
+		else:
+			ultimate_state_changed.emit(true, ultimate_remaining)
 		return
-	ultimate_remaining = maxf(0.0, ultimate_remaining - delta)
-	if ultimate_remaining <= 0.0:
-		end_ultimate()
-	else:
-		ultimate_state_changed.emit(true, ultimate_remaining)
+	if ultimate_cooldown_remaining > 0.0:
+		ultimate_cooldown_remaining = maxf(0.0, ultimate_cooldown_remaining - delta)
+		ultimate_cooldown_changed.emit(ultimate_cooldown_remaining, ULTIMATE_COOLDOWN_DURATION)
 
-func end_ultimate() -> void:
+func end_ultimate(start_cooldown: bool = false) -> void:
 	ultimate_active = false
 	ultimate_remaining = 0.0
 	_ultimate_effects.clear()
 	ultimate_state_changed.emit(false, 0.0)
+	if start_cooldown:
+		ultimate_cooldown_remaining = ULTIMATE_COOLDOWN_DURATION
+		ultimate_cooldown_changed.emit(ultimate_cooldown_remaining, ULTIMATE_COOLDOWN_DURATION)
 
 func _emit_progression_changed() -> void:
 	health = minf(health, max_health)
@@ -812,8 +812,8 @@ func save_game(slot: int = -1) -> void:
 		"inventory": inventory,
 		"genome_fragments": genome_fragments,
 		"species_progression": species_progression,
-		"progression_version": 2,
-		"ultimate_charge": ultimate_charge,
+		"progression_version": 3,
+		"ultimate_cooldown_remaining": ultimate_cooldown_remaining,
 		"claimed_progression_rewards": claimed_progression_rewards,
 		"active_species": active_species,
 		"salamander_genome_recovered": salamander_genome_recovered,
@@ -960,10 +960,10 @@ func restore_progression(data: Dictionary) -> void:
 	active_species = str(data.get("active_species", "frog"))
 	if not is_species_unlocked(active_species):
 		active_species = "frog"
-	ultimate_charge = clampf(float(data.get("ultimate_charge", 0.0)), 0.0, 100.0)
+	ultimate_cooldown_remaining = clampf(float(data.get("ultimate_cooldown_remaining", 0.0)), 0.0, ULTIMATE_COOLDOWN_DURATION)
 	var rewards: Variant = data.get("claimed_progression_rewards", {})
 	claimed_progression_rewards = rewards.duplicate(true) if rewards is Dictionary else {}
-	ultimate_charge_changed.emit(ultimate_charge)
+	ultimate_cooldown_changed.emit(ultimate_cooldown_remaining, ULTIMATE_COOLDOWN_DURATION)
 	_emit_progression_changed()
 
 func reset_data(slot: int = -1) -> void:
@@ -972,7 +972,8 @@ func reset_data(slot: int = -1) -> void:
 	active_species = "frog"
 	species_progression = {"frog": _make_species_profile()}
 	end_ultimate()
-	ultimate_charge = 0.0
+	ultimate_cooldown_remaining = 0.0
+	ultimate_cooldown_changed.emit(ultimate_cooldown_remaining, ULTIMATE_COOLDOWN_DURATION)
 	claimed_progression_rewards.clear()
 	q01_completed = false
 	q02_completed = false

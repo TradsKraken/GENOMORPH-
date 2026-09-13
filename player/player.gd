@@ -81,6 +81,7 @@ var _skill1_cooldown_timer: float = 0.0
 var damage_cooldown_timer: float = 0.0
 var _attack_debug_timer: float = 0.0 # TEMPORARY — remove once the attack-spam bug is confirmed fixed.
 @export var damage_cooldown_duration: float = 1.0
+@export_range(0.0, 0.5, 0.01) var salamander_walk_trim_seconds: float = 0.10
 var _attack_animation: String = FROG_ATTACK_ANIMATION
 var _salamander_form: Node3D
 const AdaptationCombat = preload("res://combat/adaptation_combat.gd")
@@ -172,6 +173,8 @@ func _configure_species_animations(species_id: String) -> void:
 		return
 	var walk := animation_player.get_animation(anim_walk) if not anim_walk.is_empty() else null
 	if walk:
+		if species_id == "salamander":
+			_trim_salamander_walk_cycle(walk)
 		walk.loop_mode = Animation.LOOP_LINEAR
 	var idle := animation_player.get_animation(anim_idle) if not anim_idle.is_empty() else null
 	if idle:
@@ -179,6 +182,24 @@ func _configure_species_animations(species_id: String) -> void:
 	var attack := animation_player.get_animation(_attack_animation) if not _attack_animation.is_empty() else null
 	if attack:
 		attack.loop_mode = Animation.LOOP_NONE
+
+func _trim_salamander_walk_cycle(walk: Animation) -> void:
+	# The imported clip contains a few extra ending frames whose final pose does
+	# not match the first pose. Shorten the animation and remove keys beyond the
+	# new loop endpoint so LOOP_LINEAR wraps cleanly in Godot.
+	if walk.has_meta("salamander_loop_trimmed"):
+		return
+	var trim := clampf(salamander_walk_trim_seconds, 0.0, maxf(0.0, walk.length - 0.01))
+	if trim <= 0.0:
+		walk.set_meta("salamander_loop_trimmed", true)
+		return
+	var loop_length := walk.length - trim
+	for track in range(walk.get_track_count()):
+		for key in range(walk.track_get_key_count(track) - 1, -1, -1):
+			if walk.track_get_key_time(track, key) >= loop_length - 0.0001:
+				walk.track_remove_key(track, key)
+	walk.length = loop_length
+	walk.set_meta("salamander_loop_trimmed", true)
 
 func _find_animation_name(keyword: String) -> String:
 	if not is_instance_valid(animation_player):
@@ -354,7 +375,6 @@ func take_damage(amount: float) -> void:
 	_heal_timer = 0.0
 	var actual_damage := amount * (1.0 - PlayerData.get_ultimate_damage_reduction())
 	PlayerData.take_damage(actual_damage)
-	PlayerData.gain_ultimate_charge(minf(actual_damage, 30.0) * 0.5)
 	
 	# Apply brief flinch (red flash) without blocking movement
 	var mesh = _find_mesh(self)

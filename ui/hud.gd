@@ -88,10 +88,6 @@ var _cleanup_progress_panel: PanelContainer
 var _cleanup_progress_bar: ProgressBar
 var _cleanup_progress_label: Label
 
-var _frog_defense_panel: PanelContainer
-var _frog_defense_bar: ProgressBar
-var _frog_defense_label: Label
-
 var _notification_panel: PanelContainer
 var _notification_title: Label
 var _notification_text: RichTextLabel
@@ -163,7 +159,6 @@ func _ready() -> void:
 	_build_genome_popup()
 	_build_minimap()
 	_build_zone_status()
-	_build_frog_defense_status()
 	_build_notification_panel()
 	_build_knowledge_toast()
 
@@ -422,64 +417,6 @@ func _build_cleanup_progress() -> void:
 
 	_root.add_child(_cleanup_progress_panel)
 	_cleanup_progress_panel.visible = false
-
-# ── Native Frog Defense (Q03) ───────────────────────────────────────────────
-
-func _build_frog_defense_status() -> void:
-	if is_instance_valid(_frog_defense_panel):
-		return
-
-	_frog_defense_panel = PanelContainer.new()
-	_frog_defense_panel.name = "FrogDefensePanel"
-	_frog_defense_panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_frog_defense_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_frog_defense_panel.offset_top = 172.0
-	_frog_defense_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var panel_style := StyleBoxFlat.new()
-	panel_style.bg_color = Color(0.14, 0.035, 0.045, 0.91)
-	panel_style.border_color = Color(1.0, 0.38, 0.46, 0.95)
-	panel_style.set_border_width_all(2)
-	panel_style.set_corner_radius_all(12)
-	panel_style.content_margin_left = 18
-	panel_style.content_margin_right = 18
-	panel_style.content_margin_top = 7
-	panel_style.content_margin_bottom = 9
-	_frog_defense_panel.add_theme_stylebox_override("panel", panel_style)
-
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 4)
-	_frog_defense_panel.add_child(box)
-	_frog_defense_label = Label.new()
-	_frog_defense_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_frog_defense_label.add_theme_font_size_override("font_size", 14)
-	_frog_defense_label.add_theme_color_override("font_color", Color(1.0, 0.80, 0.82))
-	box.add_child(_frog_defense_label)
-	_frog_defense_bar = ProgressBar.new()
-	_frog_defense_bar.custom_minimum_size = Vector2(285, 13)
-	_frog_defense_bar.show_percentage = false
-	_frog_defense_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var bar_bg := StyleBoxFlat.new()
-	bar_bg.bg_color = Color(0.08, 0.01, 0.02, 0.95)
-	bar_bg.set_corner_radius_all(7)
-	var bar_fill := StyleBoxFlat.new()
-	bar_fill.bg_color = Color(0.98, 0.27, 0.34)
-	bar_fill.set_corner_radius_all(7)
-	_frog_defense_bar.add_theme_stylebox_override("background", bar_bg)
-	_frog_defense_bar.add_theme_stylebox_override("fill", bar_fill)
-	box.add_child(_frog_defense_bar)
-	_root.add_child(_frog_defense_panel)
-	_frog_defense_panel.visible = false
-
-func show_frog_defense(current: float, maximum: float) -> void:
-	_build_frog_defense_status()
-	_frog_defense_bar.max_value = maximum
-	_frog_defense_bar.value = clampf(current, 0.0, maximum)
-	_frog_defense_label.text = "PROTECT NATIVE FROG  %d / %d" % [roundi(current), roundi(maximum)]
-	_frog_defense_panel.visible = true
-
-func hide_frog_defense() -> void:
-	if is_instance_valid(_frog_defense_panel):
-		_frog_defense_panel.visible = false
 
 # ── Cinematic Notification Banner ─────────────────────────────────────────────
 
@@ -2240,7 +2177,7 @@ func _tut_character_menu() -> void:
 	var tab_data = [
 		["STATS TAB", "This tab shows your [b]character statistics[/b]:\n\n[color=#ffcc00]Level[/color], [color=#ff3b5c]Health[/color], [color=#9400ff]Stamina[/color], [color=#ff8833]Attack Power[/color], [color=#33aaff]Defense[/color], [color=#44ff44]Speed[/color].\n\n[b]Tap the STATS tab[/b] to view it."],
 		["ATTRIBUTES TAB", "Earn [color=#ffcc00]2 Attribute Points[/color] per level, plus quest rewards.\n\nChoose among six attributes. Five upgrades in one attribute earn an adaptation Genome.\n\n[b]Tap ATTRIBUTES[/b] to see values and prices."],
-		["ULTIMATES TAB", "Spend adaptation Genomes to unlock, upgrade or switch one Ultimate path.\n\nEach species has its own paths. Fight to fill the shared charge meter, then tap ULT."],
+		["ULTIMATES TAB", "Spend adaptation Genomes to unlock, upgrade or switch one Ultimate path.\n\nEach species has its own paths. Once unlocked, tap ULT when it is ready. Cooldown begins after the effect ends."],
 		["INVENTORY TAB", "This shows everything you are carrying.\n\n[color=#33ff88]Genome Fragments[/color] collected will appear here.\n\n[b]Tap the INVENTORY tab[/b] to view it."],
 	]
 	for i in range(tab_data.size()):
@@ -2957,7 +2894,8 @@ func _connect_signals() -> void:
 		pd.species_unlocked.connect(_rebuild_species_selector)
 	if pd.has_signal("progression_changed"):
 		pd.progression_changed.connect(func(_species_id: String): _refresh_ultimate_button())
-	PlayerData.ultimate_charge_changed.connect(func(_charge: float): _refresh_ultimate_button())
+	if PlayerData.has_signal("ultimate_cooldown_changed"):
+		PlayerData.ultimate_cooldown_changed.connect(func(_remaining: float, _duration: float): _refresh_ultimate_button())
 	PlayerData.genome_earned.connect(_on_adaptation_genome_earned)
 	PlayerData.adaptation_level_gained.connect(_on_adaptation_level_gained)
 	PlayerData.skill2_cooldown_started.connect(_on_skill2_cooldown)
@@ -3007,45 +2945,18 @@ func _refresh_ultimate_button() -> void:
 		return
 	var definition := PlayerData.get_equipped_ultimate_definition()
 	var rank := PlayerData.get_equipped_ultimate_level()
-	var charge := PlayerData.ultimate_charge
+	var cooldown := PlayerData.ultimate_cooldown_remaining
 
-	# ── Name label above the button ──
-	var name_label := _skill3_btn.get_node_or_null("UltimateName") as Label
-	if name_label == null:
-		name_label = Label.new()
-		name_label.name = "UltimateName"
-		name_label.position = Vector2(-45, -22)
-		name_label.size = Vector2(170, 18)
-		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		name_label.add_theme_font_size_override("font_size", 11)
-		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_skill3_btn.add_child(name_label)
-	name_label.text = str(definition.get("name", "ULTIMATE"))
-	name_label.add_theme_color_override("font_color", Color("8fe7bd") if rank > 0 else Color(0.4, 0.5, 0.5))
-
-	# ── Charge meter bar under button ──
-	var meter := _skill3_btn.get_node_or_null("ChargeMeter") as ProgressBar
-	if meter == null:
-		meter = ProgressBar.new()
-		meter.name = "ChargeMeter"
-		meter.position = Vector2(6, 73)
-		meter.size = Vector2(68, 4)
-		meter.show_percentage = false
-		meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var fill := StyleBoxFlat.new()
-		fill.bg_color = Color("50e8a8")
-		fill.set_corner_radius_all(2)
-		meter.add_theme_stylebox_override("fill", fill)
-		var bg := StyleBoxFlat.new()
-		bg.bg_color = Color(0.08, 0.12, 0.14, 0.8)
-		bg.set_corner_radius_all(2)
-		meter.add_theme_stylebox_override("background", bg)
-		_skill3_btn.add_child(meter)
-	meter.value = charge
+	# Keep every Ultimate detail inside the circular button. Remove the old
+	# external title and progress-bar children if this HUD was already open.
+	for child_name in ["UltimateName", "CooldownMeter"]:
+		var old_child := _skill3_btn.get_node_or_null(child_name)
+		if is_instance_valid(old_child):
+			old_child.queue_free()
 
 	# ── Button style & text ──
 	_skill3_btn.icon = null
-	_skill3_btn.add_theme_font_size_override("font_size", 16)
+	_skill3_btn.add_theme_font_size_override("font_size", 15)
 	_skill3_btn.disabled = not PlayerData.can_activate_ultimate()
 
 	# State-based styling
@@ -3063,8 +2974,6 @@ func _refresh_ultimate_button() -> void:
 		btn_style.set_border_width_all(2)
 		btn_style.shadow_color = Color(0, 0, 0, 0.3)
 		btn_style.shadow_size = 4
-		name_label.visible = false
-		meter.visible = false
 	elif PlayerData.ultimate_active:
 		# ACTIVE — bright glowing border
 		_skill3_btn.text = "ULT\n%ds" % ceili(PlayerData.ultimate_remaining)
@@ -3074,10 +2983,18 @@ func _refresh_ultimate_button() -> void:
 		btn_style.set_border_width_all(3)
 		btn_style.shadow_color = Color(0.2, 1.0, 0.6, 0.4)
 		btn_style.shadow_size = 12
-		name_label.visible = true
-		meter.visible = false
 		_skill3_btn.add_theme_color_override("font_color", Color("d6ffe8"))
-	elif charge >= 100.0:
+	elif cooldown > 0.0:
+		# COOLDOWN — blue countdown that begins after the Ultimate ends.
+		_skill3_btn.text = "ULT\nCD %ds" % ceili(cooldown)
+		_skill3_btn.tooltip_text = "%s Lv%d — ready in %ds" % [definition.get("name", ""), rank, ceili(cooldown)]
+		btn_style.bg_color = Color(0.06, 0.16, 0.28, 0.85)
+		btn_style.border_color = Color("55aee8")
+		btn_style.set_border_width_all(3)
+		btn_style.shadow_color = Color(0.2, 0.6, 1.0, 0.35)
+		btn_style.shadow_size = 9
+		_skill3_btn.add_theme_color_override("font_color", Color("b9e5ff"))
+	else:
 		# READY — pulsing gold glow
 		_skill3_btn.text = "ULT\nREADY"
 		_skill3_btn.tooltip_text = "%s Lv%d — READY" % [definition.get("name", ""), rank]
@@ -3086,8 +3003,6 @@ func _refresh_ultimate_button() -> void:
 		btn_style.set_border_width_all(3)
 		btn_style.shadow_color = Color(1.0, 0.84, 0.3, 0.45)
 		btn_style.shadow_size = 14
-		name_label.visible = true
-		meter.visible = false
 		_skill3_btn.add_theme_color_override("font_color", Color("ffd666"))
 		# Pulse animation
 		if not _skill3_btn.has_meta("_ult_pulsing"):
@@ -3096,28 +3011,8 @@ func _refresh_ultimate_button() -> void:
 			tw.tween_property(_skill3_btn, "modulate", Color(1.15, 1.1, 0.95), 0.6).set_trans(Tween.TRANS_SINE)
 			tw.tween_property(_skill3_btn, "modulate", Color.WHITE, 0.6).set_trans(Tween.TRANS_SINE)
 			_skill3_btn.set_meta("_ult_pulse_tween", tw)
-	else:
-		# CHARGING — standard look with progress
-		_skill3_btn.text = "ULT\n%d%%" % charge
-		_skill3_btn.tooltip_text = "%s Lv%d — charge by fighting" % [definition.get("name", ""), rank]
-		btn_style.bg_color = Color(0.05, 0.09, 0.16, 0.65)
-		btn_style.border_color = Color(0.35, 0.70, 0.60, 0.55)
-		btn_style.set_border_width_all(2)
-		btn_style.shadow_color = Color(0, 0, 0, 0.35)
-		btn_style.shadow_size = 6
-		name_label.visible = true
-		meter.visible = true
-		_skill3_btn.add_theme_color_override("font_color", Color("b4d6cc"))
-		# Stop pulse if it was running
-		if _skill3_btn.has_meta("_ult_pulsing"):
-			_skill3_btn.remove_meta("_ult_pulsing")
-			var old_tw = _skill3_btn.get_meta("_ult_pulse_tween", null)
-			if old_tw and old_tw is Tween:
-				old_tw.kill()
-			_skill3_btn.modulate = Color.WHITE
-
 	# Stop pulse for non-ready states
-	if charge < 100.0 or rank == 0 or PlayerData.ultimate_active:
+	if cooldown > 0.0 or rank == 0 or PlayerData.ultimate_active:
 		if _skill3_btn.has_meta("_ult_pulsing"):
 			_skill3_btn.remove_meta("_ult_pulsing")
 			var old_tw = _skill3_btn.get_meta("_ult_pulse_tween", null)

@@ -157,7 +157,8 @@ func _finish_prologue() -> void:
 	tw.tween_callback(func():
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
-		_transition_to_terrain()
+		# Always go through SceneLoader — it will detect the preloaded resource
+		get_node("/root/SceneLoader").load_scene(MAIN_TERRAIN_PATH)
 	)
 
 func _start_fade_out() -> void:
@@ -170,19 +171,7 @@ func _start_fade_out() -> void:
 		_video_player.stop()
 		if AudioManager and AudioManager.has_method("play_game_bgm"):
 			AudioManager.play_game_bgm()
-		_transition_to_terrain()
+		# Always go through SceneLoader — it will detect the preloaded resource
+		get_node("/root/SceneLoader").load_scene(MAIN_TERRAIN_PATH)
 	)
 
-func _transition_to_terrain() -> void:
-	# If the background preload finished, use it directly (instant transition)
-	if _preload_started:
-		var status = ResourceLoader.load_threaded_get_status(MAIN_TERRAIN_PATH)
-		if status == ResourceLoader.THREAD_LOAD_LOADED:
-			print("[PRELOAD] Terrain was pre-loaded! Switching instantly.")
-			var packed_scene = ResourceLoader.load_threaded_get(MAIN_TERRAIN_PATH)
-			get_tree().change_scene_to_packed(packed_scene)
-			return
-		else:
-			print("[PRELOAD] Terrain not ready yet (status=%d), falling back to SceneLoader" % status)
-	# Fallback: use the normal loading screen
-	get_node("/root/SceneLoader").load_scene(MAIN_TERRAIN_PATH)

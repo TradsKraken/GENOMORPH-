@@ -78,7 +78,7 @@ func _run() -> void:
 	menu._confirmation.hide()
 	menu._confirmation.confirmed.emit()
 	check(PlayerData.get_equipped_ultimate_level() == 1, "UI unlocks and equips Ultimate")
-	check(not PlayerData.activate_ultimate(), "Cannot activate without charge")
+	check(PlayerData.can_activate_ultimate(), "Unlocked Ultimate is immediately available when off cooldown")
 	PlayerData.get_current_species_data().genomes_available = 8
 	PlayerData.get_current_species_data().genomes_earned = 9
 	check(PlayerData.develop_ultimate("attack") and PlayerData.develop_ultimate("attack"), "Sequential path upgrades to level 3")
@@ -89,22 +89,24 @@ func _run() -> void:
 	if capture:
 		await _capture(menu, 2, "progression_ultimates.png")
 	menu._on_close()
-	await get_tree().process_frame
+	await menu.closed
 	check(not get_tree().paused, "Closing menu resumes game")
 	PlayerData.health = 60.0
 	PlayerData.stamina = 70.0
-	PlayerData.gain_ultimate_charge(100.0)
-	check(not hud._skill3_btn.disabled and "READY" in hud._skill3_btn.text, "Shared meter enables HUD activation")
-	hud._skill3_btn.pressed.emit()
-	check(PlayerData.ultimate_active and PlayerData.ultimate_charge == 0.0, "HUD consumes full charge exactly once")
+	hud._refresh_ultimate_button()
+	check(not hud._skill3_btn.disabled and "READY" in hud._skill3_btn.text, "Ready Ultimate enables HUD activation")
+	hud._on_ultimate_pressed()
+	check(PlayerData.ultimate_active and PlayerData.ultimate_cooldown_remaining == 0.0, "HUD activates the Ultimate without a charge requirement")
 	check(PlayerData.get_ultimate_damage_reduction() > 0.0, "Defense reduces damage")
 	check(not PlayerData.develop_ultimate("agility"), "Active Ultimate cannot be changed in menu")
 	PlayerData.update_ultimate(20.0)
-	check(not PlayerData.ultimate_active and PlayerData.get_ultimate_damage_reduction() == 0.0, "Effect expires without permanent stat changes")
-	PlayerData.gain_ultimate_charge(47.0)
+	check(not PlayerData.ultimate_active and PlayerData.get_ultimate_damage_reduction() == 0.0 and PlayerData.ultimate_cooldown_remaining == 10.0, "Effect expiry starts its post-duration cooldown")
+	check(hud._skill3_btn.disabled and "CD 10s" in hud._skill3_btn.text, "HUD shows the post-duration cooldown")
+	PlayerData.update_ultimate(10.0)
+	check(PlayerData.can_activate_ultimate() and "READY" in hud._skill3_btn.text, "Ultimate returns after its cooldown")
 	PlayerData.unlock_species("salamander")
 	check(PlayerData.set_active_species("salamander"), "Discovered species selectable")
-	check(PlayerData.ultimate_charge == 47.0 and PlayerData.health == 60.0 and PlayerData.stamina == 70.0, "Switching preserves shared resources")
+	check(PlayerData.health == 60.0 and PlayerData.stamina == 70.0, "Switching preserves shared resources")
 	check(PlayerData.max_health == 125.0, "Shared maximum health does not shrink on transformation")
 	check(PlayerData.level == 1 and PlayerData.get_attribute_upgrade_count("health") == 0 and PlayerData.get_equipped_ultimate_level() == 0, "Species progression stays separate")
 	# Round-trip the real save method in an unused test slot, removing only this fixture.
@@ -114,10 +116,12 @@ func _run() -> void:
 		check(false, "Test save slot already exists; refusing to overwrite")
 	else:
 		PlayerData.award_progression_reward("saved_reward", 5.0, 1)
+		PlayerData.ultimate_cooldown_remaining = 4.0
+		PlayerData.ultimate_cooldown_changed.emit(4.0, PlayerData.ULTIMATE_COOLDOWN_DURATION)
 		PlayerData.save_game(test_slot)
 		PlayerData.reset_data()
 		check(PlayerData.load_game(test_slot), "Actual save/load succeeds")
-		check(PlayerData.active_species == "salamander" and PlayerData.ultimate_charge == 47.0, "Save retains species and charge")
+		check(PlayerData.active_species == "salamander" and PlayerData.ultimate_cooldown_remaining == 4.0, "Save retains species and Ultimate cooldown")
 		check(int(PlayerData.species_progression.frog.attack_ultimate_level) == 3, "Save retains inactive species Ultimate")
 		check(not PlayerData.award_progression_reward("saved_reward", 5.0, 1), "Reload cannot duplicate milestone reward")
 		DirAccess.remove_absolute(test_path)
@@ -153,20 +157,17 @@ func _run() -> void:
 		profile.genomes_available = 20
 		for category in ["attack", "defense", "agility"]:
 			PlayerData.develop_ultimate(category)
-			PlayerData.gain_ultimate_charge(100.0)
 			check(PlayerData.activate_ultimate(), "%s %s activates" % [species, category])
 			check(PlayerData.ultimate_remaining > 0.0, "Data-driven duration")
 			PlayerData.end_ultimate()
 	PlayerData.set_active_species("frog")
 	PlayerData.develop_ultimate("attack")
-	PlayerData.gain_ultimate_charge(100.0)
 	player._activate_ultimate()
 	player._adaptation.tick(0.1)
 	check(enemy.has_node("AdaptationPoison"), "Frog Toxic Trail poisons nearby enemy")
 	PlayerData.end_ultimate()
 	PlayerData.set_active_species("water_monitor")
 	PlayerData.develop_ultimate("attack")
-	PlayerData.gain_ultimate_charge(100.0)
 	for node in get_children():
 		if node.get_script() == load("res://combat/adaptation_field.gd"):
 			node.queue_free()

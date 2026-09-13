@@ -84,6 +84,27 @@ func load_scene(path: String, texture_path: String = "") -> void:
 	var tween = create_tween()
 	tween.tween_property(_root, "modulate:a", 1.0, 0.3)
 	tween.tween_callback(func():
+		# Check if the scene was already pre-loaded by another script (e.g. prologue)
+		var status = ResourceLoader.load_threaded_get_status(_target_scene)
+		if status == ResourceLoader.THREAD_LOAD_LOADED:
+			# Already done! Skip straight to the scene switch
+			print("[SceneLoader] Scene was pre-loaded, switching instantly")
+			_is_loading = false
+			_progress_bar.value = 100.0
+			var packed_scene = ResourceLoader.load_threaded_get(_target_scene)
+			get_tree().change_scene_to_packed(packed_scene)
+			var fade_tw = create_tween()
+			fade_tw.tween_interval(0.2)
+			fade_tw.tween_property(_root, "modulate:a", 0.0, 0.4)
+			fade_tw.tween_callback(_finish_loading)
+			return
+		elif status == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			# Already loading in background, just piggyback on it
+			print("[SceneLoader] Scene is already loading in background, piggybacking")
+			_is_loading = true
+			return
+
+		# Normal case: start a fresh threaded load
 		var err = ResourceLoader.load_threaded_request(_target_scene)
 		if err == OK:
 			_is_loading = true

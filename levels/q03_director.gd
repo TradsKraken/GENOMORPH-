@@ -106,8 +106,6 @@ func _on_frog_approached() -> void:
 
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
 	if frog and frog.has_method("begin_defense"):
-		if frog.has_signal("defense_health_changed") and not frog.is_connected("defense_health_changed", _on_frog_defense_health_changed):
-			frog.connect("defense_health_changed", _on_frog_defense_health_changed)
 		frog.begin_defense()
 
 	_wave = 1
@@ -130,18 +128,6 @@ func _spawn_rats() -> void:
 		_living_rats.append(rat)
 	PlayerData.set_objective(null, "Protect the native frog", "%d rats remaining" % _living_rats.size())
 
-func _on_frog_defense_health_changed(current: float, maximum: float) -> void:
-	if not is_instance_valid(_hud):
-		_hud = get_tree().get_first_node_in_group("hud")
-	if _hud and _hud.has_method("show_frog_defense"):
-		_hud.show_frog_defense(current, maximum)
-
-func _hide_frog_defense_status() -> void:
-	if not is_instance_valid(_hud):
-		_hud = get_tree().get_first_node_in_group("hud")
-	if _hud and _hud.has_method("hide_frog_defense"):
-		_hud.hide_frog_defense()
-
 func _on_frog_defense_failed() -> void:
 	if _state != SequenceState.FIGHTING_RATS:
 		return
@@ -152,7 +138,6 @@ func _on_frog_defense_failed() -> void:
 		if is_instance_valid(rat):
 			rat.queue_free()
 	_living_rats.clear()
-	_hide_frog_defense_status()
 	if _hud and _hud.has_method("show_notification"):
 		_hud.show_notification("Native Frog Overwhelmed", "Protect it from the rats. Draw their attention with an attack.", 2.0)
 	PlayerData.set_objective(null, "Protect the native frog", "The defense will restart shortly.")
@@ -165,8 +150,6 @@ func _on_frog_defense_failed() -> void:
 		return
 	_state = SequenceState.FIGHTING_RATS
 	frog.begin_defense()
-	var max_defense_health := float(frog.get("defense_max_health"))
-	_on_frog_defense_health_changed(max_defense_health, max_defense_health)
 	_wave = 1
 	_spawn_rats()
 
@@ -220,7 +203,6 @@ func _on_rat_died() -> void:
 		frog.set_panicking(false)
 	if frog and frog.has_method("stop_defense"):
 		frog.stop_defense()
-	_hide_frog_defense_status()
 
 	_state = SequenceState.AWAITING_RESTORE
 

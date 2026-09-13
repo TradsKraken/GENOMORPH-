@@ -31,8 +31,7 @@ func _run() -> void:
 	assert(data.get_attribute_upgrade_cost("attack") == 1, "Second Genome must match the GDD table")
 	assert(data.develop_ultimate("attack"), "A Genome must develop an Ultimate")
 	assert(data.get_equipped_ultimate_level() == 1, "Developed Ultimate should be equipped at level 1")
-	data.gain_ultimate_charge(100.0)
-	assert(data.activate_ultimate(), "Developed Ultimate must activate with full charge")
+	assert(data.activate_ultimate(), "Developed Ultimate must activate when it is off cooldown")
 	assert(data.ultimate_effect("poison", 0.0) > 0.0, "Toxic Trail must grant poison")
 	data.end_ultimate()
 	data.salamander_genome_recovered = false
