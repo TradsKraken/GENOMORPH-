@@ -61,7 +61,7 @@ const FROG_IDLE_ANIMATION := "FrogArmature|Frog_Idle"
 const FROG_WALK_ANIMATION := "FrogArmature|Frog_Jump"
 const FROG_JUMP_ANIMATION := "FrogArmature|Frog_Jump"
 const FROG_ATTACK_ANIMATION := "FrogArmature|Frog_Attack"
-const SALAMANDER_FORM_SCENE := preload("res://Models/Salamander/Salamander.glb")
+const SALAMANDER_FORM_SCENE := preload("res://Models/Salamander/SalamanderFIXED.glb")
 
 ## Reference to the on-screen virtual joystick (found at runtime via group).
 var _joystick = null
@@ -83,6 +83,7 @@ var _attack_debug_timer: float = 0.0 # TEMPORARY — remove once the attack-spam
 @export var damage_cooldown_duration: float = 1.0
 @export_range(0.0, 0.5, 0.01) var salamander_walk_trim_seconds: float = 0.10
 var _attack_animation: String = FROG_ATTACK_ANIMATION
+var _skill1_animation: String = ""
 var _salamander_form: Node3D
 const AdaptationCombat = preload("res://combat/adaptation_combat.gd")
 var _adaptation: Node
@@ -303,7 +304,7 @@ func _instantiate_species_form(species_id: String) -> void:
 		add_child(_salamander_form)
 		_hide_from_minimap(_salamander_form)
 	if species_id == "water_monitor" and not is_instance_valid(_monitor_form):
-		var scene := load("res://Models/Water Monitor Lizard/Water Monitor Lizard.glb") as PackedScene
+		var scene := load("res://Models/Water Monitor Lizard/Monitor Lizard FIXED.glb") as PackedScene
 		_monitor_form = scene.instantiate() as Node3D
 		_monitor_form.scale = Vector3(4.0, 4.0, 4.0)
 		add_child(_monitor_form)
@@ -317,12 +318,13 @@ func _configure_species_animations(species_id: String) -> void:
 	if species_id != "frog":
 		# The supplied Salamander model includes Walk and three attack clips, but
 		# no idle clip. Leaving it paused while standing preserves its rest pose.
-		anim_idle = ""
+		anim_idle = _find_animation_name("idle")
 		anim_walk = _find_animation_name("walk")
 		anim_jump = anim_walk
 		_attack_animation = _find_animation_name("attack middle")
 		if _attack_animation.is_empty():
 			_attack_animation = _find_animation_name("attack")
+		_skill1_animation = _find_animation_name("skill")
 	else:
 		anim_idle = FROG_IDLE_ANIMATION
 		anim_walk = FROG_WALK_ANIMATION
@@ -835,6 +837,15 @@ func _skill1() -> void:
 	if PlayerData.active_species != "frog":
 		_skill1_cooldown_timer = (12.0 if PlayerData.active_species == "salamander" else 5.0) * PlayerData.get_cooldown_multiplier()
 		PlayerData.skill1_cooldown_started.emit(_skill1_cooldown_timer)
+		
+		if not _skill1_animation.is_empty() and animation_player:
+			_is_using_skill = true
+			animation_player.play(_skill1_animation, 0.1)
+			get_tree().create_timer(animation_player.get_animation(_skill1_animation).length).timeout.connect(func():
+				_is_using_skill = false
+				_update_animation(Vector3.ZERO)
+			)
+			
 		_adaptation.use_skill1()
 		return
 	_is_using_skill = true

@@ -1,7 +1,7 @@
 extends InteractableBase
 class_name SalamanderGenomeSite
 
-const SalamanderScene = preload("res://Models/Salamander/Salamander.glb")
+const SalamanderScene = preload("res://Models/Salamander/SalamanderFIXED.glb")
 
 ## Q03's fixed, named discovery. It deliberately does not use
 ## GenomeFragment: this is a species genome, not another generic counter item.

@@ -29,25 +29,59 @@ func _align_visual_and_collision() -> void:
 	_collect_meshes(self, meshes)
 	var trash_mesh := _find_rubbish_mesh(meshes)
 	if trash_mesh == null:
-		push_warning("TrashPile could not find the rubbish-bin mesh to align its collision.")
-		return
+		if meshes.size() > 0:
+			trash_mesh = meshes[0]
+		else:
+			return
 
-	# This GLB also contains decorative cattails, roots, and a rock.  They are
-	# separate assets rather than part of the rubbish pile, so keep only the
-	# actual bin mesh in this reusable cleanup prop.
+	# Hide decorative meshes (cattails, roots, rock) — keep only the trash bin
 	for mesh in meshes:
-		mesh.visible = mesh == trash_mesh
+		if mesh != trash_mesh:
+			mesh.visible = false
 
-	var bounds := _get_world_bounds(trash_mesh)
-	if bounds.size == Vector3.ZERO:
-		return
+	# Compute world-space bounding box of the trash mesh
+	var aabb := trash_mesh.get_aabb()
+	var wmin := Vector3(INF, INF, INF)
+	var wmax := Vector3(-INF, -INF, -INF)
+	for x in [aabb.position.x, aabb.end.x]:
+		for y in [aabb.position.y, aabb.end.y]:
+			for z in [aabb.position.z, aabb.end.z]:
+				var wp := trash_mesh.global_transform * Vector3(x, y, z)
+				wmin.x = minf(wmin.x, wp.x)
+				wmin.y = minf(wmin.y, wp.y)
+				wmin.z = minf(wmin.z, wp.z)
+				wmax.x = maxf(wmax.x, wp.x)
+				wmax.y = maxf(wmax.y, wp.y)
+				wmax.z = maxf(wmax.z, wp.z)
 
-	# Place the centre of the bins above this node and sit their lowest point on
-	# the ground.  The StaticBody3D root is now exactly where the player sees it.
-	var desired_center := global_position + Vector3(0.0, bounds.size.y * 0.5, 0.0)
-	trash_mesh.global_position += desired_center - bounds.get_center()
-	bounds = _get_world_bounds(trash_mesh)
-	_fit_collision_to_bounds(bounds)
+	var mesh_size := wmax - wmin
+	var mesh_bottom_center := Vector3((wmin.x + wmax.x) * 0.5, wmin.y, (wmin.z + wmax.z) * 0.5)
+
+	# Save every child's world transform before we move the root
+	var child_transforms: Array[Transform3D] = []
+	for child in get_children():
+		if child is Node3D:
+			child_transforms.append((child as Node3D).global_transform)
+		else:
+			child_transforms.append(Transform3D.IDENTITY)
+
+	# Move the StaticBody3D root to where the mesh actually is.
+	# This fixes attack targeting which checks distance to self.global_position.
+	global_position = mesh_bottom_center
+
+	# Restore children to their original world positions so the mesh doesn't move
+	for i in get_child_count():
+		var child = get_child(i)
+		if child is Node3D:
+			(child as Node3D).global_transform = child_transforms[i]
+
+	# Now place the collision shape locally — the root is at the mesh's feet
+	var collision := get_node_or_null("CollisionShape3D") as CollisionShape3D
+	if collision and collision.shape is BoxShape3D:
+		collision.shape = collision.shape.duplicate()
+		var box := collision.shape as BoxShape3D
+		box.size = mesh_size + Vector3(0.3, 0.1, 0.3)
+		collision.position = Vector3(0.0, mesh_size.y * 0.5, 0.0)
 
 func _collect_meshes(node: Node, meshes: Array[MeshInstance3D]) -> void:
 	for child in node.get_children():
@@ -61,33 +95,6 @@ func _find_rubbish_mesh(meshes: Array[MeshInstance3D]) -> MeshInstance3D:
 		if "rubbish" in mesh_name or "bin" in mesh_name or "trash" in mesh_name:
 			return mesh
 	return null
-
-func _get_world_bounds(mesh: MeshInstance3D) -> AABB:
-	var local_bounds := mesh.get_aabb()
-	var first_corner := true
-	var bounds := AABB()
-	for x in [local_bounds.position.x, local_bounds.end.x]:
-		for y in [local_bounds.position.y, local_bounds.end.y]:
-			for z in [local_bounds.position.z, local_bounds.end.z]:
-				var corner := mesh.global_transform * Vector3(x, y, z)
-				if first_corner:
-					bounds.position = corner
-					first_corner = false
-				else:
-					bounds = bounds.expand(corner)
-	return bounds
-
-func _fit_collision_to_bounds(world_bounds: AABB) -> void:
-	var collision := get_node_or_null("CollisionShape3D") as CollisionShape3D
-	if collision == null or not collision.shape is BoxShape3D:
-		return
-
-	# Each placed pile needs its own shape; otherwise resizing a shared scene
-	# resource would make every pile inherit the last pile's dimensions.
-	collision.shape = collision.shape.duplicate()
-	var box := collision.shape as BoxShape3D
-	box.size = world_bounds.size + Vector3(0.15, 0.05, 0.15)
-	collision.global_position = world_bounds.get_center()
 
 var _highlight_tween: Tween
 

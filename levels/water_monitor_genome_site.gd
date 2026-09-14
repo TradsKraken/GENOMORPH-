@@ -3,7 +3,7 @@ class_name WaterMonitorGenomeSite
 
 signal genome_recovered(site: WaterMonitorGenomeSite)
 
-const MonitorScene = preload("res://Models/Water Monitor Lizard/Water Monitor Lizard.glb")
+const MonitorScene = preload("res://Models/Water Monitor Lizard/Monitor Lizard FIXED.glb")
 
 @export var objective_text := "Recover the Water Monitor genome"
 @export var objective_desc := "Approach the biological signal and tap Recover Genome."
