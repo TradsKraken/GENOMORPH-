@@ -2,9 +2,9 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cmcbe5fqe7fak"
-path.s3tc="res://.godot/imported/Water Monitor Lizard_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-0f628258901448720b474c62c11253f6.s3tc.ctex"
-path.etc2="res://.godot/imported/Water Monitor Lizard_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-0f628258901448720b474c62c11253f6.etc2.ctex"
+uid="uid://sc4ybj5alpr6"
+path.s3tc="res://.godot/imported/Monitor Lizard FIXED_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-1393448318fba96e29c81afed6d14a75.s3tc.ctex"
+path.etc2="res://.godot/imported/Monitor Lizard FIXED_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-1393448318fba96e29c81afed6d14a75.etc2.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
@@ -15,8 +15,8 @@ generator_parameters={
 
 [deps]
 
-source_file="res://Models/Water Monitor Lizard/Water Monitor Lizard_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png"
-dest_files=["res://.godot/imported/Water Monitor Lizard_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-0f628258901448720b474c62c11253f6.s3tc.ctex", "res://.godot/imported/Water Monitor Lizard_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-0f628258901448720b474c62c11253f6.etc2.ctex"]
+source_file="res://Models/Water Monitor Lizard/Monitor Lizard FIXED_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png"
+dest_files=["res://.godot/imported/Monitor Lizard FIXED_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-1393448318fba96e29c81afed6d14a75.s3tc.ctex", "res://.godot/imported/Monitor Lizard FIXED_Meshy_AI_Geometric_Monitor_Liz_0904033948_texture.png-1393448318fba96e29c81afed6d14a75.etc2.ctex"]
 
 [params]
 

@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bysdtw8q5oiv7"
-path="res://.godot/imported/Water Monitor Lizard.glb-1f618f13da765ea4310ce78b0870127e.scn"
+uid="uid://dm1n3c07reu74"
+path="res://.godot/imported/SalamanderFIXED.glb-70b501b96a4f5c91f2420ea2f9a1f2cf.scn"
 
 [deps]
 
-source_file="res://Models/Water Monitor Lizard/Water Monitor Lizard.glb"
-dest_files=["res://.godot/imported/Water Monitor Lizard.glb-1f618f13da765ea4310ce78b0870127e.scn"]
+source_file="res://Models/Salamander/SalamanderFIXED.glb"
+dest_files=["res://.godot/imported/SalamanderFIXED.glb-70b501b96a4f5c91f2420ea2f9a1f2cf.scn"]
 
 [params]
 
