@@ -3,6 +3,13 @@ extends EnemyBase
 
 @export var attack_damage: float = 10.0
 
+# Q01's large swarm uses these fields to limit how many mosquitoes can make a
+# damaging dive at once. The rest still circle/chase, so the swarm looks large
+# without delivering ten simultaneous hits.
+var _attack_slot_group: StringName
+var _attack_slot_limit: int = 0
+var _has_attack_slot: bool = false
+
 func _ready() -> void:
 	max_health = 100.0
 	debug_ai = false # TEMPORARY — remove once the "won't chase" bug is confirmed fixed.
@@ -54,10 +61,41 @@ func _find_animation_player(node: Node) -> AnimationPlayer:
 			return ap
 	return null
 
+func configure_attack_slots(group_name: StringName, max_attackers: int) -> void:
+	if not _attack_slot_group.is_empty():
+		remove_from_group(_attack_slot_group)
+	_attack_slot_group = group_name
+	_attack_slot_limit = maxi(0, max_attackers)
+	if not _attack_slot_group.is_empty() and _attack_slot_limit > 0:
+		add_to_group(_attack_slot_group)
+
+func _try_claim_attack_slot() -> bool:
+	if _attack_slot_limit <= 0 or _attack_slot_group.is_empty():
+		return true
+	var active_attackers := 0
+	for mosquito in get_tree().get_nodes_in_group(_attack_slot_group):
+		if mosquito is MosquitoSwarm and mosquito._has_attack_slot:
+			active_attackers += 1
+	if active_attackers >= _attack_slot_limit:
+		return false
+	_has_attack_slot = true
+	return true
+
+func _release_attack_slot() -> void:
+	_has_attack_slot = false
+
+func _exit_tree() -> void:
+	_release_attack_slot()
+
 # ── Attack ───────────────────────────────────────────────────────────────────
 
 func _perform_attack() -> void:
 	if not target or not is_instance_valid(target):
+		_finish_attack()
+		return
+	if not _has_attack_slot and not _try_claim_attack_slot():
+		# Another pair is already diving. Return to the normal chase/recovery
+		# loop and try again shortly instead of stacking damage on the player.
 		_finish_attack()
 		return
 
@@ -76,6 +114,7 @@ func _perform_attack() -> void:
 	await get_tree().create_timer(0.12).timeout
 
 	if is_dead:
+		_release_attack_slot()
 		return
 
 	# ── Bite: stop and deal damage ───────────────────────────────────────────
@@ -90,6 +129,7 @@ func _perform_attack() -> void:
 	await get_tree().create_timer(0.1).timeout
 
 	if is_dead:
+		_release_attack_slot()
 		return
 
 	# ── Retreat: short hop backwards ─────────────────────────────────────────
@@ -99,4 +139,5 @@ func _perform_attack() -> void:
 
 	velocity = Vector3.ZERO
 
+	_release_attack_slot()
 	_finish_attack()

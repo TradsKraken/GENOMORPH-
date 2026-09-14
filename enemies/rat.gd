@@ -1,7 +1,10 @@
 class_name Rat
 extends EnemyBase
 
-@export var bite_damage: float = 6.0
+@export var bite_damage: float = 8.0
+
+enum CombatPhase { HUNTING, ENRAGED, RABID }
+var combat_phase: CombatPhase = CombatPhase.HUNTING
 
 var _anim_player: AnimationPlayer
 var _idle_anim: String = ""
@@ -11,7 +14,9 @@ var is_spawning: bool = false
 var _defense_target: Node3D = null
 
 func _ready() -> void:
-	max_health = 25.0
+	# Rats need several clean hits at the player's starting power. Their later
+	# phases keep an encounter tense without spawning an overwhelming horde.
+	max_health = 80.0
 	super._ready()
 
 	speed = 3.5
@@ -19,6 +24,7 @@ func _ready() -> void:
 	detection_radius = 10.0
 	recovery_time = 0.8
 	patrol_radius = 4.0
+	_apply_combat_phase()
 
 	_anim_player = _find_animation_player(self)
 	if _anim_player:
@@ -117,12 +123,44 @@ func set_defense_target(defense_target: Node3D) -> void:
 
 func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
 	super.take_damage(amount, knockback)
-	if is_dead or target != _defense_target:
+	if is_dead:
+		return
+	_update_combat_phase()
+	if target != _defense_target:
 		return
 	var player := get_tree().get_first_node_in_group("player") as Node3D
 	if is_instance_valid(player):
 		target = player
 		current_state = AIState.CHASE
+
+func _update_combat_phase() -> void:
+	var health_ratio := health / maxf(1.0, max_health)
+	var new_phase := CombatPhase.HUNTING
+	if health_ratio <= 0.30:
+		new_phase = CombatPhase.RABID
+	elif health_ratio <= 0.65:
+		new_phase = CombatPhase.ENRAGED
+	if new_phase == combat_phase:
+		return
+	combat_phase = new_phase
+	_apply_combat_phase()
+
+func _apply_combat_phase() -> void:
+	match combat_phase:
+		CombatPhase.HUNTING:
+			speed = 3.5
+			bite_damage = 8.0
+			recovery_time = 0.8
+		CombatPhase.ENRAGED:
+			speed = 4.2
+			bite_damage = 10.0
+			recovery_time = 0.65
+		CombatPhase.RABID:
+			speed = 4.9
+			bite_damage = 12.0
+			recovery_time = 0.5
+	if _level_label:
+		_level_label.modulate = Color(1.0, 0.72, 0.16) if combat_phase == CombatPhase.ENRAGED else (Color(1.0, 0.22, 0.18) if combat_phase == CombatPhase.RABID else Color.WHITE)
 
 func _perform_attack() -> void:
 	if _anim_player and _attack_anim != "":

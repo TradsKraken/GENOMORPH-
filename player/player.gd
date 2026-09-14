@@ -84,6 +84,13 @@ var _attack_debug_timer: float = 0.0 # TEMPORARY — remove once the attack-spam
 @export_range(0.0, 0.5, 0.01) var salamander_walk_trim_seconds: float = 0.10
 var _attack_animation: String = FROG_ATTACK_ANIMATION
 var _skill1_animation: String = ""
+var _skill2_animation: String = ""
+var _monitor_attack_left: String = ""
+var _monitor_attack_right: String = ""
+var _monitor_attack_toggle: bool = false
+var _salamander_attack_left: String = ""
+var _salamander_attack_right: String = ""
+var _salamander_attack_toggle: bool = false
 var _salamander_form: Node3D
 const AdaptationCombat = preload("res://combat/adaptation_combat.gd")
 var _adaptation: Node
@@ -321,10 +328,31 @@ func _configure_species_animations(species_id: String) -> void:
 		anim_idle = _find_animation_name("idle")
 		anim_walk = _find_animation_name("walk")
 		anim_jump = anim_walk
-		_attack_animation = _find_animation_name("attack middle")
-		if _attack_animation.is_empty():
-			_attack_animation = _find_animation_name("attack")
-		_skill1_animation = _find_animation_name("skill")
+		
+		if species_id == "water_monitor":
+			_monitor_attack_left = _find_animation_by_keywords(["attack", "left"])
+			_monitor_attack_right = _find_animation_by_keywords(["attack", "right"])
+			if _monitor_attack_left.is_empty(): _monitor_attack_left = _find_animation_name("attack")
+			if _monitor_attack_right.is_empty(): _monitor_attack_right = _find_animation_name("attack")
+			_attack_animation = _monitor_attack_left
+			_skill1_animation = _find_animation_by_keywords(["crushing", "bite"])
+			if _skill1_animation.is_empty(): _skill1_animation = _find_animation_name("skill")
+			_skill2_animation = _find_animation_name("sweep")
+		elif species_id == "salamander":
+			_salamander_attack_left = _find_animation_by_keywords(["attack", "left"])
+			_salamander_attack_right = _find_animation_by_keywords(["attack", "right"])
+			if _salamander_attack_left.is_empty(): _salamander_attack_left = _find_animation_name("attack middle")
+			if _salamander_attack_right.is_empty(): _salamander_attack_right = _find_animation_name("attack middle")
+			
+			_attack_animation = _salamander_attack_left
+			if _attack_animation.is_empty():
+				_attack_animation = _find_animation_name("attack")
+			_skill1_animation = _find_animation_name("skill")
+		else:
+			_attack_animation = _find_animation_name("attack middle")
+			if _attack_animation.is_empty():
+				_attack_animation = _find_animation_name("attack")
+			_skill1_animation = _find_animation_name("skill")
 	else:
 		anim_idle = FROG_IDLE_ANIMATION
 		anim_walk = FROG_WALK_ANIMATION
@@ -368,7 +396,19 @@ func _find_animation_name(keyword: String) -> String:
 		return ""
 	for animation_name in animation_player.get_animation_list():
 		if String(animation_name).to_lower().contains(keyword.to_lower()):
-			return String(animation_name)
+			return animation_name
+	return ""
+
+func _find_animation_by_keywords(keywords: Array) -> String:
+	if not is_instance_valid(animation_player): return ""
+	for anim_name in animation_player.get_animation_list():
+		var ln = String(anim_name).to_lower()
+		var match_all = true
+		for k in keywords:
+			if not ln.contains(String(k).to_lower()):
+				match_all = false
+				break
+		if match_all: return anim_name
 	return ""
 
 func _hide_from_minimap(node: Node) -> void:
@@ -600,6 +640,13 @@ func _activate_ultimate() -> void:
 		AudioManager.play_sfx("level_up")
 
 func use_secondary_skill() -> bool:
+	if PlayerData.active_species == "water_monitor" and not _skill2_animation.is_empty() and animation_player:
+		if not _is_using_skill:
+			_is_using_skill = true
+			animation_player.play(_skill2_animation, 0.1)
+			get_tree().create_timer(animation_player.get_animation(_skill2_animation).length).timeout.connect(func():
+				_is_using_skill = false
+			)
 	return _adaptation.use_skill2()
 
 func _find_mesh(node: Node) -> MeshInstance3D:
@@ -756,12 +803,48 @@ func _find_closest_target_in_group(group_name: String, attack_range: float) -> N
 		if not candidate.has_method("take_damage") or candidate.get("is_dead"):
 			continue
 
-		var distance := global_position.distance_to((candidate as Node3D).global_position)
+		var target_pos = _get_target_position(candidate as Node3D)
+		var distance := global_position.distance_to(target_pos)
 		if distance < closest_distance:
 			closest_target = candidate as Node3D
 			closest_distance = distance
 
 	return closest_target
+
+func _get_target_position(candidate: Node3D) -> Vector3:
+	if candidate.has_method("get_target_position"):
+		return candidate.get_target_position()
+		
+	# Automatically calculate the visual center of the meshes for badly aligned trash
+	if candidate.is_in_group("trash"):
+		var meshes = _find_all_meshes(candidate)
+		if meshes.size() > 0:
+			var wmin := Vector3(INF, INF, INF)
+			var wmax := Vector3(-INF, -INF, -INF)
+			for mesh in meshes:
+				var aabb = mesh.get_aabb()
+				for x in [aabb.position.x, aabb.end.x]:
+					for y in [aabb.position.y, aabb.end.y]:
+						for z in [aabb.position.z, aabb.end.z]:
+							var wp = mesh.global_transform * Vector3(x, y, z)
+							wmin.x = minf(wmin.x, wp.x)
+							wmin.y = minf(wmin.y, wp.y)
+							wmin.z = minf(wmin.z, wp.z)
+							wmax.x = maxf(wmax.x, wp.x)
+							wmax.y = maxf(wmax.y, wp.y)
+							wmax.z = maxf(wmax.z, wp.z)
+			if wmin.x != INF:
+				return (wmin + wmax) * 0.5
+				
+	return candidate.global_position
+
+func _find_all_meshes(node: Node) -> Array[MeshInstance3D]:
+	var result: Array[MeshInstance3D] = []
+	if node is MeshInstance3D and node.visible:
+		result.append(node)
+	for child in node.get_children():
+		result.append_array(_find_all_meshes(child))
+	return result
 
 func _find_attack_target(attack_range: float) -> Node3D:
 	var trash_target := _find_closest_target_in_group("trash", attack_range)
@@ -770,8 +853,21 @@ func _find_attack_target(attack_range: float) -> Node3D:
 	return _find_closest_target_in_group("enemies", attack_range)
 
 func _attack() -> void:
-	if input_locked or get_tree().paused or _basic_cooldown > 0.0:
-		return
+	if input_locked or get_tree().paused or _is_using_skill or _basic_cooldown > 0.0: return
+	
+	if PlayerData.active_species == "water_monitor":
+		_monitor_attack_toggle = not _monitor_attack_toggle
+		if _monitor_attack_toggle and not _monitor_attack_right.is_empty():
+			_attack_animation = _monitor_attack_right
+		elif not _monitor_attack_left.is_empty():
+			_attack_animation = _monitor_attack_left
+	elif PlayerData.active_species == "salamander":
+		_salamander_attack_toggle = not _salamander_attack_toggle
+		if _salamander_attack_toggle and not _salamander_attack_right.is_empty():
+			_attack_animation = _salamander_attack_right
+		elif not _salamander_attack_left.is_empty():
+			_attack_animation = _salamander_attack_left
+
 	_basic_cooldown = 0.5 / PlayerData.ultimate_effect("attack_speed")
 	print("[ATTACK DEBUG] _attack() entered. current_animation=", (animation_player.current_animation if animation_player else "null"),
 		" is_playing=", (animation_player.is_playing() if animation_player else "null"),

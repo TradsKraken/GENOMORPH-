@@ -90,7 +90,8 @@ func _physics_process(delta: float) -> void:
 	if velocity.length_squared() > 0.1:
 		var look_dir = Vector3(velocity.x, 0, velocity.z)
 		if look_dir.length_squared() > 0.001:
-			var target_transform = transform.looking_at(global_position + look_dir, Vector3.UP)
+			# The snake model was exported facing +Z, but Godot's forward is -Z. We subtract look_dir to flip it.
+			var target_transform = transform.looking_at(global_position - look_dir, Vector3.UP)
 			global_transform = global_transform.interpolate_with(target_transform, delta * 10.0)
 			
 	move_and_slide()

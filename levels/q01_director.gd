@@ -5,7 +5,9 @@ signal completed
 
 const MosquitoScene = preload("res://enemies/mosquito_swarm.tscn")
 
-@export var swarm_size: int = 3
+@export var opening_mosquito_count: int = 2
+@export var swarm_size: int = 10
+@export var swarm_attackers_at_once: int = 2
 @export var spawn_distance: float = 12.0 # Increased from 6.0 so they don't spawn right on top of the player
 
 var _hud: Node = null
@@ -19,6 +21,7 @@ enum SequenceState {
 }
 
 var _state: SequenceState = SequenceState.INIT
+var _opening_mosquitoes: Array[Node] = []
 var _living_swarm: Array[Node] = []
 
 func _ready() -> void:
@@ -100,17 +103,13 @@ func _on_knowledge_scanned(clue_node: Node, kid: String) -> void:
 	# the rest.
 	await _wait_for_dialogue()
 
-	var spawn_pos = _find_safe_spawn_point(clue_node as Node3D, spawn_distance)
+	_opening_mosquitoes.clear()
+	for i in range(opening_mosquito_count):
+		var mosquito = _spawn_mosquito(clue_node as Node3D)
+		mosquito.tree_exited.connect(_on_opening_mosquito_defeated)
+		_opening_mosquitoes.append(mosquito)
 
-	var mosquito = MosquitoScene.instantiate()
-	mosquito.position = spawn_pos
-	get_tree().current_scene.add_child(mosquito)
-	mosquito.global_position = spawn_pos
-
-	# Connect to its death signal
-	mosquito.tree_exited.connect(_on_mosquito_defeated)
-
-	PlayerData.set_objective(null, "Defeat the invasive mosquito!")
+	PlayerData.set_objective(null, "Defeat the invasive mosquitoes!", "%d remaining" % _opening_mosquitoes.size())
 
 ## Picks a spot `distance` metres from the player in a random direction, then
 ## raycasts down to find the real ground height there and returns a point
@@ -142,8 +141,22 @@ func _find_safe_spawn_point(reference: Node3D, distance: float) -> Vector3:
 
 	return Vector3(spot.x, ground_y + 1.5, spot.z)
 
-func _on_mosquito_defeated() -> void:
-	if _state != SequenceState.FIGHTING_MOSQUITO: return
+func _spawn_mosquito(reference: Node3D) -> MosquitoSwarm:
+	var spawn_pos := _find_safe_spawn_point(reference, spawn_distance)
+	var mosquito := MosquitoScene.instantiate() as MosquitoSwarm
+	mosquito.position = spawn_pos
+	get_tree().current_scene.add_child(mosquito)
+	mosquito.global_position = spawn_pos
+	return mosquito
+
+func _on_opening_mosquito_defeated() -> void:
+	_opening_mosquitoes = _opening_mosquitoes.filter(func(m): return is_instance_valid(m) and not m.is_queued_for_deletion())
+	if _state != SequenceState.FIGHTING_MOSQUITO:
+		return
+	if not _opening_mosquitoes.is_empty():
+		PlayerData.set_objective(null, "Defeat the invasive mosquitoes!", "%d remaining" % _opening_mosquitoes.size())
+		return
+
 	_state = SequenceState.FIGHTING_SWARM
 
 	# Lightweight subtitle bar instead of the big centered popup — that heavy
@@ -165,11 +178,8 @@ func _on_mosquito_defeated() -> void:
 
 	_living_swarm.clear()
 	for i in range(swarm_size):
-		var spawn_pos = _find_safe_spawn_point(player as Node3D, spawn_distance)
-		var mosquito = MosquitoScene.instantiate()
-		mosquito.position = spawn_pos
-		get_tree().current_scene.add_child(mosquito)
-		mosquito.global_position = spawn_pos
+		var mosquito := _spawn_mosquito(player as Node3D)
+		mosquito.configure_attack_slots("q01_mosquito_swarm", swarm_attackers_at_once)
 		mosquito.tree_exited.connect(_on_swarm_mosquito_died)
 		_living_swarm.append(mosquito)
 

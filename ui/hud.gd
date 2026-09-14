@@ -95,6 +95,15 @@ var _cleanup_progress_panel: PanelContainer
 var _cleanup_progress_bar: ProgressBar
 var _cleanup_progress_label: Label
 
+# Full-screen combat feedback. These are visual-only and never intercept taps.
+var _damage_flash: ColorRect
+var _damage_flash_tween: Tween
+var _critical_health_vignette: TextureRect
+var _critical_health_tween: Tween
+var _last_health_value: float = -1.0
+var _startup_flash_disabled: bool = true
+
+
 var _notification_panel: PanelContainer
 var _notification_title: Label
 var _notification_text: RichTextLabel
@@ -172,6 +181,7 @@ func _ready() -> void:
 	_build_minimap()
 	_build_zone_status()
 	_build_cleanup_progress()
+	_build_damage_feedback()
 	_build_notification_panel()
 	_build_level_up_cinematic()
 	_build_knowledge_toast()
@@ -440,6 +450,79 @@ func _build_cleanup_progress() -> void:
 
 	_root.add_child(_cleanup_progress_panel)
 	_cleanup_progress_panel.visible = false
+
+# ── Damage / Critical Health Screen Feedback ──────────────────────────────────
+
+func _build_damage_feedback() -> void:
+	if is_instance_valid(_damage_flash):
+		return
+
+	# A quick red wash confirms that the player was hit, without obscuring play.
+	_damage_flash = ColorRect.new()
+	_damage_flash.name = "DamageFlash"
+	_damage_flash.color = Color(0.85, 0.01, 0.04, 0.0)
+	_damage_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_damage_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_damage_flash.z_index = 35
+	_root.add_child(_damage_flash)
+
+	# Keep the centre clear and tint only the screen edges for critical health.
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.52, 0.80, 1.0])
+	gradient.colors = PackedColorArray([
+		Color(0.45, 0.0, 0.01, 0.0),
+		Color(0.55, 0.0, 0.01, 0.0),
+		Color(0.72, 0.0, 0.02, 0.40),
+		Color(0.90, 0.0, 0.03, 0.90),
+	])
+	var texture := GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(1.0, 0.5)
+	texture.width = 512
+	texture.height = 512
+
+	_critical_health_vignette = TextureRect.new()
+	_critical_health_vignette.name = "CriticalHealthVignette"
+	_critical_health_vignette.texture = texture
+	_critical_health_vignette.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_critical_health_vignette.stretch_mode = TextureRect.STRETCH_SCALE
+	_critical_health_vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_critical_health_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_critical_health_vignette.z_index = 34
+	_critical_health_vignette.modulate.a = 0.0
+	_root.add_child(_critical_health_vignette)
+
+func _flash_damage_screen() -> void:
+	if not is_instance_valid(_damage_flash):
+		return
+	if _damage_flash_tween and _damage_flash_tween.is_valid():
+		_damage_flash_tween.kill()
+	_damage_flash_tween = create_tween()
+	_damage_flash_tween.tween_property(_damage_flash, "color:a", 0.20, 0.05)
+	_damage_flash_tween.tween_property(_damage_flash, "color:a", 0.0, 0.30).set_trans(Tween.TRANS_SINE)
+
+func _update_critical_health_effect(value: float, maximum: float) -> void:
+	if not is_instance_valid(_critical_health_vignette):
+		return
+	var health_ratio := value / maxf(1.0, maximum)
+	if health_ratio > 0.35:
+		if _critical_health_tween and _critical_health_tween.is_valid():
+			_critical_health_tween.kill()
+		_critical_health_vignette.modulate.a = 0.0
+		return
+
+	# The closer to zero health, the stronger and faster the pulse becomes.
+	var critical_progress := clampf((0.35 - health_ratio) / 0.35, 0.0, 1.0)
+	var intensity := lerpf(0.20, 0.62, critical_progress)
+	var pulse_time := lerpf(1.10, 0.45, critical_progress)
+	if _critical_health_tween and _critical_health_tween.is_valid():
+		_critical_health_tween.kill()
+	_critical_health_vignette.modulate.a = intensity * 0.55
+	_critical_health_tween = create_tween().set_loops()
+	_critical_health_tween.tween_property(_critical_health_vignette, "modulate:a", intensity, pulse_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_critical_health_tween.tween_property(_critical_health_vignette, "modulate:a", intensity * 0.45, pulse_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 # ── Cinematic Notification Banner ─────────────────────────────────────────────
 
@@ -3118,6 +3201,9 @@ func _connect_signals() -> void:
 		pd.skill_points_changed.connect(_on_skill_points_changed)
 	if pd.has_signal("active_species_changed"):
 		pd.active_species_changed.connect(_on_active_species_changed)
+		
+	# Disable startup damage flash for the first 2 seconds
+	get_tree().create_timer(2.0).timeout.connect(func(): _startup_flash_disabled = false)
 	if pd.has_signal("species_unlocked"):
 		pd.species_unlocked.connect(_rebuild_species_selector)
 	if pd.has_signal("progression_changed"):
@@ -3146,6 +3232,14 @@ func _connect_signals() -> void:
 	_hp_bar.max_value   = pd.max_health
 	_hp_bar.value       = pd.health
 	_hp_lbl.text        = "%d / %d" % [roundi(pd.health), roundi(pd.max_health)]
+	_last_health_value = pd.health
+	
+	if is_instance_valid(_critical_health_vignette):
+		_critical_health_vignette.modulate.a = 0.0
+		if _critical_health_tween and _critical_health_tween.is_valid():
+			_critical_health_tween.kill()
+	
+	_update_critical_health_effect(pd.health, pd.max_health)
 	
 	_stam_bar.max_value = pd.max_stamina
 	_stam_bar.value     = pd.stamina
@@ -3339,6 +3433,10 @@ func _on_skill1_cooldown(duration: float) -> void:
 
 
 func _on_health(value: float, maximum: float) -> void:
+	if not _startup_flash_disabled and _last_health_value >= 0.0 and value < _last_health_value:
+		_flash_damage_screen()
+	_last_health_value = value
+	_update_critical_health_effect(value, maximum)
 	_hp_bar.max_value = maximum
 	var tw := create_tween()
 	tw.tween_property(_hp_bar, "value", value, 0.15).set_trans(Tween.TRANS_SINE)

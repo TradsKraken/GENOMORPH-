@@ -32,6 +32,8 @@ enum SequenceState {
 var _state: SequenceState = SequenceState.INIT
 var _living_rats: Array[Node] = []
 var _wave: int = 1
+var _is_spawning_wave: bool = false
+
 
 func _ready() -> void:
 	add_to_group("q03_director")
@@ -200,12 +202,16 @@ func _on_rat_died() -> void:
 
 	if _state != SequenceState.FIGHTING_RATS:
 		return
+		
+	if _is_spawning_wave:
+		return
 
 	if _living_rats.size() > 0:
 		PlayerData.set_objective(null, "Protect the native frog", "%d rats remaining" % _living_rats.size())
 		return
 
 	if _wave == 1:
+		_is_spawning_wave = true
 		_wave = 2
 		if not is_instance_valid(_hud):
 			_hud = get_tree().get_first_node_in_group("hud")
@@ -213,6 +219,7 @@ func _on_rat_died() -> void:
 			_hud.show_subtitle("STERLING (RADIO)", "More coming out of the mud! Hold them back!", 3.0)
 			await _wait_for_dialogue()
 		_spawn_rats()
+		_is_spawning_wave = false
 		return
 
 	var frog = get_tree().current_scene.find_child("NativeFrog", true, false)
