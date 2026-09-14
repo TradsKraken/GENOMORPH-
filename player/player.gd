@@ -187,7 +187,7 @@ func _on_active_species_changed(species_id: String) -> void:
 	# 5. Animate in the new form
 	var new_target_scale = new_form.scale
 	if new_target_scale == Vector3.ZERO:
-		new_target_scale = Vector3(2.0, 2.0, 2.0) if species_id == "salamander" else (Vector3(0.5, 0.5, 0.5) if species_id == "water_monitor" else Vector3.ONE)
+		new_target_scale = Vector3(2.0, 2.0, 2.0) if species_id == "salamander" else (Vector3(4.0, 4.0, 4.0) if species_id == "water_monitor" else Vector3.ONE)
 	
 	new_form.scale = Vector3.ZERO
 	new_form.visible = true
@@ -305,6 +305,7 @@ func _instantiate_species_form(species_id: String) -> void:
 	if species_id == "water_monitor" and not is_instance_valid(_monitor_form):
 		var scene := load("res://Models/Water Monitor Lizard/Water Monitor Lizard.glb") as PackedScene
 		_monitor_form = scene.instantiate() as Node3D
+		_monitor_form.scale = Vector3(4.0, 4.0, 4.0)
 		add_child(_monitor_form)
 		_hide_from_minimap(_monitor_form)
 

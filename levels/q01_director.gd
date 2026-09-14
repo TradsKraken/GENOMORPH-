@@ -70,6 +70,11 @@ func _start_sequence() -> void:
 	_state = SequenceState.WAITING_FOR_SCAN
 
 func _on_knowledge_scanned(clue_node: Node, kid: String) -> void:
+	# Wait for any active knowledge popups or tutorials to finish before Sterling starts talking
+	if _hud:
+		while _hud.get("_knowledge_tutorial_queued") or _hud.get("_tut_active") or get_tree().get_first_node_in_group("knowledge_popup") != null:
+			await get_tree().process_frame
+			
 	# All clues trigger Sterling flavor text — lightweight subtitle bar, not
 	# the big centered popup (that's reserved for achievement-style toasts
 	# like "NEW KNOWLEDGE" / "OBJECTIVE COMPLETE", not conversational lines).

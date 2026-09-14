@@ -13,6 +13,12 @@ const C_BG_DARK  := Color(0.04, 0.04, 0.06, 0.65)
 const C_BTN_NORM := Color(0.12, 0.13, 0.18, 0.75)
 const C_BTN_PRSS := Color(0.85, 0.88, 0.95, 0.90)
 
+const PROFILE_ICONS := {
+	"frog": preload("res://assets/Profile Frog.png"),
+	"salamander": preload("res://assets/Profile Salamander.png"),
+	"water_monitor": preload("res://assets/Proile Water Monitor.png")
+}
+
 # ── Node refs ─────────────────────────────────────────────────────────────────
 
 var _root:       Control
@@ -783,19 +789,17 @@ func _build_species_selector() -> void:
 		button.pressed.connect(_on_species_slot_pressed.bind(species_id))
 		slot.add_child(button)
 
-		var frog_portrait := TextureRect.new()
-		frog_portrait.name = "FrogPortrait"
-		frog_portrait.texture = load("res://assets/Geno_Icon.png")
-		frog_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		frog_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		frog_portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
-		frog_portrait.offset_left = 6.0
-		frog_portrait.offset_top = 6.0
-		frog_portrait.offset_right = -6.0
-		frog_portrait.offset_bottom = -6.0
-		frog_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		frog_portrait.visible = species_id == "frog"
-		button.add_child(frog_portrait)
+		var portrait := TextureRect.new()
+		portrait.name = "Portrait"
+		portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
+		portrait.offset_left = 6.0
+		portrait.offset_top = 6.0
+		portrait.offset_right = -6.0
+		portrait.offset_bottom = -6.0
+		portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(portrait)
 
 		var symbol := Label.new()
 		symbol.name = "Symbol"
@@ -823,7 +827,7 @@ func _build_species_selector() -> void:
 func _build_species_toggle() -> void:
 	if _root.has_node("SpeciesFormToggle"):
 		_species_toggle = _root.get_node("SpeciesFormToggle") as Button
-		_species_toggle_portrait = _species_toggle.get_node_or_null("FrogPortrait") as TextureRect
+		_species_toggle_portrait = _species_toggle.get_node_or_null("Portrait") as TextureRect
 		_species_toggle_symbol = _species_toggle.get_node_or_null("Symbol") as Label
 		return
 
@@ -842,8 +846,7 @@ func _build_species_toggle() -> void:
 	_root.add_child(_species_toggle)
 
 	_species_toggle_portrait = TextureRect.new()
-	_species_toggle_portrait.name = "FrogPortrait"
-	_species_toggle_portrait.texture = load("res://assets/Geno_Icon.png")
+	_species_toggle_portrait.name = "Portrait"
 	_species_toggle_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_species_toggle_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_species_toggle_portrait.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -961,12 +964,13 @@ func _refresh_species_selector() -> void:
 		button.add_theme_stylebox_override("hover", hover)
 		button.add_theme_stylebox_override("pressed", hover)
 
-		var frog_portrait := button.get_node_or_null("FrogPortrait") as TextureRect
-		if is_instance_valid(frog_portrait):
-			frog_portrait.visible = unlocked and species_id == "frog"
+		var portrait := button.get_node_or_null("Portrait") as TextureRect
+		if is_instance_valid(portrait):
+			portrait.visible = unlocked and PROFILE_ICONS.has(species_id)
+			portrait.texture = PROFILE_ICONS.get(species_id)
 		var symbol := button.get_node_or_null("Symbol") as Label
 		if is_instance_valid(symbol):
-			symbol.visible = not (unlocked and species_id == "frog")
+			symbol.visible = not (unlocked and PROFILE_ICONS.has(species_id))
 			symbol.text = str(slot_data["short_name"]) if unlocked else "?"
 			symbol.add_theme_color_override("font_color", Color(0.68, 0.96, 0.82, 0.95) if unlocked else Color(0.36, 0.41, 0.48, 0.78))
 		var name_label := button.get_parent().get_node_or_null("Name") as Label
@@ -993,9 +997,10 @@ func _refresh_species_toggle(active_slot: Dictionary) -> void:
 	_species_toggle.add_theme_stylebox_override("hover", hover)
 	_species_toggle.add_theme_stylebox_override("pressed", hover)
 	if is_instance_valid(_species_toggle_portrait):
-		_species_toggle_portrait.visible = active_id == "frog"
+		_species_toggle_portrait.visible = PROFILE_ICONS.has(active_id)
+		_species_toggle_portrait.texture = PROFILE_ICONS.get(active_id)
 	if is_instance_valid(_species_toggle_symbol):
-		_species_toggle_symbol.visible = active_id != "frog"
+		_species_toggle_symbol.visible = not PROFILE_ICONS.has(active_id)
 		_species_toggle_symbol.text = str(active_slot.get("short_name", "?"))
 		_species_toggle_symbol.add_theme_color_override("font_color", Color(0.68, 0.96, 0.82, 0.95))
 
@@ -1953,6 +1958,7 @@ var _tut_desc_lbl: RichTextLabel = null
 var _tut_tap_hint: Label = null
 var _tut_tap_overlay: Button = null   # Invisible tap catcher placed over the target
 var _tut_active: bool = false
+var _knowledge_tutorial_queued: bool = false
 
 func start_tutorial(mode: String = "intro") -> void:
 	if _tut_active:
@@ -2035,20 +2041,9 @@ func start_tutorial(mode: String = "intro") -> void:
 	_tut_tap_overlay.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	_root.add_child(_tut_tap_overlay)
 
-	# The post-prologue tour is deliberately brief: identify each HUD region
-	# now, then teach its detailed controls only when the player needs them.
 	if mode == "intro":
-		await _tut_welcome()
-		await _tut_spotlight(_level_badge, "SUIT STATUS", "Your level and available upgrade points appear here. Upgrades are explained when you earn your first points.", "Tap to continue")
-		await _tut_spotlight(_hp_bar, "VITAL SIGNS", "Health and stamina are displayed here. Keep an eye on them while exploring.", "Tap to continue")
-		await _tut_spotlight(_objective_panel, "OBJECTIVES", "Your current task and direction appear here. This is your guide through the wetlands.", "Tap to continue")
-		await _tut_spotlight(_minimap_panel, "MINIMAP", "Use this to navigate and locate objectives.", "Tap to continue")
-		await _tut_spotlight(_knowledge_btn, "FIELD GUIDE", "New creatures, allies, and discoveries are collected here.", "Tap to continue")
-		await _tut_spotlight(_menu_btn, "SYSTEM MENU", "Pause, save, settings, and other options are available here.", "Tap to continue")
-		await _tut_spotlight(_attack_btn, "ACTIONS", "Movement and form abilities are always within reach on this side of the screen.", "Tap to continue")
-		await _tut_finish()
-		_finish_spotlight_tutorial("intro")
-		return
+		# We skip the short tour and fall straight through to the detailed tour below
+		pass
 
 	if mode == "character":
 		await _tut_character_menu()
@@ -2056,10 +2051,13 @@ func start_tutorial(mode: String = "intro") -> void:
 		return
 
 	if mode == "knowledge":
-		await _tut_spotlight(_knowledge_btn, "NEW FIELD GUIDE ENTRY", "Encounters and discoveries are recorded in the Field Guide. Tap the book to read the entry you just found.", "Tap the book to continue")
-		_open_knowledge_menu()
-		await get_tree().process_frame
-		await get_tree().process_frame
+		var existing_menus := _root.get_children().filter(func(child): return child is KnowledgeMenu)
+		if existing_menus.is_empty():
+			await _tut_spotlight(_knowledge_btn, "NEW FIELD GUIDE ENTRY", "Encounters and discoveries are recorded in the Field Guide. The highlighted book opens the entry you just found.", "Tap anywhere to continue")
+			_open_knowledge_menu()
+			await get_tree().process_frame
+			await get_tree().process_frame
+			
 		var menus := _root.get_children().filter(func(child): return child is KnowledgeMenu)
 		if not menus.is_empty():
 			var knowledge_menu: KnowledgeMenu = menus[0]
@@ -2076,10 +2074,10 @@ func start_tutorial(mode: String = "intro") -> void:
 	var badge = _root.find_child("Badge", true, false)
 	await _tut_spotlight(badge,
 		"YOUR LEVEL BADGE",
-		"This badge shows your [color=#ffcc00]Level[/color].\n\nThe golden ring is your [color=#ffcc00]EXP progress[/color] to the next level.\n\n[b]Tap it[/b] to explore your character stats!",
+		"This badge shows your [color=#ffcc00]Level[/color].\n\nThe golden ring is your [color=#ffcc00]EXP progress[/color] to the next level.\n\nYou will earn Attribute Points every time you level up.",
 		"Tap the badge to continue")
 	# After badge is tapped \u2192 open character menu sub-tutorial
-	await _tut_character_menu()
+	# await _tut_character_menu()
 
 	await _tut_spotlight(_hp_bar,
 		"HEALTH BAR",
@@ -2205,6 +2203,7 @@ func start_tutorial(mode: String = "intro") -> void:
 	if is_instance_valid(_tut_tap_overlay): _tut_tap_overlay.queue_free()
 	_tut_active = false
 	PlayerData.has_seen_prologue = true
+	PlayerData.has_seen_ui_intro = true
 	tutorial_complete.emit()
 
 func start_character_tutorial() -> void:
@@ -2229,7 +2228,7 @@ func _finish_spotlight_tutorial(mode: String) -> void:
 func _tut_welcome() -> void:
 	# Dim gently then show a welcome tooltip at screen center
 	var tw = create_tween()
-	tw.tween_property(_tut_overlay, "color:a", 0.75, 0.4)
+	tw.tween_property(_tut_overlay, "color:a", 0.58, 0.4)
 	await tw.finished
 
 	_tut_title_lbl.text = "HUD SYSTEM INITIALIZED"
@@ -2264,10 +2263,11 @@ func _tut_spotlight(target: Control, title: String, desc: String, hint: String) 
 	# Dim overlay if not already visible
 	if _tut_overlay.color.a < 0.5:
 		var tw = create_tween()
-		tw.tween_property(_tut_overlay, "color:a", 0.75, 0.3)
+		tw.tween_property(_tut_overlay, "color:a", 0.58, 0.3)
 		await tw.finished
 
-	# Position tooltip: prefer below the target, but clamp to screen
+	# Measure first, then choose the side with room so the explanation never
+	# covers the control it is explaining.
 	await get_tree().process_frame
 	var vp = get_viewport().get_visible_rect().size
 	var tr = target.get_global_rect()
@@ -2278,17 +2278,8 @@ func _tut_spotlight(target: Control, title: String, desc: String, hint: String) 
 	_tut_panel.modulate.a = 0.0
 	await get_tree().process_frame  # let it size itself
 	var tp_size = _tut_panel.size
-	var pos = Vector2(tr.position.x, tr.position.y + tr.size.y + 12)
-	# Right-align if target is near right edge
-	if pos.x + tp_size.x > vp.x - 10:
-		pos.x = vp.x - tp_size.x - 10
-	# If tooltip goes off bottom, put it above the target
-	if pos.y + tp_size.y > vp.y - 10:
-		pos.y = tr.position.y - tp_size.y - 12
-	# Clamp
-	pos.x = clamp(pos.x, 8, vp.x - tp_size.x - 8)
-	pos.y = clamp(pos.y, 8, vp.y - tp_size.y - 8)
-	_tut_panel.position = pos
+	var pos := _find_clear_tutorial_position(tr, tp_size, vp)
+	_tut_panel.global_position = pos
 	var tw2 = create_tween()
 	tw2.tween_property(_tut_panel, "modulate:a", 1.0, 0.25)
 	await tw2.finished
@@ -2313,12 +2304,16 @@ func _tut_spotlight(target: Control, title: String, desc: String, hint: String) 
 
 
 func _tut_character_menu() -> void:
-	# Open the character menu
+	# First point to the exact control that opens this menu. The upgrade-point
+	# label is hidden until it has a value, so use the always-visible badge.
 	get_tree().paused = false
+	var badge := _root.find_child("Badge", true, false) as Control
+	await _tut_spotlight(badge, "OPEN CHARACTER MENU", "Tap the highlighted Level badge to open your Character menu. A small gold number appears there whenever you can spend points.", "Tap anywhere to open it")
+
+	# Open the menu, then introduce one tab at a time.
 	_open_character_menu()
-	# Wait one frame for the menu to be added to the tree
-	await get_tree().process_frame
-	await get_tree().process_frame
+	# Wait for layout engine to build the TabContainer and its TabBar
+	await get_tree().create_timer(0.2).timeout
 
 	var menu = _root.get_children().filter(func(c): return c is CharacterMenu)
 	if menu.is_empty():
@@ -2330,16 +2325,27 @@ func _tut_character_menu() -> void:
 
 	# Sub-tutorial: highlight each tab
 	var tab_data = [
-		["STATS TAB", "This tab shows your [b]character statistics[/b]:\n\n[color=#ffcc00]Level[/color], [color=#ff3b5c]Health[/color], [color=#9400ff]Stamina[/color], [color=#ff8833]Attack Power[/color], [color=#33aaff]Defense[/color], [color=#44ff44]Speed[/color].\n\n[b]Tap the STATS tab[/b] to view it."],
-		["ATTRIBUTES TAB", "Earn [color=#ffcc00]2 Attribute Points[/color] per level, plus quest rewards.\n\nChoose among six attributes. Five upgrades in one attribute earn an adaptation Genome.\n\n[b]Tap ATTRIBUTES[/b] to see values and prices."],
+		["STATS TAB", "This highlighted tab shows your [b]character statistics[/b]:\n\n[color=#ffcc00]Level[/color], [color=#ff3b5c]Health[/color], [color=#9400ff]Stamina[/color], [color=#ff8833]Attack Power[/color], [color=#33aaff]Defense[/color], and [color=#44ff44]Speed[/color]."],
+		["ATTRIBUTES TAB", "Earn [color=#ffcc00]2 Attribute Points[/color] per level, plus quest rewards.\n\nChoose among six attributes. Five upgrades in one attribute earn an adaptation Genome."],
 		["ULTIMATES TAB", "Spend adaptation Genomes to unlock, upgrade or switch one Ultimate path.\n\nEach species has its own paths. Once unlocked, tap ULT when it is ready. Cooldown begins after the effect ends."],
-		["INVENTORY TAB", "This shows everything you are carrying.\n\n[color=#33ff88]Genome Fragments[/color] collected will appear here.\n\n[b]Tap the INVENTORY tab[/b] to view it."],
+		["INVENTORY TAB", "This shows everything you are carrying.\n\n[color=#33ff88]Genome Fragments[/color] collected will appear here."],
 	]
 	for i in range(tab_data.size()):
+		tab_container.current_tab = i
+		await get_tree().process_frame
 		var tab_btn = _get_tab_button(tab_container, i)
 		if tab_btn:
-			await _tut_spotlight_in_canvas(tab_btn, char_menu, tab_data[i][0], tab_data[i][1], "Tap the tab to continue")
-			tab_container.current_tab = i
+			await _tut_spotlight_in_canvas(tab_btn, char_menu, tab_data[i][0], tab_data[i][1], "Tap anywhere to continue")
+			tab_btn.queue_free()
+			
+			if i == 1:
+				var upg_btn = char_menu.find_child("Upgrade_attack", true, false)
+				if upg_btn:
+					await _tut_spotlight_in_canvas(upg_btn, char_menu, "SPEND ATTRIBUTE POINTS", "Tap the [+] button to spend 1 AP and permanently increase this stat. Upgrading a stat 5 times earns you an adaptation Genome.", "Tap anywhere to continue")
+			if i == 2:
+				var dev_btn = char_menu.find_child("Develop_attack", true, false)
+				if dev_btn:
+					await _tut_spotlight_in_canvas(dev_btn, char_menu, "UNLOCK ULTIMATES", "Spend Genomes here to unlock or upgrade an Ultimate ability for your current form.", "Tap anywhere to continue")
 
 	# Prompt to close
 	var close_btn = char_menu.find_child("CLOSE", true, false) as Button
@@ -2349,7 +2355,7 @@ func _tut_character_menu() -> void:
 			var b = c.find_child("CLOSE", true, false)
 			if b: close_btn = b; break
 	if close_btn:
-		await _tut_spotlight_in_canvas(close_btn, char_menu, "CLOSE THE MENU", "Good! You now know how to read your character stats.\n\n[b]Tap CLOSE[/b] to return to the field.", "Tap CLOSE to continue")
+		await _tut_spotlight_in_canvas(close_btn, char_menu, "CLOSE THE MENU", "This highlighted button returns you to the field. Tap anywhere to finish the Character menu tutorial.", "Tap anywhere to continue")
 
 	# Ensure menu is closed
 	if is_instance_valid(char_menu):
@@ -2374,7 +2380,7 @@ func _tut_spotlight_in_canvas(target: Control, canvas: Node, title: String, desc
 
 	if _tut_overlay.color.a < 0.5:
 		var tw = create_tween()
-		tw.tween_property(_tut_overlay, "color:a", 0.75, 0.3)
+		tw.tween_property(_tut_overlay, "color:a", 0.58, 0.3)
 		await tw.finished
 
 	await get_tree().process_frame
@@ -2387,12 +2393,10 @@ func _tut_spotlight_in_canvas(target: Control, canvas: Node, title: String, desc
 	_tut_panel.modulate.a = 0.0
 	await get_tree().process_frame
 	var tp_size = _tut_panel.size
-	var pos = Vector2(tr.position.x, tr.position.y + tr.size.y + 12)
-	if pos.x + tp_size.x > vp.x - 10: pos.x = vp.x - tp_size.x - 10
-	if pos.y + tp_size.y > vp.y - 10: pos.y = tr.position.y - tp_size.y - 12
-	pos.x = clamp(pos.x, 8, vp.x - tp_size.x - 8)
-	pos.y = clamp(pos.y, 8, vp.y - tp_size.y - 8)
-	_tut_panel.position = pos
+	var pos := _find_clear_tutorial_position(tr, tp_size, vp)
+	# This function reparents the tooltip into menus. Global coordinates keep
+	# its placement correct regardless of the menu's own position.
+	_tut_panel.global_position = pos
 	var tw2 = create_tween()
 	tw2.tween_property(_tut_panel, "modulate:a", 1.0, 0.25)
 	await tw2.finished
@@ -2445,14 +2449,43 @@ func _tut_finish() -> void:
 	_tut_panel.visible = false
 
 
+func _find_clear_tutorial_position(target_rect: Rect2, panel_size: Vector2, viewport_size: Vector2) -> Vector2:
+	var gap := 20.0
+	var candidates: Array[Vector2] = [
+		Vector2(target_rect.end.x + gap, target_rect.get_center().y - panel_size.y * 0.5),
+		Vector2(target_rect.position.x - panel_size.x - gap, target_rect.get_center().y - panel_size.y * 0.5),
+		Vector2(target_rect.get_center().x - panel_size.x * 0.5, target_rect.end.y + gap),
+		Vector2(target_rect.get_center().x - panel_size.x * 0.5, target_rect.position.y - panel_size.y - gap),
+	]
+	var maximum := Vector2(maxf(8.0, viewport_size.x - panel_size.x - 8.0), maxf(8.0, viewport_size.y - panel_size.y - 8.0))
+	var best_position := Vector2(8.0, 8.0)
+	var smallest_overlap := INF
+	for candidate in candidates:
+		var clamped := Vector2(clampf(candidate.x, 8.0, maximum.x), clampf(candidate.y, 8.0, maximum.y))
+		var panel_rect := Rect2(clamped, panel_size)
+		if not panel_rect.intersects(target_rect.grow(10.0)):
+			return clamped
+		var overlap := panel_rect.intersection(target_rect.grow(10.0)).get_area()
+		if overlap < smallest_overlap:
+			smallest_overlap = overlap
+			best_position = clamped
+	return best_position
+
+
 func _get_tab_button(tab_container: TabContainer, index: int) -> Control:
-	# TabContainer's tab bar is a child of type TabBar
-	for child in tab_container.get_children():
-		if child.get_class() == "TabBar":
-			# Each tab is accessible via the tab bar
-			return child
-	# Fallback: return the tab container itself if tab bar not found
-	return tab_container
+	# Godot draws all tabs inside one TabBar Control. Create a transparent
+	# target over just one tab so the tutorial does not highlight the full row.
+	var tab_bar := tab_container.get_tab_bar()
+	if not tab_bar or index < 0 or index >= tab_bar.get_tab_count():
+		return null
+	var tab_rect := tab_bar.get_tab_rect(index)
+	var target := Control.new()
+	target.name = "TutorialTabTarget%d" % index
+	target.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	target.position = tab_rect.position
+	target.size = tab_rect.size
+	tab_bar.add_child(target)
+	return target
 
 
 # ── Subtitle System ───────────────────────────────────────────────────────────
@@ -2857,17 +2890,37 @@ func _advance_walkthrough_step() -> void:
 
 func highlight_node(node: Control) -> void:
 	if not node: return
-	
-	node.pivot_offset = node.size / 2.0
+
 	if _active_highlight_tweens.has(node) and _active_highlight_tweens[node].is_valid():
 		_active_highlight_tweens[node].kill()
-		
-	var tw = create_tween().set_loops()
-	tw.tween_property(node, "scale", Vector2(1.15, 1.15), 0.4).set_trans(Tween.TRANS_SINE)
-	tw.parallel().tween_property(node, "modulate", Color(1.2, 1.5, 2.0, 1.0), 0.4)
-	tw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_SINE)
-	tw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.4)
+	var old_outline := node.get_node_or_null("TutorialHighlight")
+	if old_outline:
+		old_outline.queue_free()
+	var outline := Panel.new()
+	outline.name = "TutorialHighlight"
+	outline.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	outline.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	outline.z_index = 100
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.0, 0.0, 0.0, 0.0)
+	style.border_color = Color(0.35, 1.0, 0.78, 0.4)
+	style.set_border_width_all(2)
+	style.shadow_color = Color(0.35, 1.0, 0.78, 0.75)
+	style.shadow_size = 12
+	style.shadow_offset = Vector2(0, 0)
 	
+	if is_equal_approx(node.size.x, node.size.y) and node.size.x > 0:
+		style.set_corner_radius_all(int(node.size.x / 2.0))
+	else:
+		style.set_corner_radius_all(8)
+		
+	outline.add_theme_stylebox_override("panel", style)
+	node.add_child(outline)
+	node.z_as_relative = false
+	outline.modulate.a = 0.55
+	var tw = create_tween().set_loops()
+	tw.tween_property(outline, "modulate:a", 0.9, 0.6).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(outline, "modulate:a", 0.55, 0.6).set_trans(Tween.TRANS_SINE)
 	_active_highlight_tweens[node] = tw
 
 func stop_highlight_node(node: Control) -> void:
@@ -2878,10 +2931,10 @@ func stop_highlight_node(node: Control) -> void:
 		if tw and tw.is_valid():
 			tw.kill()
 		_active_highlight_tweens.erase(node)
-		
-	var rtw = create_tween()
-	rtw.tween_property(node, "scale", Vector2(1.0, 1.0), 0.1)
-	rtw.parallel().tween_property(node, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.1)
+	var outline := node.get_node_or_null("TutorialHighlight")
+	if outline:
+		outline.queue_free()
+	node.z_as_relative = true
 
 	
 func reveal_jump() -> void:
@@ -3367,8 +3420,19 @@ func _on_knowledge_unlocked(id: String) -> void:
 		show_float_text("NEW KNOWLEDGE: " + icon + " " + title, screen_pos, Color(0.9, 0.8, 0.4))
 		
 		_update_knowledge_badge()
-		if PlayerData.has_seen_ui_intro and not PlayerData.has_seen_knowledge_tutorial and not _tut_active:
-			call_deferred("start_knowledge_tutorial")
+		if PlayerData.has_seen_ui_intro and not PlayerData.has_seen_knowledge_tutorial and not _tut_active and not _knowledge_tutorial_queued:
+			_knowledge_tutorial_queued = true
+			call_deferred("_start_knowledge_tutorial_after_popup")
+
+func _start_knowledge_tutorial_after_popup() -> void:
+	# A first discovery is displayed in an InfoCard. Do not put the tutorial on
+	# top of it; wait through the close animation and one settled UI frame.
+	while get_tree().get_first_node_in_group("knowledge_popup") != null:
+		await get_tree().process_frame
+	await get_tree().process_frame
+	_knowledge_tutorial_queued = false
+	if PlayerData.has_seen_ui_intro and not PlayerData.has_seen_knowledge_tutorial and not _tut_active:
+		start_knowledge_tutorial()
 
 func _on_knowledge_read(_id: String) -> void:
 	_update_knowledge_badge()

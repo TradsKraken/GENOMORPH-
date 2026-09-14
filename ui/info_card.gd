@@ -17,6 +17,8 @@ signal closed
 
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
+	# Lets the HUD wait for this card's close animation before opening a tutorial.
+	add_to_group("knowledge_popup")
 	# No longer pausing the game to keep world live
 	
 	if learn_more_btn:

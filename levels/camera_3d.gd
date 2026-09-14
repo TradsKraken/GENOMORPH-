@@ -194,6 +194,13 @@ func start_cutscene(target1: Node3D, target2: Node3D) -> void:
 	_cutscene_target2 = target2
 	_previous_view_mode = view_mode
 	view_mode = ViewMode.CUTSCENE
+	
+	if is_instance_valid(target1) and is_instance_valid(target2):
+		var to_target2 = target1.global_position.direction_to(target2.global_position)
+		target1.rotation.y = atan2(to_target2.x, to_target2.z)
+		
+		var to_target1 = target2.global_position.direction_to(target1.global_position)
+		target2.rotation.y = atan2(to_target1.x, to_target1.z)
 
 func stop_cutscene() -> void:
 	view_mode = _previous_view_mode
