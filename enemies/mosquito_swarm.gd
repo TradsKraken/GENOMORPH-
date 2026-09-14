@@ -5,7 +5,7 @@ extends EnemyBase
 
 func _ready() -> void:
 	max_health = 100.0
-	debug_ai = true # TEMPORARY — remove once the "won't chase" bug is confirmed fixed.
+	debug_ai = false # TEMPORARY — remove once the "won't chase" bug is confirmed fixed.
 	super._ready()
 
 	# ── Flying mode ─────────────────────────────────────────────────────────

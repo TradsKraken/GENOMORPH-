@@ -40,6 +40,8 @@ func _process(_delta: float) -> void:
 	var dist_to_player = global_position.distance_to(player.global_position)
 	var hud = get_tree().get_first_node_in_group("hud")
 	var is_near = dist_to_player <= interact_distance
+	if is_near:
+		PlayerData.discover_species("mudfish")
 	
 	if is_near and not _was_near:
 		if hud and hud.has_method("show_interact"):

@@ -1,21 +1,10 @@
-[gd_scene format=3 uid="uid://snake1234"]
+[gd_scene load_steps=3 format=3 uid="uid://snake1234"]
 
 [ext_resource type="Script" uid="uid://d2dv5y0k2k76o" path="res://enemies/snake.gd" id="1_snake_script"]
+[ext_resource type="PackedScene" path="res://Models/Bitin/Bitin4.glb" id="2_bitin_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.3
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_1"]
-radius = 0.3
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
-albedo_color = Color(0.1, 0.6, 0.1, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_head"]
-size = Vector3(0.4, 0.4, 0.4)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_head"]
-albedo_color = Color(0.8, 0.1, 0.1, 1)
 
 [node name="Snake" type="CharacterBody3D" unique_id=1861318419 groups=["enemies"]]
 script = ExtResource("1_snake_script")
@@ -27,12 +16,5 @@ exp_value = 15.0
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.3, 0)
 shape = SubResource("CapsuleShape3D_1")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="." unique_id=1265206947]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.3, 0)
-mesh = SubResource("CapsuleMesh_1")
-surface_material_override/0 = SubResource("StandardMaterial3D_body")
-
-[node name="HeadMesh" type="MeshInstance3D" parent="." unique_id=1468792673]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.8)
-mesh = SubResource("BoxMesh_head")
-surface_material_override/0 = SubResource("StandardMaterial3D_head")
+[node name="BitinModel" parent="." instance=ExtResource("2_bitin_model")]
+scale = Vector3(0.5, 0.5, 0.5)

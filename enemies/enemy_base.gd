@@ -209,6 +209,8 @@ func _physics_process(delta: float) -> void:
 		var players = get_tree().get_nodes_in_group("player")
 		if players.size() > 0:
 			target = players[0]
+	if target and is_instance_valid(target) and global_position.distance_to(target.global_position) <= detection_radius:
+		PlayerData.discover_species(_species_knowledge_id())
 			
 	if uses_gravity and not is_on_floor():
 		velocity.y -= gravity * delta
@@ -261,6 +263,16 @@ func _physics_process(delta: float) -> void:
 				" player_nodes_in_group=", player_count)
 
 # ── AI State Machine ──────────────────────────────────────────────────────────
+
+func _species_knowledge_id() -> String:
+	match get_script().get_global_name():
+		"Rat": return "rat"
+		"MosquitoSwarm": return "mosquito"
+		"Snake": return "invasive_snake"
+		"FeralTilapia": return "feral_tilapia"
+		"GiantAfricanSnail": return "giant_african_snail"
+		"BossChimera": return "wetlands_chimera"
+	return ""
 
 func _process_ai_state_machine(delta: float) -> void:
 	match current_state:

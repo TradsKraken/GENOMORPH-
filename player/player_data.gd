@@ -356,6 +356,9 @@ var inventory: Array = []
 var genome_fragments: int = 0
 var has_seen_prologue: bool = false
 var has_seen_minimap_tutorial: bool = false
+var has_seen_ui_intro: bool = false
+var has_seen_character_tutorial: bool = false
+var has_seen_knowledge_tutorial: bool = false
 
 # Runtime-only flags so a quest director can check "did the previous quest
 # already finish?" without depending on sibling _ready() order matching
@@ -367,6 +370,7 @@ var q01_completed: bool = false
 var q02_completed: bool = false
 var q03_completed: bool = false
 var q04_completed: bool = false
+var q05_completed: bool = false
 # Fine-grained quest checkpoints. Completion booleans alone cannot restore a
 # save made halfway through a multi-step quest (for example, after its trash
 # is cleared but before the habitat-restoration interaction).
@@ -569,6 +573,30 @@ const KNOWLEDGE_DB: Dictionary = {
 		],
 		"guide_tip": "[color=#1affa0]Field Guide:[/color] Strike the swarm's center of mass. Disrupting the core will scatter the entire colony."
 	},
+	"invasive_snake": {
+		"title": "Invasive Snake", "category": "Species", "subcategory": "Invasive Reptile", "icon": "⬡", "classification": "Serpentes sp.", "threat_level": "HIGH",
+		"summary": "A territorial invasive snake adapted to polluted wetlands. It strikes from cover, then retreats through the reeds when pressured.",
+		"facts": ["Invasive snake populations can overwhelm weakened native wetlands.", "Its retreat trail can reveal polluted water sources."],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Keep moving and pressure it until it abandons its territory."
+	},
+	"feral_tilapia": {
+		"title": "Feral Tilapia", "category": "Species", "subcategory": "Invasive Fish", "icon": "⬡", "classification": "Oreochromis sp.", "threat_level": "HIGH",
+		"summary": "A fast-breeding invasive fish that consumes oxygen and food needed by native wetland species.",
+		"facts": ["Tilapia can rapidly dominate shallow, warm water.", "Dense schools worsen oxygen depletion for native fish."],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Do not let the school surround vulnerable native fish."
+	},
+	"native_frog": {
+		"title": "Native Wetland Frog", "category": "Species", "subcategory": "Native Amphibian", "icon": "◈", "classification": "Anura sp.", "threat_level": "ALLY",
+		"summary": "A surviving native frog and a sensitive indicator of wetland health. Its presence marks habitat worth protecting.",
+		"facts": ["Amphibians absorb water through their skin, making them highly vulnerable to pollution.", "Healthy frog populations indicate a recovering food web."],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Protect native frogs from invasive predators."
+	},
+	"wetlands_chimera": {
+		"title": "Wetlands Chimera", "category": "Species", "subcategory": "Mutated Apex Predator", "icon": "⬡", "classification": "Genome Cascade Entity", "threat_level": "CRITICAL",
+		"summary": "An unstable organism shaped by contamination and incompatible genomic material.",
+		"facts": ["Its biology combines traits that do not naturally coexist.", "It is strongest near heavily contaminated habitat."],
+		"guide_tip": "[color=#1affa0]Field Guide:[/color] Watch its attack pattern and avoid long attacks."
+	},
 	"swamp": {
 		"title": "Toxic Swamp Biome",
 		"category": "Environment",
@@ -740,6 +768,10 @@ func unlock_knowledge(id: String) -> void:
 		unread_knowledge.append(id)
 		knowledge_unlocked.emit(id)
 
+## Unlocks a Field Guide entry the first time a species is encountered.
+func discover_species(id: String) -> void:
+	unlock_knowledge(id)
+
 func mark_knowledge_read(id: String) -> void:
 	if id in unread_knowledge:
 		unread_knowledge.erase(id)
@@ -834,11 +866,15 @@ func save_game(slot: int = -1) -> void:
 		"total_frogs": total_frogs,
 		"minigame_started": minigame_started,
 		"has_seen_prologue": has_seen_prologue,
+		"has_seen_ui_intro": has_seen_ui_intro,
+		"has_seen_character_tutorial": has_seen_character_tutorial,
+		"has_seen_knowledge_tutorial": has_seen_knowledge_tutorial,
 		"lolo_palaka_intro_done": lolo_palaka_intro_done,
 		"q01_completed": q01_completed,
 		"q02_completed": q02_completed,
 		"q03_completed": q03_completed,
 		"q04_completed": q04_completed,
+		"q05_completed": q05_completed,
 		"quest_progress": quest_progress,
 		"unlocked_knowledge": unlocked_knowledge,
 		"unread_knowledge": unread_knowledge,
@@ -890,11 +926,15 @@ func load_game(slot: int = -1) -> bool:
 				total_frogs = data.get("total_frogs", 7)
 				minigame_started = data.get("minigame_started", false)
 				has_seen_prologue = data.get("has_seen_prologue", false)
+				has_seen_ui_intro = data.get("has_seen_ui_intro", false)
+				has_seen_character_tutorial = data.get("has_seen_character_tutorial", false)
+				has_seen_knowledge_tutorial = data.get("has_seen_knowledge_tutorial", false)
 				lolo_palaka_intro_done = data.get("lolo_palaka_intro_done", false)
 				q01_completed = data.get("q01_completed", false)
 				q02_completed = data.get("q02_completed", false)
 				q03_completed = data.get("q03_completed", false)
 				q04_completed = data.get("q04_completed", false)
+				q05_completed = data.get("q05_completed", false)
 				var saved_quest_progress: Variant = data.get("quest_progress", {})
 				quest_progress = saved_quest_progress.duplicate(true) if saved_quest_progress is Dictionary else {}
 				_migrate_legacy_quest_progress(data)
@@ -1018,6 +1058,7 @@ func reset_data(slot: int = -1) -> void:
 	q02_completed = false
 	q03_completed = false
 	q04_completed = false
+	q05_completed = false
 	quest_progress.clear()
 	health = 100.0
 	stamina = 100.0
@@ -1034,6 +1075,9 @@ func reset_data(slot: int = -1) -> void:
 	total_frogs = 7
 	minigame_started = false
 	has_seen_prologue = false
+	has_seen_ui_intro = false
+	has_seen_character_tutorial = false
+	has_seen_knowledge_tutorial = false
 	lolo_palaka_intro_done = false
 	unlocked_knowledge.clear()
 	unlocked_knowledge.append_array(["genomorph_suit", "dr_sterling", "the_collapse"])

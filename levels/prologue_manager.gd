@@ -84,8 +84,11 @@ func _auto_advance_dialogue(line_index: int, duration: float, hud: Node) -> void
 func _finish_prologue() -> void:
 	current_state = State.PLAYING
 	PlayerData.has_seen_prologue = true
-	# We DO NOT call start_tutorial() here anymore to avoid the aggressive UI walkthrough.
-	# The player is now free to explore the wetlands.
+	# A short orientation-only HUD tour follows the prologue. Detailed lessons
+	# are introduced only when their feature becomes useful.
+	var huds = get_tree().get_nodes_in_group("hud")
+	if not PlayerData.has_seen_ui_intro and huds.size() > 0 and huds[0].has_method("start_tutorial"):
+		huds[0].call_deferred("start_tutorial", "intro")
 
 	# Only NOW — conversation actually over — give control back and pull the
 	# camera out to its normal gameplay framing.

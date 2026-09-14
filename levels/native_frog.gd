@@ -92,6 +92,8 @@ func _process(delta: float) -> void:
 	var player = get_tree().get_first_node_in_group("player")
 	if player and player is Node3D:
 		var dist = global_position.distance_to((player as Node3D).global_position)
+		if dist <= ambush_radius:
+			PlayerData.discover_species("native_frog")
 		print("[FROG DEBUG] distance to player: ", dist, " (trigger radius: ", ambush_radius, ")")
 	else:
 		print("[FROG DEBUG] no node in 'player' group found at all")

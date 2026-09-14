@@ -1954,8 +1954,14 @@ var _tut_tap_hint: Label = null
 var _tut_tap_overlay: Button = null   # Invisible tap catcher placed over the target
 var _tut_active: bool = false
 
-func start_tutorial() -> void:
-	if PlayerData.has_seen_prologue:
+func start_tutorial(mode: String = "intro") -> void:
+	if _tut_active:
+		return
+	if mode == "intro" and PlayerData.has_seen_ui_intro:
+		return
+	if mode == "character" and PlayerData.has_seen_character_tutorial:
+		return
+	if mode == "knowledge" and PlayerData.has_seen_knowledge_tutorial:
 		return
 	_tut_active = true
 	get_tree().paused = false
@@ -2028,6 +2034,42 @@ func start_tutorial() -> void:
 	_tut_tap_overlay.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
 	_tut_tap_overlay.pressed.connect(func(): AudioManager.play_sfx("tap_button"))
 	_root.add_child(_tut_tap_overlay)
+
+	# The post-prologue tour is deliberately brief: identify each HUD region
+	# now, then teach its detailed controls only when the player needs them.
+	if mode == "intro":
+		await _tut_welcome()
+		await _tut_spotlight(_level_badge, "SUIT STATUS", "Your level and available upgrade points appear here. Upgrades are explained when you earn your first points.", "Tap to continue")
+		await _tut_spotlight(_hp_bar, "VITAL SIGNS", "Health and stamina are displayed here. Keep an eye on them while exploring.", "Tap to continue")
+		await _tut_spotlight(_objective_panel, "OBJECTIVES", "Your current task and direction appear here. This is your guide through the wetlands.", "Tap to continue")
+		await _tut_spotlight(_minimap_panel, "MINIMAP", "Use this to navigate and locate objectives.", "Tap to continue")
+		await _tut_spotlight(_knowledge_btn, "FIELD GUIDE", "New creatures, allies, and discoveries are collected here.", "Tap to continue")
+		await _tut_spotlight(_menu_btn, "SYSTEM MENU", "Pause, save, settings, and other options are available here.", "Tap to continue")
+		await _tut_spotlight(_attack_btn, "ACTIONS", "Movement and form abilities are always within reach on this side of the screen.", "Tap to continue")
+		await _tut_finish()
+		_finish_spotlight_tutorial("intro")
+		return
+
+	if mode == "character":
+		await _tut_character_menu()
+		_finish_spotlight_tutorial("character")
+		return
+
+	if mode == "knowledge":
+		await _tut_spotlight(_knowledge_btn, "NEW FIELD GUIDE ENTRY", "Encounters and discoveries are recorded in the Field Guide. Tap the book to read the entry you just found.", "Tap the book to continue")
+		_open_knowledge_menu()
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var menus := _root.get_children().filter(func(child): return child is KnowledgeMenu)
+		if not menus.is_empty():
+			var knowledge_menu: KnowledgeMenu = menus[0]
+			var close_btn := knowledge_menu.find_child("CLOSE", true, false) as Button
+			if close_btn:
+				await _tut_spotlight_in_canvas(close_btn, knowledge_menu, "YOUR FIELD GUIDE", "Read species, characters, and environmental discoveries here whenever you want more context.", "Tap CLOSE to return")
+			if is_instance_valid(knowledge_menu) and knowledge_menu.has_method("_on_close"):
+				knowledge_menu._on_close()
+		_finish_spotlight_tutorial("knowledge")
+		return
 
 	# \u2500\u2500 Run all steps \u2500\u2500
 	await _tut_welcome()
@@ -2165,6 +2207,24 @@ func start_tutorial() -> void:
 	PlayerData.has_seen_prologue = true
 	tutorial_complete.emit()
 
+func start_character_tutorial() -> void:
+	start_tutorial("character")
+
+func start_knowledge_tutorial() -> void:
+	start_tutorial("knowledge")
+
+func _finish_spotlight_tutorial(mode: String) -> void:
+	if is_instance_valid(_tut_overlay): _tut_overlay.queue_free()
+	if is_instance_valid(_tut_panel): _tut_panel.queue_free()
+	if is_instance_valid(_tut_tap_overlay): _tut_tap_overlay.queue_free()
+	_tut_active = false
+	if mode == "intro":
+		PlayerData.has_seen_ui_intro = true
+	elif mode == "character":
+		PlayerData.has_seen_character_tutorial = true
+	else:
+		PlayerData.has_seen_knowledge_tutorial = true
+	tutorial_complete.emit()
 
 func _tut_welcome() -> void:
 	# Dim gently then show a welcome tooltip at screen center
@@ -2213,7 +2273,7 @@ func _tut_spotlight(target: Control, title: String, desc: String, hint: String) 
 	var tr = target.get_global_rect()
 	_tut_title_lbl.text = title
 	_tut_desc_lbl.text = desc
-	_tut_tap_hint.text = "\u25bc " + hint
+	_tut_tap_hint.text = "\u25bc Highlighted: " + title.capitalize() + "   •   Tap anywhere to continue"
 	_tut_panel.visible = true
 	_tut_panel.modulate.a = 0.0
 	await get_tree().process_frame  # let it size itself
@@ -2236,10 +2296,9 @@ func _tut_spotlight(target: Control, title: String, desc: String, hint: String) 
 	# Pulsing highlight on target
 	highlight_node(target)
 
-	# Place invisible tap catcher exactly over the target
-	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	_tut_tap_overlay.position = tr.position
-	_tut_tap_overlay.size = tr.size
+	# The target keeps pulsing above the dim layer, while the whole screen
+	# advances the tutorial—matching the familiar tap-anywhere onboarding flow.
+	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_tut_tap_overlay.visible = true
 	await _tut_tap_overlay.pressed
 
@@ -2323,7 +2382,7 @@ func _tut_spotlight_in_canvas(target: Control, canvas: Node, title: String, desc
 	var tr = target.get_global_rect()
 	_tut_title_lbl.text = title
 	_tut_desc_lbl.text = desc
-	_tut_tap_hint.text = "\u25bc " + hint
+	_tut_tap_hint.text = "\u25bc Highlighted: " + title.capitalize() + "   •   Tap anywhere to continue"
 	_tut_panel.visible = true
 	_tut_panel.modulate.a = 0.0
 	await get_tree().process_frame
@@ -2340,9 +2399,7 @@ func _tut_spotlight_in_canvas(target: Control, canvas: Node, title: String, desc
 
 	highlight_node(target)
 
-	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	_tut_tap_overlay.position = tr.position
-	_tut_tap_overlay.size = tr.size
+	_tut_tap_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_tut_tap_overlay.visible = true
 	await _tut_tap_overlay.pressed
 
@@ -3045,6 +3102,7 @@ func _connect_signals() -> void:
 	_lvl_lbl.text       = str(pd.level)
 	_refresh_species_selector()
 	_refresh_ultimate_button()
+	_on_skill_points_changed(pd.skill_points)
 
 func _on_active_species_changed(_species_id: String) -> void:
 	if _species_id == "salamander":
@@ -3266,6 +3324,8 @@ func _on_skill_points_changed(points: int) -> void:
 	if is_instance_valid(_level_badge):
 		_level_badge.text = str(points)
 		_level_badge.visible = points > 0
+	if points > 0 and PlayerData.has_seen_ui_intro and not PlayerData.has_seen_character_tutorial and not _tut_active:
+		call_deferred("start_character_tutorial")
 
 func _toggle_menu() -> void:
 	_menu_open = !_menu_open
@@ -3307,6 +3367,8 @@ func _on_knowledge_unlocked(id: String) -> void:
 		show_float_text("NEW KNOWLEDGE: " + icon + " " + title, screen_pos, Color(0.9, 0.8, 0.4))
 		
 		_update_knowledge_badge()
+		if PlayerData.has_seen_ui_intro and not PlayerData.has_seen_knowledge_tutorial and not _tut_active:
+			call_deferred("start_knowledge_tutorial")
 
 func _on_knowledge_read(_id: String) -> void:
 	_update_knowledge_badge()

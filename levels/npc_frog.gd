@@ -124,6 +124,8 @@ func _process(_delta: float) -> void:
 	if not player: return
 	
 	var dist_to_player = global_position.distance_to(player.global_position)
+	if dist_to_player <= interact_distance:
+		PlayerData.discover_species("native_frog")
 	var hud := get_tree().get_first_node_in_group("hud")
 	
 	var is_in_zone = false

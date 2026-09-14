@@ -9,6 +9,7 @@ extends EnemyBase
 
 var _attack_timer: float = 0.0
 var _wake_delay: float = 0.0
+var _anim_player: AnimationPlayer = null
 
 enum State { IDLE, ATTACK, RETURN }
 var _current_state: State = State.IDLE
@@ -26,6 +27,29 @@ func _ready() -> void:
 	speed += randf_range(-0.5, 0.5) 
 	aggro_range += randf_range(-2.0, 2.0) 
 	_wake_delay = randf_range(0.0, 1.0) 
+	_anim_player = _find_animation_player(self)
+	if _anim_player:
+		var crawl_animation := _find_crawl_animation(_anim_player)
+		if crawl_animation != "":
+			var animation := _anim_player.get_animation(crawl_animation)
+			if animation:
+				animation.loop_mode = Animation.LOOP_LINEAR
+			_anim_player.play(crawl_animation)
+
+func _find_animation_player(node: Node) -> AnimationPlayer:
+	for child in node.get_children():
+		if child is AnimationPlayer:
+			return child as AnimationPlayer
+		var found := _find_animation_player(child)
+		if found:
+			return found
+	return null
+
+func _find_crawl_animation(player: AnimationPlayer) -> String:
+	for animation_name in player.get_animation_list():
+		if "snake crawl" in animation_name.to_lower():
+			return animation_name
+	return ""
 
 func _apply_level_scaling() -> void:
 	super._apply_level_scaling()

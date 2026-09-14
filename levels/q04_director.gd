@@ -6,6 +6,7 @@ class_name Q04Director
 ## When they take damage, they discover the Salamander's regenerative abilities.
 
 const RatScene = preload("res://enemies/rat.tscn")
+const Q05DirectorScript = preload("res://levels/q05_director.gd")
 
 @export var rat_pack_size: int = 3
 @export var spawn_distance: float = 6.0
@@ -22,6 +23,7 @@ func _ready() -> void:
 	add_to_group("q04_director")
 	
 	if PlayerData.q04_completed:
+		_start_q05()
 		return
 		
 	# Find HUD
@@ -143,6 +145,7 @@ func _finish_sequence() -> void:
 	PlayerData.q04_completed = true
 	PlayerData.set_objective(null, "FOLLOW THE BIOLOGICAL SIGNAL", "Move deeper into the contaminated wetlands.")
 	completed.emit()
+	_start_q05()
 	
 	if not is_instance_valid(_hud):
 		_hud = get_tree().get_first_node_in_group("hud")
@@ -152,3 +155,8 @@ func _finish_sequence() -> void:
 	# Disconnect health listener just in case it wasn't triggered
 	if PlayerData.health_changed.is_connected(_on_player_health_changed):
 		PlayerData.health_changed.disconnect(_on_player_health_changed)
+
+func _start_q05() -> void:
+	if get_tree().get_first_node_in_group("q05_director") == null:
+		var q05 := Q05DirectorScript.new()
+		add_child(q05)
