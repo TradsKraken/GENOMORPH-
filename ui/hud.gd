@@ -101,7 +101,7 @@ var _damage_flash_tween: Tween
 var _critical_health_vignette: TextureRect
 var _critical_health_tween: Tween
 var _last_health_value: float = -1.0
-var _startup_flash_disabled: bool = true
+var _damage_feedback_armed: bool = false
 
 
 var _notification_panel: PanelContainer
@@ -491,7 +491,7 @@ func _build_damage_feedback() -> void:
 	_critical_health_vignette.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_critical_health_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_critical_health_vignette.z_index = 34
-	_critical_health_vignette.modulate.a = 0.0
+	_critical_health_vignette.visible = false
 	_root.add_child(_critical_health_vignette)
 
 func _flash_damage_screen() -> void:
@@ -499,21 +499,20 @@ func _flash_damage_screen() -> void:
 		return
 	if _damage_flash_tween and _damage_flash_tween.is_valid():
 		_damage_flash_tween.kill()
+	_damage_flash.color.a = 0.20
 	_damage_flash_tween = create_tween()
-	_damage_flash_tween.tween_property(_damage_flash, "color:a", 0.20, 0.05)
 	_damage_flash_tween.tween_property(_damage_flash, "color:a", 0.0, 0.30).set_trans(Tween.TRANS_SINE)
 
 func _update_critical_health_effect(value: float, maximum: float) -> void:
-	if not is_instance_valid(_critical_health_vignette):
+	if not is_instance_valid(_critical_health_vignette) or not is_instance_valid(_damage_flash):
 		return
-	var health_ratio := value / maxf(1.0, maximum)
-	if health_ratio > 0.35:
-		if _critical_health_tween and _critical_health_tween.is_valid():
-			_critical_health_tween.kill()
-		_critical_health_vignette.modulate.a = 0.0
+	var health_ratio := maxf(0.0, value) / maxf(1.0, maximum)
+	if health_ratio >= 0.35:
+		_hide_critical_health_vignette()
 		return
 
 	# The closer to zero health, the stronger and faster the pulse becomes.
+	_critical_health_vignette.visible = true
 	var critical_progress := clampf((0.35 - health_ratio) / 0.35, 0.0, 1.0)
 	var intensity := lerpf(0.20, 0.62, critical_progress)
 	var pulse_time := lerpf(1.10, 0.45, critical_progress)
@@ -523,6 +522,14 @@ func _update_critical_health_effect(value: float, maximum: float) -> void:
 	_critical_health_tween = create_tween().set_loops()
 	_critical_health_tween.tween_property(_critical_health_vignette, "modulate:a", intensity, pulse_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	_critical_health_tween.tween_property(_critical_health_vignette, "modulate:a", intensity * 0.45, pulse_time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+func _hide_critical_health_vignette() -> void:
+	if not is_instance_valid(_critical_health_vignette):
+		return
+	if _critical_health_tween and _critical_health_tween.is_valid():
+		_critical_health_tween.kill()
+	_critical_health_vignette.visible = false
+	_critical_health_vignette.modulate.a = 0.0
 
 # ── Cinematic Notification Banner ─────────────────────────────────────────────
 
@@ -3194,6 +3201,8 @@ func _on_jump_btn_input(event: InputEvent) -> void:
 func _connect_signals() -> void:
 	var pd = PlayerData
 	pd.health_changed.connect(_on_health)
+	if pd.has_signal("damage_taken"):
+		pd.damage_taken.connect(_on_damage_taken)
 	pd.stamina_changed.connect(_on_stamina)
 	pd.exp_changed.connect(_on_exp)
 	pd.level_changed.connect(_on_level)
@@ -3202,8 +3211,6 @@ func _connect_signals() -> void:
 	if pd.has_signal("active_species_changed"):
 		pd.active_species_changed.connect(_on_active_species_changed)
 		
-	# Disable startup damage flash for the first 2 seconds
-	get_tree().create_timer(2.0).timeout.connect(func(): _startup_flash_disabled = false)
 	if pd.has_signal("species_unlocked"):
 		pd.species_unlocked.connect(_rebuild_species_selector)
 	if pd.has_signal("progression_changed"):
@@ -3235,11 +3242,10 @@ func _connect_signals() -> void:
 	_last_health_value = pd.health
 	
 	if is_instance_valid(_critical_health_vignette):
-		_critical_health_vignette.modulate.a = 0.0
-		if _critical_health_tween and _critical_health_tween.is_valid():
-			_critical_health_tween.kill()
+		_hide_critical_health_vignette()
 	
-	_update_critical_health_effect(pd.health, pd.max_health)
+	# Never show a vignette solely because a save was loaded at low health.
+	# It will arm on the first actual damage event instead.
 	
 	_stam_bar.max_value = pd.max_stamina
 	_stam_bar.value     = pd.stamina
@@ -3433,14 +3439,24 @@ func _on_skill1_cooldown(duration: float) -> void:
 
 
 func _on_health(value: float, maximum: float) -> void:
-	if not _startup_flash_disabled and _last_health_value >= 0.0 and value < _last_health_value:
-		_flash_damage_screen()
 	_last_health_value = value
-	_update_critical_health_effect(value, maximum)
+	if _damage_feedback_armed:
+		_update_critical_health_effect(maxf(0.0, value), maxf(1.0, maximum))
+	elif is_instance_valid(_critical_health_vignette):
+		_hide_critical_health_vignette()
 	_hp_bar.max_value = maximum
 	var tw := create_tween()
 	tw.tween_property(_hp_bar, "value", value, 0.15).set_trans(Tween.TRANS_SINE)
 	_hp_lbl.text = "%d / %d" % [roundi(value), roundi(maximum)]
+
+func _on_damage_taken(value: float, maximum: float) -> void:
+	# Ignore setup/tutorial health changes. The red effects should only begin
+	# after onboarding has completely handed control to the player.
+	if not PlayerData.has_seen_ui_intro or _tut_active:
+		return
+	_damage_feedback_armed = true
+	_flash_damage_screen()
+	_update_critical_health_effect(maxf(0.0, value), maxf(1.0, maximum))
 
 
 func _on_stamina(value: float, maximum: float) -> void:

@@ -5,6 +5,7 @@ extends Node
 
 # ── Signals ───────────────────────────────────────────────────────────────────
 signal health_changed(value: float, maximum: float)
+signal damage_taken(value: float, maximum: float)
 signal stamina_changed(value: float, maximum: float)
 signal exp_changed(value: float, needed: float)
 signal level_changed(new_level: int)
@@ -26,6 +27,10 @@ signal ultimate_cooldown_changed(remaining: float, duration: float)
 var current_objective: Node3D = null
 var current_objective_text: String = ""
 var current_objective_desc: String = ""
+
+# Runtime-only: saved low health must not look like a fresh hit when a level
+# first loads. The HUD arms its critical-health feedback after real damage.
+var has_taken_damage_this_session: bool = false
 
 var message_log: Array[String] = []
 
@@ -477,8 +482,12 @@ func recover_stamina(delta: float, rate: float) -> void:
 # ── Health API ────────────────────────────────────────────────────────────────
 
 func take_damage(amount: float) -> void:
+	if amount <= 0.0:
+		return
 	health = maxf(0.0, health - amount)
+	has_taken_damage_this_session = true
 	health_changed.emit(health, max_health)
+	damage_taken.emit(health, max_health)
 
 func heal(amount: float) -> void:
 	health = minf(max_health, health + amount)
@@ -1060,6 +1069,7 @@ func reset_data(slot: int = -1) -> void:
 	q04_completed = false
 	q05_completed = false
 	quest_progress.clear()
+	has_taken_damage_this_session = false
 	health = 100.0
 	stamina = 100.0
 	level = 1
