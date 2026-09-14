@@ -23,8 +23,6 @@ func _ready() -> void:
 		if PlayerData.is_object_destroyed(scene_path, node_path_str):
 			queue_free()
 			return
-			
-	_add_highlight_effect()
 
 func _align_visual_and_collision() -> void:
 	var meshes: Array[MeshInstance3D] = []
@@ -91,18 +89,36 @@ func _fit_collision_to_bounds(world_bounds: AABB) -> void:
 	box.size = world_bounds.size + Vector3(0.15, 0.05, 0.15)
 	collision.global_position = world_bounds.get_center()
 
-func _add_highlight_effect() -> void:
-	# Add a pulsing light to draw attention
-	var light = OmniLight3D.new()
-	light.light_color = Color(0.8, 1.0, 0.4) # Sickly yellow-green
-	light.light_energy = 0.5
-	light.omni_range = 4.0
-	light.position = Vector3(0, 1.5, 0)
-	add_child(light)
+var _highlight_tween: Tween
+
+func set_highlight(enabled: bool) -> void:
+	var meshes: Array[MeshInstance3D] = []
+	_collect_meshes(self, meshes)
+	var trash_mesh := _find_rubbish_mesh(meshes)
+	if trash_mesh == null:
+		return
+		
+	if not enabled:
+		trash_mesh.material_overlay = null
+		if _highlight_tween:
+			_highlight_tween.kill()
+		return
+		
+	if trash_mesh.material_overlay != null:
+		return # Already highlighted
+		
+	var mat = StandardMaterial3D.new()
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(0.6, 1.0, 0.2, 0.0)
+	trash_mesh.material_overlay = mat
 	
-	var tw = create_tween().set_loops()
-	tw.tween_property(light, "light_energy", 1.5, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(light, "light_energy", 0.5, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if _highlight_tween:
+		_highlight_tween.kill()
+		
+	_highlight_tween = create_tween().set_loops()
+	_highlight_tween.tween_property(mat, "albedo_color:a", 0.45, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_highlight_tween.tween_property(mat, "albedo_color:a", 0.0, 1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
 func take_damage(amount: float, _knockback: Vector3 = Vector3.ZERO) -> void:
 	if is_dead or not _cleanup_enabled:

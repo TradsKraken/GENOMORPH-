@@ -73,9 +73,9 @@ func _register_trash(trash: Node) -> void:
 		return
 
 	if trash.has_signal("cleaned"):
-		trash.connect("cleaned", _on_trash_destroyed)
+		trash.connect("cleaned", _on_trash_destroyed.bind(trash))
 	elif trash.has_signal("destroyed"):
-		trash.connect("destroyed", _on_trash_destroyed)
+		trash.connect("destroyed", _on_trash_destroyed.bind(trash))
 	else:
 		return
 
@@ -96,15 +96,21 @@ func begin_cleanup() -> void:
 
 	_cleanup_started = true
 	for trash in _registered_trash:
-		if is_instance_valid(trash) and trash.has_method("set_cleanup_enabled"):
-			trash.set_cleanup_enabled(true)
+		if is_instance_valid(trash):
+			if trash.has_method("set_cleanup_enabled"):
+				trash.set_cleanup_enabled(true)
+			_add_cleanup_marker(trash)
 	if _trash_count > 0:
 		PlayerData.set_objective(null, "Clear the habitat trash", "%d remaining" % _trash_count)
 		_update_cleanup_progress()
 	else:
 		_enable_restore()
 
-func _on_trash_destroyed() -> void:
+func _on_trash_destroyed(trash: Node = null) -> void:
+	if is_instance_valid(trash):
+		var marker := trash.get_node_or_null("CleanupMarker")
+		if marker:
+			marker.queue_free()
 	_trash_count -= 1
 	if not _cleanup_started or _is_restored:
 		return
@@ -113,6 +119,10 @@ func _on_trash_destroyed() -> void:
 		PlayerData.set_objective(null, "Clear the habitat trash", "%d remaining" % _trash_count)
 	else:
 		_enable_restore()
+
+func _add_cleanup_marker(trash: Node) -> void:
+	if trash.has_method("set_highlight"):
+		trash.set_highlight(true)
 
 func _enable_restore() -> void:
 	set_active(true)

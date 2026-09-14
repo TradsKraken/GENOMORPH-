@@ -56,10 +56,7 @@ func apply_settings() -> void:
 	# Apply glow to WorldEnvironment if present
 	_apply_glow_to_tree(get_tree().root)
 	
-	var meshes = get_tree().get_nodes_in_group("cullable_meshes")
-	for m in meshes:
-		if m is MeshInstance3D:
-			m.visibility_range_end = draw_distance
+	_apply_draw_distance()
 			
 	_apply_shadows_to_tree(get_tree().root)
 	
@@ -76,6 +73,23 @@ func apply_settings() -> void:
 			cam.tp_distance_back = camera_zoom
 			
 	settings_changed.emit()
+
+func _apply_draw_distance() -> void:
+	# Camera3D's far plane is the reliable global draw-distance control. Godot's
+	# renderer then performs its native frustum culling for every visible 3D
+	# object before issuing draw calls. Do not hide gameplay nodes manually:
+	# they must continue simulating even when their visuals are out of view.
+	var camera := get_viewport().get_camera_3d()
+	if camera:
+		camera.far = maxf(10.0, draw_distance)
+
+	# Some detailed props can opt into an earlier mesh-level cutoff through this
+	# existing group. Mesh-level ranges avoid rendering small decorations at the
+	# edge of the camera far plane while keeping large terrain uninterrupted.
+	for mesh in get_tree().get_nodes_in_group("cullable_meshes"):
+		if mesh is GeometryInstance3D:
+			mesh.visibility_range_end = draw_distance
+			mesh.visibility_range_end_margin = minf(8.0, draw_distance * 0.1)
 
 func _apply_glow_to_tree(node: Node) -> void:
 	if node is WorldEnvironment and node.environment != null:

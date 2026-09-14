@@ -88,6 +88,10 @@ func _ready() -> void:
 	
 	# Hide Layer 11 (Fog of War) from the main camera
 	cull_mask = 1047551 # 0xFFFFF ^ 1024
+	# SettingsManager may have started before this level camera existed. Apply
+	# now so Draw Distance immediately controls this camera's far plane.
+	if SettingsManager:
+		SettingsManager.call_deferred("apply_settings")
 
 	# ── Spawn game systems at runtime (avoids UID-less .tscn references) ──────
 	if not is_main_menu:
